@@ -2,7 +2,7 @@
 # Step 1: Install Sunshine
 echo "Installing Sunshine..."
 mkdir -p /userdata/system
-wget -q -O /userdata/system/sunshine.AppImage  https://github.com/DTJW92/Remote-desktop/raw/main/sunshine.AppImage
+wget -q -O /userdata/system/sunshine.AppImage  https://github.com/DTJW92/batocera-unofficial-addons/raw/main/sunshine/sunshine.AppImage
 
 chmod a+x /userdata/system/sunshine.AppImage
 
