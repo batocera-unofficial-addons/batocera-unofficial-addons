@@ -106,7 +106,7 @@ chmod +x /userdata/system/services/sunshine
 
 echo "Applying Nvidia patches for a smoother experience..."
 # Apply Nvidia patches if necessary
-curl -L https://github.com/DTJW92/Remote-desktop/raw/main/nvidia-patches.sh | bash
+curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/main/nvidiapatch/nvidiapatchers.sh | bash
 
 # Enable and start the Sunshine service
 batocera-services enable sunshine
