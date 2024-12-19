@@ -11,6 +11,7 @@
 </b><i>Run this command in xterm or ssh: </font></b></i><br>
 ```   curl -L UPDATE ME | bash   ``` <br>
 
+<b>Special thanks to Alaska-Ops for providing the working script</b> <br>
 <br>
 <br>
 <br>
