@@ -13,7 +13,7 @@
 <br>
 <br>
 <br>
-<b>Special thanks to Alaska-Ops for providing the working script</b> <br>
+<b>Special thanks to Alaska-Ops for providing the framework :)</b> <br>
 <br>
 <br>
 <br>
