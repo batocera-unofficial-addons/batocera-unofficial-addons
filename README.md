@@ -2,10 +2,10 @@
 Unofficial add-ons for Batocera, in no way affiliated with the Batocera development team!
 
 Completed;<br>
-sunshine
-moonlight
-tailscale
+sunshine<br>
+moonlight<br>
+tailscale<br>
 
-WIP - DO NOT ATTEMPT TO INSTALL
-fightcade
+WIP - DO NOT ATTEMPT TO INSTALL<br>
+fightcade<br>
 
