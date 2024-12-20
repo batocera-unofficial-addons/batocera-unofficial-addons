@@ -79,7 +79,7 @@ chmod +x /userdata/roms/ports/Moonlight.sh
 
 # Step 3: Refresh the Ports menu
 echo "Refreshing Ports menu..."
-batocera-es-swissknife --refresh
+curl http://127.0.0.1:1234/reloadgames
 
 echo
 echo "Installation complete! You can now launch Moonlight from the Ports menu."
