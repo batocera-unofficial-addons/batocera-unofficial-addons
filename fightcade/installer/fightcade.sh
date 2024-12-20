@@ -298,7 +298,7 @@ chmod a+x ~/custom.sh 2>/dev/null
 # 
 # get updated files:
 # --- 
-url==https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/installer
+url==https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/fightcade/installer
 # startup 
 wget -q -O /userdata/system/add-ons/fightcade/extras/startup.sh $url/startup.sh 2>/dev/null 
 dos2unix /userdata/system/add-ons/fightcade/extras/startup.sh 1>/dev/null 2>/dev/null
@@ -324,14 +324,14 @@ chmod a+x /userdata/system/add-ons/fightcade/extras/unwine.sh 2>/dev/null
 #dos2unix /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null
 #chmod a+x /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null
 # pad2key 
-url==https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/installer
+url==https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/fightcade/installer
 wget -q -O /userdata/roms/ports/Fightcade2.sh.keys $url/Fightcade2.sh.keys 2>/dev/null 
 # 
 #/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 #\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 #
 # + additional updates/fixes for v37: 
-url=https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/installer
+url=https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/fightcade/installer
 wget -q -O /userdata/system/add-ons/fightcade/extras/wine.sh $url/wine.sh 2>/dev/null
   dos2unix /userdata/system/add-ons/fightcade/extras/wine.sh 1>/dev/null 2>/dev/null 
   chmod a+x /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null 
