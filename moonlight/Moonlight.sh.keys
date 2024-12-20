@@ -1,29 +1,28 @@
 {
     "actions_player1": [
         {
-            "trigger": "joystick1",
-            "type": "mouse"
+            "trigger": [
+                "hotkey",
+            ],
+            "type": "key",
+            "target": [
+                "KEY_LEFTCTRL",
+                "KEY_LEFTALT",
+                "KEY_LEFTSHIFT",
+                "KEY_Z"
+            ]
         },
         {
             "trigger": [
-                "hotkey",
-                "start"
+                "start",
+                "select"
+                "L1"
+                "R1"
             ],
             "type": "key",
             "target": [
                 "KEY_LEFTALT",
                 "KEY_F4"
             ]
-        },
-        {
-            "trigger": "b",
-            "type": "key",
-            "target": "KEY_ENTER"
-        },
-        {
-            "trigger": "a",
-            "type": "key",
-            "target": "KEY_ESC"
         }
-    ]
 }
