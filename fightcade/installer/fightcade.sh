@@ -83,7 +83,7 @@ echo
 #\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 # -- download the package 
 # -- set temp for curl download
-dl=/userdata/system/pro/fightcade/extras/downloads
+dl=/userdata/system/add-ons/fightcade/extras/downloads
 rm -rf $dl 2>/dev/null; mkdir $dl 2>/dev/null; cd $dl 
 echo
 echo -e "DOWNLOADING FIGHTCADE [1/9] . . ."
