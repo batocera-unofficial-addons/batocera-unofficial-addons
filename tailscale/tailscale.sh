@@ -11,11 +11,11 @@ wget -q https://pkgs.tailscale.com/stable/tailscale_1.76.1_amd64.tgz
 tar -xf tailscale_1.76.1_amd64.tgz
 cd tailscale_1.76.1_amd64 || exit 1
 
-mkdir -p /userdata/tailscale
+mkdir -p /userdata/add-ons/tailscale
 
-mv systemd /userdata/tailscale/systemd
-mv tailscale /userdata/tailscale/tailscale
-mv tailscaled /userdata/tailscale/tailscaled
+mv systemd /userdata/add-ons/tailscale/systemd
+mv tailscale /userdata/add-ons/tailscale/tailscale
+mv tailscaled /userdata/add-ons/tailscale/tailscaled
 
 # Cleanup temporary files
 cd /userdata || exit 1
@@ -57,10 +57,10 @@ mv "$temp_sysctl_config" "$sysctl_config"
 sysctl -p "$sysctl_config"
 
 # Start Tailscale daemon
-/userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &
+/userdata/add-ons/tailscale/tailscaled -state /userdata/add-ons/tailscale/state > /userdata/add-ons/tailscale/tailscaled.log 2>&1 &
 
 # Bring up Tailscale with specific options
-/userdata/tailscale/tailscale up --advertise-routes=192.168.1.0/24 --snat-subnet-routes=false --accept-routes
+/userdata/add-ons/tailscale/tailscale up --advertise-routes=192.168.1.0/24 --snat-subnet-routes=false --accept-routes
 EOF
 
 chmod +x /userdata/system/services/tailscale
