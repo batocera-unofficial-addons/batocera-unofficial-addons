@@ -10,19 +10,19 @@ fi
 # Step 2: Download the AppImage
 echo "Downloading Moonlight AppImage from $latest_release_url..."
 mkdir -p /userdata/system
-wget -q -O /userdata/system/moonlight.AppImage "$latest_release_url"
+wget -q -O /userdata/system/add-ons/moonlight/moonlight.AppImage "$latest_release_url"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download the Moonlight AppImage."
     exit 1
 fi
 
-chmod a+x /userdata/system/moonlight.AppImage
+chmod a+x /userdata/system/add-ons/moonlight/moonlight.AppImage
 echo "Moonlight AppImage downloaded and marked as executable."
 
 
 # Create persistent configuration and log directories
-mkdir -p /userdata/system/moonlight-config
+mkdir -p /userdata/system/add-ons/moonlight/moonlight-config
 mkdir -p /userdata/system/logs
 
 # Step 2: Create the Moonlight Launcher Script
@@ -36,7 +36,7 @@ export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
 
 # Directories and file paths
-app_dir="/userdata/system"
+app_dir="/userdata/system/add-ons/moonlight"
 config_dir="${app_dir}/moonlight-config"
 config_symlink="${HOME}/.config/moonlight"
 app_image="${app_dir}/moonlight.AppImage"
