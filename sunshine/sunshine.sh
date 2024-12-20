@@ -4,10 +4,10 @@ echo "Installing Sunshine..."
 mkdir -p /userdata/system/add-ons/sunshine
 wget -q -O /userdata/system/add-ons/sunshine/sunshine.AppImage  https://github.com/DTJW92/batocera-unofficial-addons/raw/main/sunshine/sunshine.AppImage
 
-chmod a+x /userdata/system/sunshine.AppImage
+chmod a+x /userdata/system/add-ons/sunshine/sunshine.AppImage
 
 # Create a persistent configuration directory
-mkdir -p /userdata/system/sunshine-config
+mkdir -p /userdata/system/add-ons/sunshine/sunshine-config
 mkdir -p /userdata/system/logs
 
 # Configure Sunshine as a service
