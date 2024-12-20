@@ -29,7 +29,7 @@ app_dir="/userdata/system/add-ons/sunshine"
 config_dir="${app_dir}/sunshine-config/sunshine"
 config_symlink="${HOME}/.config/sunshine"
 app_image="${app_dir}/sunshine.AppImage"
-log_dir="${app_dir}/logs"
+log_dir="/userdata/system/logs"
 log_file="${log_dir}/sunshine.log"
 
 # Ensure log directory exists
