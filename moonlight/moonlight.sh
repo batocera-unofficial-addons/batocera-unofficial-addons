@@ -9,7 +9,7 @@ fi
 
 # Step 2: Download the AppImage
 echo "Downloading Moonlight AppImage from $latest_release_url..."
-mkdir -p /userdata/system
+mkdir -p /userdata/system/add-ons/moonlight
 wget -q -O /userdata/system/add-ons/moonlight/moonlight.AppImage "$latest_release_url"
 
 if [ $? -ne 0 ]; then
