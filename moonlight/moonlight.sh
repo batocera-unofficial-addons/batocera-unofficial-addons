@@ -40,7 +40,7 @@ app_dir="/userdata/system/add-ons/moonlight"
 config_dir="${app_dir}/moonlight-config"
 config_symlink="${HOME}/.config/moonlight"
 app_image="${app_dir}/moonlight.AppImage"
-log_dir="${app_dir}/logs"
+log_dir="/userdata/system/logs"
 log_file="${log_dir}/moonlight.log"
 
 # Ensure log directory exists
