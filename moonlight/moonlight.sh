@@ -11,7 +11,8 @@ fi
 echo "Downloading Moonlight AppImage from $latest_release_url..."
 mkdir -p /userdata/system
 wget -q -O /userdata/system/moonlight.AppImage "$latest_release_url"
-wget -q -O /userdata/roms/ports/Moonlight.sh.keys "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/moonlight/Moonlight.sh.keys"
+echo "Downloading Pad2Key profile..."
+wget -O /userdata/roms/ports/Moonlight.sh.keys "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/moonlight/Moonlight.sh.keys"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download the Moonlight AppImage."
