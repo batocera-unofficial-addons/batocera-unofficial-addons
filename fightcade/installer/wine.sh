@@ -7,8 +7,6 @@
 
 # -- link wine software stack -- 
 function batocera-fightcade-wine() {
-	
-	mkdir -p /usr/bin/wine
 
 	cp -rL /userdata/system/add-ons/fightcade/wine/usr/bin/grep /bin/ 2>/dev/null
 	cp -rL /userdata/system/add-ons/fightcade/wine/usr/bin/grep /usr/bin/ 2>/dev/null
