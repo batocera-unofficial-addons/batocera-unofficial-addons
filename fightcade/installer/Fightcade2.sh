@@ -47,7 +47,8 @@ fs=$(blkid | grep "$(df -h /userdata | awk 'END {print $1}')" | sed 's,^.*TYPE=,
 #   3) link wine stack 
     dos2unix /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null 
     chmod a+x /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null 
-    /userdata/system/add-ons/fightcade/extras/wine.sh 
+    cd /userdata/system/add-ons/fightcade/extras
+    ./wine.sh 
 #--------------------------------------------------------------------------
 #   4) add libraries/dependencies 
     cp -rL /userdata/system/add-ons/fightcade/extras/libatk-bridge-2.0.so.0 /lib/ 2>/dev/null
