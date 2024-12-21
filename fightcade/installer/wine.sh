@@ -7,8 +7,6 @@
 
 # -- link wine software stack -- 
 function batocera-fightcade-wine() {
-    
-    mkdir -p /usr/bin/wine
 
     # Replace cp with ln -s to create symlinks instead of copying files
     ln -s /userdata/system/add-ons/fightcade/wine/usr/bin/grep /bin/ 2>/dev/null
