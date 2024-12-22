@@ -10,8 +10,8 @@ fi
 # make directory for fc1 roms 
 mkdir -p /userdata/roms/fc1 2>/dev/null
 # prepare winesync.sh 
-dos2unix /userdata/system/add-ons/fightcade/extras/winesync.sh 2>/dev/null 
-chmod a+x /userdata/system/add-ons/fightcade/extras/winesync.sh 2>/dev/null 
+dos2unix /userdata/system/add-ons/Fightcade/extras/winesync.sh 2>/dev/null 
+chmod a+x /userdata/system/add-ons/Fightcade/extras/winesync.sh 2>/dev/null 
 ###########################################################################
 # link rom folders for symlinking filesystems 
 fs=$(blkid | grep "$(df -h /userdata | awk 'END {print $1}')" | sed 's,^.*TYPE=,,g' | sed 's,",,g' | tr 'a-z' 'A-Z')
@@ -24,55 +24,55 @@ fs=$(blkid | grep "$(df -h /userdata | awk 'END {print $1}')" | sed 's,^.*TYPE=,
     DISPLAY=:0.0 /usr/bin/loading_fightcade -fs 8 -fullscreen -fg black -bg black -fa Monospace -en UTF-8 -e bash -c "echo -e \"\033[0;37mLOADING FIGHTCADE . . .\" & " 2>/dev/null & 
 #--------------------------------------------------------------------------
 #   1) link fightcade main ROMs folder 
-    rm -rf /userdata/system/add-ons/fightcade/ROMs/Flycast\ ROMs 2>/dev/null
-    rm -rf /userdata/system/add-ons/fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
-    rm -rf /userdata/system/add-ons/fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
-    rm -rf /userdata/system/add-ons/fightcade/ROMs/FC1\ ROMs 2>/dev/null
-    mkdir -p /userdata/system/add-ons/fightcade/ROMs 2>/dev/null
-    ln -s /userdata/roms/dreamcast /userdata/system/add-ons/fightcade/ROMs/Flycast\ ROMs 2>/dev/null
-    ln -s /userdata/roms/fbneo /userdata/system/add-ons/fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
-    ln -s /userdata/roms/snes /userdata/system/add-ons/fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
-    ln -s /userdata/roms/fc1 /userdata/system/add-ons/fightcade/ROMs/FC1\ ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/Fightcade/ROMs/Flycast\ ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/Fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/Fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/Fightcade/ROMs/FC1\ ROMs 2>/dev/null
+    mkdir -p /userdata/system/add-ons/Fightcade/ROMs 2>/dev/null
+    ln -s /userdata/roms/dreamcast /userdata/system/add-ons/Fightcade/ROMs/Flycast\ ROMs 2>/dev/null
+    ln -s /userdata/roms/fbneo /userdata/system/add-ons/Fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
+    ln -s /userdata/roms/snes /userdata/system/add-ons/Fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
+    ln -s /userdata/roms/fc1 /userdata/system/add-ons/Fightcade/ROMs/FC1\ ROMs 2>/dev/null
 #--------------------------------------------------------------------------
 #   2) link fightcade emulators ROMs folders 
-    rm -rf /userdata/system/add-ons/fightcade/emulator/flycast/ROMs 2>/dev/null
-    rm -rf /userdata/system/add-ons/fightcade/emulator/fbneo/ROMs 2>/dev/null
-    rm -rf /userdata/system/add-ons/fightcade/emulator/snes9x/ROMs 2>/dev/null
-    rm -rf /userdata/system/add-ons/fightcade/emulator/ggpofba/ROMs 2>/dev/null
-    ln -s /userdata/roms/dreamcast /userdata/system/add-ons/fightcade/emulator/flycast/ROMs 2>/dev/null
-    ln -s /userdata/roms/fbneo /userdata/system/add-ons/fightcade/emulator/fbneo/ROMs 2>/dev/null
-    ln -s /userdata/roms/snes /userdata/system/add-ons/fightcade/emulator/snes9x/ROMs 2>/dev/null
-    ln -s /userdata/roms/fc1 /userdata/system/add-ons/fightcade/emulator/ggpofba/ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/Fightcade/emulator/flycast/ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/Fightcade/emulator/fbneo/ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/Fightcade/emulator/snes9x/ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/Fightcade/emulator/ggpofba/ROMs 2>/dev/null
+    ln -s /userdata/roms/dreamcast /userdata/system/add-ons/Fightcade/emulator/flycast/ROMs 2>/dev/null
+    ln -s /userdata/roms/fbneo /userdata/system/add-ons/Fightcade/emulator/fbneo/ROMs 2>/dev/null
+    ln -s /userdata/roms/snes /userdata/system/add-ons/Fightcade/emulator/snes9x/ROMs 2>/dev/null
+    ln -s /userdata/roms/fc1 /userdata/system/add-ons/Fightcade/emulator/ggpofba/ROMs 2>/dev/null
 #--------------------------------------------------------------------------
 #   3) link wine stack 
-    dos2unix /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null 
-    chmod a+x /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null 
-    cd /userdata/system/add-ons/fightcade/extras
+    dos2unix /userdata/system/add-ons/Fightcade/extras/wine.sh 2>/dev/null 
+    chmod a+x /userdata/system/add-ons/Fightcade/extras/wine.sh 2>/dev/null 
+    cd /userdata/system/add-ons/Fightcade/extras
     ./wine.sh 
 #--------------------------------------------------------------------------
 #   4) add libraries/dependencies 
-    cp -rL /userdata/system/add-ons/fightcade/extras/libatk-bridge-2.0.so.0 /lib/ 2>/dev/null
-    cp -rL /userdata/system/add-ons/fightcade/extras/libatspi.so.0 /lib/ 2>/dev/null
-    cp -rL /userdata/system/add-ons/fightcade/extras/libcups.so.2 /lib/ 2>/dev/null
-    cp -rL /userdata/system/add-ons/fightcade/wine/usr/bin/grep /bin/ 2>/dev/null
-    cp -rL /userdata/system/add-ons/fightcade/wine/usr/bin/grep /usr/bin/ 2>/dev/null
-    cp -rL /userdata/system/add-ons/fightcade/wine/usr/bin/xdg* /usr/bin/ 2>/dev/null
-    cp -rL /userdata/system/add-ons/fightcade/wine/usr/bin/readlink /usr/bin/ 2>/dev/null
-    cp -rL /userdata/system/add-ons/fightcade/wine/usr/bin/dirname /usr/bin/ 2>/dev/null
-    cp -rL /userdata/system/add-ons/fightcade/wine/usr/bin/notify-send /usr/bin/ 2>/dev/null
-    cp -rL /userdata/system/add-ons/fightcade/wine/usr/bin/zenity* /usr/bin/ 2>/dev/null
+    cp -rL /userdata/system/add-ons/Fightcade/extras/libatk-bridge-2.0.so.0 /lib/ 2>/dev/null
+    cp -rL /userdata/system/add-ons/Fightcade/extras/libatspi.so.0 /lib/ 2>/dev/null
+    cp -rL /userdata/system/add-ons/Fightcade/extras/libcups.so.2 /lib/ 2>/dev/null
+    cp -rL /userdata/system/add-ons/Fightcade/wine/usr/bin/grep /bin/ 2>/dev/null
+    cp -rL /userdata/system/add-ons/Fightcade/wine/usr/bin/grep /usr/bin/ 2>/dev/null
+    cp -rL /userdata/system/add-ons/Fightcade/wine/usr/bin/xdg* /usr/bin/ 2>/dev/null
+    cp -rL /userdata/system/add-ons/Fightcade/wine/usr/bin/readlink /usr/bin/ 2>/dev/null
+    cp -rL /userdata/system/add-ons/Fightcade/wine/usr/bin/dirname /usr/bin/ 2>/dev/null
+    cp -rL /userdata/system/add-ons/Fightcade/wine/usr/bin/notify-send /usr/bin/ 2>/dev/null
+    cp -rL /userdata/system/add-ons/Fightcade/wine/usr/bin/zenity* /usr/bin/ 2>/dev/null
 #--------------------------------------------------------------------------
 #   5) start fightcade2 
-    chmod a+x /userdata/system/add-ons/fightcade/Fightcade2.sh 2>/dev/null
+    chmod a+x /userdata/system/add-ons/Fightcade/Fightcade2.sh 2>/dev/null
     unclutter-remote -s 
     echo 
     echo -e "  # # #"
     echo -e "  #    "
-    echo -e "  #   STARTING FIGHTCADE $(cat /userdata/system/add-ons/fightcade/VERSION.txt)"
+    echo -e "  #   STARTING FIGHTCADE $(cat /userdata/system/add-ons/Fightcade/VERSION.txt)"
     echo -e "  #    "
     echo -e "  # # #"
-    /userdata/system/add-ons/fightcade/Fightcade2.sh & 
-    /userdata/system/add-ons/fightcade/extras/syncwine.sh & 
+    /userdata/system/add-ons/Fightcade/Fightcade2.sh & 
+    /userdata/system/add-ons/Fightcade/extras/syncwine.sh & 
 ###########################################################################
 else # display info that fightcade requires a symlinking filesystem & exit
 DISPLAY=:0.0 xterm -fs 10 -fullscreen -fg white -bg black -fa Monospace -en UTF-8 -e bash -c "echo -e \"  █\n  █  ERROR: FIGHTCADE ON BATOCERA REQUIRES A SYMLINKING FILESYSTEM, EXT4 OR BTRFS \n  █\" & sleep 3" 2>/dev/null && exit 0 & exit 1 & exit 2
