@@ -24,25 +24,25 @@ fs=$(blkid | grep "$(df -h /userdata | awk 'END {print $1}')" | sed 's,^.*TYPE=,
     DISPLAY=:0.0 /usr/bin/loading_fightcade -fs 8 -fullscreen -fg black -bg black -fa Monospace -en UTF-8 -e bash -c "echo -e \"\033[0;37mLOADING FIGHTCADE . . .\" & " 2>/dev/null & 
 #--------------------------------------------------------------------------
 #   1) link fightcade main ROMs folder 
-    rm -rf /userdata/system/add-ons/fightcade/fightcade/ROMs/Flycast\ ROMs 2>/dev/null
-    rm -rf /userdata/system/add-ons/fightcade/fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
-    rm -rf /userdata/system/add-ons/fightcade/fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
-    rm -rf /userdata/system/add-ons/fightcade/fightcade/ROMs/FC1\ ROMs 2>/dev/null
-    mkdir -p /userdata/system/add-ons/fightcade/fightcade/ROMs 2>/dev/null
-    ln -s /userdata/roms/dreamcast /userdata/system/add-ons/fightcade/fightcade/ROMs/Flycast\ ROMs 2>/dev/null
-    ln -s /userdata/roms/fbneo /userdata/system/add-ons/fightcade/fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
-    ln -s /userdata/roms/snes /userdata/system/add-ons/fightcade/fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
-    ln -s /userdata/roms/fc1 /userdata/system/add-ons/fightcade/fightcade/ROMs/FC1\ ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/fightcade/ROMs/Flycast\ ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/fightcade/ROMs/FC1\ ROMs 2>/dev/null
+    mkdir -p /userdata/system/add-ons/fightcade/ROMs 2>/dev/null
+    ln -s /userdata/roms/dreamcast /userdata/system/add-ons/fightcade/ROMs/Flycast\ ROMs 2>/dev/null
+    ln -s /userdata/roms/fbneo /userdata/system/add-ons/fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
+    ln -s /userdata/roms/snes /userdata/system/add-ons/fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
+    ln -s /userdata/roms/fc1 /userdata/system/add-ons/fightcade/ROMs/FC1\ ROMs 2>/dev/null
 #--------------------------------------------------------------------------
 #   2) link fightcade emulators ROMs folders 
-    rm -rf /userdata/system/add-ons/fightcade/fightcade/emulator/flycast/ROMs 2>/dev/null
-    rm -rf /userdata/system/add-ons/fightcade/fightcade/emulator/fbneo/ROMs 2>/dev/null
-    rm -rf /userdata/system/add-ons/fightcade/fightcade/emulator/snes9x/ROMs 2>/dev/null
-    rm -rf /userdata/system/add-ons/fightcade/fightcade/emulator/ggpofba/ROMs 2>/dev/null
-    ln -s /userdata/roms/dreamcast /userdata/system/add-ons/fightcade/fightcade/emulator/flycast/ROMs 2>/dev/null
-    ln -s /userdata/roms/fbneo /userdata/system/add-ons/fightcade/fightcade/emulator/fbneo/ROMs 2>/dev/null
-    ln -s /userdata/roms/snes /userdata/system/add-ons/fightcade/fightcade/emulator/snes9x/ROMs 2>/dev/null
-    ln -s /userdata/roms/fc1 /userdata/system/add-ons/fightcade/fightcade/emulator/ggpofba/ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/fightcade/emulator/flycast/ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/fightcade/emulator/fbneo/ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/fightcade/emulator/snes9x/ROMs 2>/dev/null
+    rm -rf /userdata/system/add-ons/fightcade/emulator/ggpofba/ROMs 2>/dev/null
+    ln -s /userdata/roms/dreamcast /userdata/system/add-ons/fightcade/emulator/flycast/ROMs 2>/dev/null
+    ln -s /userdata/roms/fbneo /userdata/system/add-ons/fightcade/emulator/fbneo/ROMs 2>/dev/null
+    ln -s /userdata/roms/snes /userdata/system/add-ons/fightcade/emulator/snes9x/ROMs 2>/dev/null
+    ln -s /userdata/roms/fc1 /userdata/system/add-ons/fightcade/emulator/ggpofba/ROMs 2>/dev/null
 #--------------------------------------------------------------------------
 #   3) link wine stack 
     dos2unix /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null 
@@ -63,15 +63,15 @@ fs=$(blkid | grep "$(df -h /userdata | awk 'END {print $1}')" | sed 's,^.*TYPE=,
     cp -rL /userdata/system/add-ons/fightcade/wine/usr/bin/zenity* /usr/bin/ 2>/dev/null
 #--------------------------------------------------------------------------
 #   5) start fightcade2 
-    chmod a+x /userdata/system/add-ons/fightcade/fightcade/Fightcade2.sh 2>/dev/null
+    chmod a+x /userdata/system/add-ons/fightcade/Fightcade2.sh 2>/dev/null
     unclutter-remote -s 
     echo 
     echo -e "  # # #"
     echo -e "  #    "
-    echo -e "  #   STARTING FIGHTCADE $(cat /userdata/system/add-ons/fightcade/fightcade/VERSION.txt)"
+    echo -e "  #   STARTING FIGHTCADE $(cat /userdata/system/add-ons/fightcade/VERSION.txt)"
     echo -e "  #    "
     echo -e "  # # #"
-    /userdata/system/add-ons/fightcade/fightcade/Fightcade2.sh & 
+    /userdata/system/add-ons/fightcade/Fightcade2.sh & 
     /userdata/system/add-ons/fightcade/extras/syncwine.sh & 
 ###########################################################################
 else # display info that fightcade requires a symlinking filesystem & exit
