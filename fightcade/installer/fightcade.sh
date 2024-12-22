@@ -88,7 +88,7 @@ dl=/userdata/system/add-ons/fightcade/extras/downloads
 rm -rf $dl 2>/dev/null; mkdir $dl 2>/dev/null; cd $dl 
 echo
 echo -e "DOWNLOADING FIGHTCADE . . ."
-curl --progress-bar --remote-name --location https://web.fightcade.com/download/Fightcade-linux-latest.tar.gz -o "$dl"/fightcade.tar.gz
+curl --progress-bar --location https://web.fightcade.com/download/Fightcade-linux-latest.tar.gz -o $dl/fightcade.tar.gz
 #/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 #\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 #
