@@ -96,7 +96,7 @@ function batocera-fightcade-unwine() {
 
 		##################################
 		# restore files from system backup
-		b=/userdata/system/add-ons/fightcade/extras/system 
+		b=/userdata/system/add-ons/Fightcade/extras/system 
 			cp -rL $b/grep /bin/ 2>/dev/null
 			cp -rL $b/xdg* /usr/bin/ 2>/dev/null
 			cp -rL $b/readlink /usr/bin/ 2>/dev/null
