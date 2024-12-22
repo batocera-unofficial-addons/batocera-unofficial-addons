@@ -47,7 +47,7 @@ spinner()
 # prepare paths and files for installation 
 cd ~/
 killall fc2-electron 2>/dev/null
-fightcade=/userdata/system/add-ons/fightcade; mkdir -p $fightcade/extras 2>/dev/null
+Fightcade=/userdata/system/add-ons/Fightcade; mkdir -p $Fightcade/extras 2>/dev/null
 tmp=/tmp/batocera-fightcade; rm -rf $tmp 2>/dev/null; mkdir -p /tmp 2>/dev/null
 # --------------------------------------------------------------------
 # -- prepare dependencies for this app and the installer: 
@@ -84,7 +84,7 @@ echo
 #\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 # -- download the package 
 # -- set temp for curl download
-dl=/userdata/system/add-ons/fightcade/extras/downloads
+dl=/userdata/system/add-ons/Fightcade/extras/downloads
 rm -rf $dl 2>/dev/null; mkdir $dl 2>/dev/null; cd $dl 
 echo
 echo -e "DOWNLOADING FIGHTCADE . . ."
@@ -95,11 +95,11 @@ curl --progress-bar --location https://web.fightcade.com/download/Fightcade-linu
 echo
 echo -e "EXTRACTING. . . ."
 cd /userdata/system/add-ons/
-mv /userdata/system/add-ons/fightcade/extras/downloads/fightcade.tar.gz /userdata/system/add-ons/
+mv /userdata/system/add-ons/Fightcade/extras/downloads/fightcade.tar.gz /userdata/system/add-ons/
 chmod a+x /bin/tar 2>/dev/null
 /bin/tar -xf /userdata/system/add-ons/fightcade.tar.gz 
-rm -rf /userdata/system/add-ons/fightcade/extras/downloads 2>/dev/null
-size=$(du -h ~/add-ons/fightcade | tail -n 1 | awk '{print $1}' | sed 's,G,,g')
+rm -rf /userdata/system/add-ons/Fightcade/extras/downloads 2>/dev/null
+size=$(du -h ~/add-ons/Fightcade | tail -n 1 | awk '{print $1}' | sed 's,G,,g')
 echo -e "$size GB"
 echo -e "DONE,"
 #
@@ -110,13 +110,13 @@ echo
 echo -e "INSTALLING . . ."
 #
 # check d2u/a+x 
-dos2unix /userdata/system/add-ons/fightcade/extras/startup.sh 2>/dev/null
-dos2unix /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null
-dos2unix /userdata/system/add-ons/fightcade/Fightcade2.sh 2>/dev/null
-chmod a+x /userdata/system/add-ons/fightcade/extras/startup.sh 2>/dev/null
-chmod a+x /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null
-chmod a+x /userdata/system/add-ons/fightcade/Fightcade2.sh 2>/dev/null
-/userdata/system/add-ons/fightcade/extras/startup.sh 2>/dev/null
+dos2unix /userdata/system/add-ons/Fightcade/extras/startup.sh 2>/dev/null
+dos2unix /userdata/system/add-ons/Fightcade/extras/wine.sh 2>/dev/null
+dos2unix /userdata/system/add-ons/Fightcade/Fightcade2.sh 2>/dev/null
+chmod a+x /userdata/system/add-ons/Fightcade/extras/startup.sh 2>/dev/null
+chmod a+x /userdata/system/add-ons/Fightcade/extras/wine.sh 2>/dev/null
+chmod a+x /userdata/system/add-ons/Fightcade/Fightcade2.sh 2>/dev/null
+/userdata/system/add-ons/Fightcade/extras/startup.sh 2>/dev/null
 # 
 #/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 #\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
@@ -126,7 +126,7 @@ chmod a+x /userdata/system/add-ons/fightcade/Fightcade2.sh 2>/dev/null
 # -------------------------------------------------------------------
 # 
 csh=/userdata/system/custom.sh; dos2unix $csh 2>/dev/null
-startup="/userdata/system/add-ons/fightcade/extras/startup.sh"
+startup="/userdata/system/add-ons/Fightcade/extras/startup.sh"
 if [[ -f $csh ]];
    then
       tmp1=/tmp/tcsh1
@@ -168,29 +168,29 @@ chmod a+x ~/custom.sh 2>/dev/null
 # --- 
 url=https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/fightcade/installer
 # startup 
-wget -q -O /userdata/system/add-ons/fightcade/extras/startup.sh $url/startup.sh 2>/dev/null 
-dos2unix /userdata/system/add-ons/fightcade/extras/startup.sh 1>/dev/null 2>/dev/null
-chmod a+x /userdata/system/add-ons/fightcade/extras/startup.sh 2>/dev/null
+wget -q -O /userdata/system/add-ons/Fightcade/extras/startup.sh $url/startup.sh 2>/dev/null 
+dos2unix /userdata/system/add-ons/Fightcade/extras/startup.sh 1>/dev/null 2>/dev/null
+chmod a+x /userdata/system/add-ons/Fightcade/extras/startup.sh 2>/dev/null
 # launcher 
-wget -q -O /userdata/system/add-ons/fightcade/Fightcade2.sh $url/Fightcade2.sh 2>/dev/null 
-dos2unix /userdata/system/add-ons/fightcade/Fightcade2.sh 1>/dev/null 2>/dev/null
-chmod a+x /userdata/system/add-ons/fightcade/Fightcade2.sh 2>/dev/null
+wget -q -O /userdata/system/add-ons/Fightcade/Fightcade2.sh $url/Fightcade2.sh 2>/dev/null 
+dos2unix /userdata/system/add-ons/Fightcade/Fightcade2.sh 1>/dev/null 2>/dev/null
+chmod a+x /userdata/system/add-ons/Fightcade/Fightcade2.sh 2>/dev/null
 # winesync 
-wget -q -O /userdata/system/add-ons/fightcade/extras/winesync.sh $url/winesync.sh 2>/dev/null 
-dos2unix /userdata/system/add-ons/fightcade/extras/winesync.sh 1>/dev/null 2>/dev/null
-chmod a+x /userdata/system/add-ons/fightcade/extras/winesync.sh 2>/dev/null
+wget -q -O /userdata/system/add-ons/Fightcade/extras/winesync.sh $url/winesync.sh 2>/dev/null 
+dos2unix /userdata/system/add-ons/Fightcade/extras/winesync.sh 1>/dev/null 2>/dev/null
+chmod a+x /userdata/system/add-ons/Fightcade/extras/winesync.sh 2>/dev/null
 # syncwine 
-wget -q -O /userdata/system/add-ons/fightcade/extras/syncwine.sh $url/syncwine.sh 2>/dev/null 
-dos2unix /userdata/system/add-ons/fightcade/extras/syncwine.sh 1>/dev/null 2>/dev/null
-chmod a+x /userdata/system/add-ons/fightcade/extras/syncwine.sh 2>/dev/null
+wget -q -O /userdata/system/add-ons/Fightcade/extras/syncwine.sh $url/syncwine.sh 2>/dev/null 
+dos2unix /userdata/system/add-ons/Fightcade/extras/syncwine.sh 1>/dev/null 2>/dev/null
+chmod a+x /userdata/system/add-ons/Fightcade/extras/syncwine.sh 2>/dev/null
 # unwine 
-wget -q -O /userdata/system/add-ons/fightcade/extras/unwine.sh $url/unwine.sh 2>/dev/null 
-dos2unix /userdata/system/add-ons/fightcade/extras/unwine.sh 1>/dev/null 2>/dev/null
-chmod a+x /userdata/system/add-ons/fightcade/extras/unwine.sh 2>/dev/null
+wget -q -O /userdata/system/add-ons/Fightcade/extras/unwine.sh $url/unwine.sh 2>/dev/null 
+dos2unix /userdata/system/add-ons/Fightcade/extras/unwine.sh 1>/dev/null 2>/dev/null
+chmod a+x /userdata/system/add-ons/Fightcade/extras/unwine.sh 2>/dev/null
 # wine 
-#wget -q -O /userdata/system/add-ons/fightcade/extras/wine.sh $url/wine.sh 2>/dev/null 
-#dos2unix /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null
-#chmod a+x /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null
+wget -q -O /userdata/system/add-ons/Fightcade/extras/wine.sh $url/wine.sh 2>/dev/null 
+dos2unix /userdata/system/add-ons/Fightcade/extras/wine.sh 2>/dev/null
+chmod a+x /userdata/system/add-ons/Fightcade/extras/wine.sh 2>/dev/null
 # pad2key 
 url=https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/fightcade/installer
 wget -q -O /userdata/roms/ports/Fightcade2.sh.keys $url/Fightcade2.sh.keys 2>/dev/null 
@@ -200,19 +200,19 @@ wget -q -O /userdata/roms/ports/Fightcade2.sh.keys $url/Fightcade2.sh.keys 2>/de
 #
 # + additional updates/fixes for v37: 
 url=https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/fightcade/installer
-wget -q -O /userdata/system/add-ons/fightcade/extras/wine.sh $url/wine.sh 2>/dev/null
-  dos2unix /userdata/system/add-ons/fightcade/extras/wine.sh 1>/dev/null 2>/dev/null 
-  chmod a+x /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null 
-wget -q -O /userdata/system/add-ons/fightcade/extras/liblua5.2.so.0 $url/liblua5.2.so.0 2>/dev/null 
-wget -q -O /userdata/system/add-ons/fightcade/extras/liblua5.3.so.0 $url/liblua5.3.so.0 2>/dev/null 
-wget -q -O /userdata/system/add-ons/fightcade/extras/libzip.so.4 $url/libzip.so.4 2>/dev/null 
-wget -q -O /userdata/system/add-ons/fightcade/extras/libzip.so.5 $url/libzip.so.5 2>/dev/null 
+wget -q -O /userdata/system/add-ons/Fightcade/extras/wine.sh $url/wine.sh 2>/dev/null
+  dos2unix /userdata/system/add-ons/Fightcade/extras/wine.sh 1>/dev/null 2>/dev/null 
+  chmod a+x /userdata/system/add-ons/Fightcade/extras/wine.sh 2>/dev/null 
+wget -q -O /userdata/system/add-ons/Fightcade/extras/liblua5.2.so.0 $url/liblua5.2.so.0 2>/dev/null 
+wget -q -O /userdata/system/add-ons/Fightcade/extras/liblua5.3.so.0 $url/liblua5.3.so.0 2>/dev/null 
+wget -q -O /userdata/system/add-ons/Fightcade/extras/libzip.so.4 $url/libzip.so.4 2>/dev/null 
+wget -q -O /userdata/system/add-ons/Fightcade/extras/libzip.so.5 $url/libzip.so.5 2>/dev/null 
 # 
 #/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 #\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 #
 # add Fightcade2 to ports
-cp /userdata/system/add-ons/fightcade/Fightcade2.sh /userdata/roms/ports/Fightcade2.sh 2>/dev/null
+cp /userdata/system/add-ons/Fightcade/Fightcade2.sh /userdata/roms/ports/Fightcade2.sh 2>/dev/null
 # reload gamelists 
 curl http://127.0.0.1:1234/reloadgames 
 echo -e "DONE,"
@@ -221,14 +221,14 @@ echo -e "DONE,"
 #\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 # 
 # set icon for f1 launcher 
-if [[ -f /userdata/system/add-ons/fightcade/extras/fightcade.desktop ]]; then 
-    sed -i 's/icon.png/icong.png/g' /userdata/system/add-ons/fightcade/extras/fightcade.desktop 2>/dev/null
-    /userdata/system/add-ons/fightcade/extras/startup.sh 2>/dev/null 
+if [[ -f /userdata/system/add-ons/Fightcade/extras/fightcade.desktop ]]; then 
+    sed -i 's/icon.png/icong.png/g' /userdata/system/add-ons/Fightcade/extras/fightcade.desktop 2>/dev/null
+    /userdata/system/add-ons/Fightcade/extras/startup.sh 2>/dev/null 
 fi
 # add --disable-gpu to fightcade launcher for compatibility  
-if [[ -f /userdata/system/add-ons/fightcade/fightcade/Fightcade2.sh ]]; then
-    if [[ $(cat "/userdata/system/add-ons/fightcade/fightcade/Fightcade2.sh" | grep "disable-gpu") = "" ]] || [[ $(cat "/userdata/system/add-ons/fightcade/fightcade/Fightcade2.sh" | grep "no-sandbox") != "" ]]; then
-    sed -i 's/--no-sandbox/--no-sandbox --disable-gpu/g' /userdata/system/add-ons/fightcade/fightcade/Fightcade2.sh 2>/dev/null
+if [[ -f /userdata/system/add-ons/Fightcade/Fightcade2.sh ]]; then
+    if [[ $(cat "/userdata/system/add-ons/Fightcade/Fightcade2.sh" | grep "disable-gpu") = "" ]] || [[ $(cat "/userdata/system/add-ons/Fightcade/Fightcade2.sh" | grep "no-sandbox") != "" ]]; then
+    sed -i 's/--no-sandbox/--no-sandbox --disable-gpu/g' /userdata/system/add-ons/Fightcade/Fightcade2.sh 2>/dev/null
     fi 
 fi
 # 
