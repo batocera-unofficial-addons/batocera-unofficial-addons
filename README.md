@@ -6,6 +6,7 @@ sunshine<br>
 moonlight<br>
 tailscale<br>
 Nvidia patcher<br>
+switch<br>
 
 WIP - DO NOT ATTEMPT TO INSTALL<br>
 fightcade<br>
