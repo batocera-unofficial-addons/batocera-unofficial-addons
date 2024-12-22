@@ -35,6 +35,7 @@ cat << 'EOF' > /userdata/roms/ports/BerryOS.sh
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
+export XDG_RUNTIME_DIR=/userdata/system/add-ons/berry-os
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/berry-os"
