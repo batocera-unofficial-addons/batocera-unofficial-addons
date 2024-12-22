@@ -86,69 +86,8 @@ echo
 dl=/userdata/system/add-ons/fightcade/extras/downloads
 rm -rf $dl 2>/dev/null; mkdir $dl 2>/dev/null; cd $dl 
 echo
-echo -e "DOWNLOADING FIGHTCADE [1/9] . . ."
-curl --progress-bar --remote-name --location https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/package/fightcade.tar.gz.partaa
-echo -e "DOWNLOADING FIGHTCADE [2/9] . . ."
-curl --progress-bar --remote-name --location https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/package/fightcade.tar.gz.partab
-echo -e "DOWNLOADING FIGHTCADE [3/9] . . ."
-curl --progress-bar --remote-name --location https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/package/fightcade.tar.gz.partac
-echo -e "DOWNLOADING FIGHTCADE [4/9] . . ."
-curl --progress-bar --remote-name --location https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/package/fightcade.tar.gz.partad
-echo -e "DOWNLOADING FIGHTCADE [5/9] . . ."
-curl --progress-bar --remote-name --location https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/package/fightcade.tar.gz.partae
-echo -e "DOWNLOADING FIGHTCADE [6/9] . . ."
-curl --progress-bar --remote-name --location https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/package/fightcade.tar.gz.partaf
-echo -e "DOWNLOADING FIGHTCADE [7/9] . . ."
-curl --progress-bar --remote-name --location https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/package/fightcade.tar.gz.partag
-echo -e "DOWNLOADING FIGHTCADE [8/9] . . ."
-curl --progress-bar --remote-name --location https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/package/fightcade.tar.gz.partah
-echo -e "DOWNLOADING FIGHTCADE [9/9] . . ."
-curl --progress-bar --remote-name --location https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/package/fightcade.tar.gz.partai
-#
-# check downloads integrity 
-p1=$dl/fightcade.tar.gz.partaa
-p2=$dl/fightcade.tar.gz.partab
-p3=$dl/fightcade.tar.gz.partac
-p4=$dl/fightcade.tar.gz.partad
-p5=$dl/fightcade.tar.gz.partae
-p6=$dl/fightcade.tar.gz.partaf
-p7=$dl/fightcade.tar.gz.partag
-p8=$dl/fightcade.tar.gz.partah
-p9=$dl/fightcade.tar.gz.partai
-if [[ -f "$p1" ]] && [[ -f "$p2" ]] && [[ -f "$p3" ]] && [[ -f "$p4" ]] && [[ -f "$p5" ]] && [[ -f "$p6" ]] && [[ -f "$p7" ]] && [[ -f "$p8" ]] && [[ -f "$p9" ]]; 
-    then 
-    p1m=$(md5sum $p1 | awk '{print $1}')
-    p2m=$(md5sum $p2 | awk '{print $1}')
-    p3m=$(md5sum $p3 | awk '{print $1}')
-    p4m=$(md5sum $p4 | awk '{print $1}')
-    p5m=$(md5sum $p5 | awk '{print $1}')
-    p6m=$(md5sum $p6 | awk '{print $1}')
-    p7m=$(md5sum $p7 | awk '{print $1}')
-    p8m=$(md5sum $p8 | awk '{print $1}')
-    p9m=$(md5sum $p9 | awk '{print $1}')
-    if [[ "$p1m" = "978124aae588ef07d856a1ef0c9c669c" ]] && [[ "$p2m" = "8a9f5f08ef33879ff79c6026f785247b" ]] && [[ "$p3m" = "3edd3cf329397daa0d39ebd23928aac2" ]] && [[ "$p4m" = "7603a41027baba2de7ee78791ccb01b3" ]] && [[ "$p5m" = "ead03d97ac853097c2c0a3af70fdefca" ]] && [[ "$p6m" = "5a90b5818b1966067ea06fd42bd54ffb" ]] && [[ "$p7m" = "0b5073cf440b3f41f38582a1ee773ee1" ]] && [[ "$p8m" = "bdbc04d91cedb9fce8505fb04e127237" ]] && [[ "$p9m" = "6cbbf0708e94bb00bc45227af1acdc43" ]]; 
-        then 
-            #
-            size=$(du -h ~/add-ons/fightcade/extras/downloads | tail -n 1 | awk '{print $1}' | sed 's,G,,g')
-            echo -e "DONE, $size "
-        else 
-            echo
-            echo -e "DOWNLOAD WENT BAD! ;( "
-            sleep 2
-            echo -e "RESTARTING INSTALLER . . ."
-            sleep 2
-            exit 1 & curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/installer/fightcade.sh | bash
-    fi
-fi
-# 
-#/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-#\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
-#
-echo
-echo -e "MERGING . . ."
-cd /userdata/system/add-ons/fightcade/extras/downloads
-cat /userdata/system/add-ons/fightcade/extras/downloads/fightcade.tar.gz.part* >/userdata/system/add-ons/fightcade/extras/downloads/fightcade.tar.gz
-echo -e "DONE,"
+echo -e "DOWNLOADING FIGHTCADE . . ."
+curl --progress-bar --remote-name --location https://www.fightcade.com/download/linux
 #
 #/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 #\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
