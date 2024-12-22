@@ -2,9 +2,9 @@
 export DISPLAY=:0.0 
 
 # backup system libraries/binaries 
-rm -rf /userdata/system/add-ons/fightcade/extras/system 2>/dev/null
-mkdir -p /userdata/system/add-ons/fightcade/extras/system 2>/dev/null
-b=/userdata/system/add-ons/fightcade/extras/system 
+rm -rf /userdata/system/add-ons/Fightcade/extras/system 2>/dev/null
+mkdir -p /userdata/system/add-ons/Fightcade/extras/system 2>/dev/null
+b=/userdata/system/add-ons/Fightcade/extras/system 
 	cp -rL /bin/grep $b/ 2>/dev/null
 	cp -rL /usr/bin/xdg* $b/ 2>/dev/null
 	cp -rL /usr/bin/readlink $b/ 2>/dev/null
@@ -17,5 +17,5 @@ b=/userdata/system/add-ons/fightcade/extras/system
 	cp -r /usr/lib/i386-linux-gnu/ld-linux.so.2 $b/2>/dev/null
 # /backup 
 
-cp /userdata/system/add-ons/fightcade/extras/fightcade.desktop /usr/share/applications/ 2>/dev/null & 
+cp /userdata/system/add-ons/Fightcade/extras/fightcade.desktop /usr/share/applications/ 2>/dev/null & 
 
