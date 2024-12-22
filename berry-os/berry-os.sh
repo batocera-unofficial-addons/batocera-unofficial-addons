@@ -33,9 +33,10 @@ cat << 'EOF' > /userdata/roms/ports/BerryOS.sh
 #!/bin/bash
 
 # Environment setup
-export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
-export XDG_RUNTIME_DIR=/userdata/system/add-ons/berry-os
+export XDG_RUNTIME_DIR=/tmp  # Ensure this points to a valid location
+export TMPDIR=/userdata/tmp  # Ensure the AppImage has a writable directory for extraction
+mkdir -p $TMPDIR  # Create the tmp directory if it doesn't exist
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/berry-os"
@@ -52,7 +53,11 @@ echo "$(date): Launching Berry OS"
 
 # Launch Berry OS AppImage
 if [ -x "${app_image}" ]; then
+    # Before running, make sure all necessary directories are in place
     cd "${app_dir}"
+    
+    # Run the AppImage
+    echo "Launching Berry OS AppImage..."
     ./berry-os.AppImage > "${log_file}" 2>&1
     echo "Berry OS exited."
 else
