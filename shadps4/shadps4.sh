@@ -76,6 +76,7 @@ echo "$(date): Launching ShadPS4"
 
 # Create persistent directory for ShadPS4 config
 mkdir -p "${config_dir}"
+mkdir -p /userdata/roms/ps4
 
 # Move existing config if present
 if [ -d "${config_symlink}" ] && [ ! -L "${config_symlink}" ]; then
