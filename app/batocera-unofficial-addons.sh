@@ -70,7 +70,6 @@ apps=(
         ["SWITCH"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/switch/switch.sh | bash"
         ["TAILSCALE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/tailscale/tailscale.sh | bash"
         ["WINEMANAGER"]="curl -Ls links.gregoryc.dev/wine-manager | bash"
-        ["CEMU"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/cemu/cemu.sh | bash"
         ["SHADPS4"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/shadps4/shadps4.sh | bash"
         ["CONTY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/conty/conty.sh | bash"
 )
