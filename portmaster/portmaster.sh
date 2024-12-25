@@ -13,8 +13,8 @@ echo "Latest installer found: $installer_url"
 
 # Step 2: Download the PortMaster installer
 echo "Downloading PortMaster installer..."
-mkdir -p /userdata/roms/ports
-wget -q -O /userdata/roms/ports/PortMaster.sh "$installer_url"
+mkdir -p /userdata/system/add-ons/portmaster
+wget -q -O /userdata/system/add-ons/portmaster/Install.Full.PortMaster.sh "$installer_url"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download the PortMaster installer."
@@ -22,12 +22,12 @@ if [ $? -ne 0 ]; then
 fi
 
 # Step 3: Make the installer executable
-chmod +x /userdata/roms/ports/PortMaster.sh
-echo "PortMaster installer downloaded to /userdata/roms/ports/ and renamed to PortMaster.sh."
+chmod +x /userdata/system/add-ons/portmaster/Install.Full.PortMaster.sh
+echo "PortMaster installer downloaded and marked as executable."
 
 # Step 4: Run the installer
 echo "Running the PortMaster installer..."
-/userdata/roms/ports/PortMaster.sh
+/userdata/system/add-ons/portmaster/Install.Full.PortMaster.sh
 
 if [ $? -ne 0 ]; then
     echo "PortMaster installation failed."
@@ -35,5 +35,5 @@ if [ $? -ne 0 ]; then
 fi
 
 echo
-echo "PortMaster installation complete! You can launch it from Ports in ES."
+echo "Installation complete! You can now launch Moonlight from the Ports menu."
 curl http://127.0.0.1:1234/reloadgames
