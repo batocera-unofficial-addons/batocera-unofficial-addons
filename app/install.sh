@@ -2,17 +2,17 @@
 
 # URL of the script to download
 SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/symlinks.sh"  # URL for symlink_manager.sh
-BATOCERA_ADDONS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/batocera-unofficial-addons.sh"  # URL for batocera-unofficial-addons.sh
-KEYS_URL="https://your-keys-url-here"  # Replace with the actual URL for keys.txt
+BATOCERA_ADDONS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/BatoceraUnofficialAddOns.sh"  # URL for batocera-unofficial-addons.sh
+KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/keys.txt"  # URL for keys.txt
 
 # Destination path to download the script
-DOWNLOAD_DIR="/userdata/system/services/symlink_manager"
+DOWNLOAD_DIR="/userdata/system/services/"
 SCRIPT_NAME="symlink_manager.sh"
 SCRIPT_PATH="$DOWNLOAD_DIR/$SCRIPT_NAME"
 
 # Destination path for batocera-unofficial-addons.sh and keys.txt
 ROM_PORTS_DIR="/userdata/roms/ports"
-BATOCERA_ADDONS_PATH="$ROM_PORTS_DIR/batocera-unofficial-addons.sh"
+BATOCERA_ADDONS_PATH="$ROM_PORTS_DIR/BatoceraUnofficialAddOns.sh"
 KEYS_FILE="$ROM_PORTS_DIR/keys.txt"
 
 # Step 1: Download the symlink manager script
@@ -41,16 +41,18 @@ echo "Starting batocera-unofficial-addons-symlinks service..."
 batocera-services start $SCRIPT_WITHOUT_EXTENSION
 
 # Step 6: Download batocera-unofficial-addons.sh
-echo "Downloading batocera-unofficial-addons.sh..."
+echo "Downloading Batocera Unofficial Add-Ons Launcher..."
 curl -L -o "$BATOCERA_ADDONS_PATH" "$BATOCERA_ADDONS_URL"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download batocera-unofficial-addons.sh. Exiting."
     exit 1
 fi
+
+# Step 7: Make batocera-unofficial-addons.sh executable
 chmod +x "$BATOCERA_ADDONS_PATH"
 
-# Step 7: Download keys.txt
+# Step 8: Download keys.txt
 echo "Downloading keys.txt..."
 curl -L -o "$KEYS_FILE" "$KEYS_URL"
 
@@ -59,7 +61,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Step 8: Rename keys.txt to match the .sh file name with .sh.keys extension
+# Step 9: Rename keys.txt to match the .sh file name with .sh.keys extension
 RENAME_KEY_FILE="${BATOCERA_ADDONS_PATH}.keys"
 echo "Renaming $KEYS_FILE to $RENAME_KEY_FILE..."
 mv "$KEYS_FILE" "$RENAME_KEY_FILE"
