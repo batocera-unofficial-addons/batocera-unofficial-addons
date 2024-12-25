@@ -63,7 +63,7 @@ fs=$(blkid | grep "$(df -h /userdata | awk 'END {print $1}')" | sed 's,^.*TYPE=,
     cp -rL /userdata/system/add-ons/fightcade/wine/usr/bin/zenity* /usr/bin/ 2>/dev/null
 #--------------------------------------------------------------------------
 #   5) start fightcade2 
-    chmod a+x /userdata/system/add-ons/fightcade/fightcade2.sh 2>/dev/null
+    chmod a+x /userdata/system/add-ons/fightcade/Fightcade2.sh 2>/dev/null
     unclutter-remote -s 
     echo 
     echo -e "  # # #"
@@ -71,7 +71,7 @@ fs=$(blkid | grep "$(df -h /userdata | awk 'END {print $1}')" | sed 's,^.*TYPE=,
     echo -e "  #   STARTING FIGHTCADE $(cat /userdata/system/add-ons/fightcade/VERSION.txt)"
     echo -e "  #    "
     echo -e "  # # #"
-    /userdata/system/add-ons/fightcade/fightcade2.sh & 
+    /userdata/system/add-ons/fightcade/Fightcade2.sh & 
     /userdata/system/add-ons/fightcade/extras/syncwine.sh & 
 ###########################################################################
 else # display info that fightcade requires a symlinking filesystem & exit
