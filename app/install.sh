@@ -66,4 +66,8 @@ RENAME_KEY_FILE="${BATOCERA_ADDONS_PATH}.keys"
 echo "Renaming $KEYS_FILE to $RENAME_KEY_FILE..."
 mv "$KEYS_FILE" "$RENAME_KEY_FILE"
 
-echo "Script setup completed!"
+echo "Refreshing Ports menu..."
+curl http://127.0.0.1:1234/reloadgames
+
+echo
+echo "Installation complete! You can now launch Batocera Unoffical Add-Ons from the Ports menu."
