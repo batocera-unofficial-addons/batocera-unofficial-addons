@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash 
 ######################################################################
 # BATOCERA-FIGHTCADE // FIGHTCADE BATOCERA INSTALLER
@@ -250,9 +249,9 @@ wget -q -O /userdata/system/add-ons/fightcade/extras/unwine.sh $url/unwine.sh 2>
 dos2unix /userdata/system/add-ons/fightcade/extras/unwine.sh 1>/dev/null 2>/dev/null
 chmod a+x /userdata/system/add-ons/fightcade/extras/unwine.sh 2>/dev/null
 # wine 
-#wget -q -O /userdata/system/add-ons/fightcade/extras/wine.sh $url/wine.sh 2>/dev/null 
-#dos2unix /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null
-#chmod a+x /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null
+wget -q -O /userdata/system/add-ons/fightcade/extras/wine.sh $url/wine.sh 2>/dev/null 
+dos2unix /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null
+chmod a+x /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null
 # pad2key 
 url=https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/fightcade/installer
 wget -q -O /userdata/roms/ports/Fightcade2.sh.keys $url/Fightcade2.sh.keys 2>/dev/null 
@@ -262,9 +261,6 @@ wget -q -O /userdata/roms/ports/Fightcade2.sh.keys $url/Fightcade2.sh.keys 2>/de
 #
 # + additional updates/fixes for v37: 
 url=https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/fightcade/installer
-wget -q -O /userdata/system/add-ons/fightcade/extras/wine.sh $url/wine.sh 2>/dev/null
-  dos2unix /userdata/system/add-ons/fightcade/extras/wine.sh 1>/dev/null 2>/dev/null 
-  chmod a+x /userdata/system/add-ons/fightcade/extras/wine.sh 2>/dev/null 
 wget -q -O /userdata/system/add-ons/fightcade/extras/liblua5.2.so.0 $url/liblua5.2.so.0 2>/dev/null 
 wget -q -O /userdata/system/add-ons/fightcade/extras/liblua5.3.so.0 $url/liblua5.3.so.0 2>/dev/null 
 wget -q -O /userdata/system/add-ons/fightcade/extras/libzip.so.4 $url/libzip.so.4 2>/dev/null 
