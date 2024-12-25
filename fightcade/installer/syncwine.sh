@@ -1,6 +1,6 @@
 #!/usr/bin/env bash 
-dos2unix /userdata/system/add-ons/Fightcade/extras/unwine.sh 2>/dev/null 
-chmod a+x /userdata/system/add-ons/Fightcade/extras/unwine.sh 2>/dev/null 
+dos2unix /userdata/system/add-ons/fightcade/extras/unwine.sh 2>/dev/null 
+chmod a+x /userdata/system/add-ons/fightcade/extras/unwine.sh 2>/dev/null 
 
 # wait for fc2 to load 
 sleep 3 
