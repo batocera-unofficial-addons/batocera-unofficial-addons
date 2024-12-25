@@ -29,7 +29,7 @@ fi
 
 # Step 4: Move the AppImage to the correct location
 echo "Moving ShadPS4 AppImage to /userdata/system/add-ons/shadps4/"
-mv /userdata/system/add-ons/shadps4/shadPS4*/shadps4.AppImage /userdata/system/add-ons/shadps4/shadps4.AppImage
+mv /userdata/system/add-ons/shadps4/Shadps4-qt.AppImage /userdata/system/add-ons/shadps4/shadps4.AppImage
 
 if [ $? -ne 0 ]; then
     echo "Failed to move the ShadPS4 AppImage."
