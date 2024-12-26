@@ -60,8 +60,24 @@ download_libcups() {
     fi
 }
 
-# Call the function to download libcups
+# Function to ensure the quickCss.css file exists
+ensure_quick_css() {
+    config_settings_dir="${HOME}/.config/vesktop/settings"
+    quickCss="${config_settings_dir}/quickCss.css"
+
+    # Ensure the .config/vesktop/settings directory exists
+    mkdir -p "$config_settings_dir"
+
+    # Ensure quickCss.css exists (you can create an empty file or add some default content)
+    if [ ! -f "$quickCss" ]; then
+        echo "/* Default CSS for Vesktop */" > "$quickCss"
+        echo "$(date): Created default quickCss.css."
+    fi
+}
+
+# Call functions
 download_libcups
+ensure_quick_css
 
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
@@ -69,8 +85,8 @@ export DISPLAY=:0
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/vesktop"
-config_dir="${app_dir}/vesktop-config"
-config_symlink="${HOME}/.config/vesktop"
+quickCss_symlink="${HOME}/.config/vesktop"
+quickCss="${HOME}/.config/vesktop/settings/quickCss.css"
 app_image="${app_dir}/Vesktop.AppImage"
 log_dir="/userdata/system/logs"
 log_file="${log_dir}/vesktop.log"
@@ -82,24 +98,22 @@ mkdir -p "${log_dir}"
 exec &> >(tee -a "$log_file")
 echo "$(date): Launching Vesktop"
 
-# Create persistent directory for Vesktop config
-mkdir -p "${config_dir}"
-
 # Move existing config if present
-if [ -d "${config_symlink}" ] && [ ! -L "${config_symlink}" ]; then
-    mv "${config_symlink}" "${config_dir}"
+if [ -d "$quickCss_symlink" ] && [ ! -L "$quickCss_symlink" ]; then
+    mv "$quickCss_symlink" "${app_dir}/vesktop-config"
 fi
 
-# Ensure config directory is symlinked
-if [ ! -L "${config_symlink}" ]; then
-    ln -sf "${config_dir}" "${config_symlink}"
+# Ensure quickCss file is symlinked as config
+if [ ! -L "$quickCss_symlink" ]; then
+    ln -sf "$quickCss" "$quickCss_symlink"
+    echo "$(date): Symlink created for quickCss.css as config."
 fi
 
 # Launch Vesktop AppImage
-if [ -x "${app_image}" ]; then
+if [ -x "$app_image" ]; then
     echo "$(date): AppImage is executable, launching..."
-    cd "${app_dir}"
-    ./Vesktop.AppImage --no-sandbox > "${log_file}" 2>&1
+    cd "$app_dir"
+    ./Vesktop.AppImage --no-sandbox > "$log_file" 2>&1
     echo "$(date): Vesktop exited."
 else
     echo "$(date): Vesktop.AppImage not found or not executable."
