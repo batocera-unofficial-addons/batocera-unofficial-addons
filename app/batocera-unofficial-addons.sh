@@ -72,6 +72,7 @@ apps=(
         ["WINEMANAGER"]="curl -Ls links.gregoryc.dev/wine-manager | bash"
         ["SHADPS4 (NOT FULLY RELIABLE)"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/shadps4/shadps4.sh | bash"
         ["CONTY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/conty/conty.sh | bash"
+        ["MINECRAFT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/minecraft/minecraft.sh | bash"
 )
 
 # Prepare array for dialog command, sorted by app name
