@@ -37,10 +37,11 @@ echo "Creating Vesktop launcher script in Ports..."
 mkdir -p /userdata/roms/ports
 cat << 'EOF' > /userdata/roms/ports/Vesktop.sh
 #!/bin/bash
+/userdata/system/add-ons/.dep/mousemove.sh 2>/dev/null
 
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
-export DISPLAY=:0.0
+export DISPLAY=:0
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/vesktop"
@@ -73,7 +74,7 @@ fi
 # Launch Vesktop AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
-    ./Vesktop.AppImage > "${log_file}" 2>&1
+    ./Vesktop.AppImage --no-sandbox > "${log_file}" 2>&1
     echo "Vesktop exited."
 else
     echo "Vesktop.AppImage not found or not executable."
