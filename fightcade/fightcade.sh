@@ -34,10 +34,9 @@ rm /userdata/system/add-ons/$appname/extra/command 2>/dev/null
 
 # --------------------------------------------------------------------
 # Get icon for Fightcade
-extra=https://github.com/DTJW92/batocera-unofficial-addons/raw/main/$appname/extra
-mkdir -p $extra
+extra=https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/extra/icon.png
 echo "Downloading icon..."
-wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O /userdata/system/add-ons/$appname/extra/icon.png $extra/icon.png
+wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O /userdata/system/add-ons/$appname/extra/icon.png $extra
 
 # --------------------------------------------------------------------
 # -- Prepare F1 - applications - app shortcut
