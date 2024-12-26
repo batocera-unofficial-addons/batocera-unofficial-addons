@@ -26,7 +26,7 @@ echo '#!/bin/bash ' >> $launcher
 echo '~/add-ons/.dep/mousemove.sh 2>/dev/null' >> $launcher
 ## -- GET APP SPECIFIC LAUNCHER COMMAND:
 ######################################################################
-echo "/userdata/system/add-ons/$appname/Fightcade2.sh" >> $launcher
+echo "/userdata/system/add-ons/$appname/Fightcade/Fightcade2.sh" >> $launcher
 ######################################################################
 dos2unix $launcher
 chmod a+x $launcher
@@ -72,7 +72,7 @@ pre=/userdata/system/add-ons/$appname/extra/startup
 mkdir -p $pre
 rm -rf $pre 2>/dev/null
 echo "#!/usr/bin/env bash" >> $pre
-echo "cp /userdata/system/add-ons/$appname/extra/$appname.desktop /usr/share/applications/ 2>/dev/null" >> $pre
+echo "cp /userdata/system/add-ons/$appname/extra/Fightcade.desktop /usr/share/applications/ 2>/dev/null" >> $pre
 dos2unix $pre
 chmod a+x $pre
 
