@@ -58,9 +58,36 @@ cp $shortcut $f1shortcut 2>/dev/null
 # -- Prepare Ports file
 port="/userdata/roms/ports/Fightcade2.sh"
 rm "$port"
-echo '#!/bin/bash ' >> $port
-echo 'killall -9 fc2-electron' >> $port 
-echo '/userdata/system/add-ons/'$appname'/Launcher' >> $port
+cat << 'EOF' > /userdata/roms/ports/Fightcade2.sh
+#!/bin/bash
+# BATOCERA-FIGHTCADE  
+###########################################################################
+# check if batocera is version 35+ 
+kernel=$(uname -a | awk '{print $3}' 2>/dev/null)
+if [[ "$kernel" < "5.18" ]]; then 
+DISPLAY=:0.0 xterm -fs 10 -fullscreen -fg white -bg black -fa Monospace -en UTF-8 -e bash -c "echo -e \"  █\n  █  ERROR: FIGHTCADE REQUIRES BATOCERA VERSION 35+ \n  █\" & sleep 3" 2>/dev/null && exit 0 & exit 1 & exit 2
+fi
+###########################################################################
+# make directory for fc1 roms 
+mkdir -p /userdata/roms/fc1 2>/dev/null
+# prepare winesync.sh 
+dos2unix /userdata/system/pro/fightcade/extras/winesync.sh 2>/dev/null 
+chmod a+x /userdata/system/pro/fightcade/extras/winesync.sh 2>/dev/null 
+###########################################################################
+#   start fightcade2 
+    chmod a+x /userdata/system/add-ons/fightcade/fightcade/Fightcade2.sh 2>/dev/null
+    unclutter-remote -s 
+    echo 
+    echo -e "  # # #"
+    echo -e "  #    "
+    echo -e "  #   STARTING FIGHTCADE $(cat /userdata/system/add-ons/fightcade/Fightcade/VERSION.txt)"
+    echo -e "  #    "
+    echo -e "  # # #"
+    /userdata/system/pro/fightcade/fightcade/Fightcade2.sh & 
+    /userdata/system/pro/fightcade/extras/syncwine.sh & 
+########################################################################### '
+EOF
+
 dos2unix "$port"
 chmod a+x "$port"
 
