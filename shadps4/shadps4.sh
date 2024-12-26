@@ -48,6 +48,7 @@ cat << 'EOF' > /userdata/roms/ports/ShadPS4.sh
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
+export HOME=/userdata/system/add-ons/shadps4
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/shadps4"
@@ -67,6 +68,7 @@ echo "$(date): Launching ShadPS4"
 # Create persistent directory for ShadPS4 config
 mkdir -p "${config_dir}"
 mkdir -p /userdata/roms/ps4
+mkdir -p /userdata/system/add-ons/shadps4/.local/share/shadPS4
 
 # Move existing config if present
 if [ -d "${config_symlink}" ] && [ ! -L "${config_symlink}" ]; then
@@ -94,6 +96,7 @@ else
     echo "Shadps4-qt.AppImage not found or not executable."
     exit 1
 fi
+
 
 EOF
 
