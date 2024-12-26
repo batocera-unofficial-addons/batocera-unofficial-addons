@@ -83,8 +83,8 @@ chmod a+x /userdata/system/pro/fightcade/extras/winesync.sh 2>/dev/null
     echo -e "  #   STARTING FIGHTCADE $(cat /userdata/system/add-ons/fightcade/Fightcade/VERSION.txt)"
     echo -e "  #    "
     echo -e "  # # #"
-    /userdata/system/pro/fightcade/fightcade/Fightcade2.sh & 
-    /userdata/system/pro/fightcade/extras/syncwine.sh & 
+    /userdata/system/pro/fightcade/Fightcade/Fightcade2.sh & 
+    /userdata/system/pro/fightcade/extra/syncwine.sh & 
 ########################################################################### '
 EOF
 
