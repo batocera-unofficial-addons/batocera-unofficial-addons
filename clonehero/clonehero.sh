@@ -1,5 +1,5 @@
 #!/usr/bin/env bash 
-# BATOCERA.PRO INSTALLER
+# BATOCERA ADD-ONS INSTALLER
 ######################################################################
 ######################################################################
 ######################################################################
@@ -18,9 +18,10 @@
 APPNAME=clonehero 
 APPLINK=https://github.com/clonehero-game/releases/releases/download/v1.1.0.4261-PTB/clonehero-linux.tar.xz
 APPHOME=github.com/clonehero-game
+APPDIR="/userdata/system/add-ons/clonehero"
 #---------------------------------------------------------------------
 #       DEFINE LAUNCHER COMMAND >>
-COMMAND='sysctl -w vm.max_map_count=2097152; ulimit -H -n 819200; ulimit -S -n 819200; ulimit -S -n 819200 clonehero; ulimit -H -l 61634; ulimit -S -l 61634; ulimit -H -s 61634; ulimit -S -s 61634; mkdir /userdata/system/pro/'$APPNAME'/home 2>/dev/null; mkdir /userdata/system/pro/'$APPNAME'/config 2>/dev/null; mkdir /userdata/system/pro/'$APPNAME'/roms 2>/dev/null; HOME=/userdata/system/pro/'$APPNAME'/home XDG_CONFIG_HOME=/userdata/system/pro/'$APPNAME'/config XDG_DATA_HOME=/userdata/system/pro/'$APPNAME'/home XDG_CURRENT_DESKTOP=XFCE DESKTOP_SESSION=XFCE DISPLAY=:0.0 /userdata/system/pro/'$APPNAME'/'$APPNAME' ${@}'
+COMMAND='sysctl -w vm.max_map_count=2097152; ulimit -H -n 819200; ulimit -S -n 819200; ulimit -S -n 819200 clonehero; ulimit -H -l 61634; ulimit -S -l 61634; ulimit -H -s 61634; ulimit -S -s 61634; mkdir '$APPDIR'/home 2>/dev/null; mkdir '$APPDIR'/config 2>/dev/null; mkdir '$APPDIR'/roms 2>/dev/null; HOME='$APPDIR'/home XDG_CONFIG_HOME='$APPDIR'/config XDG_DATA_HOME='$APPDIR'/home XDG_CURRENT_DESKTOP=XFCE DESKTOP_SESSION=XFCE DISPLAY=:0.0 '$APPDIR'/'$APPNAME' ${@}'
 #--------------------------------------------------------------------- 
 ######################################################################
 ######################################################################
@@ -36,7 +37,7 @@ COMMAND='sysctl -w vm.max_map_count=2097152; ulimit -H -n 819200; ulimit -S -n 8
 ######################################################################
 ######################################################################
 # --------------------------------------------------------------------
-APPNAME="${APPNAME^^}"; ORIGIN="${APPHOME^^}"; appname=$(echo "$APPNAME" | awk '{print tolower($0)}'); AppName=$appname; APPPATH=/userdata/system/pro/$appname/$AppName.AppImage
+APPNAME="${APPNAME^^}"; ORIGIN="${APPHOME^^}"; appname=$(echo "$APPNAME" | awk '{print tolower($0)}'); AppName=$appname; APPPATH=$APPDIR/$AppName.AppImage
 # --------------------------------------------------------------------
 # --------------------------------------------------------------------
 # show console/ssh info: 
@@ -70,7 +71,7 @@ R=$X
 # --------------------------------------------------------------------
 # -- prepare paths and files for installation: 
 cd ~/
-pro=/userdata/system/pro
+pro="/userdata/system/add-ons"
 mkdir $pro 2>/dev/null
 mkdir $pro/extra 2>/dev/null
 rm -rf $pro/$appname 2>/dev/null
@@ -92,8 +93,8 @@ chmod 777 ~/pro/.dep/* && for file in /userdata/system/pro/.dep/lib*; do sudo ln
 # -- run before installer:  
 #killall wget 2>/dev/null && killall $AppName 2>/dev/null && killall $AppName 2>/dev/null && killall $AppName 2>/dev/null
 # --------------------------------------------------------------------
-cols=$($dep/tput cols); rm -rf /userdata/system/pro/$appname/extra/cols
-echo $cols >> /userdata/system/pro/$appname/extra/cols
+cols=$($dep/tput cols); rm -rf /userdata/system/add-ons/$appname/extra/cols
+echo $cols >> /userdata/system/add-ons/$appname/extra/cols
 line(){
 echo 1>/dev/null
 }
@@ -102,7 +103,7 @@ clear
 echo
 echo
 echo
-echo -e "${X}BATOCERA.PRO/$APPNAME INSTALLER${X}"
+echo -e "${X}BATOCERA/$APPNAME INSTALLER${X}"
 echo
 echo
 echo
@@ -112,7 +113,7 @@ clear
 echo
 echo
 echo -e "${W}- - - - - - -"
-echo -e "${X}BATOCERA.PRO/$APPNAME INSTALLER${X}"
+echo -e "${X}BATOCERA/$APPNAME INSTALLER${X}"
 echo -e "${W}- - - - - - -"
 echo
 echo
@@ -122,7 +123,7 @@ clear
 echo
 echo -e "${W}- - - - - - -"
 line $cols ' '; echo
-echo -e "${X}BATOCERA.PRO/$APPNAME INSTALLER${X}"
+echo -e "${X}BATOCERA/$APPNAME INSTALLER${X}"
 line $cols ' '; echo
 echo -e "${W}- - - - - - -"
 echo
@@ -132,7 +133,7 @@ clear
 line $cols '\'; echo
 line $cols '/'; echo
 line $cols ' '; echo
-echo -e "${X}BATOCERA.PRO/$APPNAME INSTALLER${X}"
+echo -e "${X}BATOCERA/$APPNAME INSTALLER${X}"
 line $cols ' '; echo
 line $cols '/'; echo
 line $cols '\'; echo
@@ -143,7 +144,7 @@ echo -e "${X}USING $ORIGIN"
 echo
 echo -e "${X}$APPNAME WILL BE AVAILABLE IN PORTS"
 echo -e "${X}AND ALSO IN THE F1->APPLICATIONS MENU"
-echo -e "${X}AND INSTALLED IN /USERDATA/SYSTEM/PRO/$APPNAME"
+echo -e "${X}AND INSTALLED IN /USERDATA/SYSTEM/ADD-ONS/$APPNAME"
 echo
 echo -e "${X}FOLLOW THE BATOCERA DISPLAY"
 echo
@@ -153,7 +154,7 @@ echo
 # --------------------------------------------------------------------
 #\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 # -- THIS WILL BE SHOWN ON MAIN BATOCERA DISPLAY:   
-function batocera-pro-installer {
+function batocera-addons-installer {
 APPNAME="$1"
 appname="$2"
 AppName="$3"
@@ -183,7 +184,7 @@ B=$BLUE
 G=$GREEN
 P=$PURPLE
 # --------------------------------------------------------------------
-cols=$(cat /userdata/system/pro/.dep/display.cfg | tail -n 1)
+cols=$(cat /userdata/system/add-ons/.dep/display.cfg | tail -n 1)
 cols=$(bc <<<"scale=0;$cols/1.3") 2>/dev/null
 #cols=$(cat /userdata/system/pro/$appname/extra/cols | tail -n 1)
 line(){
@@ -193,7 +194,7 @@ clear
 echo
 echo
 echo
-echo -e "${W}BATOCERA.PRO/${G}$APPNAME${W} INSTALLER ${W}"
+echo -e "${W}BATOCERA/${G}$APPNAME${W} INSTALLER ${W}"
 echo
 echo
 echo
@@ -203,7 +204,7 @@ clear
 echo
 echo
 echo
-echo -e "${W}BATOCERA.PRO/${W}$APPNAME${W} INSTALLER ${W}"
+echo -e "${W}BATOCERA/${W}$APPNAME${W} INSTALLER ${W}"
 echo
 echo
 echo
@@ -213,7 +214,7 @@ clear
 echo
 echo
 echo -e "${W}- - - - - - -"
-echo -e "${W}BATOCERA.PRO/${G}$APPNAME${W} INSTALLER ${W}"
+echo -e "${W}BATOCERA/${G}$APPNAME${W} INSTALLER ${W}"
 echo -e "${W}- - - - - - -"
 echo
 echo
@@ -223,7 +224,7 @@ clear
 echo
 echo -e "${W}- - - - - - -"
 echo; #echo -e "${W}- - -"
-echo -e "${W}BATOCERA.PRO/${W}$APPNAME${W} INSTALLER ${W}"
+echo -e "${W}BATOCERA/${W}$APPNAME${W} INSTALLER ${W}"
 echo; #echo -e "${W}- - -"
 echo -e "${W}- - - - - - -"
 echo
@@ -233,7 +234,7 @@ clear
 echo -e "${W}- - - - - - -"
 echo; #echo -e "${W}- - -"
 echo; #echo -e "${W}- - -"
-echo -e "${W}BATOCERA.PRO/${G}$APPNAME${W} INSTALLER ${W}"
+echo -e "${W}BATOCERA/${G}$APPNAME${W} INSTALLER ${W}"
 echo; #echo -e "${W}- - -"
 echo; #echo -e "${W}- - -"
 echo -e "${W}- - - - - - -"
@@ -244,7 +245,7 @@ clear
 echo;
 echo; #echo -e "${W}- - -"
 echo; #echo -e "${W}- - -"
-echo -e "${W}BATOCERA.PRO/${G}$APPNAME${W} INSTALLER ${W}"
+echo -e "${W}BATOCERA/${G}$APPNAME${W} INSTALLER ${W}"
 echo; #echo -e "${W}- - -"
 echo; #echo -e "${W}- - -"
 echo;
@@ -253,7 +254,7 @@ echo -e "${W}USING $ORIGIN"
 echo
 echo -e "${W}$APPNAME WILL BE AVAILABLE IN PORTS"
 echo -e "${W}AND ALSO IN THE F1->APPLICATIONS MENU"
-echo -e "${W}AND INSTALLED IN /USERDATA/SYSTEM/PRO/$APPNAME"
+echo -e "${W}AND INSTALLED IN /USERDATA/SYSTEM/ADD-ONS/$APPNAME"
 echo 
 # --------------------------------------------------------------------
 # -- check system before proceeding
@@ -271,7 +272,7 @@ exit 0
 fi
 # --------------------------------------------------------------------
 # -- temp for curl download
-pro=/userdata/system/pro
+pro="/userdata/system/add-ons"
 temp=$pro/$appname/extra/downloads
 rm -rf $temp 2>/dev/null 
 mkdir -p $temp 2>/dev/null
@@ -307,29 +308,29 @@ SIZE=$(du -sh $pro/$appname | awk '{print $1}') 2>/dev/null
 echo -e "${T}$pro/$appname  ${T}$SIZE( )  ${G}OK${W}" | sed 's/( )//g'
 # --------------------------------------------------------------------
 # -- prepare launcher to solve dependencies on each run and avoid overlay, 
-launcher=/userdata/system/pro/$appname/Launcher
+launcher="/userdata/system/add-ons/$appname/Launcher"
 rm -rf $launcher
 echo '#!/bin/bash ' >> $launcher
-echo '~/pro/.dep/mousemove.sh 2>/dev/null' >> $launcher
+echo '~/add-ons/.dep/mousemove.sh 2>/dev/null' >> $launcher
 ## -- GET APP SPECIFIC LAUNCHER COMMAND: 
 ######################################################################
-echo "$(cat /userdata/system/pro/$appname/extra/command)" >> $launcher
+echo "$(cat /userdata/system/add-ons/$appname/extra/command)" >> $launcher
 ######################################################################
 dos2unix $launcher
 chmod a+x $launcher
-rm /userdata/system/pro/$appname/extra/command 2>/dev/null
+rm /userdata/system/add-ons/$appname/extra/command 2>/dev/null
 # --------------------------------------------------------------------
 # get icon
 extra=https://github.com/uureel/batocera.pro/raw/main/$appname/extra
 wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O $pro/$appname/extra/icon.png $extra/icon.png
 # --------------------------------------------------------------------
 # -- prepare f1 - applications - app shortcut, 
-shortcut=/userdata/system/pro/$appname/extra/$appname.desktop
+shortcut=/userdata/system/add-ons/$appname/extra/$appname.desktop
 rm -rf $shortcut 2>/dev/null
 echo "[Desktop Entry]" >> $shortcut
 echo "Version=1.0" >> $shortcut
-echo "Icon=/userdata/system/pro/$appname/extra/icon.png" >> $shortcut
-echo "Exec=/userdata/system/pro/$appname/Launcher" >> $shortcut
+echo "Icon=/userdata/system/add-ons/$appname/extra/icon.png" >> $shortcut
+echo "Exec=/userdata/system/add-ons/$appname/Launcher" >> $shortcut
 echo "Terminal=false" >> $shortcut
 echo "Type=Application" >> $shortcut
 echo "Categories=Game;batocera.linux;" >> $shortcut
@@ -344,27 +345,27 @@ port="/userdata/roms/ports/CloneHero.sh"
 rm "$port"
 echo '#!/bin/bash ' >> $port
 echo 'killall -9 clonehero' >> $port
-echo '/userdata/system/pro/'$appname'/Launcher' >> $port
+echo '/userdata/system/add-ons/'$appname'/Launcher' >> $port
 dos2unix "$port"
 chmod a+x "$port" 
 # --------------------------------------------------------------------
 # -- prepare prelauncher to avoid overlay,
-pre=/userdata/system/pro/$appname/extra/startup
+pre=/userdata/system/add-ons/$appname/extra/startup
 rm -rf $pre 2>/dev/null
 echo "#!/usr/bin/env bash" >> $pre
-echo "cp /userdata/system/pro/$appname/extra/$appname.desktop /usr/share/applications/ 2>/dev/null" >> $pre
+echo "cp /userdata/system/add-ons/$appname/extra/$appname.desktop /usr/share/applications/ 2>/dev/null" >> $pre
 dos2unix $pre
 chmod a+x $pre
 # -- add prelauncher to custom.sh to run @ reboot
 csh=/userdata/system/custom.sh
-if [[ -e $csh ]] && [[ "$(cat $csh | grep "/userdata/system/pro/$appname/extra/startup")" = "" ]]; then
-echo -e "\n/userdata/system/pro/$appname/extra/startup" >> $csh
+if [[ -e $csh ]] && [[ "$(cat $csh | grep "/userdata/system/add-ons/$appname/extra/startup")" = "" ]]; then
+echo -e "\n/userdata/system/add-ons/$appname/extra/startup" >> $csh
 fi
-if [[ -e $csh ]] && [[ "$(cat $csh | grep "/userdata/system/pro/$appname/extra/startup" | grep "#")" != "" ]]; then
-echo -e "\n/userdata/system/pro/$appname/extra/startup" >> $csh
+if [[ -e $csh ]] && [[ "$(cat $csh | grep "/userdata/system/add-ons/$appname/extra/startup" | grep "#")" != "" ]]; then
+echo -e "\n/userdata/system/add-ons/$appname/extra/startup" >> $csh
 fi
 if [[ -e $csh ]]; then :; else
-echo -e "\n/userdata/system/pro/$appname/extra/startup" >> $csh
+echo -e "\n/userdata/system/add-ons/$appname/extra/startup" >> $csh
 fi
 dos2unix $csh
 # -- done. 
@@ -379,18 +380,18 @@ sleep 3
 # reaload for ports file
 curl http://127.0.0.1:1234/reloadgames
 }
-export -f batocera-pro-installer 2>/dev/null
+export -f batocera-addons-installer 2>/dev/null
 # --------------------------------------------------------------------
 # RUN:
 # |
-  batocera-pro-installer "$APPNAME" "$appname" "$AppName" "$APPPATH" "$APPLINK" "$ORIGIN"
+  batocera-addons-installer "$APPNAME" "$appname" "$AppName" "$APPPATH" "$APPLINK" "$ORIGIN"
 # --------------------------------------------------------------------
 # BATOCERA.PRO INSTALLER //
 ##########################
 function autostart() {
   csh="/userdata/system/custom.sh"
-  pcsh="/userdata/system/pro-custom.sh"
-  pro="/userdata/system/pro"
+  pcsh="/userdata/system/add-ons-custom.sh"
+  pro="/userdata/system/add-ons"
   rm -f $pcsh
   temp_file=$(mktemp)
   find $pro -type f \( -path "*/extra/startup" -o -path "*/extras/startup.sh" \) > $temp_file
