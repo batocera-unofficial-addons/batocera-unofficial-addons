@@ -10,6 +10,6 @@ while ps axg | grep -vw grep | grep -w fc2-electron > /dev/null; do
 sleep 3 
 done 
 # if fc2 is closed, unlink wine environment  
-/userdata/system/add-ons/Fightcade/extras/unwine.sh 
+/userdata/system/add-ons/fightcade/extras/unwine.sh 
 exit 0; exit 1; exit 2; 
 
