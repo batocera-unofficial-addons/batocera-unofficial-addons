@@ -29,7 +29,7 @@ fi
 
 # Step 4: Move the AppImage to the correct location
 echo "Moving ShadPS4 AppImage to /userdata/system/add-ons/shadps4/"
-mv /userdata/system/add-ons/shadps4/Shadps4-qt.AppImage /userdata/system/add-ons/shadps4/shadps4.AppImage
+mv /userdata/system/add-ons/shadps4/Shadps4-qt.AppImage /userdata/system/add-ons/shadps4/Shadps4-qt.AppImage
 
 if [ $? -ne 0 ]; then
     echo "Failed to move the ShadPS4 AppImage."
@@ -42,7 +42,7 @@ rm -rf /userdata/system/add-ons/shadps4/shadps4.zip
 rm -rf /userdata/system/add-ons/shadPS4*
 
 # Step 6: Set executable permissions for the AppImage
-chmod a+x /userdata/system/add-ons/shadps4/shadps4.AppImage
+chmod a+x /userdata/system/add-ons/shadps4/Shadps4-qt.AppImage
 echo "ShadPS4 AppImage moved and marked as executable."
 
 # Step 7: Create persistent configuration and log directories
@@ -63,7 +63,7 @@ export DISPLAY=:0.0
 app_dir="/userdata/system/add-ons/shadps4"
 config_dir="${app_dir}/shadps4-config"
 config_symlink="${HOME}/.config/shadps4"
-app_image="${app_dir}/shadps4.AppImage"
+app_image="${app_dir}/Shadps4-qt.AppImage"
 log_dir="/userdata/system/logs"
 log_file="${log_dir}/shadps4.log"
 
@@ -94,7 +94,7 @@ if [ -x "${app_image}" ]; then
     ./shadps4.AppImage > "${log_file}" 2>&1
     echo "ShadPS4 exited."
 else
-    echo "shadps4.AppImage not found or not executable."
+    echo "Shadps4-qt.AppImage not found or not executable."
     exit 1
 fi
 EOF
