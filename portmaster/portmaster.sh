@@ -35,5 +35,5 @@ if [ $? -ne 0 ]; then
 fi
 
 echo
-echo "Installation complete! You can now launch Moonlight from the Ports menu."
+echo "Installation complete! You can now launch PortMaster from the Ports menu."
 curl http://127.0.0.1:1234/reloadgames
