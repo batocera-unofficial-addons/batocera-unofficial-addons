@@ -81,7 +81,7 @@ fi
 # Launch ShadPS4 AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
-    ./shadps4.AppImage > "${log_file}" 2>&1
+    ./Shadps4-qt.AppImage > "${log_file}" 2>&1
     echo "ShadPS4 exited."
 else
     echo "Shadps4-qt.AppImage not found or not executable."
