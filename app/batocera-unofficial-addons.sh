@@ -28,11 +28,13 @@ animate_border() {
 
 # Function to display controls
 display_controls() {
-    echo -e "\e[1;32m"  # Set color to green
+    echo -e "\e[1;33m"  # Set color to green
     echo "Controls:"
     echo "  Navigate with up-down-left-right"
     echo "  Select app with A/B/SPACE and execute with Start/X/Y/ENTER"
-    echo -e "\e[0m"  # Reset color
+    echo -e "\e[0m" # Reset color
+    echo " Install these add-ons at your own risk. They are not endorsed by the Batocera Devs nor are they supported." 
+    echo " Please don't go into the official Batocera discord with issues, I can't help you there!"
     sleep 4
 }
 
