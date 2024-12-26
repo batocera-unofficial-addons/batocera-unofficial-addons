@@ -330,7 +330,7 @@ port="/userdata/roms/ports/CloneHero.sh"
 rm "$port"
 echo '#!/bin/bash ' >> $port
 echo 'killall -9 clonehero' >> $port
-echo '/userdata/system/add-ons/$APPNAME/Launcher' >> $port
+echo "/userdata/system/add-ons/$APPNAME/Launcher" >> $port
 dos2unix "$port"
 chmod a+x "$port" 
 # --------------------------------------------------------------------
