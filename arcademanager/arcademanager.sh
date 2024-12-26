@@ -5,7 +5,7 @@ APPIMAGE_URL_X86_64="https://github.com/cosmo0/arcade-manager/releases/download/
 APPIMAGE_URL_ARM64="https://github.com/cosmo0/arcade-manager/releases/download/v7.1/ArcadeManager-7.1-linux-arm64.AppImage"
 APP_NAME="arcademanager"
 APPIMAGE_NAME="arcademanager.AppImage"
-APP_DIR="/userdata/system/add-ons"
+APP_DIR="/userdata/system/add-ons/$APP_NAME"
 LOG_DIR="/userdata/system/logs"
 LOG_FILE=${LOG_FILE:-"$LOG_DIR/$APP_NAME.log"}
 
