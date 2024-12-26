@@ -31,13 +31,37 @@ echo "Vesktop AppImage downloaded and marked as executable."
 # Create persistent configuration and log directories
 mkdir -p /userdata/system/add-ons/vesktop/vesktop-config
 mkdir -p /userdata/system/logs
+mkdir -p /userdata/system/add-ons/vesktop/lib
 
 # Step 3: Create the Vesktop Launcher Script
 echo "Creating Vesktop launcher script in Ports..."
 mkdir -p /userdata/roms/ports
 cat << 'EOF' > /userdata/roms/ports/Vesktop.sh
 #!/bin/bash
-/userdata/system/add-ons/.dep/mousemove.sh 2>/dev/null
+
+# Function to download libcups.so.2 if not present
+download_libcups() {
+    libcups_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vesktop/lib/libcups.so.2"
+    libcups_dest="/userdata/system/add-ons/vesktop/lib/libcups.so.2"
+
+    # Check if the file already exists
+    if [ ! -f "$libcups_dest" ]; then
+        echo "$(date): libcups.so.2 not found, downloading..."
+        wget -q --show-progress -O "$libcups_dest" "$libcups_url"
+
+        if [ $? -eq 0 ]; then
+            echo "$(date): libcups.so.2 downloaded successfully."
+        else
+            echo "$(date): Failed to download libcups.so.2."
+            exit 1
+        fi
+    else
+        echo "$(date): libcups.so.2 already exists, skipping download."
+    fi
+}
+
+# Call the function to download libcups
+download_libcups
 
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
@@ -73,13 +97,15 @@ fi
 
 # Launch Vesktop AppImage
 if [ -x "${app_image}" ]; then
+    echo "$(date): AppImage is executable, launching..."
     cd "${app_dir}"
     ./Vesktop.AppImage --no-sandbox > "${log_file}" 2>&1
-    echo "Vesktop exited."
+    echo "$(date): Vesktop exited."
 else
-    echo "Vesktop.AppImage not found or not executable."
+    echo "$(date): Vesktop.AppImage not found or not executable."
     exit 1
 fi
+
 EOF
 
 chmod +x /userdata/roms/ports/Vesktop.sh
