@@ -75,7 +75,7 @@ dos2unix /userdata/system/pro/fightcade/extras/winesync.sh 2>/dev/null
 chmod a+x /userdata/system/pro/fightcade/extras/winesync.sh 2>/dev/null 
 ###########################################################################
 #   start fightcade2 
-    chmod a+x /userdata/system/add-ons/fightcade/fightcade/Fightcade2.sh 2>/dev/null
+    chmod a+x /userdata/system/add-ons/fightcade/Fightcade/Fightcade2.sh 2>/dev/null
     unclutter-remote -s 
     echo 
     echo -e "  # # #"
