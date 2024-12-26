@@ -3,6 +3,7 @@
 # Step 1: Define the static download URL for Armagetron Advanced
 echo "Downloading Armagetron Advanced AppImage..."
 appimage_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/armagetron/ArmagetronAdvanced.AppImage"
+keys_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/armagetron/Armagetron.sh.keys"
 
 # Step 2: Download the AppImage
 mkdir -p /userdata/system/add-ons/armagetron
@@ -70,6 +71,7 @@ fi
 EOF
 
 chmod +x /userdata/roms/ports/Armagetron.sh
+wget -q -O /userdata/roms/ports/Armagetron.sh.keys "$keys_url"
 
 # Step 4: Refresh the Ports menu
 echo "Refreshing Ports menu..."
