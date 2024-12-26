@@ -11,10 +11,10 @@ fi
 
 echo "Architecture: x86_64 detected."
 
-# Step 2: Fetch the latest Steam AppImage release
+# Step 2: Fetch the latest Steam AppImage release from the HTML page
 echo "Fetching the latest Steam AppImage release..."
-release_url="https://api.github.com/repos/ivan-hc/Steam-appimage/releases/tags/continuous"
-appimage_url=$(curl -s "$release_url" | grep "browser_download_url" | grep -E "\.AppImage$" | cut -d '"' -f 4)
+page_url="https://github.com/ivan-hc/Steam-appimage/releases/tag/continuous"
+appimage_url=$(curl -s "$page_url" | grep -Eo 'https://github.com/ivan-hc/Steam-appimage/releases/download/continuous/Steam-[^"]*x86_64.AppImage' | head -n 1)
 
 if [ -z "$appimage_url" ]; then
     echo "Failed to retrieve the latest Steam AppImage URL."
