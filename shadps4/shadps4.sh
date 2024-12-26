@@ -27,15 +27,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Step 4: Move the AppImage to the correct location
-echo "Moving ShadPS4 AppImage to /userdata/system/add-ons/shadps4/"
-mv /userdata/system/add-ons/shadps4/Shadps4-qt.AppImage /userdata/system/add-ons/shadps4/Shadps4-qt.AppImage
-
-if [ $? -ne 0 ]; then
-    echo "Failed to move the ShadPS4 AppImage."
-    exit 1
-fi
-
 # Step 5: Delete the zip file and extracted folder
 echo "Cleaning up... Deleting the zip file and extracted folder."
 rm -rf /userdata/system/add-ons/shadps4/shadps4.zip
