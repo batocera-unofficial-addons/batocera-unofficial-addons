@@ -78,6 +78,13 @@ if [ ! -L "${config_symlink}" ]; then
     ln -sf "${config_dir}" "${config_symlink}"
 fi
 
+# Symlink .local/share/shadPS4 to the config directory
+local_share_dir="${HOME}/.local/share/shadPS4"
+if [ ! -L "${local_share_dir}" ]; then
+    echo "Creating symlink for .local/share/shadPS4 to shadps4-config"
+    ln -sf "${config_dir}" "${local_share_dir}"
+fi
+
 # Launch ShadPS4 AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
@@ -87,6 +94,7 @@ else
     echo "Shadps4-qt.AppImage not found or not executable."
     exit 1
 fi
+
 EOF
 
 chmod +x /userdata/roms/ports/ShadPS4.sh
