@@ -15,9 +15,9 @@ rm /userdata/system/add-ons/$appname/fightcade-linux.tar.gz
 # -- Download Fightcade dependencies and unzip them into /userdata/system/add-ons/fightcade/lib
 echo "Downloading Fightcade dependencies..."
 mkdir -p /userdata/system/add-ons/$appname/lib
-curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/lib/lib.zip -o /userdata/system/add-ons/$appname/lib.zip
-unzip -o /userdata/system/add-ons/$appname/libs.zip -d /userdata/system/add-ons/$appname/
-rm /userdata/system/add-ons/$appname/libs.zip
+wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O /userdata/system/add-ons/$appname/lib.zip  https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/lib/lib.zip
+unzip -oq /userdata/system/add-ons/$appname/lib.zip
+rm /userdata/system/add-ons/$appname/lib.zip
 
 # -- Prepare launcher to solve dependencies on each run and avoid overlay
 launcher="/userdata/system/add-ons/$appname/Launcher"
@@ -113,6 +113,9 @@ ln -s /userdata/roms/fbneo /userdata/system/add-ons/fightcade/Fightcade/emulator
 ln -s /userdata/roms/snes /userdata/system/add-ons/fightcade/Fightcade/emulator/snes9x/ROMs 2>/dev/null
 ln -s /userdata/roms/fc1 /userdata/system/add-ons/fightcade/Fightcade/emulator/ggpofba/ROMs 2>/dev/null
 
+
+curl -L https://fightcade.download/fc2json.zip -o /userdata/system/add-ons/fightcade/Fightcade
+unzip -o /userdata/system/add-ons/fightcade/Fightcade/fc2json.zip -d /userdata/system/add-ons/fightcade/Fightcade/emulator
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
