@@ -30,7 +30,6 @@ fi
 # Step 5: Delete the zip file and extracted folder
 echo "Cleaning up... Deleting the zip file and extracted folder."
 rm -rf /userdata/system/add-ons/shadps4/shadps4.zip
-rm -rf /userdata/system/add-ons/shadPS4*
 
 # Step 6: Set executable permissions for the AppImage
 chmod a+x /userdata/system/add-ons/shadps4/Shadps4-qt.AppImage
