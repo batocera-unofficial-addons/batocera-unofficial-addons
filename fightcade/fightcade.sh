@@ -1,84 +1,91 @@
 #!/bin/bash
 
-# Define directories and URLs
-DOWNLOAD_DIR="/userdata/system/add-ons/fightcade"
-FIGHTCADE_URL="https://www.fightcade.com/download/linux"
-LIBS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/lib/libs.zip"
+# Define the app name for Fightcade
+appname="fightcade"
 
-# Create necessary directories if they don't exist
-mkdir -p "$DOWNLOAD_DIR"
-mkdir -p "$DOWNLOAD_DIR/lib"
+# -- Download the latest Fightcade tar.gz and extract it into /userdata/system/add-ons/fightcade
+echo "Downloading Fightcade..."
+mkdir -p /userdata/system/add-ons/$appname
+curl -L https://www.fightcade.com/download/linux -o /userdata/system/add-ons/$appname/fightcade-linux.tar.gz
 
-# Step 1: Download Fightcade tar.gz
-echo "Downloading Fightcade from $FIGHTCADE_URL..."
-curl -L "$FIGHTCADE_URL" -o "$DOWNLOAD_DIR/fightcade-linux.tar.gz"
+echo "Extracting Fightcade..."
+tar -xvf /userdata/system/add-ons/$appname/fightcade-linux.tar.gz -C /userdata/system/add-ons/$appname
+rm /userdata/system/add-ons/$appname/fightcade-linux.tar.gz
 
-# Check if the download was successful
-if [[ $? -eq 0 ]]; then
-    echo "Fightcade downloaded successfully."
-else
-    echo "Error downloading Fightcade. Exiting."
-    exit 1
+# -- Download Fightcade dependencies and unzip them into /userdata/system/add-ons/fightcade/lib
+echo "Downloading Fightcade dependencies..."
+curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/lib/libs.zip -o /userdata/system/add-ons/$appname/lib/libs.zip
+mkdir -p /userdata/system/add-ons/$appname/lib
+unzip -o /userdata/system/add-ons/$appname/lib/libs.zip -d /userdata/system/add-ons/$appname/lib
+rm /userdata/system/add-ons/$appname/lib/libs.zip
+
+# -- Prepare launcher to solve dependencies on each run and avoid overlay
+launcher="/userdata/system/add-ons/$appname/Launcher"
+rm -rf $launcher
+echo '#!/bin/bash ' >> $launcher
+echo '~/add-ons/.dep/mousemove.sh 2>/dev/null' >> $launcher
+## -- GET APP SPECIFIC LAUNCHER COMMAND:
+######################################################################
+echo "/userdata/system/add-ons/$appname/Fightcade2.sh" >> $launcher
+######################################################################
+dos2unix $launcher
+chmod a+x $launcher
+rm /userdata/system/add-ons/$appname/extra/command 2>/dev/null
+
+# --------------------------------------------------------------------
+# Get icon for Fightcade
+extra=https://github.com/uureel/batocera.pro/raw/main/$appname/extra
+echo "Downloading icon..."
+wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O /userdata/system/add-ons/$appname/extra/icon.png $extra/icon.png
+
+# --------------------------------------------------------------------
+# -- Prepare F1 - applications - app shortcut
+shortcut=/userdata/system/add-ons/$appname/extra/$appname.desktop
+rm -rf $shortcut 2>/dev/null
+echo "[Desktop Entry]" >> $shortcut
+echo "Version=1.0" >> $shortcut
+echo "Icon=/userdata/system/add-ons/$appname/extra/icon.png" >> $shortcut
+echo "Exec=/userdata/system/add-ons/$appname/Launcher" >> $shortcut
+echo "Terminal=false" >> $shortcut
+echo "Type=Application" >> $shortcut
+echo "Categories=Game;batocera.linux;" >> $shortcut
+echo "Name=$appname" >> $shortcut
+f1shortcut=/usr/share/applications/$appname.desktop
+dos2unix $shortcut
+chmod a+x $shortcut
+cp $shortcut $f1shortcut 2>/dev/null
+
+# --------------------------------------------------------------------
+# -- Prepare Ports file
+port="/userdata/roms/ports/$appname.sh"
+rm "$port"
+echo '#!/bin/bash ' >> $port
+echo 'killall -9 Fightcade2.sh' >> $port  # Adjust this if needed
+echo '/userdata/system/add-ons/'$appname'/Launcher' >> $port
+dos2unix "$port"
+chmod a+x "$port"
+
+# --------------------------------------------------------------------
+# -- Prepare prelauncher to avoid overlay
+pre=/userdata/system/add-ons/$appname/extra/startup
+rm -rf $pre 2>/dev/null
+echo "#!/usr/bin/env bash" >> $pre
+echo "cp /userdata/system/add-ons/$appname/extra/$appname.desktop /usr/share/applications/ 2>/dev/null" >> $pre
+dos2unix $pre
+chmod a+x $pre
+
+# -- Add prelauncher to custom.sh to run @ reboot
+csh=/userdata/system/custom.sh
+if [[ -e $csh ]] && [[ "$(cat $csh | grep "/userdata/system/add-ons/$appname/extra/startup")" = "" ]]; then
+    echo -e "\n/userdata/system/add-ons/$appname/extra/startup" >> $csh
 fi
-
-# Step 2: Unpack Fightcade tar.gz into the directory
-echo "Unpacking Fightcade into $DOWNLOAD_DIR..."
-tar -xvzf "$DOWNLOAD_DIR/fightcade-linux.tar.gz" -C "$DOWNLOAD_DIR"
-
-# Check if unpacking was successful
-if [[ $? -eq 0 ]]; then
-    echo "Fightcade unpacked successfully."
-else
-    echo "Error unpacking Fightcade. Exiting."
-    exit 1
+if [[ -e $csh ]] && [[ "$(cat $csh | grep "/userdata/system/add-ons/$appname/extra/startup" | grep "#")" != "" ]]; then
+    echo -e "\n/userdata/system/add-ons/$appname/extra/startup" >> $csh
 fi
-
-# Step 3: Delete the tar.gz file
-echo "Deleting Fightcade tar.gz file..."
-rm "$DOWNLOAD_DIR/fightcade-linux.tar.gz"
-
-# Check if the deletion was successful
-if [[ $? -eq 0 ]]; then
-    echo "Fightcade tar.gz file deleted successfully."
-else
-    echo "Error deleting Fightcade tar.gz file."
+if [[ -e $csh ]]; then :; else
+    echo -e "\n/userdata/system/add-ons/$appname/extra/startup" >> $csh
 fi
+dos2unix $csh
 
-# Step 4: Download dependencies
-echo "Downloading dependencies from $LIBS_URL..."
-curl -L "$LIBS_URL" -o "$DOWNLOAD_DIR/libs.zip"
-
-# Check if the download was successful
-if [[ $? -eq 0 ]]; then
-    echo "Dependencies downloaded successfully."
-else
-    echo "Error downloading dependencies. Exiting."
-    exit 1
-fi
-
-# Step 5: Unzip dependencies into the lib directory
-echo "Unzipping dependencies into $DOWNLOAD_DIR/lib..."
-unzip -o "$DOWNLOAD_DIR/libs.zip" -d "$DOWNLOAD_DIR/lib"
-
-# Check if unzipping was successful
-if [[ $? -eq 0 ]]; then
-    echo "Dependencies unzipped successfully."
-else
-    echo "Error unzipping dependencies. Exiting."
-    exit 1
-fi
-
-# Step 6: Delete the libs.zip file
-echo "Deleting libs.zip file..."
-rm "$DOWNLOAD_DIR/libs.zip"
-
-# Check if the deletion was successful
-if [[ $? -eq 0 ]]; then
-    echo "libs.zip file deleted successfully."
-else
-    echo "Error deleting libs.zip file."
-fi
-
-# Installation complete
-echo "Fightcade installation completed successfully!"
-
+# -- Done!
+echo "Fightcade installation and setup completed!"
