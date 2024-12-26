@@ -41,7 +41,7 @@ wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O /userdata/s
 
 # --------------------------------------------------------------------
 # -- Prepare F1 - applications - app shortcut
-shortcut=/userdata/system/add-ons/$appname/extra/$appname.desktop
+shortcut=/userdata/system/add-ons/fightcade/Fightcade/Fightcade.desktop
 rm -rf $shortcut 2>/dev/null
 echo "[Desktop Entry]" >> $shortcut
 echo "Version=1.0" >> $shortcut
@@ -58,7 +58,7 @@ cp $shortcut $f1shortcut 2>/dev/null
 
 # --------------------------------------------------------------------
 # -- Prepare Ports file
-port="/userdata/roms/ports/$appname.sh"
+port="/userdata/roms/ports/Fightcade2.sh"
 rm "$port"
 echo '#!/bin/bash ' >> $port
 echo 'killall -9 fc2-electron' >> $port 
