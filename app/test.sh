@@ -41,6 +41,7 @@ cat << 'EOF' > /userdata/roms/ports/Steam.sh
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
+export ALLOW_ROOT=1
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/steam"
