@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Function to remove symlinks
 remove_symlinks() {
     # Base directory containing add-ons with bin and lib folders
