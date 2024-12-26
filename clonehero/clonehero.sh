@@ -83,9 +83,9 @@ command=$pro/$appname/extra/command; rm $command 2>/dev/null;
 echo "$COMMAND" >> $command 2>/dev/null 
 # --------------------------------------------------------------------
 # -- prepare dependencies for this app and the installer: 
-mkdir -p ~/pro/.dep 2>/dev/null && cd ~/pro/.dep && wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O ~/pro/.dep/dep.zip https://github.com/uureel/batocera.pro/raw/main/.dep/dep.zip && yes "y" | unzip -oq ~/pro/.dep/dep.zip && cd ~/
+mkdir -p ~/add-ons/.dep 2>/dev/null && cd ~/add-ons/.dep && wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O ~/add-ons/.dep/dep.zip https://github.com/uureel/batocera.pro/raw/main/.dep/dep.zip && yes "y" | unzip -oq ~/add-ons/.dep/dep.zip && cd ~/
 wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O $pro/$appname/extra/icon.png https://github.com/uureel/batocera.pro/raw/main/$appname/extra/icon.png; chmod a+x $dep/* 2>/dev/null; cd ~/
-chmod 777 ~/pro/.dep/* && for file in /userdata/system/pro/.dep/lib*; do sudo ln -s "$file" "/usr/lib/$(basename $file)"; done
+chmod 777 ~/add-ons/.dep/* && for file in /userdata/system/add-ons/.dep/lib*; do sudo ln -s "$file" "/usr/lib/$(basename $file)"; done
 # --------------------------------------------------------------------
 # // end of dependencies 
 #
