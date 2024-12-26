@@ -14,7 +14,7 @@ echo "Architecture: x86_64 detected."
 # Step 2: Fetch the latest Steam AppImage release
 echo "Fetching the latest Steam AppImage release..."
 release_url="https://api.github.com/repos/ivan-hc/Steam-appimage/releases/latest"
-appimage_url=$(curl -s "$release_url" | grep "browser_download_url" | grep "Steam-x86_64.AppImage" | cut -d '"' -f 4)
+appimage_url=$(curl -s "$release_url" | grep "browser_download_url" | grep ".AppImage" | cut -d '"' -f 4)
 
 if [ -z "$appimage_url" ]; then
     echo "Failed to retrieve the latest Steam AppImage URL."
