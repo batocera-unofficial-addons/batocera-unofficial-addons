@@ -17,5 +17,5 @@ b=/userdata/system/add-ons/fightcade/extras/system
 	cp -r /usr/lib/i386-linux-gnu/ld-linux.so.2 $b/2>/dev/null
 # /backup 
 
-cp /userdata/system/add-ons/Fightcade/extras/fightcade.desktop /usr/share/applications/ 2>/dev/null & 
+cp /userdata/system/add-ons/fightcade/extras/fightcade.desktop /usr/share/applications/ 2>/dev/null & 
 
