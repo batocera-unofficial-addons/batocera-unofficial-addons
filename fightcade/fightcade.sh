@@ -87,5 +87,30 @@ if [[ -e $csh ]]; then :; else
 fi
 dos2unix $csh
 
+# --------------------------------------------------------------------
+# 1) Link Fightcade main ROMs folder
+echo "Linking Fightcade ROMs folders..."
+rm -rf /userdata/system/pro/fightcade/fightcade/ROMs/Flycast\ ROMs 2>/dev/null
+rm -rf /userdata/system/pro/fightcade/fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
+rm -rf /userdata/system/pro/fightcade/fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
+rm -rf /userdata/system/pro/fightcade/fightcade/ROMs/FC1\ ROMs 2>/dev/null
+mkdir -p /userdata/system/pro/fightcade/fightcade/ROMs 2>/dev/null
+ln -s /userdata/roms/dreamcast /userdata/system/pro/fightcade/fightcade/ROMs/Flycast\ ROMs 2>/dev/null
+ln -s /userdata/roms/fbneo /userdata/system/pro/fightcade/fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
+ln -s /userdata/roms/snes /userdata/system/pro/fightcade/fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
+ln -s /userdata/roms/fc1 /userdata/system/pro/fightcade/fightcade/ROMs/FC1\ ROMs 2>/dev/null
+
+# --------------------------------------------------------------------
+# 2) Link Fightcade emulators ROMs folders
+echo "Linking Fightcade emulator ROMs folders..."
+rm -rf /userdata/system/pro/fightcade/fightcade/emulator/flycast/ROMs 2>/dev/null
+rm -rf /userdata/system/pro/fightcade/fightcade/emulator/fbneo/ROMs 2>/dev/null
+rm -rf /userdata/system/pro/fightcade/fightcade/emulator/snes9x/ROMs 2>/dev/null
+rm -rf /userdata/system/pro/fightcade/fightcade/emulator/ggpofba/ROMs 2>/dev/null
+ln -s /userdata/roms/dreamcast /userdata/system/pro/fightcade/fightcade/emulator/flycast/ROMs 2>/dev/null
+ln -s /userdata/roms/fbneo /userdata/system/pro/fightcade/fightcade/emulator/fbneo/ROMs 2>/dev/null
+ln -s /userdata/roms/snes /userdata/system/pro/fightcade/fightcade/emulator/snes9x/ROMs 2>/dev/null
+ln -s /userdata/roms/fc1 /userdata/system/pro/fightcade/fightcade/emulator/ggpofba/ROMs 2>/dev/null
+
 # -- Done!
-echo "Fightcade installation and setup completed!"
+echo "Fightcade installation, setup, and linking completed!"
