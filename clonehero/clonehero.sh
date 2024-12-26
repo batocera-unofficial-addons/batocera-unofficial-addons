@@ -56,20 +56,20 @@ R=$X
 # --------------------------------------------------------------------
 # -- prepare paths and files for installation: 
 cd ~/
-add-ons=/userdata/system/add-ons
-mkdir $add-ons 2>/dev/null
-mkdir $add-ons/extra 2>/dev/null
-rm -rf $add-ons/$appname 2>/dev/null
-mkdir $add-ons/$appname 2>/dev/null
-mkdir $add-ons/$appname/extra 2>/dev/null
+addons=/userdata/system/add-ons/
+mkdir $addons 2>/dev/null
+mkdir $addons/extra 2>/dev/null
+rm -rf $addons/$appname 2>/dev/null
+mkdir $addons/$appname 2>/dev/null
+mkdir $addons/$appname/extra 2>/dev/null
 # --------------------------------------------------------------------
 # -- pass launcher command as cookie for main function: 
-command=$add-ons/$appname/extra/command; rm $command 2>/dev/null;
+command=$addons/$appname/extra/command; rm $command 2>/dev/null;
 echo "$COMMAND" >> $command 2>/dev/null 
 # --------------------------------------------------------------------
 # -- prepare dependencies for this app and the installer: 
 mkdir -p ~/add-ons/.dep 2>/dev/null && cd ~/add-ons/.dep && wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O ~/add-ons/.dep/dep.zip https://github.com/uureel/batocera.add-ons/raw/main/.dep/dep.zip && yes "y" | unzip -oq ~/add-ons/.dep/dep.zip && cd ~/
-wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O $add-ons/$appname/extra/icon.png https://github.com/uureel/batocera.add-ons/raw/main/$appname/extra/icon.png; chmod a+x $dep/* 2>/dev/null; cd ~/
+wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O $addons/$appname/extra/icon.png https://github.com/uureel/batocera.add-ons/raw/main/$appname/extra/icon.png; chmod a+x $dep/* 2>/dev/null; cd ~/
 chmod 777 ~/add-ons/.dep/* && for file in /userdata/system/add-ons/.dep/lib*; do sudo ln -s "$file" "/usr/lib/$(basename $file)"; done
 # --------------------------------------------------------------------
 # // end of dependencies 
@@ -258,7 +258,7 @@ fi
 # --------------------------------------------------------------------
 # -- temp for curl download
 add-ons=/userdata/system/add-ons
-temp=$add-ons/$appname/extra/downloads
+temp=$addons/$appname/extra/downloads
 rm -rf $temp 2>/dev/null 
 mkdir -p $temp 2>/dev/null
 # --------------------------------------------------------------------
@@ -276,21 +276,21 @@ sleep 1.333
 echo -e "${G}INSTALLING${W}" 
 # --------------------------------------------------------------------
 depurl=https://github.com/uureel/batocera.add-ons/raw/main/.dep
-#wget -q -O $add-ons/.dep/tar $depurl/tar
-#wget -q -O $add-ons/.dep/libselinux.so.1 $depurl/libselinux.so.1
-#chmod a+x $add-ons/.dep/tar; cp $depurl/libselinux.so.1 /lib/ 2>/dev/null 
+#wget -q -O $addons/.dep/tar $depurl/tar
+#wget -q -O $addons/.dep/libselinux.so.1 $depurl/libselinux.so.1
+#chmod a+x $addons/.dep/tar; cp $depurl/libselinux.so.1 /lib/ 2>/dev/null 
 cd $temp
 tar -xf $temp/*.tar.xz
 cd $(ls -d */)
 chmod 777 ./clonehero 2>/dev/null
 chmod 777 ./Clonehero 2>/dev/null
 chmod 777 ./*.so 2>/dev/null
-mv ./* $add-ons/$appname/
-chmod a+x $add-ons/$appname/$appname 2>/dev/null
-cd $add-ons
+mv ./* $addons/$appname/
+chmod a+x $addons/$appname/$appname 2>/dev/null
+cd $addons
 rm -rf $temp
-SIZE=$(du -sh $add-ons/$appname | awk '{print $1}') 2>/dev/null
-echo -e "${T}$add-ons/$appname  ${T}$SIZE( )  ${G}OK${W}" | sed 's/( )//g'
+SIZE=$(du -sh $addons/$appname | awk '{print $1}') 2>/dev/null
+echo -e "${T}$addons/$appname  ${T}$SIZE( )  ${G}OK${W}" | sed 's/( )//g'
 # --------------------------------------------------------------------
 # -- prepare launcher to solve dependencies on each run and avoid overlay, 
 launcher=/userdata/system/add-ons/$appname/Launcher
@@ -307,7 +307,7 @@ rm /userdata/system/add-ons/$appname/extra/command 2>/dev/null
 # --------------------------------------------------------------------
 # get icon
 extra=https://github.com/uureel/batocera.add-ons/raw/main/$appname/extra
-wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O $add-ons/$appname/extra/icon.png $extra/icon.png
+wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O $addons/$appname/extra/icon.png $extra/icon.png
 # --------------------------------------------------------------------
 # -- prepare f1 - applications - app shortcut, 
 shortcut=/userdata/system/add-ons/$appname/extra/$appname.desktop
@@ -379,7 +379,7 @@ function autostart() {
   add-ons="/userdata/system/add-ons"
   rm -f $pcsh
   temp_file=$(mktemp)
-  find $add-ons -type f \( -path "*/extra/startup" -o -path "*/extras/startup.sh" \) > $temp_file
+  find $addons -type f \( -path "*/extra/startup" -o -path "*/extras/startup.sh" \) > $temp_file
   echo "#!/bin/bash" > $pcsh
   sort $temp_file >> $pcsh
   rm $temp_file
