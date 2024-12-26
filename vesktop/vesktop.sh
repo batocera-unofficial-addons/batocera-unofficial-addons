@@ -113,7 +113,7 @@ fi
 if [ -x "$app_image" ]; then
     echo "$(date): AppImage is executable, launching..."
     cd "$app_dir"
-    ./Vesktop.AppImage > "$log_file" 2>&1
+    ./Vesktop.AppImage --no-sandbox --trace-warnings > "$log_file" 2>&1
     echo "$(date): Vesktop exited."
 else
     echo "$(date): Vesktop.AppImage not found or not executable."
