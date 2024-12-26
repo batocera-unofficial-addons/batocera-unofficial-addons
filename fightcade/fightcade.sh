@@ -15,9 +15,9 @@ rm /userdata/system/add-ons/$appname/fightcade-linux.tar.gz
 # -- Download Fightcade dependencies and unzip them into /userdata/system/add-ons/fightcade/lib
 echo "Downloading Fightcade dependencies..."
 mkdir -p /userdata/system/add-ons/$appname/lib
-curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/lib/libs.zip -o /userdata/system/add-ons/$appname/lib/libs.zip
-unzip -o /userdata/system/add-ons/$appname/lib/libs.zip -d /userdata/system/add-ons/$appname/lib
-rm /userdata/system/add-ons/$appname/lib/libs.zip
+curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/lib/lib.zip -o /userdata/system/add-ons/$appname/lib.zip
+unzip -o /userdata/system/add-ons/$appname/libs.zip -d /userdata/system/add-ons/$appname/
+rm /userdata/system/add-ons/$appname/libs.zip
 
 # -- Prepare launcher to solve dependencies on each run and avoid overlay
 launcher="/userdata/system/add-ons/$appname/Launcher"
