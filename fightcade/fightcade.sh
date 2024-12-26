@@ -34,7 +34,7 @@ rm /userdata/system/add-ons/$appname/extra/command 2>/dev/null
 
 # --------------------------------------------------------------------
 # Get icon for Fightcade
-extra=https://github.com/uureel/batocera.pro/raw/main/$appname/extra
+extra=https://github.com/DTJW92/batocera-unofficial-addons/raw/main/$appname/extra
 echo "Downloading icon..."
 wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O /userdata/system/add-ons/$appname/extra/icon.png $extra/icon.png
 
@@ -90,27 +90,27 @@ dos2unix $csh
 # --------------------------------------------------------------------
 # 1) Link Fightcade main ROMs folder
 echo "Linking Fightcade ROMs folders..."
-rm -rf /userdata/system/pro/fightcade/fightcade/ROMs/Flycast\ ROMs 2>/dev/null
-rm -rf /userdata/system/pro/fightcade/fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
-rm -rf /userdata/system/pro/fightcade/fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
-rm -rf /userdata/system/pro/fightcade/fightcade/ROMs/FC1\ ROMs 2>/dev/null
-mkdir -p /userdata/system/pro/fightcade/fightcade/ROMs 2>/dev/null
-ln -s /userdata/roms/dreamcast /userdata/system/pro/fightcade/fightcade/ROMs/Flycast\ ROMs 2>/dev/null
-ln -s /userdata/roms/fbneo /userdata/system/pro/fightcade/fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
-ln -s /userdata/roms/snes /userdata/system/pro/fightcade/fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
-ln -s /userdata/roms/fc1 /userdata/system/pro/fightcade/fightcade/ROMs/FC1\ ROMs 2>/dev/null
+rm -rf /userdata/system/add-ons/fightcade/fightcade/ROMs/Flycast\ ROMs 2>/dev/null
+rm -rf /userdata/system/add-ons/fightcade/fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
+rm -rf /userdata/system/add-ons/fightcade/fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
+rm -rf /userdata/system/add-ons/fightcade/fightcade/ROMs/FC1\ ROMs 2>/dev/null
+mkdir -p /userdata/system/add-ons/fightcade/fightcade/ROMs 2>/dev/null
+ln -s /userdata/roms/dreamcast /userdata/system/add-ons/fightcade/fightcade/ROMs/Flycast\ ROMs 2>/dev/null
+ln -s /userdata/roms/fbneo /userdata/system/add-ons/fightcade/fightcade/ROMs/FBNeo\ ROMs 2>/dev/null
+ln -s /userdata/roms/snes /userdata/system/add-ons/fightcade/fightcade/ROMs/SNES9x\ ROMs 2>/dev/null
+ln -s /userdata/roms/fc1 /userdata/system/add-ons/fightcade/fightcade/ROMs/FC1\ ROMs 2>/dev/null
 
 # --------------------------------------------------------------------
 # 2) Link Fightcade emulators ROMs folders
 echo "Linking Fightcade emulator ROMs folders..."
-rm -rf /userdata/system/pro/fightcade/fightcade/emulator/flycast/ROMs 2>/dev/null
-rm -rf /userdata/system/pro/fightcade/fightcade/emulator/fbneo/ROMs 2>/dev/null
-rm -rf /userdata/system/pro/fightcade/fightcade/emulator/snes9x/ROMs 2>/dev/null
-rm -rf /userdata/system/pro/fightcade/fightcade/emulator/ggpofba/ROMs 2>/dev/null
-ln -s /userdata/roms/dreamcast /userdata/system/pro/fightcade/fightcade/emulator/flycast/ROMs 2>/dev/null
-ln -s /userdata/roms/fbneo /userdata/system/pro/fightcade/fightcade/emulator/fbneo/ROMs 2>/dev/null
-ln -s /userdata/roms/snes /userdata/system/pro/fightcade/fightcade/emulator/snes9x/ROMs 2>/dev/null
-ln -s /userdata/roms/fc1 /userdata/system/pro/fightcade/fightcade/emulator/ggpofba/ROMs 2>/dev/null
+rm -rf /userdata/system/add-ons/fightcade/fightcade/emulator/flycast/ROMs 2>/dev/null
+rm -rf /userdata/system/add-ons/fightcade/fightcade/emulator/fbneo/ROMs 2>/dev/null
+rm -rf /userdata/system/add-ons/fightcade/fightcade/emulator/snes9x/ROMs 2>/dev/null
+rm -rf /userdata/system/add-ons/fightcade/fightcade/emulator/ggpofba/ROMs 2>/dev/null
+ln -s /userdata/roms/dreamcast /userdata/system/add-ons/fightcade/fightcade/emulator/flycast/ROMs 2>/dev/null
+ln -s /userdata/roms/fbneo /userdata/system/add-ons/fightcade/fightcade/emulator/fbneo/ROMs 2>/dev/null
+ln -s /userdata/roms/snes /userdata/system/add-ons/fightcade/fightcade/emulator/snes9x/ROMs 2>/dev/null
+ln -s /userdata/roms/fc1 /userdata/system/add-ons/fightcade/fightcade/emulator/ggpofba/ROMs 2>/dev/null
 
 # -- Done!
 echo "Fightcade installation, setup, and linking completed!"
