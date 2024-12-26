@@ -143,6 +143,12 @@ ln -s /userdata/roms/fc1 /userdata/system/add-ons/fightcade/Fightcade/emulator/g
 curl -L https://fightcade.download/fc2json.zip -o /userdata/system/add-ons/fightcade/Fightcade/fc2json.zip
 unzip -o /userdata/system/add-ons/fightcade/Fightcade/fc2json.zip -d /userdata/system/add-ons/fightcade/Fightcade/emulator
 rm /userdata/system/add-ons/fightcade/Fightcade/fc2json.zip
+curl -o /userdata/system/add-ons/fightcade/extras/wine.sh https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/wine.sh
+curl -o /userdata/system/add-ons/fightcade/extras/syncwine.sh https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/syncwine.sh
+curl -o /userdata/system/add-ons/fightcade/extras/unwine.sh https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/unwine.sh
+chmod +x /userdata/system/add-ons/fightcade/extras/wine.sh
+chmod +x /userdata/system/add-ons/fightcade/extras/unwine.sh
+chmod +x /userdata/system/add-ons/fightcade/extras/syncwine.sh
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
