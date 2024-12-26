@@ -85,7 +85,8 @@ chmod a+x /userdata/system/pro/fightcade/extras/winesync.sh 2>/dev/null
     echo -e "  # # #"
     /userdata/system/pro/fightcade/Fightcade/Fightcade2.sh & 
     /userdata/system/pro/fightcade/extra/syncwine.sh & 
-########################################################################### '
+###########################################################################
+
 EOF
 
 dos2unix "$port"
