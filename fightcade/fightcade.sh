@@ -114,5 +114,8 @@ ln -s /userdata/roms/fbneo /userdata/system/add-ons/fightcade/Fightcade/emulator
 ln -s /userdata/roms/snes /userdata/system/add-ons/fightcade/Fightcade/emulator/snes9x/ROMs 2>/dev/null
 ln -s /userdata/roms/fc1 /userdata/system/add-ons/fightcade/Fightcade/emulator/ggpofba/ROMs 2>/dev/null
 
+echo "Refreshing Ports menu..."
+curl http://127.0.0.1:1234/reloadgames
+
 # -- Done!
 echo "Fightcade installation, setup, and linking completed!"
