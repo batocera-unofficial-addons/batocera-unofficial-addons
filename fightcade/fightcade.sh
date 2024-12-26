@@ -65,14 +65,18 @@ cat << 'EOF' > /userdata/roms/ports/Fightcade2.sh
 # check if batocera is version 35+ 
 kernel=$(uname -a | awk '{print $3}' 2>/dev/null)
 if [[ "$kernel" < "5.18" ]]; then 
-DISPLAY=:0.0 xterm -fs 10 -fullscreen -fg white -bg black -fa Monospace -en UTF-8 -e bash -c "echo -e \"  █\n  █  ERROR: FIGHTCADE REQUIRES BATOCERA VERSION 35+ \n  █\" & sleep 3" 2>/dev/null && exit 0 & exit 1 & exit 2
+DISPLAY=:0.0 xterm -fs 10 -fullscreen -fg white -bg black -fa Monospace -en UTF-8 -e bash -c "echo -e \"  ¦\n  ¦  ERROR: FIGHTCADE REQUIRES BATOCERA VERSION 35+ \n  ¦\" & sleep 3" 2>/dev/null && exit 0 & exit 1 & exit 2
 fi
 ###########################################################################
 # make directory for fc1 roms 
 mkdir -p /userdata/roms/fc1 2>/dev/null
-# prepare winesync.sh 
-dos2unix /userdata/system/pro/fightcade/extras/winesync.sh 2>/dev/null 
-chmod a+x /userdata/system/pro/fightcade/extras/winesync.sh 2>/dev/null 
+#  link wine stack 
+    dos2unix /userdata/system/add-ons/fightcade/extra/wine.sh 2>/dev/null 
+    chmod a+x /userdata/system/add-ons/fightcade/extra/wine.sh 2>/dev/null 
+    /userdata/system/add-ons/fightcade/extra/wine.sh 
+# prepare syncwine.sh 
+dos2unix /userdata/system/add-ons/fightcade/extra/syncwine.sh 2>/dev/null 
+chmod a+x /userdata/system/add-ons/fightcade/extra/syncwine.sh 2>/dev/null 
 ###########################################################################
 #   start fightcade2 
     chmod a+x /userdata/system/add-ons/fightcade/Fightcade/Fightcade2.sh 2>/dev/null
@@ -83,10 +87,9 @@ chmod a+x /userdata/system/pro/fightcade/extras/winesync.sh 2>/dev/null
     echo -e "  #   STARTING FIGHTCADE $(cat /userdata/system/add-ons/fightcade/Fightcade/VERSION.txt)"
     echo -e "  #    "
     echo -e "  # # #"
-    /userdata/system/add-ons/fightcade/Fightcade/Fightcade2.sh & 
+    /userdata/system/add-ons/fightcade/Fightcade/Fightcade2.sh &
     /userdata/system/add-ons/fightcade/extra/syncwine.sh & 
 ###########################################################################
-
 EOF
 
 dos2unix "$port"
