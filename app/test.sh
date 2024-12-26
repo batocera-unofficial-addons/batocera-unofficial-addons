@@ -11,20 +11,12 @@ fi
 
 echo "Architecture: x86_64 detected."
 
-# Step 2: Fetch the latest Steam AppImage release from the HTML page
-echo "Fetching the latest Steam AppImage release..."
-page_url="https://github.com/ivan-hc/Steam-appimage/releases/tag/continuous"
-appimage_url=$(curl -s "$page_url" | grep -Eo 'https://github.com/ivan-hc/Steam-appimage/releases/download/continuous/Steam-[^"]*x86_64.AppImage' | head -n 1)
-
-if [ -z "$appimage_url" ]; then
-    echo "Failed to retrieve the latest Steam AppImage URL."
-    exit 1
-fi
-
-echo "Latest Steam AppImage URL: $appimage_url"
+# Step 2: Static URL for Steam AppImage
+appimage_url="https://github.com/ivan-hc/Steam-appimage/releases/download/continuous/Steam-1.0.0.81-2-x86_64.AppImage"
+echo "Using static Steam AppImage URL: $appimage_url"
 
 # Step 3: Download the Steam AppImage
-echo "Downloading Steam AppImage from $appimage_url..."
+echo "Downloading Steam AppImage..."
 mkdir -p /userdata/system/add-ons/steam
 wget -q --show-progress -O /userdata/system/add-ons/steam/Steam.AppImage "$appimage_url"
 
