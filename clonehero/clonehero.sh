@@ -414,4 +414,22 @@ function autostart() {
 }
 export -f autostart
 autostart
+
+echo "Refreshing Ports menu..."
+curl http://127.0.0.1:1234/reloadgames
+
+# Download the image
+echo "Downloading Clone Hero logo..."
+curl -L -o /userdata/roms/ports/images/CloneHero_Logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/clonehero/extra/cloneherologo.png
+
+echo "Adding logo to Arcade Manager entry in gamelist.xml..."
+xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./CloneHero.sh" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "Clone Hero" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/CloneHero_Logo.png" \
+  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+
+
+curl http://127.0.0.1:1234/reloadgames
+
 exit 0
