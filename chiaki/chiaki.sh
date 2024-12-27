@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Step 1: Detect system architecture
@@ -13,26 +12,26 @@ else
     exit 1
 fi
 
-# Step 2: Download the AppImage
-echo "Downloading Chiaki AppImage from $appimage_url..."
+# Step 2: Prepare directories
+echo "Setting up directories..."
 mkdir -p /userdata/system/add-ons/chiaki
-wget -q --show-progress -O /userdata/system/add-ons/chiaki/Chiaki.AppImage "$appimage_url"
+mkdir -p /userdata/system/add-ons/chiaki/chiaki-config
+mkdir -p /userdata/system/logs
+mkdir -p /userdata/roms/ports/images
 
+# Step 3: Download the AppImage
+echo "Downloading Chiaki AppImage..."
+wget -q --show-progress -O /userdata/system/add-ons/chiaki/Chiaki.AppImage "$appimage_url"
 if [ $? -ne 0 ]; then
-    echo "Failed to download Chiaki AppImage."
+    echo "Failed to download Chiaki AppImage. Exiting."
     exit 1
 fi
 
 chmod a+x /userdata/system/add-ons/chiaki/Chiaki.AppImage
 echo "Chiaki AppImage downloaded and marked as executable."
 
-# Create persistent configuration and log directories
-mkdir -p /userdata/system/add-ons/chiaki/chiaki-config
-mkdir -p /userdata/system/logs
-
-# Step 3: Create the Endless Sky Script
-echo "Creating Chiaki script in Ports..."
-mkdir -p /userdata/roms/ports
+# Step 4: Create the Chiaki launch script
+echo "Creating Chiaki launch script in Ports..."
 cat << 'EOF' > /userdata/roms/ports/Chiaki.sh
 #!/bin/bash
 
@@ -53,9 +52,9 @@ mkdir -p "${log_dir}"
 
 # Append all output to the log file
 exec &> >(tee -a "$log_file")
-echo "$(date): Launching Endless Sky"
+echo "$(date): Launching Chiaki"
 
-# Create persistent directory for Endless Sky config
+# Create persistent directory for Chiaki config
 mkdir -p "${config_dir}"
 
 # Move existing config if present
@@ -68,37 +67,33 @@ if [ ! -L "${config_symlink}" ]; then
     ln -sf "${config_dir}" "${config_symlink}"
 fi
 
-# Launch Endless Sky AppImage
+# Launch Chiaki AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
     ./Chiaki.AppImage > "${log_file}" 2>&1
-    echo "Chiaki exited."
-else
-    echo "Chiakie not found or not executable."
-    exit 1
-fi
+    echo
+
 EOF
 
 chmod +x /userdata/roms/ports/Chiaki.sh
 
-# Step 4: Refresh the Ports menu
-echo "Refreshing Ports menu..."
-curl http://127.0.0.1:1234/reloadgames
+# Step 5: Add Chiaki to Ports menu
+if ! command -v xmlstarlet &> /dev/null; then
+    echo "Error: xmlstarlet is not installed. Install it and re-run the script."
+    exit 1
+fi
 
-# Download the image
-echo "Downloading Chiaki logo..."
+echo "Adding Chiaki to Ports menu..."
 curl -L -o /userdata/roms/ports/images/chiakilogo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/chiaki/extra/chiakilogo.png
-
-echo "Adding logo to Chiaki entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./Chiaki.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "Chiaki" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/chiakilogo.png" \
   /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
 
-
+# Step 6: Refresh the Ports menu
+echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
 echo
 echo "Installation complete! You can now launch Chiaki from the Ports menu."
-
