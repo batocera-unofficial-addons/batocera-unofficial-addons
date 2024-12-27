@@ -38,11 +38,11 @@ chmod +x "$SCRIPT_WITHOUT_EXTENSION"
 
 # Step 4: Enable the batocera-unofficial-addons-symlinks service
 echo "Enabling batocera-unofficial-addons-symlinks service..."
-batocera-services enable $SCRIPT_WITHOUT_EXTENSION
+batocera-services enable symlink_manager
 
 # Step 5: Start the batocera-unofficial-addons-symlinks service
 echo "Starting batocera-unofficial-addons-symlinks service..."
-batocera-services start $SCRIPT_WITHOUT_EXTENSION
+batocera-services start symlink_manager
 
 # Step 6: Download batocera-unofficial-addons.sh
 echo "Downloading Batocera Unofficial Add-Ons Launcher..."
