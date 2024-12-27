@@ -84,6 +84,20 @@ chmod +x /userdata/roms/ports/EndlessSky.sh
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
+# Download the image
+echo "Downloading Arcade Manager logo..."
+curl -L -o /userdata/roms/ports/images/endlessskylogo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/endlesssky/extra/endlessskylogo.png
+
+echo "Adding logo to Arcade Manager entry in gamelist.xml..."
+xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./EndlessSky.sh" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "Endless Sku" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/endlessskylogo.png" \
+  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+
+
+curl http://127.0.0.1:1234/reloadgames
+
 echo
 echo "Installation complete! You can now launch Endless Sky from the Ports menu."
 
