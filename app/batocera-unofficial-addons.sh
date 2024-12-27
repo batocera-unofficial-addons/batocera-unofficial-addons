@@ -109,7 +109,7 @@ categories=(
 
 while true; do
     # Show category menu
-    category_choice=$(dialog --menu "Choose a category" 15 60 4 \
+    category_choice=$(dialog --menu "Choose a category" 15 70 4 \
         "Games" "Install games and game-related add-ons" \
         "Utilities" "Install utility apps" \
         "Patches" "Install patches and fixes" \
