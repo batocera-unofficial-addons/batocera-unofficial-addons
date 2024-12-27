@@ -77,6 +77,20 @@ wget -q -O /userdata/roms/ports/Armagetron.sh.keys "$keys_url"
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
+# Download the image
+echo "Downloading Armagetron logo..."
+curl -L -o /userdata/roms/ports/images/armagetron-logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/armagetron/extra/armagetronlogo.png
+
+echo "Adding logo to Batocera Unofficial Add-ons entry in gamelist.xml..."
+xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./Armagetron.sh" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "Armagetron Advanced" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/armagetron-logo.png" \
+  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+
+
+curl http://127.0.0.1:1234/reloadgames
+
 echo
 echo "Installation complete! You can now launch Armagetron Advanced from the Ports menu."
 
