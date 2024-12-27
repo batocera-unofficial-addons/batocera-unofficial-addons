@@ -2,48 +2,52 @@
 
 # Function to create symlinks
 create_symlinks() {
-    # Base directory containing add-ons with bin and lib folders
+    # Base directory containing add-ons and .dep folder
     ADDONS_BASE_DIR="/userdata/system/add-ons"
+    DEP_DIR="$ADDONS_BASE_DIR/.dep"
 
     # Loop through each subdirectory in the add-ons base directory
     for addon_dir in "$ADDONS_BASE_DIR"/*; do
-        # Check if this is a directory and contains a 'bin' folder
-        if [ -d "$addon_dir/bin" ]; then
-            echo "Found bin folder in: $addon_dir"
+        # Create symlinks for bin and lib files
+        for folder in "bin" "lib"; do
+            if [ -d "$addon_dir/$folder" ]; then
+                echo "Found $folder folder in: $addon_dir"
+                for file in "$addon_dir/$folder"/*; do
+                    if [ -f "$file" ]; then
+                        target_dir="/usr/bin"
+                        [[ "$folder" == "lib" ]] && target_dir="/usr/lib"
 
-            # Loop through all executables in the bin folder
-            for bin_file in "$addon_dir/bin"/*; do
-                if [ -f "$bin_file" ] && [ -x "$bin_file" ]; then
-                    # Create a symlink in /usr/bin if it doesn't already exist
-                    symlink_target="/usr/bin/$(basename "$bin_file")"
-                    if [ ! -L "$symlink_target" ]; then
-                        echo "Creating symlink: $symlink_target -> $bin_file"
-                        ln -s "$bin_file" "$symlink_target"
-                    else
-                        echo "Symlink already exists: $symlink_target. Skipping."
+                        symlink_target="$target_dir/$(basename "$file")"
+                        if [ ! -L "$symlink_target" ]; then
+                            echo "Creating symlink: $symlink_target -> $file"
+                            ln -s "$file" "$symlink_target"
+                        else
+                            echo "Symlink already exists: $symlink_target. Skipping."
+                        fi
                     fi
-                fi
-            done
-        fi
+                done
+            fi
+        done
 
-        # Check if this is a directory and contains a 'lib' folder
-        if [ -d "$addon_dir/lib" ]; then
-            echo "Found lib folder in: $addon_dir"
-
-            # Loop through all files in the lib folder
-            for lib_file in "$addon_dir/lib"/*; do
-                if [ -f "$lib_file" ]; then
-                    # Create a symlink in /usr/lib if it doesn't already exist
-                    symlink_target="/usr/lib/$(basename "$lib_file")"
-                    if [ ! -L "$symlink_target" ]; then
-                        echo "Creating symlink: $symlink_target -> $lib_file"
-                        ln -s "$lib_file" "$symlink_target"
-                    else
-                        echo "Symlink already exists: $symlink_target. Skipping."
-                    fi
+        # Handle files in .dep (handling it as originally designed)
+        for file in "$DEP_DIR"/*; do
+            if [ -f "$file" ]; then
+                # Check if the filename contains "lib"
+                if [[ "$(basename "$file")" == *lib* ]]; then
+                    symlink_target="/usr/lib/$(basename "$file")"
+                else
+                    symlink_target="/usr/bin/$(basename "$file")"
                 fi
-            done
-        fi
+
+                # Create symlink if it doesn't already exist
+                if [ ! -L "$symlink_target" ]; then
+                    echo "Creating symlink: $symlink_target -> $file"
+                    ln -s "$file" "$symlink_target"
+                else
+                    echo "Symlink already exists: $symlink_target. Skipping."
+                fi
+            fi
+        done
     done
 
     echo "Symlink creation completed!"
@@ -51,48 +55,52 @@ create_symlinks() {
 
 # Function to remove symlinks
 remove_symlinks() {
-    # Base directory containing add-ons with bin and lib folders
+    # Base directory containing add-ons and .dep folder
     ADDONS_BASE_DIR="/userdata/system/add-ons"
+    DEP_DIR="$ADDONS_BASE_DIR/.dep"
 
     # Loop through each subdirectory in the add-ons base directory
     for addon_dir in "$ADDONS_BASE_DIR"/*; do
-        # Check if this is a directory and contains a 'bin' folder
-        if [ -d "$addon_dir/bin" ]; then
-            echo "Found bin folder in: $addon_dir"
+        # Remove symlinks for bin and lib files
+        for folder in "bin" "lib"; do
+            if [ -d "$addon_dir/$folder" ]; then
+                echo "Found $folder folder in: $addon_dir"
+                for file in "$addon_dir/$folder"/*; do
+                    if [ -f "$file" ]; then
+                        target_dir="/usr/bin"
+                        [[ "$folder" == "lib" ]] && target_dir="/usr/lib"
 
-            # Loop through all executables in the bin folder
-            for bin_file in "$addon_dir/bin"/*; do
-                if [ -f "$bin_file" ] && [ -x "$bin_file" ]; then
-                    # Remove the symlink from /usr/bin if it exists
-                    symlink_target="/usr/bin/$(basename "$bin_file")"
-                    if [ -L "$symlink_target" ]; then
-                        echo "Removing symlink: $symlink_target"
-                        rm "$symlink_target"
-                    else
-                        echo "Symlink does not exist: $symlink_target. Skipping."
+                        symlink_target="$target_dir/$(basename "$file")"
+                        if [ -L "$symlink_target" ]; then
+                            echo "Removing symlink: $symlink_target"
+                            rm "$symlink_target"
+                        else
+                            echo "Symlink does not exist: $symlink_target. Skipping."
+                        fi
                     fi
-                fi
-            done
-        fi
+                done
+            fi
+        done
 
-        # Check if this is a directory and contains a 'lib' folder
-        if [ -d "$addon_dir/lib" ]; then
-            echo "Found lib folder in: $addon_dir"
-
-            # Loop through all files in the lib folder
-            for lib_file in "$addon_dir/lib"/*; do
-                if [ -f "$lib_file" ]; then
-                    # Remove the symlink from /usr/lib if it exists
-                    symlink_target="/usr/lib/$(basename "$lib_file")"
-                    if [ -L "$symlink_target" ]; then
-                        echo "Removing symlink: $symlink_target"
-                        rm "$symlink_target"
-                    else
-                        echo "Symlink does not exist: $symlink_target. Skipping."
-                    fi
+        # Handle files in .dep (removal logic preserved as originally)
+        for file in "$DEP_DIR"/*; do
+            if [ -f "$file" ]; then
+                # Check if the filename contains "lib"
+                if [[ "$(basename "$file")" == *lib* ]]; then
+                    symlink_target="/usr/lib/$(basename "$file")"
+                else
+                    symlink_target="/usr/bin/$(basename "$file")"
                 fi
-            done
-        fi
+
+                # Remove the symlink if it exists
+                if [ -L "$symlink_target" ]; then
+                    echo "Removing symlink: $symlink_target"
+                    rm "$symlink_target"
+                else
+                    echo "Symlink does not exist: $symlink_target. Skipping."
+                fi
+            fi
+        done
     done
 
     echo "Symlink removal completed!"
@@ -107,41 +115,25 @@ check_status() {
 
     # Loop through each subdirectory in the add-ons base directory
     for addon_dir in "$ADDONS_BASE_DIR"/*; do
-        # Check if this is a directory and contains a 'bin' folder
-        if [ -d "$addon_dir/bin" ]; then
-            echo "Found bin folder in: $addon_dir"
+        # Check symlinks in bin and lib folders
+        for folder in "bin" "lib"; do
+            if [ -d "$addon_dir/$folder" ]; then
+                echo "Found $folder folder in: $addon_dir"
+                for file in "$addon_dir/$folder"/*; do
+                    if [ -f "$file" ]; then
+                        target_dir="/usr/bin"
+                        [[ "$folder" == "lib" ]] && target_dir="/usr/lib"
 
-            # Loop through all executables in the bin folder
-            for bin_file in "$addon_dir/bin"/*; do
-                if [ -f "$bin_file" ] && [ -x "$bin_file" ]; then
-                    # Check if the symlink exists
-                    symlink_target="/usr/bin/$(basename "$bin_file")"
-                    if [ -L "$symlink_target" ]; then
-                        echo "Symlink exists: $symlink_target"
-                    else
-                        echo "Symlink does not exist: $symlink_target"
+                        symlink_target="$target_dir/$(basename "$file")"
+                        if [ -L "$symlink_target" ]; then
+                            echo "Symlink exists: $symlink_target"
+                        else
+                            echo "Symlink does not exist: $symlink_target"
+                        fi
                     fi
-                fi
-            done
-        fi
-
-        # Check if this is a directory and contains a 'lib' folder
-        if [ -d "$addon_dir/lib" ]; then
-            echo "Found lib folder in: $addon_dir"
-
-            # Loop through all files in the lib folder
-            for lib_file in "$addon_dir/lib"/*; do
-                if [ -f "$lib_file" ]; then
-                    # Check if the symlink exists
-                    symlink_target="/usr/lib/$(basename "$lib_file")"
-                    if [ -L "$symlink_target" ]; then
-                        echo "Symlink exists: $symlink_target"
-                    else
-                        echo "Symlink does not exist: $symlink_target"
-                    fi
-                fi
-            done
-        fi
+                done
+            fi
+        done
     done
 }
 
