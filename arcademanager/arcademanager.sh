@@ -43,7 +43,7 @@ mkdir -p "$LOG_DIR"
 # Step 3: Create the App Launcher Script
 echo "Creating App launcher script in Ports..."
 mkdir -p /userdata/roms/ports
-cat << EOF > /userdata/roms/ports/$APP_NAME.sh
+cat << 'EOF' > /userdata/roms/ports/ArcadeManager.sh
 #!/bin/bash
 
 # Environment setup
@@ -51,26 +51,26 @@ export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0
 
 # Directories and file paths
-app_dir="$APP_DIR"
-app_image="\$app_dir/$APPIMAGE_NAME"
-log_dir="$LOG_DIR"
-log_file="\$log_dir/$APP_NAME.log"
+app_dir="/userdata/system/add-ons/arcademanager"
+app_image="arcademanager.AppImage"
+log_dir="/userdata/system/logs"
+log_file="$log_dir/arcademanager.log"
 
 # Ensure log directory exists
 mkdir -p "\$log_dir"
 
 # Append all output to the log file
 exec &> >(tee -a "\$log_file")
-echo "\$(date): Launching $APP_NAME"
+echo "\$(date): Launching Arcade Manager"
 
 # Launch the AppImage
 if [ -x "\$app_image" ]; then
     echo "\$(date): AppImage is executable, launching..."
-    cd "\$app_dir"
-    ./$APPIMAGE_NAME > "\$log_file" 2>&1
-    echo "\$(date): $APP_NAME exited."
+    cd "$app_dir"
+    ./$app_image > "\$log_file" 2>&1
+    echo "\$(date): Arcade Manager exited."
 else
-    echo "\$(date): $APPIMAGE_NAME not found or not executable."
+    echo "\$(date): $app_image not found or not executable."
     exit 1
 fi
 
