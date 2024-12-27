@@ -35,13 +35,13 @@ display_controls() {
     echo -e "\e[0m" # Reset color
     echo " Install these add-ons at your own risk. They are not endorsed by the Batocera Devs nor are they supported." 
     echo " Please don't go into the official Batocera discord with issues, I can't help you there!"
-    sleep 4
+    sleep 10
 }
 
 # Function to display loading animation
 loading_animation() {
     local delay=0.1
-    local spinstr='|/-\'
+    local spinstr='|/-\' 
     echo -n "Loading "
     while :; do
         for (( i=0; i<${#spinstr}; i++ )); do
@@ -63,31 +63,80 @@ animate_title
 animate_border
 display_controls
 
-# Define an associative array for app names and their install commands
+# Define an associative array for app names, their install commands, and descriptions
 declare -A apps
+declare -A descriptions
+
 apps=(
-        ["SUNSHINE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/sunshine/sunshine.sh | bash"
-        ["MOONLIGHT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/moonlight/moonlight.sh | bash"
-        ["NVIDIAPATCHER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/nvidiapatch/nvidiapatch.sh | bash"
-        ["SWITCH"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/switch/switch.sh | bash"
-        ["TAILSCALE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/tailscale/tailscale.sh | bash"
-        ["WINEMANAGER"]="curl -Ls links.gregoryc.dev/wine-manager | bash"
-        ["SHADPS4-(NOT_FULLY_RELIABLE)"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/shadps4/shadps4.sh | bash"
-        ["CONTY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/conty/conty.sh | bash"
-        ["MINECRAFT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/minecraft/minecraft.sh | bash"
-        ["ARMAGETRON"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/armagetron/armagetron.sh | bash"
-        ["CLONEHERO"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/clonehero/clonehero.sh | bash"
-        ["VESKTOP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vesktop/vesktop.sh | bash"
-        ["ENDLESS-SKY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/endlesssky/endlesssky.sh | bash"
+    ["SUNSHINE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/sunshine/sunshine.sh | bash"
+    ["MOONLIGHT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/moonlight/moonlight.sh | bash"
+    ["NVIDIAPATCHER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/nvidiapatch/nvidiapatch.sh | bash"
+    ["SWITCH"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/switch/switch.sh | bash"
+    ["TAILSCALE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/tailscale/tailscale.sh | bash"
+    ["WINEMANAGER"]="curl -Ls links.gregoryc.dev/wine-manager | bash"
+    ["SHADPS4"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/shadps4/shadps4.sh | bash"
+    ["CONTY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/conty/conty.sh | bash"
+    ["MINECRAFT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/minecraft/minecraft.sh | bash"
+    ["ARMAGETRON"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/armagetron/armagetron.sh | bash"
+    ["CLONEHERO"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/clonehero/clonehero.sh | bash"
+    ["VESKTOP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vesktop/vesktop.sh | bash"
+    ["ENDLESS-SKY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/endlesssky/endlesssky.sh | bash"
 )
 
-# Prepare array for dialog command, sorted by app name
+descriptions=(
+    ["SUNSHINE"]="A game streaming app to use with Batocera for remote play."
+    ["MOONLIGHT"]="Ggame streaming software for PC gaming on your Batocera machine."
+    ["NVIDIAPATCHER"]="Patch for enabling NVIDIA GPU support in Batocera."
+    ["SWITCH"]="Install Nintendo Switch emulation on Batocera."
+    ["TAILSCALE"]="A VPN service to secure your Batocera network connections."
+    ["WINEMANAGER"]="A wine manager for running Windows games on Batocera."
+    ["SHADPS4"]="Experimental PlayStation 4 streaming support, not guaranteed to work."
+    ["CONTY"]="A standalone Linux distro container."
+    ["MINECRAFT"]="Minecraft: Bedrock Edition on Batocera."
+    ["ARMAGETRON"]="A Tron-style game for Batocera."
+    ["CLONEHERO"]="A Guitar Hero clone for Batocera, works with guitar controllers."
+    ["VESKTOP"]="A Discord application for Batocera."
+    ["ENDLESS-SKY"]="A space exploration game for Batocera."
+)
+
+# Define categories
+declare -A categories
+categories=(
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT SWITCH SHADPS4"
+    ["Patches"]="NVIDIAPATCHER"
+)
+
+# Show category menu
+category_choice=$(dialog --menu "Choose a category" 15 50 3 \
+    "Games" "Install games and game-related add-ons" \
+    "Utilities" "Install utility apps" \
+    "Patches" "Install patches and fixes" 2>&1 >/dev/tty)
+
+# Based on category, show the corresponding apps
+case "$category_choice" in
+    "Games")
+        selected_apps="${categories["Games"]}"
+        ;;
+    "Utilities")
+        selected_apps="${categories["Utilities"]}"
+        ;;
+    "Patches")
+        selected_apps="${categories["Patches"]}"
+        ;;
+    *)
+        echo "Invalid choice!"
+        exit 1
+        ;;
+esac
+
+# Prepare array for dialog command, with descriptions
 app_list=()
-for app in $(printf "%s\n" "${!apps[@]}" | sort); do
-    app_list+=("$app" "" OFF)
+for app in $selected_apps; do
+    app_list+=("$app" "${descriptions[$app]}" OFF)
 done
 
-# Show dialog checklist
+# Show dialog checklist with descriptions
 cmd=(dialog --separate-output --checklist "Select applications to install or update:" 22 76 16)
 choices=$("${cmd[@]}" "${app_list[@]}" 2>&1 >/dev/tty)
 
@@ -118,4 +167,3 @@ done
 curl http://127.0.0.1:1234/reloadgames
 
 echo "Exiting."
-
