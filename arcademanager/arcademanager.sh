@@ -28,11 +28,6 @@ fi
 chmod a+x /userdata/system/add-ons/arcade-manager/ArcadeManager.AppImage
 echo "Arcade Manager AppImage downloaded and marked as executable."
 
-# Add logo to gamelist.xml using xmlstarlet
-echo "Adding logo to Arcade Manager entry in gamelist.xml..."
-xmlstarlet ed -s "/gamelist/game[last()]" -t elem -n "image" -v "./images/ArcadeManager_Logo.png" /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp
-mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
-
 # Step 3: Create the Arcade Manager Script
 echo "Creating Arcade Manager script in Ports..."
 mkdir -p /userdata/roms/ports
@@ -86,6 +81,20 @@ chmod +x /userdata/roms/ports/ArcadeManager.sh
 
 # Step 4: Refresh the Ports menu
 echo "Refreshing Ports menu..."
+curl http://127.0.0.1:1234/reloadgames
+
+# Download the image
+echo "Downloading Arcade Manager logo..."
+curl -L -o /userdata/roms/ports/images/ArcadeManager_Logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/arcademanager/extra/icon.png
+
+echo "Adding logo to Arcade Manager entry in gamelist.xml..."
+xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./ArcadeManager.sh" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "ArcadeManager" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/ArcadeManager_Logo.png" \
+  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+
+
 curl http://127.0.0.1:1234/reloadgames
 
 echo
