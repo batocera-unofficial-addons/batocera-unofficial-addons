@@ -89,7 +89,7 @@ while true; do
         done
 
         # Show dialog checklist with descriptions
-        cmd=(dialog --separate-output --checklist "Select applications to install or update:" 22 80 16)
+        cmd=(dialog --separate-output --checklist "Select applications to install or update:" 22 90 16)
         choices=$("${cmd[@]}" "${app_list[@]}" 2>&1 >/dev/tty)
 
         # Check if Cancel was pressed
