@@ -102,9 +102,23 @@ EOF
 
 chmod +x /userdata/roms/ports/ShadPS4.sh
 
-# Step 9: Refresh the Ports menu
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
+
+# Download the image
+echo "Downloading ShadPS4 logo..."
+curl -L -o /userdata/roms/ports/images/shadps4logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/shadps4/extra/shadps4logo.png
+
+echo "Adding logo to ShadPS4 entry in gamelist.xml..."
+xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./ShadPS4.sh" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "ShadPS4" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/shadps4logo.png" \
+  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+
+
+curl http://127.0.0.1:1234/reloadgames
+
 
 echo
 echo "Installation complete! You can now launch ShadPS4 from the Ports menu."
