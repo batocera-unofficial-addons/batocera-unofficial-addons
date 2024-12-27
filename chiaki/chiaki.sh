@@ -16,7 +16,7 @@ fi
 # Step 2: Download the AppImage
 echo "Downloading Chiaki AppImage from $appimage_url..."
 mkdir -p /userdata/system/add-ons/chiaki
-wget -q --show-progress -O /userdata/system/add-ons/endless-sky/Chiaki.AppImage "$appimage_url"
+wget -q --show-progress -O /userdata/system/add-ons/chiaki/Chiaki.AppImage "$appimage_url"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download Chiaki AppImage."
