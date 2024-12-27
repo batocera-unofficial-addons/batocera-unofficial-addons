@@ -72,7 +72,7 @@ if [ -x "${app_image}" ]; then
     cd "${app_dir}"
     ./Chiaki.AppImage > "${log_file}" 2>&1
     echo
-
+fi
 EOF
 
 chmod +x /userdata/roms/ports/Chiaki.sh
