@@ -37,7 +37,32 @@ cat << 'EOF' > /userdata/roms/ports/Stremio.sh
 
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
-export DISPLAY=:0.0
+export DISPLAY=:0
+export NSS_DB=/userdata/system/add-ons/stremio/stremio-config/.pki/nssdb
+export LD_LIBRARY_PATH=/userdata/system/add-ons/stremio/lib:$LD_LIBRARY_PATH
+mkdir -p /userdata/system/add-ons/stremio/stremio-config/.pki/nssdb
+export STREMIO_LOCALFILES_DIR="/userdata/system/add-ons/stremio/stremio-config"
+export HOME="/userdata/system/add-ons/stremio"
+
+kill_process_on_port() {
+    port=$1
+    pid=$(lsof -ti :$port)
+    if [ -n "$pid" ]; then
+        echo "Process using port $port found with PID $pid. Killing process..."
+        sudo kill -9 $pid
+    else
+        echo "No process found using port $port."
+    fi
+}
+
+# Ports to check for conflicts
+PORTS=("11470" "12470")
+
+# Check and kill processes occupying the ports
+for port in "${PORTS[@]}"; do
+    kill_process_on_port $port
+done
+
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/stremio"
@@ -70,9 +95,10 @@ fi
 # Launch Stremio AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
-    ./Stremio.AppImage > "${log_file}" 2>&1
+    ./Stremio.AppImage --no-sandbox > "${log_file}" 2>&1
     echo
 fi
+
 EOF
 
 chmod +x /userdata/roms/ports/Stremio.sh
