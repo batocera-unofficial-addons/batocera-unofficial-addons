@@ -87,17 +87,13 @@ curl http://127.0.0.1:1234/reloadgames
 echo "Downloading Arcade Manager logo..."
 curl -L -o /userdata/roms/ports/images/ArcadeManager_Logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/arcademanager/extra/icon.png
 
-# Add the logo to the Arcade Manager entry in gamelist.xml
 echo "Adding logo to Arcade Manager entry in gamelist.xml..."
 
-# Append the new <game> entry with the image to the XML
-xmlstarlet ed -s "/gamelist" -t elem -n "game" -v "" \
-  -s "/gamelist/game[last()]" -t elem -n "path" -v "./ArcadeManager.sh" \
-  -s "/gamelist/game[last()]" -t elem -n "name" -v "Arcade Manager" \
-  -s "/gamelist/game[last()]" -t elem -n "image" -v "./images/ArcadeManager_Logo.png" \
-  /userdata/roms/ports/gamelist.xml | xmlstarlet fo > /userdata/roms/ports/gamelist.xml.tmp
-
-mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./ArcadeManager.sh" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "ArcadeManager" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/ArcadeManager_Logo.png" \
+  -r "/gameList/game[last()]" -v "" /userdata/roms/ports/gamelist.xml
 
 curl http://127.0.0.1:1234/reloadgames
 
