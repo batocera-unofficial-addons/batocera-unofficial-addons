@@ -47,7 +47,7 @@ cat << 'EOF' > /userdata/roms/ports/ArcadeManager.sh
 #!/bin/bash
 
 # Environment setup
-export \$(cat /proc/1/environ | tr '\0' '\n')
+export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0
 
 # Directories and file paths
@@ -76,7 +76,7 @@ fi
 
 EOF
 
-chmod +x /userdata/roms/ports/$APP_NAME.sh
+chmod +x /userdata/roms/ports/ArcadeManager.sh
 
 # Step 4: Refresh the Ports menu
 echo "Refreshing Ports menu..."
