@@ -88,7 +88,7 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Download the image
 echo "Downloading Minecraft logo..."
-curl -L -o /userdata/roms/ports/images/minecraft-bedrock-ogo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-bedrock-logo.png
+curl -L -o /userdata/roms/ports/images/minecraft-bedrock-logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-bedrock-logo.png
 
 echo "Adding logo to Minecraft entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
