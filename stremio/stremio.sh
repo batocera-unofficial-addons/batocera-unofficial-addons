@@ -38,11 +38,12 @@ cat << 'EOF' > /userdata/roms/ports/Stremio.sh
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0
-export NSS_DB=/userdata/system/add-ons/stremio/stremio-config/.pki/nssdb
+export NSS_DB=/userdata/system/add-ons/stremio/stremio/.pki/nssdb
 export LD_LIBRARY_PATH=/userdata/system/add-ons/stremio/lib:$LD_LIBRARY_PATH
-mkdir -p /userdata/system/add-ons/stremio/stremio-config/.pki/nssdb
+mkdir -p /userdata/system/add-ons/stremio/.stremio-server/localFiles
 export STREMIO_LOCALFILES_DIR="/userdata/system/add-ons/stremio/stremio-config"
 export HOME="/userdata/system/add-ons/stremio"
+
 
 kill_process_on_port() {
     port=$1
