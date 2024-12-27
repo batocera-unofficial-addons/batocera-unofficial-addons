@@ -124,8 +124,21 @@ EOF
 
 chmod +x /userdata/roms/ports/Vesktop.sh
 
-# Step 4: Refresh the Ports menu
 echo "Refreshing Ports menu..."
+curl http://127.0.0.1:1234/reloadgames
+
+# Download the image
+echo "Downloading Vesktop logo..."
+curl -L -o /userdata/roms/ports/images/vesktoplogo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/vesktop/extra/vesktoplogo.png
+
+echo "Adding logo to Vesktop entry in gamelist.xml..."
+xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./Vesktop.sh" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "Vesktop" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/vesktoplogo.png" \
+  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+
+
 curl http://127.0.0.1:1234/reloadgames
 
 echo
