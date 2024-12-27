@@ -28,9 +28,10 @@ fi
 chmod a+x /userdata/system/add-ons/arcade-manager/ArcadeManager.AppImage
 echo "Arcade Manager AppImage downloaded and marked as executable."
 
-# Create persistent configuration and log directories
-mkdir -p /userdata/system/add-ons/arcade-manager/arcade-manager-config
-mkdir -p /userdata/system/logs
+# Add logo to gamelist.xml using xmlstarlet
+echo "Adding logo to Arcade Manager entry in gamelist.xml..."
+xmlstarlet ed -s "/gamelist/game[last()]" -t elem -n "image" -v "./images/ArcadeManager_Logo.png" /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp
+mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
 
 # Step 3: Create the Arcade Manager Script
 echo "Creating Arcade Manager script in Ports..."
@@ -73,7 +74,7 @@ fi
 # Launch Arcade Manager AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
-    ./ArcadeManager.AppImage --no-sandbox > "${log_file}" 2>&1
+    ./ArcadeManager.AppImage > "${log_file}" 2>&1
     echo "Arcade Manager exited."
 else
     echo "ArcadeManager.AppImage not found or not executable."
