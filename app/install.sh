@@ -4,6 +4,7 @@
 SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/symlinks.sh"  # URL for symlink_manager.sh
 BATOCERA_ADDONS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/BatoceraUnofficialAddOns.sh"  # URL for batocera-unofficial-addons.sh
 KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/keys.txt"  # URL for keys.txt
+XMLSTARLET_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/xmlstarlet"  # URL for xmlstarlet
 
 # Destination path to download the script
 DOWNLOAD_DIR="/userdata/system/services/"
@@ -69,8 +70,28 @@ RENAME_KEY_FILE="${BATOCERA_ADDONS_PATH}.keys"
 echo "Renaming $KEYS_FILE to $RENAME_KEY_FILE..."
 mv "$KEYS_FILE" "$RENAME_KEY_FILE"
 
+# Step: Download xmlstarlet
+echo "Downloading xmlstarlet..."
+curl -L -o "/userdata/system/add-ons/.dep/xmlstarlet" "$XMLSTARLET_URL"
+
+# Check if download was successful
+if [ $? -ne 0 ]; then
+    echo "Failed to download xmlstarlet. Exiting."
+    exit 1
+fi
+
+# Make xmlstarlet executable
+chmod +x /userdata/system/add-ons/.dep/xmlstarlet
+
+# Step: Symlink xmlstarlet to /usr/bin
+echo "Creating symlink for xmlstarlet in /usr/bin..."
+ln -sf /userdata/system/add-ons/.dep/xmlstarlet /usr/bin/xmlstarlet
+
+echo "xmlstarlet has been installed and symlinked to /usr/bin."
+
+# Step 10: Refresh the Ports menu
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
 echo
-echo "Installation complete! You can now launch Batocera Unoffical Add-Ons from the Ports menu."
+echo "Installation complete! You can now launch Batocera Unofficial Add-Ons from the Ports menu."
