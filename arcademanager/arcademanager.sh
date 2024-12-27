@@ -92,7 +92,8 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./ArcadeManager.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "ArcadeManager" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/ArcadeManager_Logo.png" \
-  -u "/gameList/game[last()]" -v "" /userdata/roms/ports/gamelist.xml
+  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+
 
 curl http://127.0.0.1:1234/reloadgames
 
