@@ -1,3 +1,61 @@
+#!/bin/bash
+
+# Function to display animated title with colors
+animate_title() {
+    local text="BATOCERA UNOFFICIAL ADD-ONS INSTALLER"
+    local delay=0.03
+    local length=${#text}
+
+    echo -ne "\e[1;36m"  # Set color to cyan
+    for (( i=0; i<length; i++ )); do
+        echo -n "${text:i:1}"
+        sleep $delay
+    done
+    echo -e "\e[0m"  # Reset color
+}
+
+# Function to display animated border
+animate_border() {
+    local char="#"
+    local width=50
+
+    for (( i=0; i<width; i++ )); do
+        echo -n "$char"
+        sleep 0.02
+    done
+    echo
+}
+
+# Function to display controls
+display_controls() {
+    echo -e "\e[1;33m"  # Set color to green
+    echo "Controls:"
+    echo "  Navigate with up-down-left-right"
+    echo "  Select app with A/B/SPACE and execute with Start/X/Y/ENTER"
+    echo -e "\e[0m" # Reset color
+    echo " Install these add-ons at your own risk. They are not endorsed by the Batocera Devs nor are they supported." 
+    echo " Please don't go into the official Batocera discord with issues, I can't help you there!"
+    sleep 10
+}
+
+# Function to display loading animation
+loading_animation() {
+    local delay=0.1
+    local spinstr='|/-\' 
+    echo -n "Loading "
+    while :; do
+        for (( i=0; i<${#spinstr}; i++ )); do
+            echo -ne "${spinstr:i:1}"
+            echo -ne "\010"
+            sleep $delay
+        done
+    done &  # Run spinner in the background
+    spinner_pid=$!
+    sleep 3  # Adjust for how long the spinner runs
+    kill $spinner_pid
+    echo "Done!"
+}
+
 # Main script execution
 clear
 animate_border
