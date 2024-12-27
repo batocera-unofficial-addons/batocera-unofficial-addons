@@ -92,14 +92,14 @@ echo "Adding logo to Arcade Manager entry in gamelist.xml..."
 
 # Append the new <game> entry with the image to the XML
 xmlstarlet ed -s "/gamelist" -t elem -n "game" -v "" \
-  -s "/gamelist/game[last()]" -t elem -n "path" -v "./ArcadeManager" \
+  -s "/gamelist/game[last()]" -t elem -n "path" -v "./ArcadeManager.sh" \
   -s "/gamelist/game[last()]" -t elem -n "name" -v "Arcade Manager" \
   -s "/gamelist/game[last()]" -t elem -n "image" -v "./images/ArcadeManager_Logo.png" \
   /userdata/roms/ports/gamelist.xml | xmlstarlet fo > /userdata/roms/ports/gamelist.xml.tmp
 
 mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
 
-
+curl http://127.0.0.1:1234/reloadgames
 
 echo
 echo "Installation complete! You can now launch Arcade Manager from the Ports menu."
