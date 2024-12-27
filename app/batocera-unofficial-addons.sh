@@ -81,6 +81,7 @@ apps=(
     ["CLONEHERO"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/clonehero/clonehero.sh | bash"
     ["VESKTOP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vesktop/vesktop.sh | bash"
     ["ENDLESS-SKY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/endlesssky/endlesssky.sh | bash"
+    ["CHIAKI"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/chiaki/chiaki.sh | bash"
 )
 
 descriptions=(
@@ -97,13 +98,14 @@ descriptions=(
     ["CLONEHERO"]="A Guitar Hero clone for Batocera, works with guitar controllers."
     ["VESKTOP"]="A Discord application for Batocera."
     ["ENDLESS-SKY"]="A space exploration game for Batocera."
+    ["CHIAKI"]="An open-source PlayStation Remote Play client for streaming PS4 and PS5 games."
 )
 
 # Define categories
 declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT SWITCH SHADPS4"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT SWITCH SHADPS4 CHIAKI"
     ["Patches"]="NVIDIAPATCHER"
 )
 
