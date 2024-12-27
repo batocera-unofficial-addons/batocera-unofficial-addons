@@ -42,7 +42,7 @@ batocera-services enable symlink_manager
 
 # Step 5: Start the batocera-unofficial-addons-symlinks service
 echo "Starting batocera-unofficial-addons-symlinks service..."
-batocera-services start symlink_manager &
+batocera-services start symlink_manager &>/dev/null &
 
 # Step 6: Download batocera-unofficial-addons.sh
 echo "Downloading Batocera Unofficial Add-Ons Launcher..."
