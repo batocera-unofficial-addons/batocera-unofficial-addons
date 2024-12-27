@@ -73,7 +73,7 @@ fi
 # Launch Arcade Manager AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
-    ./ArcadeManager.AppImage > "${log_file}" 2>&1
+    ./ArcadeManager.AppImage --no-sandbox > "${log_file}" 2>&1
     echo "Arcade Manager exited."
 else
     echo "ArcadeManager.AppImage not found or not executable."
