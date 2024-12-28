@@ -12,7 +12,7 @@ install_dir="/userdata/system/add-ons/shadps4"
 echo "Preparing installation directory at $install_dir..."
 
 if [ -d "$install_dir" ]; then
-    echo "Directory $install_dir exists. Deleting and recreating it..."
+    echo "ShadPS4 exists. Updating it..."
     rm -rf "$install_dir"
 fi
 
