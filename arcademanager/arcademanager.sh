@@ -40,8 +40,6 @@ export DISPLAY=:0.0
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/arcade-manager"
-config_dir="${app_dir}/arcade-manager-config"
-config_symlink="${HOME}/.config/arcade-manager"
 app_image="${app_dir}/ArcadeManager.AppImage"
 log_dir="/userdata/system/logs"
 log_file="${log_dir}/arcade-manager.log"
@@ -52,19 +50,6 @@ mkdir -p "${log_dir}"
 # Append all output to the log file
 exec &> >(tee -a "$log_file")
 echo "$(date): Launching Arcade Manager"
-
-# Create persistent directory for Arcade Manager config
-mkdir -p "${config_dir}"
-
-# Move existing config if present
-if [ -d "${config_symlink}" ] && [ ! -L "${config_symlink}" ]; then
-    mv "${config_symlink}" "${config_dir}"
-fi
-
-# Ensure config directory is symlinked
-if [ ! -L "${config_symlink}" ]; then
-    ln -sf "${config_dir}" "${config_symlink}"
-fi
 
 # Launch Arcade Manager AppImage
 if [ -x "${app_image}" ]; then
