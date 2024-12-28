@@ -52,40 +52,7 @@ export HOME=/userdata/system/add-ons/shadps4
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/shadps4"
-config_dir="${app_dir}/shadps4-config"
-config_symlink="${HOME}/.config/shadps4"
 app_image="${app_dir}/Shadps4-qt.AppImage"
-log_dir="/userdata/system/logs"
-log_file="${log_dir}/shadps4.log"
-
-# Ensure log directory exists
-mkdir -p "${log_dir}"
-
-# Append all output to the log file
-exec &> >(tee -a "$log_file")
-echo "$(date): Launching ShadPS4"
-
-# Create persistent directory for ShadPS4 config
-mkdir -p "${config_dir}"
-mkdir -p /userdata/roms/ps4
-mkdir -p /userdata/system/add-ons/shadps4/.local/share/shadPS4
-
-# Move existing config if present
-if [ -d "${config_symlink}" ] && [ ! -L "${config_symlink}" ]; then
-    mv "${config_symlink}" "${config_dir}"
-fi
-
-# Ensure config directory is symlinked
-if [ ! -L "${config_symlink}" ]; then
-    ln -sf "${config_dir}" "${config_symlink}"
-fi
-
-# Symlink .local/share/shadPS4 to the config directory
-local_share_dir="${HOME}/.local/share/shadPS4"
-if [ ! -L "${local_share_dir}" ]; then
-    echo "Creating symlink for .local/share/shadPS4 to shadps4-config"
-    ln -sf "${config_dir}" "${local_share_dir}"
-fi
 
 # Launch ShadPS4 AppImage
 if [ -x "${app_image}" ]; then
