@@ -7,7 +7,7 @@ wget -q -O /userdata/system/add-ons/sunshine/sunshine.AppImage  https://github.c
 chmod a+x /userdata/system/add-ons/sunshine/sunshine.AppImage
 
 # Create a persistent configuration directory
-mkdir -p /userdata/system/add-ons/sunshine/sunshine-config
+mkdir -p /userdata/system/add-ons/sunshine
 mkdir -p /userdata/system/logs
 
 # Configure Sunshine as a service
@@ -22,12 +22,10 @@ cat << 'EOF' > /userdata/system/services/sunshine
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
-
+export HOME=/userdata/system/add-ons/sunshine
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/sunshine"
-config_dir="${app_dir}/sunshine-config/sunshine"
-config_symlink="${HOME}/.config/sunshine"
 app_image="${app_dir}/sunshine.AppImage"
 log_dir="/userdata/system/logs"
 log_file="${log_dir}/sunshine.log"
@@ -42,18 +40,6 @@ echo "$(date): ${1} service sunshine"
 case "$1" in
     start)
         echo "Starting Sunshine service..."
-        # Create persistent directory for Sunshine config
-        mkdir -p "${config_dir}"
-
-        # Move existing config if present
-        if [ -d "${config_symlink}" ] && [ ! -L "${config_symlink}" ]; then
-            mv "${config_symlink}" "${config_dir}"
-        fi
-
-        # Ensure config directory is symlinked
-        if [ ! -L "${config_symlink}" ]; then
-            ln -sf "${config_dir}" "${config_symlink}"
-        fi
 
         # Start Sunshine AppImage
         if [ -x "${app_image}" ]; then
@@ -89,7 +75,6 @@ restart)
         echo "Uninstalling Sunshine service..."
         "$0" stop
         rm -f "${app_image}"
-        rm -rf "${config_symlink}" "${config_dir}"
         echo "Sunshine uninstalled successfully."
         ;;
     *)
