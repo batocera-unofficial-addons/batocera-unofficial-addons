@@ -6,11 +6,15 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url="https://git.sr.ht/~thestr4ng3r/chiaki/refs/download/v2.2.0/Chiaki-v2.2.0-Linux-x86_64.AppImage"
+    appimage_url="https://github.com/streetpea/chiaki-ng/releases/download/v1.9.3/chiaki-ng.AppImage_x86_64"
+elif [ "$arch" == "aarch64" ]; then
+    echo "Architecture: ARM64 detected."
+    appimage_url="https://github.com/streetpea/chiaki-ng/releases/download/v1.9.3/chiaki-ng.AppImage_arm64"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
 fi
+
 
 # Step 2: Prepare directories
 echo "Setting up directories..."
