@@ -14,7 +14,7 @@ fi
 
 # Step 2: Download the application
 echo "Downloading Amazon Luna client from $app_url..."
-app_dir="/userdata/system/pro/amazonluna"
+app_dir="/userdata/system/add-ons/amazonluna"
 mkdir -p "$app_dir"
 temp_dir="${app_dir}/temp"
 mkdir -p "$temp_dir"
@@ -43,11 +43,29 @@ cat << 'EOF' > "${ports_dir}/AmazonLuna.sh"
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
-export HOME="/userdata/system/pro/amazonluna"
+export HOME="/userdata/system/add-ons/amazonluna/home"
+export XDG_CONFIG_HOME="/userdata/system/add-ons/amazonluna/config"
+export XDG_DATA_HOME="/userdata/system/add-ons/amazonluna/home"
+export XDG_CURRENT_DESKTOP=XFCE
+export DESKTOP_SESSION=XFCE
+export LD_LIBRARY_PATH="/userdata/system/add-ons/.dep:${LD_LIBRARY_PATH}"
+
+# Ensure required directories exist
+mkdir -p "/userdata/system/add-ons/amazonluna/home"
+mkdir -p "/userdata/system/add-ons/amazonluna/config"
+mkdir -p "/userdata/system/add-ons/amazonluna/roms"
+
+# Configure system settings
+sysctl -w vm.max_map_count=2097152
+ulimit -H -n 819200
+ulimit -S -n 819200
+ulimit -H -l 61634
+ulimit -S -l 61634
+ulimit -H -s 61634
+ulimit -S -s 61634
 
 # Paths
-app_dir="/userdata/system/pro/amazonluna"
-app_bin="${app_dir}/AmazonLuna"
+app_bin="/userdata/system/add-ons/amazonluna/AmazonLuna"
 log_dir="/userdata/system/logs"
 log_file="${log_dir}/amazonluna.log"
 
@@ -60,7 +78,7 @@ echo "$(date): Launching Amazon Luna"
 
 # Launch Amazon Luna
 if [ -x "${app_bin}" ]; then
-    cd "${app_dir}"
+    cd "/userdata/system/add-ons/amazonluna"
     ./AmazonLuna --no-sandbox --test-type "$@" > "${log_file}" 2>&1
     echo "Amazon Luna exited."
 else
@@ -75,18 +93,5 @@ chmod +x "${ports_dir}/AmazonLuna.sh"
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
-# Download the image
-echo "Downloading Amazon Luna logo..."
-curl -L -o /userdata/roms/ports/images/ArcadeManager_Logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/amazonluna/extra/amazonluna.png
-
-echo "Adding logo to Amazon Luna entry in gamelist.xml..."
-xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-  -s "/gameList/game[last()]" -t elem -n "path" -v "./AmazonLuna.sh" \
-  -s "/gameList/game[last()]" -t elem -n "name" -v "Amazon Luna" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/amazonluna.png" \
-  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
-
-
-curl http://127.0.0.1:1234/reloadgames
 echo
 echo "Installation complete! You can now launch Amazon Luna from the Ports menu."
