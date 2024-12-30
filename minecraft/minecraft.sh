@@ -140,7 +140,7 @@ curl http://127.0.0.1:1234/reloadgames
 curl -L -o "/userdata/roms/ports/images/minecraft-${script_name%.*}-logo.png" "$logo_url"
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./$script_name" \
-  -s "/gameList/game[last()]" -t elem -n "name" -v "Minecraft ${script_name%.*}" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "${script_name%.*}" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/minecraft-${script_name%.*}-logo.png" \
   /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
 
