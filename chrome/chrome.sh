@@ -56,7 +56,7 @@ echo "$(date): Launching Google Chrome"
 # Launch Google Chrome AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
-    ./GoogleChrome.AppImage > "${log_file}" 2>&1
+    ./GoogleChrome.AppImage --no-sandbox > "${log_file}" 2>&1
     echo "Google Chrome exited."
 else
     echo "GoogleChrome.AppImage not found or not executable."
