@@ -1,66 +1,114 @@
 #!/usr/bin/env bash
 ######################################################################
-# GAMELIST-MANAGER INSTALLER
+# BATOCERA.ADD-ONS/GAMELIST MANAGER INSTALLER
 ######################################################################
+
 APPNAME="gamelist-manager"
-appname="gamelist-manager"
-AppName="gamelist-manager"
-APPPATH=/userdata/system/add-ons/$appname
-APPLINK=$(curl -s https://api.github.com/repos/RobG66/Gamelist-Manager/releases | grep "browser_download_url" | sed 's,^.*https://,https://,g' | cut -d \" -f1 | grep ".zip" | head -n1)
+APPDIR="/userdata/system/add-ons/$APPNAME"
+APPLINK=$(curl -s https://api.github.com/repos/RobG66/Gamelist-Manager/releases \
+          | grep "browser_download_url" \
+          | sed 's,^.*https://,https://,g' \
+          | cut -d \" -f1 \
+          | grep ".zip" \
+          | head -n1)
 ORIGIN="github.com/RobG66/Gamelist-Manager"
 
-# Output colors
-X='\033[0m'
-G='\033[0;32m'
+# Color codes for console output
+RESET='\033[0m'
+GREEN='\033[32m'
+RED='\033[31m'
+BLUE='\033[34m'
 
-# Prepare paths and files
-add_ons_dir=/userdata/system/add-ons
-mkdir -p $add_ons_dir/$appname/extra
+# Helper function for printing colored messages
+echo_colored() {
+    local color=$1
+    shift
+    echo -e "${color}$@${RESET}"
+}
 
-# Download application
-echo -e "${G}Downloading $APPNAME...${X}"
-temp_dir=$add_ons_dir/$appname/extra/downloads
-rm -rf $temp_dir && mkdir -p $temp_dir && cd $temp_dir
-curl --progress-bar --remote-name --location "$APPLINK"
-unzip -oq $PWD/*.zip -d $add_ons_dir/$appname
-rm -rf $temp_dir
+# Start of the installation script
+clear
+echo_colored $BLUE "Preparing GAMELIST-MANAGER Installer..."
 
-# Create launcher
-launcher=$add_ons_dir/$appname/Launcher
-cat <<EOF > $launcher
+# Ensure required tools are installed
+for cmd in curl unzip dos2unix; do
+    command -v $cmd >/dev/null 2>&1 || {
+        echo_colored $RED "Error: $cmd is not installed."
+        exit 1
+    }
+done
+
+# Prepare installation directories
+mkdir -p "$APPDIR/extra"
+TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TEMP_DIR"' EXIT
+
+# Download and extract application
+if ! curl --progress-bar --remote-name --location "$APPLINK" -o "$TEMP_DIR/app.zip"; then
+    echo_colored $RED "Error: Failed to download the application archive."
+    exit 1
+fi
+
+if ! unzip -oq "$TEMP_DIR/app.zip" -d "$TEMP_DIR"; then
+    echo_colored $RED "Error: Failed to extract the application archive."
+    exit 1
+fi
+
+# Move extracted files to application directory
+if [[ ! -d "$TEMP_DIR/Release" ]]; then
+    echo_colored $RED "Error: Release directory not found in the archive."
+    exit 1
+fi
+cp -r "$TEMP_DIR/Release" "$APPDIR/"
+
+# Create launcher script
+LAUNCHER="$APPDIR/Launcher"
+cat <<EOF > "$LAUNCHER"
 #!/bin/bash
 export DISPLAY=:0.0
-DISPLAY=:0.0 QT_SCALE_FACTOR="1.25" GDK_SCALE="1.25" batocera-wine windows play $add_ons_dir/$appname/Release/GamelistManager.exe
+unclutter-remote -s
+DISPLAY=:0.0 QT_SCALE_FACTOR="1.25" GDK_SCALE="1.25" batocera-wine windows play "$APPDIR/Release/GamelistManager.exe"
 EOF
-chmod a+x $launcher
+chmod +x "$LAUNCHER"
 
 # Create desktop shortcut
-shortcut=$add_ons_dir/$appname/extra/$appname.desktop
-cat <<EOF > $shortcut
+DESKTOP_FILE="$APPDIR/extra/$APPNAME.desktop"
+cat <<EOF > "$DESKTOP_FILE"
 [Desktop Entry]
 Version=1.0
-Icon=$add_ons_dir/$appname/extra/icon.png
-Exec=$add_ons_dir/$appname/Launcher
+Icon=$APPDIR/extra/icon.png
+Exec=$LAUNCHER
 Terminal=false
 Type=Application
-Categories=Game;
-Name=$appname
+Categories=Game;batocera.linux;
+Name=$APPNAME
 EOF
-chmod a+x $shortcut
-cp $shortcut /usr/share/applications/ 2>/dev/null
+dos2unix "$DESKTOP_FILE"
+chmod +x "$DESKTOP_FILE"
+cp "$DESKTOP_FILE" /usr/share/applications/
 
-# Add prelauncher to custom.sh
-prelauncher=$add_ons_dir/$appname/extra/startup
-cat <<EOF > $prelauncher
-#!/usr/bin/env bash
-cp $shortcut /usr/share/applications/ 2>/dev/null
+# Prepare startup script
+STARTUP_SCRIPT="$APPDIR/extra/startup"
+cat <<EOF > "$STARTUP_SCRIPT"
+#!/bin/bash
+cp "$DESKTOP_FILE" /usr/share/applications/
 EOF
-chmod a+x $prelauncher
+dos2unix "$STARTUP_SCRIPT"
+chmod +x "$STARTUP_SCRIPT"
 
-custom_sh=/userdata/system/custom.sh
-if ! grep -q "$prelauncher" $custom_sh 2>/dev/null; then
-  echo "$prelauncher" >> $custom_sh
+# Add startup script to custom.sh
+CUSTOM_SH="/userdata/system/custom.sh"
+if [[ -e "$CUSTOM_SH" ]]; then
+    grep -q "$STARTUP_SCRIPT" "$CUSTOM_SH" || echo "$STARTUP_SCRIPT" >> "$CUSTOM_SH"
+else
+    echo "$STARTUP_SCRIPT" > "$CUSTOM_SH"
 fi
-chmod a+x $custom_sh
+dos2unix "$CUSTOM_SH"
+chmod +x "$CUSTOM_SH"
 
-echo -e "${G}> Installation complete. $APPNAME is ready!${X}"
+# Final output
+clear
+echo_colored $GREEN "$APPNAME has been successfully installed!"
+echo_colored $GREEN "It is available under F1 -> Applications."
+echo_colored $BLUE "Installation directory: $APPDIR"
+exit 0
