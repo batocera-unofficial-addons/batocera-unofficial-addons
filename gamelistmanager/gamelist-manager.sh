@@ -42,10 +42,10 @@ R=$X
 # -- prepare paths and files for installation: 
 cd ~/
 add-ons=/userdata/system/add-ons
-mkdir $add-ons 2>/dev/null
-mkdir $add-ons/extra 2>/dev/null
-mkdir $add-ons/$appname 2>/dev/null
-mkdir $add-ons/$appname/extra 2>/dev/null
+mkdir $addons 2>/dev/null
+mkdir $addons/extra 2>/dev/null
+mkdir $addons/$appname 2>/dev/null
+mkdir $addons/$appname/extra 2>/dev/null
 # --------------------------------------------------------------------
 # -- run before installer:  
 killall wget 2>/dev/null && killall $AppName 2>/dev/null && killall $AppName 2>/dev/null && killall $AppName 2>/dev/null
@@ -223,7 +223,7 @@ echo -e "${G}DOWNLOADING...${W}"
 sleep 1
 #echo -e "${T}$APPLINK" | sed 's,https://,> ,g' | sed 's,http://,> ,g' 2>/dev/null
 add-ons=/userdata/system/add-ons
-extra=$add-ons/$appname/extra
+extra=$addons/$appname/extra
 temp=$extra/downloads
 rm -rf $temp 2>/dev/null
 mkdir $temp 2>/dev/null
@@ -235,8 +235,8 @@ cp -r $PWD/Release /userdata/system/add-ons/gamelist-manager/
 cd ~/
 rm -rf $temp 2>/dev/null
 #
-SIZE=$(du -hs $add-ons/$appname | awk '{print $1}') 2>/dev/null
-echo -e "${T}$add-ons/$appname   [${T}$SIZE]   ${G}OK${W}"
+SIZE=$(du -hs $addons/$appname | awk '{print $1}') 2>/dev/null
+echo -e "${T}$addons/$appname   [${T}$SIZE]   ${G}OK${W}"
 #echo -e "${G}> ${W}DONE"
 echo
 line $cols '='; echo
@@ -321,7 +321,7 @@ function autostart() {
   add-ons="/userdata/system/add-ons"
   rm -f $pcsh
   temp_file=$(mktemp)
-  find $add-ons -type f \( -path "*/extra/startup" -o -path "*/extras/startup.sh" \) > $temp_file
+  find $addons -type f \( -path "*/extra/startup" -o -path "*/extras/startup.sh" \) > $temp_file
   echo "#!/bin/bash" > $pcsh
   sort $temp_file >> $pcsh
   rm $temp_file
