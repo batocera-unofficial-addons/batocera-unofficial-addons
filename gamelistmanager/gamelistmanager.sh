@@ -5,12 +5,7 @@
 
 APPNAME="gamelist-manager"
 APPDIR="/userdata/system/add-ons/$APPNAME"
-APPLINK=$(curl -s https://api.github.com/repos/RobG66/Gamelist-Manager/releases \
-          | grep "browser_download_url" \
-          | sed 's,^.*https://,https://,g' \
-          | cut -d \" -f1 \
-          | grep ".zip" \
-          | head -n1)
+APPLINK=$(curl -s https://api.github.com/repos/RobG66/Gamelist-Manager/releases | grep "browser_download_url" | sed 's,^.*https://,https://,g' | cut -d \" -f1 | grep ".zip" | head -n1)
 ORIGIN="github.com/RobG66/Gamelist-Manager"
 
 # Color codes for console output
