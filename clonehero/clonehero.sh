@@ -12,7 +12,7 @@ PORTS_DIR="/userdata/roms/ports"
 LOGO_URL="https://raw.githubusercontent.com/KevoBato/batocera-assets/main/logos/clonehero.png"
 LOGO_PATH="$PORTS_DIR/clonehero.png"
 GAME_LIST="$PORTS_DIR/gamelist.xml"
-GAME_URL="https://github.com/srylain/CloneHero/releases/download/v1.0.0.4080/CloneHero-v1.0.0.4080-linux-x86_64.tar.xz"
+GAME_URL="https://github.com/clonehero-game/releases/releases/download/v1.1.0.4261-PTB/clonehero-linux.tar.xz"
 
 # Functions
 log() { echo -e "\e[1;32m$1\e[0m"; }
