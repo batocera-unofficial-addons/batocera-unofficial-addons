@@ -25,8 +25,7 @@ fi
 chmod a+x /userdata/system/add-ons/google-chrome/GoogleChrome.AppImage
 echo "Google Chrome AppImage downloaded and marked as executable."
 
-# Create persistent configuration and log directories
-mkdir -p /userdata/system/add-ons/google-chrome/google-chrome-config
+# Create persistent log directory
 mkdir -p /userdata/system/logs
 
 # Step 3: Create the Google Chrome Script
@@ -38,7 +37,7 @@ cat << 'EOF' > /userdata/roms/ports/GoogleChrome.sh
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
-export HOME="/userdata/system/add-ons/chrome"
+export HOME="/userdata/system/add-ons/google-chrome"
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/google-chrome"
