@@ -17,11 +17,6 @@ G='\033[0;32m'
 add_ons_dir=/userdata/system/add-ons
 mkdir -p $add_ons_dir/$appname/extra
 
-# Download dependencies
-mkdir -p ~/add-ons/.dep 2>/dev/null && cd ~/add-ons/.dep
-wget --tries=10 --no-check-certificate -q -O dep.zip https://github.com/uureel/batocera.add-ons/raw/main/.dep/dep.zip
-unzip -oq dep.zip && cd ~/
-
 # Download application
 echo -e "${G}Downloading $APPNAME...${X}"
 temp_dir=$add_ons_dir/$appname/extra/downloads
