@@ -41,7 +41,7 @@ R=$X
 # --------------------------------------------------------------------
 # -- prepare paths and files for installation: 
 cd ~/
-add-ons=/userdata/system/add-ons
+addons=/userdata/system/add-ons
 mkdir $addons 2>/dev/null
 mkdir $addons/extra 2>/dev/null
 mkdir $addons/$appname 2>/dev/null
@@ -222,7 +222,7 @@ echo
 echo -e "${G}DOWNLOADING...${W}"
 sleep 1
 #echo -e "${T}$APPLINK" | sed 's,https://,> ,g' | sed 's,http://,> ,g' 2>/dev/null
-add-ons=/userdata/system/add-ons
+addons=/userdata/system/add-ons
 extra=$addons/$appname/extra
 temp=$extra/downloads
 rm -rf $temp 2>/dev/null
@@ -318,7 +318,7 @@ export -f batocera-add-ons-installer 2>/dev/null
 function autostart() {
   csh="/userdata/system/custom.sh"
   pcsh="/userdata/system/add-ons-custom.sh"
-  add-ons="/userdata/system/add-ons"
+  addons="/userdata/system/add-ons"
   rm -f $pcsh
   temp_file=$(mktemp)
   find $addons -type f \( -path "*/extra/startup" -o -path "*/extras/startup.sh" \) > $temp_file
