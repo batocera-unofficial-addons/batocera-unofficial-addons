@@ -126,6 +126,8 @@ else
     logo_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-bedrock-logo.png"
 fi
 
+curl http://127.0.0.1:1234/reloadgames
+
 curl -L -o "/userdata/roms/ports/images/minecraft-${edition_choice,,}-logo.png" "$logo_url"
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./$script_name" \
