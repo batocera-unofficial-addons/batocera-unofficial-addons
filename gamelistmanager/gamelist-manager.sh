@@ -228,7 +228,7 @@ temp=$extra/downloads
 rm -rf $temp 2>/dev/null
 mkdir $temp 2>/dev/null
 cd $temp
-curl --add-onsgress-bar --remote-name --location "$APPLINK"
+curl --progress-bar --remote-name --location "$APPLINK"
 yes "y" | unzip -oq $PWD/*.zip 
 mkdir -p /userdata/system/add-ons/ 2>/dev/null
 cp -r $PWD/Release /userdata/system/add-ons/gamelist-manager/
