@@ -27,14 +27,16 @@ fi
 echo "Detecting system architecture..."
 arch=$(uname -m)
 
-# Initialize appimage_url variable
+# Initialize variables
 appimage_url=""
+script_name=""
 
-# Step 3: Set the download URL based on the user's choice and architecture
+# Step 3: Set the download URL and script name based on the user's choice and architecture
 if [ "$edition_choice" == "1" ]; then
     if [ "$arch" == "x86_64" ]; then
         echo "Java Edition selected for x86_64."
         appimage_url="https://launcherupdates.lunarclientcdn.com/Lunar%20Client-3.3.2-ow.AppImage"
+        script_name="MinecraftJava.sh"
     else
         echo "Java Edition is not supported on this architecture: $arch. Exiting."
         exit 1
@@ -43,9 +45,11 @@ elif [ "$edition_choice" == "2" ]; then
     if [ "$arch" == "x86_64" ]; then
         echo "Bedrock Edition selected for x86_64."
         appimage_url="https://github.com/minecraft-linux/mcpelauncher-manifest/releases/download/nightly/Minecraft_Bedrock_Launcher-bookworm-x86_64-v1.0.0.590.AppImage"
+        script_name="MinecraftBedrock.sh"
     elif [ "$arch" == "aarch64" ]; then
         echo "Bedrock Edition selected for arm64."
         appimage_url="https://github.com/minecraft-linux/mcpelauncher-manifest/releases/download/nightly/Minecraft_Bedrock_Launcher-arm64-v1.0.0.590.AppImage"
+        script_name="MinecraftBedrock.sh"
     else
         echo "Unsupported architecture: $arch. Exiting."
         exit 1
@@ -76,7 +80,6 @@ mkdir -p /userdata/system/logs
 # Step 5: Create the Launcher Script
 echo "Creating Launcher script in Ports..."
 mkdir -p /userdata/roms/ports
-script_name="Minecraft${edition_choice,,}.sh"
 
 cat << EOF > "/userdata/roms/ports/$script_name"
 #!/bin/bash
@@ -84,7 +87,7 @@ cat << EOF > "/userdata/roms/ports/$script_name"
 # Environment setup
 export \$(cat /proc/1/environ | tr '\\0' '\\n')
 export DISPLAY=:0.0
-export HOME=$outputdir
+export HOME="$output_dir"
 
 # Directories and file paths
 app_dir="$output_dir"
@@ -96,10 +99,16 @@ log_file="\${log_dir}/minecraft-${edition_choice,,}.log"
 mkdir -p "\${log_dir}"
 
 # Append all output to the log file
-exec &> >(tee -a "$log_file")
-echo "\$(date): Launching Minecraft ${edition_choice}"\\n
+exec &> >(tee -a "\${log_file}")
+echo "\$(date): Launching Minecraft ${script_name%.*}"
 
 # Launch Minecraft Launcher AppImage
+if [ "$script_name" == "MinecraftJava.sh" ]; then
+    ./Minecraft_Launcher.AppImage --no-sandbox > "\${log_file}" 2>&1
+else
+    ./Minecraft_Launcher.AppImage > "\${log_file}" 2>&1
+fi
+
 if [ -x "\${app_image}" ]; then
     cd "\${app_dir}"
     ./Minecraft_Launcher.AppImage > "\${log_file}" 2>&1
@@ -118,7 +127,7 @@ if ! command -v xmlstarlet &> /dev/null; then
     exit 1
 fi
 
-echo "Adding Minecraft ${edition_choice} to Ports menu..."
+echo "Adding Minecraft ${script_name%.*} to Ports menu..."
 logo_url=""
 if [ "$edition_choice" == "1" ]; then
     logo_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-java.png"
@@ -128,14 +137,14 @@ fi
 
 curl http://127.0.0.1:1234/reloadgames
 
-curl -L -o "/userdata/roms/ports/images/minecraft-${edition_choice,,}-logo.png" "$logo_url"
+curl -L -o "/userdata/roms/ports/images/minecraft-${script_name%.*}-logo.png" "$logo_url"
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./$script_name" \
-  -s "/gameList/game[last()]" -t elem -n "name" -v "Minecraft ${edition_choice}" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/minecraft-${edition_choice,,}-logo.png" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "Minecraft ${script_name%.*}" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/minecraft-${script_name%.*}-logo.png" \
   /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
 
 curl http://127.0.0.1:1234/reloadgames
 
 echo
-echo "Installation complete! You can now launch Minecraft ${edition_choice} from the Ports menu."
+echo "Installation complete! You can now launch Minecraft ${script_name%.*} from the Ports menu."
