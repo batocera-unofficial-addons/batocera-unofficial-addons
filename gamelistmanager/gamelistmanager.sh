@@ -5,7 +5,12 @@
 
 APPNAME="gamelist-manager"
 APPDIR="/userdata/system/add-ons/$APPNAME"
-APPLINK=$(curl -s https://api.github.com/repos/RobG66/Gamelist-Manager/releases | grep "browser_download_url" | sed 's,^.*https://,https://,g' | cut -d \" -f1 | grep ".zip" | head -n1)
+APPLINK=$(curl -s https://api.github.com/repos/RobG66/Gamelist-Manager/releases \
+          | grep "browser_download_url" \
+          | sed 's,^.*https://,https://,g' \
+          | cut -d \" -f1 \
+          | grep ".zip" \
+          | head -n1)
 ORIGIN="github.com/RobG66/Gamelist-Manager"
 
 # Color codes for console output
@@ -33,17 +38,26 @@ for cmd in curl unzip dos2unix; do
     }
 done
 
+# Validate the APPLINK URL
+if [[ -z "$APPLINK" ]]; then
+    echo_colored $RED "Error: Could not determine the download URL."
+    exit 1
+fi
+
 # Prepare installation directories
 mkdir -p "$APPDIR/extra"
 TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TEMP_DIR"' EXIT
 
-# Download and extract application
-if ! curl --progress-bar --remote-name --location "$APPLINK" -o "$TEMP_DIR/app.zip"; then
+# Download the application archive
+echo_colored $BLUE "Downloading from: $APPLINK"
+if ! curl --progress-bar --location "$APPLINK" -o "$TEMP_DIR/app.zip"; then
     echo_colored $RED "Error: Failed to download the application archive."
     exit 1
 fi
 
+# Extract the application archive
+echo_colored $BLUE "Extracting application archive..."
 if ! unzip -oq "$TEMP_DIR/app.zip" -d "$TEMP_DIR"; then
     echo_colored $RED "Error: Failed to extract the application archive."
     exit 1
