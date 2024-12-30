@@ -13,6 +13,8 @@ dialog --clear --backtitle "Minecraft Launcher Setup" \
     1 "Java Edition" \
     2 "Bedrock Edition" 2> /tmp/edition_choice.txt
 
+clear
+
 # Read the user's choice from the temporary file
 edition_choice=$(< /tmp/edition_choice.txt)
 rm -f /tmp/edition_choice.txt
