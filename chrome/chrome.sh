@@ -6,7 +6,7 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url=$(curl -s https://api.github.com/repos/ivan-hc/Chrome-appimage/releases/latest | jq -r '.assets[] | select(.name? and (.name | tostring | contains("stable") and (.name | endswith(".AppImage")))) | .browser_download_url' | head -n 1)
+    appimage_url=$(curl -s https://api.github.com/repos/ivan-hc/Chrome-appimage/releases/latest | jq -r '.assets[] | select(.name and (.name | contains("stable") and (.name | endswith(".AppImage")))) | .browser_download_url')
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
