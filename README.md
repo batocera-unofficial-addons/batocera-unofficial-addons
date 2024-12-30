@@ -6,3 +6,5 @@ Unofficial add-ons for Batocera, in no way affiliated with the Batocera developm
 WIP - DO NOT ATTEMPT TO INSTALL ANYTHING UNTIL THIS README IS COMPLETE, IT WILL MOST LIKELY BREAK YOUR SYSTEM IF YOU TRY TO!<br>
 Estimated release date: Early 2025
 
+Follow along with the progress via the Batocera Unofficial Add-Ons discord https://discord.gg/5sfHzMuQ
+
