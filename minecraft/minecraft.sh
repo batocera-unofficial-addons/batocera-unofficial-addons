@@ -1,10 +1,27 @@
 #!/bin/bash
 
-# Step 1: Ask the user to choose between Java or Bedrock edition
-echo "Select Minecraft Edition:"
-echo "1) Java Edition"
-echo "2) Bedrock Edition"
-read -p "Enter your choice (1 or 2): " edition_choice
+# Ensure the dialog utility is installed
+if ! command -v dialog &> /dev/null; then
+    echo "Error: 'dialog' is not installed. Install it and re-run the script."
+    exit 1
+fi
+
+# Step 1: Display a dialog menu for the user to select Minecraft Edition
+dialog --clear --backtitle "Minecraft Launcher Setup" \
+    --title "Select Minecraft Edition" \
+    --menu "Choose your Minecraft Edition:" 15 50 2 \
+    1 "Java Edition" \
+    2 "Bedrock Edition" 2> /tmp/edition_choice.txt
+
+# Read the user's choice from the temporary file
+edition_choice=$(< /tmp/edition_choice.txt)
+rm -f /tmp/edition_choice.txt
+
+# Check if the user pressed Cancel
+if [ -z "$edition_choice" ]; then
+    echo "No choice made. Exiting."
+    exit 1
+fi
 
 # Step 2: Detect system architecture
 echo "Detecting system architecture..."
@@ -65,9 +82,9 @@ cat << EOF > "/userdata/roms/ports/$script_name"
 #!/bin/bash
 
 # Environment setup
-export \$(cat /proc/1/environ | tr '\0' '\n')
+export \$(cat /proc/1/environ | tr '\\0' '\\n')
 export DISPLAY=:0.0
-export HOME=$output_dir
+export HOME=$outputdir
 
 # Directories and file paths
 app_dir="$output_dir"
@@ -80,7 +97,7 @@ mkdir -p "\${log_dir}"
 
 # Append all output to the log file
 exec &> >(tee -a "$log_file")
-echo "\$(date): Launching Minecraft ${edition_choice}"\n
+echo "\$(date): Launching Minecraft ${edition_choice}"\\n
 
 # Launch Minecraft Launcher AppImage
 if [ -x "\${app_image}" ]; then
