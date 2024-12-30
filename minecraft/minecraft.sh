@@ -29,14 +29,13 @@ arch=$(uname -m)
 
 # Initialize variables
 appimage_url=""
-script_name=""
 
-# Step 3: Set the download URL and script name based on the user's choice and architecture
+# Step 3: Set the download URL based on the user's choice and architecture
 if [ "$edition_choice" == "1" ]; then
     if [ "$arch" == "x86_64" ]; then
         echo "Java Edition selected for x86_64."
         appimage_url="https://launcherupdates.lunarclientcdn.com/Lunar%20Client-3.3.2-ow.AppImage"
-        script_name="MinecraftJava.sh"
+        app_dir="/userdata/system/add-ons/minecraft/minecraftjava"
     else
         echo "Java Edition is not supported on this architecture: $arch. Exiting."
         exit 1
@@ -45,11 +44,11 @@ elif [ "$edition_choice" == "2" ]; then
     if [ "$arch" == "x86_64" ]; then
         echo "Bedrock Edition selected for x86_64."
         appimage_url="https://github.com/minecraft-linux/mcpelauncher-manifest/releases/download/nightly/Minecraft_Bedrock_Launcher-bookworm-x86_64-v1.0.0.590.AppImage"
-        script_name="MinecraftBedrock.sh"
+        app_dir="/userdata/system/add-ons/minecraft/minecraftbedrock"
     elif [ "$arch" == "aarch64" ]; then
         echo "Bedrock Edition selected for arm64."
         appimage_url="https://github.com/minecraft-linux/mcpelauncher-manifest/releases/download/nightly/Minecraft_Bedrock_Launcher-arm64-v1.0.0.590.AppImage"
-        script_name="MinecraftBedrock.sh"
+        app_dir="/userdata/system/add-ons/minecraft/minecraftbedrock"
     else
         echo "Unsupported architecture: $arch. Exiting."
         exit 1
@@ -61,54 +60,83 @@ fi
 
 # Step 4: Download the AppImage
 echo "Downloading AppImage from $appimage_url..."
-output_dir="/userdata/system/add-ons/minecraft-${edition_choice,,}"
-mkdir -p "$output_dir"
-wget -q --show-progress -O "$output_dir/Minecraft_Launcher.AppImage" "$appimage_url"
+mkdir -p "$app_dir"
+wget -q --show-progress -O "$app_dir/Minecraft_Launcher.AppImage" "$appimage_url"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download the AppImage. Exiting."
     exit 1
 fi
 
-chmod a+x "$output_dir/Minecraft_Launcher.AppImage"
+chmod a+x "$app_dir/Minecraft_Launcher.AppImage"
 echo "AppImage downloaded and marked as executable."
 
 # Create persistent configuration and log directories
-mkdir -p "$output_dir/minecraft-config"
+mkdir -p "$app_dir/minecraft-config"
 mkdir -p /userdata/system/logs
 
-# Step 5: Create the Launcher Script
-echo "Creating Launcher script in Ports..."
-mkdir -p /userdata/roms/ports
-
-cat << EOF > "/userdata/roms/ports/$script_name"
+if [ "$edition_choice" == "1" ]; then
+    # Step 5: Create the Java Launcher Script
+    echo "Creating Java Edition Launcher script in Ports..."
+    mkdir -p /userdata/roms/ports
+    cat << EOF > "/userdata/roms/ports/MinecraftJava.sh"
 #!/bin/bash
 
 # Environment setup
-export \$(cat /proc/1/environ | tr '\\0' '\\n')
+export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
-export HOME="$output_dir"
+export HOME="$app_dir"
 
 # Directories and file paths
-app_dir="$output_dir"
+app_dir="$app_dir"
 app_image="\${app_dir}/Minecraft_Launcher.AppImage"
 log_dir="/userdata/system/logs"
-log_file="\${log_dir}/minecraft-${edition_choice,,}.log"
+log_file="\${log_dir}/minecraft-java.log"
 
 # Ensure log directory exists
 mkdir -p "\${log_dir}"
 
 # Append all output to the log file
 exec &> >(tee -a "\${log_file}")
-echo "\$(date): Launching Minecraft ${script_name%.*}"
+echo "\$(date): Launching Minecraft Java Edition"
 
 # Launch Minecraft Launcher AppImage
-if [ "$script_name" == "MinecraftJava.sh" ]; then
+if [ -x "\${app_image}" ]; then
+    cd "\${app_dir}"
     ./Minecraft_Launcher.AppImage --no-sandbox > "\${log_file}" 2>&1
+    echo "Minecraft Launcher exited."
 else
-    ./Minecraft_Launcher.AppImage > "\${log_file}" 2>&1
+    echo "AppImage not found or not executable."
+    exit 1
 fi
+EOF
+    chmod +x "/userdata/roms/ports/MinecraftJava.sh"
+else
+    # Step 5: Create the Bedrock Launcher Script
+    echo "Creating Bedrock Edition Launcher script in Ports..."
+    mkdir -p /userdata/roms/ports
+    cat << EOF > "/userdata/roms/ports/MinecraftBedrock.sh"
+#!/bin/bash
 
+# Environment setup
+export \$(cat /proc/1/environ | tr '\0' '\n')
+export DISPLAY=:0.0
+export HOME="$app_dir"
+
+# Directories and file paths
+app_dir="$app_dir"
+app_image="\${app_dir}/Minecraft_Launcher.AppImage"
+log_dir="/userdata/system/logs"
+log_file="\${log_dir}/minecraft-bedrock.log"
+
+# Ensure log directory exists
+mkdir -p "\${log_dir}"
+
+# Append all output to the log file
+exec &> >(tee -a "\${log_file}")
+echo "\$(date): Launching Minecraft Bedrock Edition"
+
+# Launch Minecraft Launcher AppImage
 if [ -x "\${app_image}" ]; then
     cd "\${app_dir}"
     ./Minecraft_Launcher.AppImage > "\${log_file}" 2>&1
@@ -118,8 +146,8 @@ else
     exit 1
 fi
 EOF
-
-chmod +x "/userdata/roms/ports/$script_name"
+    chmod +x "/userdata/roms/ports/MinecraftBedrock.sh"
+fi
 
 # Step 6: Add Entry to Ports Menu
 if ! command -v xmlstarlet &> /dev/null; then
@@ -127,24 +155,29 @@ if ! command -v xmlstarlet &> /dev/null; then
     exit 1
 fi
 
-echo "Adding Minecraft ${script_name%.*} to Ports menu..."
-logo_url=""
+curl http://127.0.0.1:1234/reloadgames
+
 if [ "$edition_choice" == "1" ]; then
+    echo "Adding Minecraft Java Edition to Ports menu..."
     logo_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-java.png"
+    curl -L -o "/userdata/roms/ports/images/minecraft-java-logo.png" "$logo_url"
+    xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+      -s "/gameList/game[last()]" -t elem -n "path" -v "./MinecraftJava.sh" \
+      -s "/gameList/game[last()]" -t elem -n "name" -v "Minecraft Java Edition" \
+      -s "/gameList/game[last()]" -t elem -n "image" -v "./images/minecraft-java-logo.png" \
+      /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
 else
+    echo "Adding Minecraft Bedrock Edition to Ports menu..."
     logo_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-bedrock-logo.png"
+    curl -L -o "/userdata/roms/ports/images/minecraft-bedrock-logo.png" "$logo_url"
+    xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+      -s "/gameList/game[last()]" -t elem -n "path" -v "./MinecraftBedrock.sh" \
+      -s "/gameList/game[last()]" -t elem -n "name" -v "Minecraft Bedrock Edition" \
+      -s "/gameList/game[last()]" -t elem -n "image" -v "./images/minecraft-bedrock-logo.png" \
+      /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
 fi
 
 curl http://127.0.0.1:1234/reloadgames
 
-curl -L -o "/userdata/roms/ports/images/minecraft-${script_name%.*}-logo.png" "$logo_url"
-xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-  -s "/gameList/game[last()]" -t elem -n "path" -v "./$script_name" \
-  -s "/gameList/game[last()]" -t elem -n "name" -v "${script_name%.*}" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/minecraft-${script_name%.*}-logo.png" \
-  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
-
-curl http://127.0.0.1:1234/reloadgames
-
 echo
-echo "Installation complete! You can now launch Minecraft ${script_name%.*} from the Ports menu."
+echo "Installation complete! You can now launch Minecraft from the Ports menu."
