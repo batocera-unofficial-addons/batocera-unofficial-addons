@@ -6,7 +6,7 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url="https://github.com/ivan-hc/Chrome-appimage/releases/download/continuous/Google-Chrome-stable-131.0.6778.204-1-x86_64.AppImage"
+    appimage_url=$(curl -s https://api.github.com/repos/ivan-hc/Chrome-appimage/releases/latest | jq -r '.assets[] | select(.name | endswith(".AppImage")) | .browser_download_url')
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
@@ -56,7 +56,7 @@ echo "$(date): Launching Google Chrome"
 # Launch Google Chrome AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
-    ./GoogleChrome.AppImage --no-sandbox > "${log_file}" 2>&1
+    ./GoogleChrome.AppImage --no-sandbox --test-type "$@" > "${log_file}" 2>&1
     echo "Google Chrome exited."
 else
     echo "GoogleChrome.AppImage not found or not executable."
