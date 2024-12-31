@@ -56,7 +56,7 @@ ulimit -S -s 61634
 # Paths
 app_bin="/userdata/system/add-ons/greenlight"
 log_dir="/userdata/system/logs"
-log_file="${log_dir}/amazonluna.log"
+log_file="${log_dir}/greenlight.log"
 
 # Ensure log directory exists
 mkdir -p "${log_dir}"
@@ -68,10 +68,10 @@ echo "$(date): Launching Amazon Luna"
 # Launch Amazon Luna
 if [ -x "${app_bin}" ]; then
     cd "/userdata/system/add-ons/greenlight"
-    ./greenlight.AppImage
-    echo "Amazon Luna exited."
+    ./greenlight.AppImage --no-sandbox > "${log_file}" 2>&1
+    echo "Greenlight exited."
 else
-    echo "AmazonLuna binary not found or not executable."
+    echo "Greenlight not found or not executable."
     exit 1
 fi
 EOF
