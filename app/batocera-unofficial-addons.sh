@@ -83,6 +83,9 @@ apps=(
     ["VESKTOP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vesktop/vesktop.sh | bash"
     ["ENDLESS-SKY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/endlesssky/endlesssky.sh | bash"
     ["CHIAKI"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/chiaki/chiaki.sh | bash"
+    ["CHROME"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh | bash"
+    ["AMAZON-LUNA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/amazonluna/amazonluna.sh | bash"
+    ["PORTMASTER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/portmaster/portmaster.sh | bash"
 )
 
 descriptions=(
@@ -94,19 +97,22 @@ descriptions=(
     ["WINEMANAGER"]="A wine manager for running Windows games on Batocera."
     ["SHADPS4"]="Experimental PlayStation 4 streaming support, not guaranteed to work."
     ["CONTY"]="A standalone Linux distro container."
-    ["MINECRAFT"]="Minecraft: Bedrock Edition on Batocera."
+    ["MINECRAFT"]="Minecraft: Java or Bedrock Edition on Batocera."
     ["ARMAGETRON"]="A Tron-style game for Batocera."
     ["CLONEHERO"]="A Guitar Hero clone for Batocera, works with guitar controllers."
     ["VESKTOP"]="A Discord application for Batocera."
     ["ENDLESS-SKY"]="A space exploration game for Batocera."
     ["CHIAKI"]="An open-source PlayStation Remote Play client for streaming PS4 and PS5 games."
+    ["CHROME"]="Google Chrome browser for accessing the web."
+    ["AMAZON-LUNA"]="Amazon Luna game streaming service client."
+    ["PORTMASTER"]="A game launcher and manager designed to streamline your gaming experience on Batocera"
 )
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT SWITCH SHADPS4 CHIAKI"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT SWITCH SHADPS4 CHIAKI CHROME"
     ["Patches"]="NVIDIAPATCHER"
 )
 
