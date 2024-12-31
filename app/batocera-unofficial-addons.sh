@@ -86,6 +86,7 @@ apps=(
     ["CHROME"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh | bash"
     ["AMAZON-LUNA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/amazonluna/amazonluna.sh | bash"
     ["PORTMASTER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/portmaster/portmaster.sh | bash"
+    ["GREENLIGHT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/greenlight/greenlight.sh | bash"
 )
 
 descriptions=(
@@ -106,13 +107,14 @@ descriptions=(
     ["CHROME"]="Google Chrome browser for accessing the web."
     ["AMAZON-LUNA"]="Amazon Luna game streaming service client."
     ["PORTMASTER"]="Designed and streamlined for handlehelds, download and install games."
+    ["GREENLIGHT"]="An open-source client for xCloud and Xbox home streaming"
 )
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT SWITCH SHADPS4 CHIAKI CHROME"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME"
     ["Patches"]="NVIDIAPATCHER"
 )
 
