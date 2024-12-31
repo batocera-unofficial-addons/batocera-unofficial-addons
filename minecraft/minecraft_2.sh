@@ -6,7 +6,7 @@ APPNAME=MINECRAFT
 appname=minecraft
 AppName=Minecraft
 APPPATH=/userdata/system/add-ons/$appname/$AppName
-APPLINK=https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/Minecraft
+APPLINK=https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/
 LIBPATH=/userdata/system/add-ons/$appname/lib
 IMAGEPATH=/userdata/system/add-ons/$appname
 PORTSPATH=/userdata/roms/ports
@@ -33,29 +33,48 @@ libs=("liblauncher.tar.bz2.partaa" "liblauncher.tar.bz2.partab" "liblauncher.tar
 
 for lib in "${libs[@]}"; do
     echo -e "${GREEN}Downloading $lib...${X}"
-    wget --progress=bar --no-check-certificate -q -O "$LIBPATH/$lib" "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/$lib"
+    wget --progress=bar --no-check-certificate -q -O "$LIBPATH/$lib" "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/lib/$lib"
+    if [[ ! -f "$LIBPATH/$lib" ]]; then
+        echo -e "${RED}Failed to download $lib. Aborting.${X}"
+        exit 1
+    fi
+    echo -e "${GREEN}$lib downloaded successfully.${X}"
 done
 
 # Combine tar.bz2 parts and extract
 cd $LIBPATH
-cat liblauncher.tar.bz2.part* > liblauncher.tar.bz2
-pro=/userdata/system/add-ons
-mkdir -p $pro/.dep 2>/dev/null
-chmod a+x $pro/.dep/tar
-$pro/.dep/tar -xf liblauncher.tar.bz2
-chmod a+x $LIBPATH/liblauncher.so
-rm -f liblauncher.tar.bz2.part* liblauncher.tar.bz2
+if cat liblauncher.tar.bz2.part* > liblauncher.tar.bz2; then
+    echo -e "${GREEN}Combining parts succeeded. Extracting...${X}"
+    tar -xjf liblauncher.tar.bz2
+    if [[ $? -ne 0 ]]; then
+        echo -e "${RED}Extraction failed. Archive might be corrupted.${X}"
+        exit 1
+    fi
+    chmod a+x $LIBPATH/liblauncher.so
+    rm -f liblauncher.tar.bz2.part* liblauncher.tar.bz2
+else
+    echo -e "${RED}Failed to combine parts. Aborting.${X}"
+    exit 1
+fi
 
 # Download Minecraft AppImage
 cd $IMAGEPATH
 echo -e "${GREEN}Downloading Minecraft AppImage...${X}"
 wget --progress=bar --no-check-certificate -q -O "$IMAGEPATH/$AppName" "$APPLINK"
+if [[ ! -f "$IMAGEPATH/$AppName" ]]; then
+    echo -e "${RED}Failed to download Minecraft AppImage. Aborting.${X}"
+    exit 1
+fi
 chmod a+x "$IMAGEPATH/$AppName"
 
 # Download and place Minecraft.sh.keys
 cd $PORTSPATH
 echo -e "${GREEN}Downloading Minecraft.sh.keys...${X}"
 wget --progress=bar --no-check-certificate -q -O "$PORTSPATH/Minecraft.sh.keys" "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/Minecraft.sh.keys"
+if [[ ! -f "$PORTSPATH/Minecraft.sh.keys" ]]; then
+    echo -e "${RED}Failed to download Minecraft.sh.keys. Aborting.${X}"
+    exit 1
+fi
 
 # Confirmation message
 echo -e "${GREEN}Installation completed successfully.${X}"
