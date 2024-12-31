@@ -29,11 +29,11 @@ tar -xzvf "${FILENAME}" -C "${DESTINATION_DIR}"
 # Modify the run script: change enter_zsh=1 to enter_zsh=0
 sed -i 's/enter_zsh=1/enter_zsh=0/' "${DESTINATION_DIR}/run"
 
-#wget https://github.com/garbagescow/batocera.pro/raw/main/docker/docker -O /userdata/system/services/docker
-#chmod +x /userdata/system/services/docker
+wget https://github.com/DTJW92/batocera-unofficial-addons/raw/main/blissos/docker -O /userdata/system/services/docker
+chmod +x /userdata/system/services/docker
 
 # Add the command to ~/custom.sh before starting Docker and Portainer
-echo "bash /userdata/system/cli/run &" >> ~/custom.sh
+# echo "bash /userdata/system/cli/run &" >> ~/custom.sh
 
 cd ~/cli
 chmod +x run
