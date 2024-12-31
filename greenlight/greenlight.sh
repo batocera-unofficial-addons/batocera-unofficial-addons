@@ -21,7 +21,7 @@ mkdir -p "$temp_dir"
 
 wget -q --show-progress -O "${temp_dir}/greenlight.AppImage" "$app_url"
 if [ $? -ne 0 ]; then
-    echo "Failed to download Amazon Luna client. Exiting."
+    echo "Failed to download Greenlight. Exiting."
     exit 1
 fi
 mv "${temp_dir}/greenlight.AppImage" "$app_dir/"
@@ -63,9 +63,9 @@ mkdir -p "${log_dir}"
 
 # Append all output to the log file
 exec &> >(tee -a "$log_file")
-echo "$(date): Launching Amazon Luna"
+echo "$(date): Launching Greenlight"
 
-# Launch Amazon Luna
+# Launch Greenlight
 if [ -x "${app_bin}" ]; then
     cd "/userdata/system/add-ons/greenlight"
     ./greenlight.AppImage --no-sandbox > "${log_file}" 2>&1
@@ -85,7 +85,7 @@ curl http://127.0.0.1:1234/reloadgames
 # Download the image
 echo "Downloading Greenlight logo..."
 curl -L -o /userdata/roms/ports/images/greenlight.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/greenlight/extra/greenlight.png
-echo "Adding logo to Amazon Luna entry in gamelist.xml..."
+echo "Adding logo to Greenlight entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./Greenlight.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "Greenlight" \
