@@ -15,7 +15,7 @@ fi
 # Check for Docker
 if ! command -v docker &> /dev/null; then
     dialog --title "Docker Installation" --infobox "Docker could not be found. Installing Docker..." 10 50
-    curl -L https://github.com/uureel/batocera.pro/raw/main/docker/install.sh | bash
+    curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/blissos/install.sh | bash
     if ! command -v docker &> /dev/null; then
         dialog --title "Docker Installation Error" --msgbox "Docker installation failed. Please install Docker manually." 10 50
         clear
