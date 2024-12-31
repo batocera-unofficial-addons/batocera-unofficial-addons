@@ -27,7 +27,9 @@ echo "PortMaster installer downloaded and marked as executable."
 
 # Step 4: Run the installer
 echo "Running the PortMaster installer..."
-/userdata/system/add-ons/portmaster/Install.Full.PortMaster.sh
+echo "A" | /userdata/system/add-ons/portmaster/Install.Full.PortMaster.sh > /dev/null 2>&1
+
+
 
 if [ $? -ne 0 ]; then
     echo "PortMaster installation failed."
