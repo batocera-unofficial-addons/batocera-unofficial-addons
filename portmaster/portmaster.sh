@@ -14,7 +14,7 @@ echo "Latest installer found: $installer_url"
 # Step 2: Download the PortMaster installer
 echo "Downloading PortMaster installer..."
 mkdir -p /userdata/system/add-ons/portmaster
-wget -q -O /userdata/system/add-ons/portmaster/Install.Full.PortMaster.sh "$installer_url"
+wget --show-progress -O /userdata/system/add-ons/portmaster/Install.Full.PortMaster.sh "$installer_url"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download the PortMaster installer."
