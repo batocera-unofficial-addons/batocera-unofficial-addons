@@ -9,6 +9,7 @@ APPPATH=/userdata/system/add-ons/$appname/$AppName
 APPLINK=https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/Minecraft
 LIBPATH=/userdata/system/add-ons/$appname/lib
 IMAGEPATH=/userdata/system/add-ons/$appname
+PORTSPATH=/userdata/roms/ports
 
 # Output colors
 W='\033[0;37m'
@@ -24,6 +25,7 @@ echo -e "${GREEN}Preparing $APPNAME Installer...${X}"
 # Prepare directories
 mkdir -p $LIBPATH 2>/dev/null
 mkdir -p $IMAGEPATH 2>/dev/null
+mkdir -p $PORTSPATH 2>/dev/null
 
 # Download lib files and Minecraft AppImage
 cd $LIBPATH
@@ -50,7 +52,12 @@ echo -e "${GREEN}Downloading Minecraft AppImage...${X}"
 wget --progress=bar --no-check-certificate -q -O "$IMAGEPATH/$AppName" "$APPLINK"
 chmod a+x "$IMAGEPATH/$AppName"
 
+# Download and place Minecraft.sh.keys
+cd $PORTSPATH
+echo -e "${GREEN}Downloading Minecraft.sh.keys...${X}"
+wget --progress=bar --no-check-certificate -q -O "$PORTSPATH/Minecraft.sh.keys" "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/Minecraft.sh.keys"
+
 # Confirmation message
 echo -e "${GREEN}Installation completed successfully.${X}"
-echo -e "${GREEN}Files have been installed to $IMAGEPATH and $LIBPATH.${X}"
+echo -e "${GREEN}Files have been installed to $IMAGEPATH, $LIBPATH, and $PORTSPATH.${X}"
 exit 0
