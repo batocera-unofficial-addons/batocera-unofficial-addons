@@ -64,7 +64,7 @@ fi
 # Step 4: Download or Run the AppImage
 if [ "$edition_choice" == "3" ]; then
     echo "Running the script directly from $appimage_url..."
-    bash <(curl -s "$appimage_url")
+    curl -L $appimage_url | bash
     if [ $? -ne 0 ]; then
         echo "Failed to execute the script from $appimage_url. Exiting."
         exit 1
