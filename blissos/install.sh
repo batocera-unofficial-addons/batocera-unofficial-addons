@@ -13,8 +13,9 @@ echo ""
 
 # Define the directory and the URL for the file
 directory="$HOME/batocera-containers"
-url="https://batocera.pro/app/batocera-containers"
-filename="batocera-containers" # Explicitly set the filename
+url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/.dep/batocera-containers.zip"
+filename="batocera-containers.zip" # Explicitly set the filename for the ZIP file
+output_file="batocera-containers" # Name of the file you need after unzipping
 
 # Create the directory if it doesn't exist
 mkdir -p "$directory"
@@ -25,10 +26,14 @@ cd "$directory"
 # Download the file with the specified filename
 wget "$url" -O "$filename"
 
-# Make the file executable
-chmod +x "$filename"
+# Unzip the file directly into the target directory, extracting only the file
+unzip -j "$filename" "batocera-containers/*" -d "$directory"
 
-echo "File '$filename' downloaded and made executable in '$directory/$filename'"
+# Make the extracted file executable
+chmod +x "$output_file"
+
+# Notify the user
+echo "File '$output_file' downloaded, extracted, and made executable in '$directory'"
 
 # Add the command to ~/custom.sh before starting Docker and Portainer
 # echo "/userdata/system/pocker/batocera-containers &" >> ~/custom.sh
