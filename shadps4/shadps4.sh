@@ -20,7 +20,7 @@ mkdir -p "$install_dir"
 
 # Step 3: Download the zip file
 echo "Downloading ShadPS4 zip from $latest_release_url..."
-wget --showprogress -O "$install_dir/shadps4.zip" "$latest_release_url"
+wget -q --showprogress -O "$install_dir/shadps4.zip" "$latest_release_url"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download the ShadPS4 zip file."
