@@ -41,7 +41,7 @@ curl http://127.0.0.1:1234/reloadgames
 echo "Downloading Port Master logo..."
 curl -L -o /userdata/roms/ports/images/portmasterlogo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/portmaster/extra/portmasterlogo.png
 
-echo "Adding logo to Arcade Manager entry in gamelist.xml..."
+echo "Adding logo to Port Master entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./PortMaster.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "Port Master" \
