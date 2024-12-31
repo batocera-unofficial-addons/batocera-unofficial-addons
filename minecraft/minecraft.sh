@@ -58,7 +58,7 @@ elif [ "$edition_choice" == "2" ]; then
     fi
 elif [ "$edition_choice" == "3" ]; then
     appimage_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/minecraft/minecraft_2.sh"
-    app_dir="/userdata/system/add-ons/minecraft/minecraft"
+    app_dir="/userdata/system/add-ons/minecraft/"
 fi
 
 # Step 4: Download or Run the AppImage
@@ -172,7 +172,7 @@ export HOME="$app_dir"
 
 # Directories and file paths
 app_dir="$app_dir"
-app_image="\${app_dir}/Minecraft_Launcher.AppImage"
+app_image="\${app_dir}/Minecraft"
 log_dir="/userdata/system/logs"
 log_file="\${log_dir}/minecraft-custom.log"
 
@@ -186,7 +186,7 @@ echo "\$(date): Launching Minecraft"
 # Launch Minecraft Launcher AppImage
 if [ -x "\${app_image}" ]; then
     cd "\${app_dir}"
-    ./Minecraft_Launcher.AppImage > "\${log_file}" 2>&1
+    ./Minecraft > "\${log_file}" 2>&1
     echo "Minecraft Launcher exited."
 else
     echo "AppImage not found or not executable."
