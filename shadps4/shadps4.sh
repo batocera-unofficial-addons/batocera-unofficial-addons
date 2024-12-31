@@ -77,7 +77,7 @@ cat << 'EOF' > "$launcher"
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
-export HOME="/userdata/system/add-ons/shadps4"
+export HOME="/userdata/system/"
 export XDG_CURRENT_DESKTOP=XFCE
 export DESKTOP_SESSION=XFCE
 
