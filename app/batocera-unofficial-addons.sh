@@ -105,7 +105,7 @@ descriptions=(
     ["CHIAKI"]="An open-source PlayStation Remote Play client for streaming PS4 and PS5 games."
     ["CHROME"]="Google Chrome browser for accessing the web."
     ["AMAZON-LUNA"]="Amazon Luna game streaming service client."
-    ["PORTMASTER"]="A game launcher and manager designed to streamline your gaming experience on Batocera"
+    ["PORTMASTER"]="Designed and streamlined for handlehelds, download and install games."
 )
 
 # Define categories
