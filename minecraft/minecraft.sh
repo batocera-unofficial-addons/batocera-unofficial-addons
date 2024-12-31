@@ -61,18 +61,27 @@ elif [ "$edition_choice" == "3" ]; then
     app_dir="/userdata/system/add-ons/minecraft/minecraft"
 fi
 
-# Step 4: Download the AppImage
-echo "Downloading AppImage from $appimage_url..."
-mkdir -p "$app_dir"
-wget -q --show-progress -O "$app_dir/Minecraft_Launcher.AppImage" "$appimage_url"
+# Step 4: Download or Run the AppImage
+if [ "$edition_choice" == "3" ]; then
+    echo "Running the script directly from $appimage_url..."
+    bash <(curl -s "$appimage_url")
+    if [ $? -ne 0 ]; then
+        echo "Failed to execute the script from $appimage_url. Exiting."
+        exit 1
+    fi
+else
+    echo "Downloading AppImage from $appimage_url..."
+    mkdir -p "$app_dir"
+    wget -q --show-progress -O "$app_dir/Minecraft_Launcher.AppImage" "$appimage_url"
 
-if [ $? -ne 0 ]; then
-    echo "Failed to download the AppImage. Exiting."
-    exit 1
+    if [ $? -ne 0 ]; then
+        echo "Failed to download the AppImage. Exiting."
+        exit 1
+    fi
+
+    chmod a+x "$app_dir/Minecraft_Launcher.AppImage"
+    echo "AppImage downloaded and marked as executable."
 fi
-
-chmod a+x "$app_dir/Minecraft_Launcher.AppImage"
-echo "AppImage downloaded and marked as executable."
 
 # Create persistent configuration and log directories
 mkdir -p "$app_dir/minecraft-config"
