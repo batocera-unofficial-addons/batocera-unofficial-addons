@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Display the warning message
-dialog --title "Warning" --yesno "This container is experimental and not supported by Batocera PRO. Contact sickcodes github repo or bliss os for support. Proceed?" 15 80
+dialog --title "Warning" --yesno "This container is experimental and not supported by us. Contact sickcodes github repo or bliss os for support. Proceed?" 15 80
 
 # Capture the exit status of the dialog command
 response=$?
@@ -27,7 +27,7 @@ is_port_in_use() {
 if ! command -v docker &> /dev/null; then
     dialog --title "Docker Installation" --infobox "Docker could not be found. Installing Docker..." 10 50
     sleep 2 # Gives user time to read the message
-    curl -L https://github.com/uureel/batocera.pro/raw/main/docker/install.sh | bash
+    curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/main/blissos/install.sh | bash
     # Check if Docker was successfully installed
     if ! command -v docker &> /dev/null; then
         dialog --title "Docker Installation Error" --msgbox "Docker installation failed. Please install Docker manually." 10 50
@@ -39,14 +39,14 @@ fi
 # Create directories if they don't exist and download necessary scripts
 clear
 echo "Installing Launcher.."
-mkdir -p ~/pro/bliss
-curl -Ls https://github.com/uureel/batocera.pro/raw/main/docker/bliss.sh -o ~/pro/bliss/bliss.sh
-chmod +x ~/pro/bliss/bliss.sh
+mkdir -p ~/add-ons/bliss
+curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/blissos/bliss.sh -o ~/add-ons/bliss/bliss.sh
+chmod +x ~/add-ons/bliss/bliss.sh
 sleep 5
 
 echo "Installing Shortcut to ports..."
 mkdir -p /userdata/roms/ports
-curl -Ls https://github.com/uureel/batocera.pro/raw/main/docker/Bliss-OS.sh -o /userdata/roms/ports/Bliss-OS.sh
+curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/blissos/Bliss-OS.sh -o /userdata/roms/ports/Bliss-OS.sh
 chmod +x /userdata/roms/ports/Bliss-OS.sh
 sleep 5
 clear
@@ -61,7 +61,7 @@ fi
 clear
 echo "Loading container... After Docker pulls the container, it should start in the main display after a while."
 sleep 5
-curl -Ls https://github.com/uureel/batocera.pro/raw/main/docker/bliss_cli.sh | bash
+curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/blissos/bliss_cli.sh | bash
 
 
 # Final dialog message with Portainer management info
