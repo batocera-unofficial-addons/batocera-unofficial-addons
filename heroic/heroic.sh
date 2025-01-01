@@ -59,7 +59,7 @@ Version=1.0
 Type=Application
 Name=Heroic Games Launcher
 Exec=$WRAPPER_SCRIPT
-Icon=/userdata/system/add-ons/heroic/resources/app.asar.unpacked/assets/icon.png
+Icon=/userdata/system/add-ons/heroic/resources/app.asar.unpacked/build/icon.png
 Terminal=false
 Categories=Game;batocera.linux;
 EOF
