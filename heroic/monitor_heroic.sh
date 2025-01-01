@@ -4,6 +4,9 @@
 HEROIC_EXEC="/userdata/system/add-ons/heroic/heroic"
 CREATE_LAUNCHERS_SCRIPT="/userdata/system/add-ons/heroic/create_game_launchers.sh"
 
+# Set HOME explicitly
+export HOME="/userdata/system/add-ons/heroic"
+
 # Function to check if Heroic is running
 is_heroic_running() {
     pgrep -f "$HEROIC_EXEC" > /dev/null
