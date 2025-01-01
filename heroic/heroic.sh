@@ -3,15 +3,17 @@
 # Set variables
 INSTALL_DIR="/userdata/system/add-ons/heroic"
 DESKTOP_FILE="/usr/share/applications/heroic.desktop"
+PERSISTENT_DESKTOP="/userdata/system/configs/heroic/heroic.desktop"
 COLLECTIONS_DIR="/userdata/system/configs/emulationstation/collections"
 HEROIC_CFG="${COLLECTIONS_DIR}/Heroic.cfg"
 SYSTEMS_CFG="/userdata/system/configs/emulationstation/es_systems_heroic.cfg"
 LAUNCHERS_SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/create_game_launchers.sh"
 MONITOR_SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/monitor_heroic.sh"
 WRAPPER_SCRIPT="${INSTALL_DIR}/launch_heroic.sh"
-ROM_DIR="userdata/roms/heroic"
+ROM_DIR="/userdata/roms/heroic"
 
 mkdir -p "$ROM_DIR"
+mkdir -p "/userdata/system/configs/heroic"
 
 # Fetch the latest version of Heroic from GitHub API
 echo "Fetching the latest version of Heroic Games Launcher..."
@@ -51,9 +53,9 @@ EOF
 
 chmod +x "$WRAPPER_SCRIPT"
 
-# Create desktop entry
-echo "Creating desktop entry for Heroic..."
-cat <<EOF > "$DESKTOP_FILE"
+# Create persistent desktop entry
+echo "Creating persistent desktop entry for Heroic..."
+cat <<EOF > "$PERSISTENT_DESKTOP"
 [Desktop Entry]
 Version=1.0
 Type=Application
@@ -64,7 +66,31 @@ Terminal=false
 Categories=Game;batocera.linux;
 EOF
 
-chmod +x "$DESKTOP_FILE"
+chmod +x "$PERSISTENT_DESKTOP"
+
+# Ensure the desktop entry is always restored to /usr/share/applications
+echo "Ensuring Heroic desktop entry is restored at startup..."
+cat <<EOF > "/userdata/system/configs/heroic/restore_desktop_entry.sh"
+#!/bin/bash
+# Restore Heroic desktop entry
+if [ ! -f "$DESKTOP_FILE" ]; then
+    echo "Restoring Heroic desktop entry..."
+    cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+    chmod +x "$DESKTOP_FILE"
+    echo "Heroic desktop entry restored."
+else
+    echo "Heroic desktop entry already exists."
+fi
+EOF
+chmod +x "/userdata/system/configs/heroic/restore_desktop_entry.sh"
+
+# Add to startup
+cat <<EOF > "/userdata/system/custom.sh"
+#!/bin/bash
+# Restore Heroic desktop entry at startup
+bash /userdata/system/configs/heroic/restore_desktop_entry.sh &
+EOF
+chmod +x "/userdata/system/custom.sh"
 
 # Create es_systems_heroic.cfg
 echo "Creating Heroic Category for EmulationStation..."
@@ -92,5 +118,5 @@ batocera-es-swissknife --restart &> /dev/null
 
 # Final message
 echo "Heroic Games Launcher setup complete! Installed version $HEROIC_VERSION."
-echo "A desktop entry has been created at $DESKTOP_FILE."
+echo "A desktop entry has been created and will persist across reboots."
 echo "You can install games from here and launch them via the Emulation Station menu."
