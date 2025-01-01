@@ -48,7 +48,7 @@ cat <<EOF > "$WRAPPER_SCRIPT"
 #!/bin/bash
 # Launch Heroic with monitoring
 /userdata/system/add-ons/heroic/monitor_heroic.sh &
-HOME=/userdata/system/add-ons/heroic /userdata/system/add-ons/heroic/heroic --no-sandbox
+/userdata/system/add-ons/heroic/heroic --no-sandbox
 EOF
 
 chmod +x "$WRAPPER_SCRIPT"
@@ -119,4 +119,3 @@ batocera-es-swissknife --restart &> /dev/null
 # Final message
 echo "Heroic Games Launcher setup complete! Installed version $HEROIC_VERSION."
 echo "A desktop entry has been created and will persist across reboots."
-echo "You can install games from here and launch them via the Emulation Station menu."
