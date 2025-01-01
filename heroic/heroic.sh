@@ -5,6 +5,7 @@ INSTALL_DIR="/userdata/system/add-ons/heroic"
 DESKTOP_FILE="/usr/share/applications/heroic.desktop"
 COLLECTIONS_DIR="/userdata/system/configs/emulationstation/collections"
 HEROIC_CFG="${COLLECTIONS_DIR}/Heroic.cfg"
+SYSTEMS_CFG="/userdata/system/configs/emulationstation/es_systems_heroic.cfg"
 LAUNCHERS_SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/create_game_launchers.sh"
 MONITOR_SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/monitor_heroic.sh"
 
@@ -48,19 +49,26 @@ EOF
 
 chmod +x "$DESKTOP_FILE"
 
-# Create Heroic.cfg
-echo "Creating Heroic.cfg for EmulationStation..."
-mkdir -p "$COLLECTIONS_DIR"
-cat <<EOF > "$HEROIC_CFG"
-# Heroic Games Collection
-PATH=/userdata/roms/heroic
-EXTENSION=.sh
-NAME=Heroic Games
+# Create es_systems_heroic.cfg
+echo "Creating Heroic Category for EmulationStation..."
+cat <<EOF > "$SYSTEMS_CFG"
+<?xml version="1.0"?>
+<systemList>
+  <system>
+        <fullname>Heroic Games</fullname>
+        <name>heroic</name>
+        <manufacturer>PC</manufacturer>
+        <release>2021</release>
+        <hardware>PC</hardware>
+        <path>/userdata/roms/heroic</path>
+        <extension>.sh</extension>
+        <command>%ROM%</command>
+        <platform>pc</platform>
+        <theme>heroic</theme>
+  </system>
+</systemList>
 EOF
-
-echo "Heroic.cfg created at $HEROIC_CFG."
 
 # Final message
 echo "Heroic Games Launcher setup complete! Installed version $HEROIC_VERSION."
-echo "A desktop entry has been created at $DESKTOP_FILE."
-echo "Heroic.cfg has been created for EmulationStation integration."
+echo "A desktop entry has been created at $DESKTOP_FILE. You can install games from here, and launch them via the Emulation Station menu"
