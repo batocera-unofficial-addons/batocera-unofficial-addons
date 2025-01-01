@@ -27,13 +27,16 @@ fi
 # Create a launcher for each game
 echo "Creating launchers..."
 echo "$GAMES" | while read -r line; do
-    GAME_NAME=$(echo "$line" | sed -E 's/.*: (.+) \(App name:.*/\1/' | tr -d ' ')
+    GAME_NAME=$(echo "$line" | sed -E 's/^[* ]*(.+) \(App name:.*/\1/' | tr -d ' ')
     APP_NAME=$(echo "$line" | sed -E 's/.*App name: ([^|]+).*/\1/')
 
     LAUNCHER_PATH="${LAUNCHERS_DIR}/${GAME_NAME}.sh"
 
     cat <<EOF > "$LAUNCHER_PATH"
 #!/bin/bash
+export WINEPREFIX="/userdata/system/add-ons/heroic/.wine"
+export WINEDLLOVERRIDES="winemenubuilder.exe=d"
+
 # Launch game with Legendary and Wine
 "$LEGENDARY_PATH" launch "$APP_NAME" --wine "$WINE_PATH"
 EOF
