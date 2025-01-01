@@ -87,6 +87,7 @@ apps=(
     ["AMAZON-LUNA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/amazonluna/amazonluna.sh | bash"
     ["PORTMASTER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/portmaster/portmaster.sh | bash"
     ["GREENLIGHT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/greenlight/greenlight.sh | bash"
+    ["HEROIC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/heroic.sh | bash"
 )
 
 descriptions=(
@@ -108,12 +109,13 @@ descriptions=(
     ["AMAZON-LUNA"]="Amazon Luna game streaming service client."
     ["PORTMASTER"]="Designed and streamlined for handlehelds, download and install games."
     ["GREENLIGHT"]="An open-source client for xCloud and Xbox home streaming"
+    ["HEROIC"]="Heroic Game Launcher for V39/40/41. Epic, GOG and Amazon Games."
 )
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC"
     ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME"
     ["Patches"]="NVIDIAPATCHER"
 )
