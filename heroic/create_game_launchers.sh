@@ -11,7 +11,7 @@ mkdir -p "$LAUNCHERS_DIR"
 # Ensure the Legendary config symlink exists
 echo "Ensuring Legendary config symlink is correctly set..."
 rm -rf /userdata/system/.config/legendary
-ln -sf /userdata/system/add-ons/heroic/.config/heroic/legendaryConfig/legendary /userdata/system/.config/legendary
+ln -sf /userdata/system/.config/heroic/legendaryConfig/legendary /userdata/system/.config/legendary
 echo "Legendary config symlink recreated."
 
 # Fetch the list of games from Legendary
