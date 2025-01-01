@@ -8,6 +8,10 @@ HEROIC_CFG="${COLLECTIONS_DIR}/Heroic.cfg"
 SYSTEMS_CFG="/userdata/system/configs/emulationstation/es_systems_heroic.cfg"
 LAUNCHERS_SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/create_game_launchers.sh"
 MONITOR_SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/monitor_heroic.sh"
+WRAPPER_SCRIPT="${INSTALL_DIR}/launch_heroic.sh"
+ROM_DIR="userdata/roms/heroic"
+
+mkdir -p "$ROM_DIR"
 
 # Fetch the latest version of Heroic from GitHub API
 echo "Fetching the latest version of Heroic Games Launcher..."
@@ -36,15 +40,28 @@ chmod +x "${INSTALL_DIR}/heroic"
 chmod +x "${INSTALL_DIR}/create_game_launchers.sh"
 chmod +x "${INSTALL_DIR}/monitor_heroic.sh"
 
+# Create wrapper script
+echo "Creating wrapper script for Heroic..."
+cat <<EOF > "$WRAPPER_SCRIPT"
+#!/bin/bash
+# Launch Heroic with monitoring
+/userdata/system/add-ons/heroic/monitor_heroic.sh &
+HOME=/userdata/system/add-ons/heroic /userdata/system/add-ons/heroic/heroic --no-sandbox
+EOF
+
+chmod +x "$WRAPPER_SCRIPT"
+
 # Create desktop entry
 echo "Creating desktop entry for Heroic..."
 cat <<EOF > "$DESKTOP_FILE"
 [Desktop Entry]
+Version=1.0
 Type=Application
 Name=Heroic Games Launcher
-Exec=bash -c "/userdata/system/add-ons/heroic/monitor_heroic.sh &; HOME=/userdata/system/add-ons/heroic /userdata/system/add-ons/heroic/heroic --no-sandbox"
+Exec=$WRAPPER_SCRIPT
 Icon=/userdata/system/add-ons/heroic/resources/app.asar.unpacked/assets/icon.png
-Categories=Game;
+Terminal=false
+Categories=Game;batocera.linux;
 EOF
 
 chmod +x "$DESKTOP_FILE"
@@ -69,9 +86,11 @@ cat <<EOF > "$SYSTEMS_CFG"
 </systemList>
 EOF
 
-# Final message
-echo "Heroic Games Launcher setup complete! Installed version $HEROIC_VERSION."
-echo "A desktop entry has been created at $DESKTOP_FILE. You can install games from here, and launch them via the Emulation Station menu"
-
+# Restart EmulationStation
+echo "Restarting EmulationStation to apply changes..."
 batocera-es-swissknife --restart &> /dev/null
 
+# Final message
+echo "Heroic Games Launcher setup complete! Installed version $HEROIC_VERSION."
+echo "A desktop entry has been created at $DESKTOP_FILE."
+echo "You can install games from here and launch them via the Emulation Station menu."
