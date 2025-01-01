@@ -34,8 +34,7 @@ echo "$GAMES" | while read -r line; do
 
     cat <<EOF > "$LAUNCHER_PATH"
 #!/bin/bash
-export WINEPREFIX="/userdata/system/add-ons/heroic/.wine"
-export WINEDLLOVERRIDES="winemenubuilder.exe=d"
+export DISPLAY=:0.0
 
 # Launch game with Legendary and Wine
 "$LEGENDARY_PATH" launch "$APP_NAME" --wine "$WINE_PATH"
