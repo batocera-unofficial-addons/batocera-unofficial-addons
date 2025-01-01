@@ -8,6 +8,18 @@ LAUNCHERS_DIR="/userdata/roms/heroic" # Updated path for Heroic game launchers
 # Ensure the launchers directory exists
 mkdir -p "$LAUNCHERS_DIR"
 
+HEROIC_CONFIG="/userdata/system/add-ons/heroic/legendaryConfig/legendary"
+LEGENDARY_CONFIG="$HOME/.config/legendary"
+# Ensure the Legendary config symlink exists
+echo "Ensuring Legendary config symlink is correctly set..."
+if [ ! -L "$LEGENDARY_CONFIG" ]; then
+    mkdir -p "$(dirname "$LEGENDARY_CONFIG")"
+    ln -sf "$HEROIC_CONFIG" "$LEGENDARY_CONFIG"
+    echo "Created symlink: $LEGENDARY_CONFIG -> $HEROIC_CONFIG"
+else
+    echo "Symlink already exists: $LEGENDARY_CONFIG"
+fi
+
 # Fetch the list of games from Legendary
 echo "Fetching game list from Legendary..."
 GAMES=$($LEGENDARY_PATH list | grep "App name:")
