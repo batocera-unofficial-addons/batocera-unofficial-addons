@@ -17,7 +17,7 @@ cat <<EOF > "$DESKTOP_FILE"
 [Desktop Entry]
 Type=Application
 Name=Heroic Games Launcher
-Exec=bash -c "/userdata/system/add-ons/heroic/create_game_launchers.sh &; /userdata/system/add-ons/heroic/heroic"
+Exec=bash -c "/userdata/system/add-ons/heroic/create_game_launchers.sh & HOME=/userdata/system/add-ons/heroic /userdata/system/add-ons/heroic/heroic --no-sandbox"
 Icon=/userdata/system/add-ons/heroic/resources/app.asar.unpacked/assets/icon.png
 Categories=Game;
 EOF
