@@ -112,10 +112,15 @@ cat <<EOF > "$SYSTEMS_CFG"
 </systemList>
 EOF
 
-# Restart EmulationStation
-echo "Restarting EmulationStation to apply changes..."
-batocera-es-swissknife --restart &> /dev/null
 
 # Final message
 echo "Heroic Games Launcher setup complete! Installed version $HEROIC_VERSION."
 echo "A desktop entry has been created and will persist across reboots."
+echo "The system needs to reboot in order for Heroic to initialise, rebooting in..."
+for i in {10..1}; do
+    echo "$i"
+    sleep 1
+done
+reboot
+
+
