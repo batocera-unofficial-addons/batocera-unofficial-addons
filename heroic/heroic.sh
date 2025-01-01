@@ -73,4 +73,5 @@ EOF
 echo "Heroic Games Launcher setup complete! Installed version $HEROIC_VERSION."
 echo "A desktop entry has been created at $DESKTOP_FILE. You can install games from here, and launch them via the Emulation Station menu"
 
-batocera-es-swissknife --restart
+batocera-es-swissknife --restart &> /dev/null
+
