@@ -3,6 +3,8 @@
 # Set variables
 INSTALL_DIR="/userdata/system/add-ons/heroic"
 DESKTOP_FILE="/usr/share/applications/heroic.desktop"
+COLLECTIONS_DIR="/userdata/system/configs/emulationstation/collections"
+HEROIC_CFG="${COLLECTIONS_DIR}/Heroic.cfg"
 LAUNCHERS_SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/create_game_launchers.sh"
 MONITOR_SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/monitor_heroic.sh"
 
@@ -44,7 +46,21 @@ Icon=/userdata/system/add-ons/heroic/resources/app.asar.unpacked/assets/icon.png
 Categories=Game;
 EOF
 
-# Make the desktop entry executable
 chmod +x "$DESKTOP_FILE"
 
-echo "Heroic Games Launcher setup complete! Installed version $HEROIC_VERSION. A desktop entry has been created at $DESKTOP_FILE."
+# Create Heroic.cfg
+echo "Creating Heroic.cfg for EmulationStation..."
+mkdir -p "$COLLECTIONS_DIR"
+cat <<EOF > "$HEROIC_CFG"
+# Heroic Games Collection
+PATH=/userdata/roms/heroic
+EXTENSION=.sh
+NAME=Heroic Games
+EOF
+
+echo "Heroic.cfg created at $HEROIC_CFG."
+
+# Final message
+echo "Heroic Games Launcher setup complete! Installed version $HEROIC_VERSION."
+echo "A desktop entry has been created at $DESKTOP_FILE."
+echo "Heroic.cfg has been created for EmulationStation integration."
