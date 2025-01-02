@@ -70,6 +70,7 @@ if [ -f "$launcher" ]; then
     rm -f "$launcher"
 fi
 
+mkdir -p "userdata/roms/ps4"
 mkdir -p "$ports_dir"
 cat << 'EOF' > "$launcher"
 #!/bin/bash
