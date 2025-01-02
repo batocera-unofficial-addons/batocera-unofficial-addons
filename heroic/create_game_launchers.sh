@@ -62,7 +62,11 @@ export DISPLAY=:0.0
 
 # Launch the game using the extracted command
 $LAUNCH_COMMAND
+
+# Add a delay to wait for the game to fully initialize
+sleep 10
 EOF
+
 
     chmod +x "$LAUNCHER_PATH"
     echo "Launcher created: $LAUNCHER_PATH"
