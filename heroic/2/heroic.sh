@@ -31,7 +31,7 @@ fi
 chmod a+x "$APPPATH"
 
 # Download and prepare Proton (in 3 parts)
-PROTON_BASE="https://github.com/DTJW92/batocera-unofficial-addons/tree/main/heroic/2"
+PROTON_BASE="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/heroic/2"
 echo "Downloading Proton parts..."
 for part in partaa partab partac; do
   if ! curl -L --progress-bar "$PROTON_BASE/Proton-GE-Proton7-42.tar.xz.$part" -o "$PROTON_PATH/Proton-GE-Proton7-42.tar.xz.$part"; then
@@ -48,7 +48,7 @@ rm -rf "$PROTON_PATH/Proton-GE-Proton7-42.tar.xz" "$PROTON_PATH/Proton-GE-Proton
 
 # Download create_game_launchers.sh
 CREATE_LAUNCHERS_SCRIPT="$EXTRA_PATH/create_game_launchers.sh"
-LAUNCHERS_SCRIPT_LINK="https://github.com/DTJW92/batocera-unofficial-addons/tree/main/heroic/2/create_game_launchers.sh"
+LAUNCHERS_SCRIPT_LINK="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/heroic/2/create_game_launchers.sh"
 echo "Downloading create_game_launchers.sh..."
 if ! curl -L --progress-bar "$LAUNCHERS_SCRIPT_LINK" -o "$CREATE_LAUNCHERS_SCRIPT"; then
   echo "Error: Failed to download create_game_launchers.sh." >&2
@@ -158,7 +158,7 @@ chmod a+x "$PORT_FILE"
 # Add example ROM
 ROM_PATH="/userdata/roms/heroic"
 mkdir -p "$ROM_PATH" 2>/dev/null
-EXAMPLE_ROM_URL="https://github.com/DTJW92/batocera-unofficial-addons/tree/main/heroic/2/FallGuys.txt"
+EXAMPLE_ROM_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/heroic/2/FallGuys.txt"
 EXAMPLE_ROM_FILE="$ROM_PATH/FallGuys.txt"
 if ! curl -L --progress-bar "$EXAMPLE_ROM_URL" -o "$EXAMPLE_ROM_FILE"; then
   echo "Error: Failed to download example ROM." >&2
