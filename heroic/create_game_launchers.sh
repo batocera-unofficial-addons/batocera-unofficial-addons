@@ -29,6 +29,9 @@ echo "$LOG_FILES" | while read -r LOG_FILE; do
         continue
     fi
 
+    # Replace spaces in the game name with underscores
+    GAME_NAME=$(echo "$GAME_NAME" | tr ' ' '_')
+
     # Extract the launch command from the log file
     LAUNCH_COMMAND=$(grep "Launch Command:" "$LOG_FILE" | sed 's/Launch Command: //')
 
@@ -40,7 +43,7 @@ echo "$LOG_FILES" | while read -r LOG_FILE; do
     # Replace any existing --wine argument with the custom wine path
     LAUNCH_COMMAND=$(echo "$LAUNCH_COMMAND" | sed -E "s|--wine[ ]+[^ ]+|--wine \"$WINE_PATH\"|")
 
-    # Use the actual directory name for the launcher
+    # Use the sanitized game name for the launcher
     LAUNCHER_NAME="$GAME_NAME"
     LAUNCHER_PATH="${LAUNCHERS_DIR}/${LAUNCHER_NAME}.sh"
 
