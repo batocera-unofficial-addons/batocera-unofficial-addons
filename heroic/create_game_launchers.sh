@@ -22,8 +22,8 @@ fi
 echo "Creating launchers..."
 echo "$LOG_FILES" | while read -r LOG_FILE; do
     # Extract the game name from the first line of the log file
-    GAME_NAME=$(head -n 1 "$LOG_FILE" | sed -E 's/^"(.+)"$/\1/' | tr -d ' ')
-    
+    GAME_NAME=$(head -n 1 "$LOG_FILE" | awk -F'"' '{print $2}')
+
     if [ -z "$GAME_NAME" ]; then
         echo "Game name not found in $LOG_FILE, skipping..."
         continue
