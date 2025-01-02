@@ -75,22 +75,6 @@ mkdir -p "$ports_dir"
 cat << 'EOF' > "$launcher"
 #!/bin/bash
 
-# Environment setup
-export $(cat /proc/1/environ | tr '\0' '\n')
-export DISPLAY=:0.0
-export HOME="/userdata/system/"
-export XDG_CURRENT_DESKTOP=XFCE
-export DESKTOP_SESSION=XFCE
-
-# Configure system settings
-sysctl -w vm.max_map_count=2097152
-ulimit -H -n 819200
-ulimit -S -n 819200
-ulimit -H -l 61634
-ulimit -S -l 61634
-ulimit -H -s 61634
-ulimit -S -s 61634
-
 # Directories and file paths
 app_dir="/userdata/system/add-ons/shadps4"
 app_image="${app_dir}/Shadps4-qt.AppImage"
@@ -98,8 +82,7 @@ app_image="${app_dir}/Shadps4-qt.AppImage"
 # Launch ShadPS4 AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
-    ./Shadps4-qt.AppImage
-    echo "ShadPS4 exited."
+    exec ./Shadps4-qt.AppImage
 else
     echo "Shadps4-qt.AppImage not found or not executable."
     exit 1
