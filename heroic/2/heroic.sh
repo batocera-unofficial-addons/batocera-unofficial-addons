@@ -11,6 +11,7 @@ ES_CONFIG="/userdata/system/configs/emulationstation/es_systems_heroic.cfg"
 PORTS_PATH="/userdata/roms/ports"
 PROTON_PATH="/userdata/system/add-ons/$APPNAME/proton"
 
+
 # Prepare directories
 mkdir -p "/userdata/system/add-ons/$APPNAME" "$EXTRA_PATH" "$PROTON_PATH" "$PORTS_PATH" 2>/dev/null
 
@@ -55,6 +56,15 @@ if ! curl -L --progress-bar "$LAUNCHERS_SCRIPT_LINK" -o "$CREATE_LAUNCHERS_SCRIP
   exit 1
 fi
 chmod a+x "$CREATE_LAUNCHERS_SCRIPT"
+
+# Download icon.png
+ICON="$EXTRA_PATH/icon.png"
+ICON_LINK="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/heroic/2/icon.png"
+echo "Downloading Icon..."
+if ! curl -L --progress-bar "$ICON_LINK" -o "$ICON"; then
+  echo "Error: Failed to download icon." >&2
+  exit 1
+fi
 
 # Create launcher script
 LAUNCHER="/userdata/system/add-ons/$APPNAME/Launcher"
@@ -103,19 +113,31 @@ chmod a+x "$DESKTOP_FILE"
 # Copy desktop shortcut to system applications
 cp "$DESKTOP_FILE" /usr/share/applications/ 2>/dev/null
 
-# Create prelauncher script
-cat <<EOL > "$PRELAUNCHER_PATH"
-#!/bin/bash
-cp "$DESKTOP_FILE" /usr/share/applications/ 2>/dev/null
-EOL
-chmod a+x "$PRELAUNCHER_PATH"
+PERSISTENT_DESKTOP="/usr/share/applications
 
-# Ensure prelauncher is added to system custom script for execution at boot
-CUSTOM_SCRIPT="/userdata/system/custom.sh"
-if ! grep -q "$PRELAUNCHER_PATH" "$CUSTOM_SCRIPT" 2>/dev/null; then
-  echo "$PRELAUNCHER_PATH" >> "$CUSTOM_SCRIPT"
+# Ensure the desktop entry is always restored to /usr/share/applications
+echo "Ensuring Heroic desktop entry is restored at startup..."
+cat <<EOF > "/userdata/system/add-ons/heroic/restore_desktop_entry.sh"
+#!/bin/bash
+# Restore Heroic desktop entry
+if [ ! -f "$DESKTOP_FILE" ]; then
+    echo "Restoring Heroic desktop entry..."
+    cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+    chmod +x "$DESKTOP_FILE"
+    echo "Heroic desktop entry restored."
+else
+    echo "Heroic desktop entry already exists."
 fi
-chmod a+x "$CUSTOM_SCRIPT"
+EOF
+chmod +x "/userdata/system/configs/heroic/restore_desktop_entry.sh"
+
+# Add to startup
+cat <<EOF > "/userdata/system/custom.sh"
+#!/bin/bash
+# Restore Heroic desktop entry at startup
+bash /userdata/system/add-ons/heroic/restore_desktop_entry.sh &
+EOF
+chmod +x "/userdata/system/custom.sh"
 
 # Add es_systems configuration
 cat <<EOL > "$ES_CONFIG"
