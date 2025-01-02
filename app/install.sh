@@ -16,6 +16,8 @@ ROM_PORTS_DIR="/userdata/roms/ports"
 BATOCERA_ADDONS_PATH="$ROM_PORTS_DIR/BatoceraUnofficialAddOns.sh"
 KEYS_FILE="$ROM_PORTS_DIR/keys.txt"
 
+mkdir -p "$DOWNLOAD_DIR"
+
 # Step 1: Download the symlink manager script
 echo "Downloading the symlink manager script from $SCRIPT_URL..."
 curl -L -o "$SCRIPT_PATH" "$SCRIPT_URL"
