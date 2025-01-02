@@ -1,45 +1,31 @@
 #!/bin/bash
 
 # Paths
-LEGENDARY_PATH="/userdata/system/add-ons/heroic/resources/app.asar.unpacked/build/bin/x64/linux/legendary"
 WINE_PATH="/usr/wine/ge-custom/bin/wine"
 LAUNCHERS_DIR="/userdata/roms/heroic" # Path for Heroic game launchers
-GAMES_DIR="/userdata/system/Games/Heroic" # Base directory for installed games
 LOG_DIR="/userdata/system/.config/heroic/GamesConfig" # Directory containing game logs
 
 # Ensure the launchers directory exists
 mkdir -p "$LAUNCHERS_DIR"
 
-# Ensure the Legendary config symlink exists
-echo "Ensuring Legendary config symlink is correctly set..."
-rm -rf /userdata/system/.config/legendary
-ln -sf /userdata/system/.config/heroic/legendaryConfig/legendary /userdata/system/.config/legendary
-echo "Legendary config symlink recreated."
+# Fetch all lastPlay.log files
+echo "Searching for lastPlay.log files in $LOG_DIR..."
+LOG_FILES=$(find "$LOG_DIR" -type f -iname "*-lastPlay.log")
 
-# Fetch the list of games from Legendary
-echo "Fetching game list from Legendary..."
-GAMES=$($LEGENDARY_PATH list-installed | grep "App name:")
-
-# Check if any games are installed
-if [ -z "$GAMES" ]; then
-    echo "No games found in Legendary!"
+# Check if any log files are found
+if [ -z "$LOG_FILES" ]; then
+    echo "No lastPlay.log files found!"
     exit 1
 fi
 
 # Create a launcher for each game
 echo "Creating launchers..."
-echo "$GAMES" | while read -r line; do
-    GAME_NAME=$(echo "$line" | sed -E 's/^[* ]*(.+) \(App name:.*/\1/' | tr -d ' ')
-    APP_NAME=$(echo "$line" | sed -E 's/.*App name: ([^|]+).*/\1/' | tr -d ' ')
-
-    # Debug log for GAME_NAME and APP_NAME
-    echo "Processing game: GAME_NAME='$GAME_NAME', APP_NAME='$APP_NAME'"
-
-    # Locate the log file
-    LOG_FILE=$(find "$LOG_DIR" -type f -iname "${APP_NAME}-lastPlay.log" | head -n 1)
-
-    if [ -z "$LOG_FILE" ]; then
-        echo "Log file not found for $GAME_NAME, skipping..."
+echo "$LOG_FILES" | while read -r LOG_FILE; do
+    # Extract the game name from the first line of the log file
+    GAME_NAME=$(head -n 1 "$LOG_FILE" | sed -E 's/^"(.+)"$/\1/' | tr -d ' ')
+    
+    if [ -z "$GAME_NAME" ]; then
+        echo "Game name not found in $LOG_FILE, skipping..."
         continue
     fi
 
@@ -47,7 +33,7 @@ echo "$GAMES" | while read -r line; do
     LAUNCH_COMMAND=$(grep "Launch Command:" "$LOG_FILE" | sed 's/Launch Command: //' | sed 's/--wine[^ ]* /--wine \"\/usr\/wine\/ge-custom\/bin\/wine\" /')
 
     if [ -z "$LAUNCH_COMMAND" ]; then
-        echo "Launch command not found in log file for $GAME_NAME, skipping..."
+        echo "Launch command not found in $LOG_FILE for $GAME_NAME, skipping..."
         continue
     fi
 
@@ -66,14 +52,13 @@ $LAUNCH_COMMAND
 
 # Wait for the game process (or anti-cheat) to stabilize
 GAME_PID=\$!
-while pgrep -f "$APP_NAME" > /dev/null; do
+while pgrep -f "$GAME_NAME" > /dev/null; do
     sleep 1
 done
 
 # Additional delay to ensure full initialization
 sleep 5
 EOF
-
 
     chmod +x "$LAUNCHER_PATH"
     echo "Launcher created: $LAUNCHER_PATH"
