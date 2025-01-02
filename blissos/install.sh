@@ -74,7 +74,7 @@ chmod a+x ~/custom.sh 2>/dev/null
 
 cd ~/batocera-containers
 
-clear
+
 echo "Starting Docker..."
 echo ""
 ~/batocera-containers/batocera-containers
