@@ -61,10 +61,10 @@ echo "$GAMES" | while read -r line; do
 export DISPLAY=:0.0
 
 # Launch the game using the extracted command
-$LAUNCH_COMMAND
+$LAUNCH_COMMAND &
 
 # Add a delay to wait for the game to fully initialize
-sleep 10
+wait
 EOF
 
 
