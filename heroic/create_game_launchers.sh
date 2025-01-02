@@ -61,8 +61,16 @@ echo "$GAMES" | while read -r line; do
 export DISPLAY=:0.0
 
 # Launch the game using the extracted command
-$LAUNCH_COMMAND 
+$LAUNCH_COMMAND &
 
+# Wait for the game process (or anti-cheat) to stabilize
+GAME_PID=\$!
+while pgrep -f "$APP_NAME" > /dev/null; do
+    sleep 1
+done
+
+# Additional delay to ensure full initialization
+sleep 5
 EOF
 
 
