@@ -113,7 +113,7 @@ chmod a+x "$DESKTOP_FILE"
 # Copy desktop shortcut to system applications
 cp "$DESKTOP_FILE" /usr/share/applications/ 2>/dev/null
 
-PERSISTENT_DESKTOP="/usr/share/applications
+PERSISTENT_DESKTOP="/usr/share/applications"
 
 # Ensure the desktop entry is always restored to /usr/share/applications
 echo "Ensuring Heroic desktop entry is restored at startup..."
