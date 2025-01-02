@@ -3,7 +3,9 @@
 # Paths
 LEGENDARY_PATH="/userdata/system/add-ons/heroic/resources/app.asar.unpacked/build/bin/x64/linux/legendary"
 WINE_PATH="/usr/wine/ge-custom/bin/wine"
-LAUNCHERS_DIR="/userdata/roms/heroic" # Updated path for Heroic game launchers
+LAUNCHERS_DIR="/userdata/roms/heroic" # Path for Heroic game launchers
+GAMES_DIR="/userdata/system/Games/Heroic" # Base directory for installed games
+LOG_DIR="/userdata/system/.config/heroic/GamesConfig" # Directory containing game logs
 
 # Ensure the launchers directory exists
 mkdir -p "$LAUNCHERS_DIR"
@@ -28,16 +30,38 @@ fi
 echo "Creating launchers..."
 echo "$GAMES" | while read -r line; do
     GAME_NAME=$(echo "$line" | sed -E 's/^[* ]*(.+) \(App name:.*/\1/' | tr -d ' ')
-    APP_NAME=$(echo "$line" | sed -E 's/.*App name: ([^|]+).*/\1/')
+    APP_NAME=$(echo "$line" | sed -E 's/.*App name: ([^|]+).*/\1/' | tr -d ' ')
 
-    LAUNCHER_PATH="${LAUNCHERS_DIR}/${GAME_NAME}.sh"
+    # Debug log for GAME_NAME and APP_NAME
+    echo "Processing game: GAME_NAME='$GAME_NAME', APP_NAME='$APP_NAME'"
 
+    # Locate the log file
+    LOG_FILE=$(find "$LOG_DIR" -type f -iname "${APP_NAME}-lastPlay.log" | head -n 1)
+
+    if [ -z "$LOG_FILE" ]; then
+        echo "Log file not found for $GAME_NAME, skipping..."
+        continue
+    fi
+
+    # Extract the launch command from the log file
+    LAUNCH_COMMAND=$(grep "Launch Command:" "$LOG_FILE" | sed 's/Launch Command: //' | sed 's/--wine[^ ]* /--wine \"\/usr\/wine\/ge-custom\/bin\/wine\" /')
+
+    if [ -z "$LAUNCH_COMMAND" ]; then
+        echo "Launch command not found in log file for $GAME_NAME, skipping..."
+        continue
+    fi
+
+    # Use the actual directory name for the launcher
+    LAUNCHER_NAME="$GAME_NAME"
+    LAUNCHER_PATH="${LAUNCHERS_DIR}/${LAUNCHER_NAME}.sh"
+
+    # Create the launcher script
     cat <<EOF > "$LAUNCHER_PATH"
 #!/bin/bash
 export DISPLAY=:0.0
 
-# Launch game with Legendary and Wine
-"$LEGENDARY_PATH" launch "$APP_NAME" --wine "$WINE_PATH"
+# Launch the game using the extracted command
+$LAUNCH_COMMAND
 EOF
 
     chmod +x "$LAUNCHER_PATH"
