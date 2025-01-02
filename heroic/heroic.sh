@@ -46,6 +46,7 @@ chmod +x "${INSTALL_DIR}/monitor_heroic.sh"
 echo "Creating wrapper script for Heroic..."
 cat <<EOF > "$WRAPPER_SCRIPT"
 #!/bin/bash
+unclutter-remote -s
 # Launch Heroic with monitoring
 /userdata/system/add-ons/heroic/monitor_heroic.sh &
 /userdata/system/add-ons/heroic/heroic --no-sandbox
