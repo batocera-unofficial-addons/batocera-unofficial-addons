@@ -30,12 +30,15 @@ echo "$LOG_FILES" | while read -r LOG_FILE; do
     fi
 
     # Extract the launch command from the log file
-    LAUNCH_COMMAND=$(grep "Launch Command:" "$LOG_FILE" | sed 's/Launch Command: //' | sed 's/--wine[^ ]* /--wine \"\/usr\/wine\/ge-custom\/bin\/wine\" /')
+    LAUNCH_COMMAND=$(grep "Launch Command:" "$LOG_FILE" | sed 's/Launch Command: //')
 
     if [ -z "$LAUNCH_COMMAND" ]; then
         echo "Launch command not found in $LOG_FILE for $GAME_NAME, skipping..."
         continue
     fi
+
+    # Replace any existing --wine argument with the custom wine path
+    LAUNCH_COMMAND=$(echo "$LAUNCH_COMMAND" | sed -E "s|--wine[ ]+[^ ]+|--wine \"$WINE_PATH\"|")
 
     # Use the actual directory name for the launcher
     LAUNCHER_NAME="$GAME_NAME"
