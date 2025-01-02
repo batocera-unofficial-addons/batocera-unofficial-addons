@@ -200,4 +200,3 @@ echo -e "Proton version: $PROTON_VERSION"
 # Final output
 echo -e "\nHeroic Launcher has been installed successfully.\n"
 echo "Launcher is available in Ports or Applications menu."
-echo "Prelauncher, Proton, SystemLauncher, create_game_launchers.sh, and example ROM have been set up."
