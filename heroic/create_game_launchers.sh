@@ -59,9 +59,10 @@ echo "$GAMES" | while read -r line; do
     cat <<EOF > "$LAUNCHER_PATH"
 #!/bin/bash
 export DISPLAY=:0.0
+unclutter-remote -s
 
 # Launch the game using the extracted command
-$LAUNCH_COMMAND &
+$LAUNCH_COMMAND
 
 # Wait for the game process (or anti-cheat) to stabilize
 GAME_PID=\$!
