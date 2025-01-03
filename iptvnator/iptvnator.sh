@@ -60,7 +60,7 @@ echo "$(date): Launching IPTVNator"
 # Launch IPTVNator AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
-    ./IPTVNator.AppImage "$@" > "${log_file}" 2>&1
+    ./IPTVNator.AppImage --no-sandbox > "${log_file}" 2>&1
     echo "IPTVNator exited."
 else
     echo "IPTVNator.AppImage not found or not executable."
