@@ -72,7 +72,8 @@ cat <<EOL > "$LAUNCHER"
 #!/bin/bash
 mkdir -p /userdata/system/add-ons/$APPNAME/home 2>/dev/null
 mkdir -p /userdata/system/add-ons/$APPNAME/config 2>/dev/null
-
+/userdata/system/add-ons/heroic/extra/heroic-sync.sh &
+unclutter-remote -s
 HOME=/userdata/system/add-ons/$APPNAME/home \
 XDG_CONFIG_HOME=/userdata/system/add-ons/$APPNAME/config \
 DISPLAY=:0.0 $APPPATH --no-sandbox "\$@"
@@ -173,9 +174,10 @@ unclutter-remote -s
 HOME=/userdata/system/add-ons/$APPNAME/home \
 XDG_DATA_HOME=/userdata/system/add-ons/$APPNAME/home \
 XDG_CONFIG_HOME=/userdata/system/add-ons/$APPNAME/config \
-DISPLAY=:0.0 /userdata/system/add-ons/$APPNAME/$APPNAME.AppImage --no-sandbox --disable-gpu
+DISPLAY=:0.0 /userdata/system/add-ons/$APPNAME/Launcher
 EOL
 chmod a+x "$PORT_FILE"
+
 
 # Add example ROM
 ROM_PATH="/userdata/roms/heroic"
