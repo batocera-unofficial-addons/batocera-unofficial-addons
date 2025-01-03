@@ -69,6 +69,12 @@ if [[ -e "$list" ]]; then
       # Sanitize game name (replace spaces with underscores)
       sanitized_name=$(echo "$game_name" | tr ' ' '_')
 
+      # Rename icon to sanitized game name
+      if [[ -n "$icon" ]]; then
+        ext="${icon##*.}"
+        mv "$images/$icon" "$images/$sanitized_name.$ext" 2>/dev/null
+      fi
+
       # Check existing ROMs and remove outdated files
       find "$roms" -maxdepth 1 -type f -not -name '*.txt' -exec basename {} \; > "$all"
       dos2unix "$all" 2>/dev/null
