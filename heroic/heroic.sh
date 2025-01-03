@@ -48,7 +48,7 @@ chmod +x "${INSTALL_DIR}/monitor_heroic.sh"
 LAUNCHER="/userdata/system/add-ons/heroic/Launcher"
 cat <<EOL > "$LAUNCHER"
 #!/bin/bash
-/userdata/system/add-ons/heroic/extra/heroic-sync.sh &
+/userdata/system/add-ons/heroic/extra/monitor_heroic.sh &
 unclutter-remote -s
 DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic.AppImage --no-sandbox "\$@"
 EOL
