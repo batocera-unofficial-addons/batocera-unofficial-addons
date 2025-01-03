@@ -42,17 +42,29 @@ chmod +x "${INSTALL_DIR}/heroic"
 chmod +x "${INSTALL_DIR}/create_game_launchers.sh"
 chmod +x "${INSTALL_DIR}/monitor_heroic.sh"
 
-# Create wrapper script
-echo "Creating wrapper script for Heroic..."
-cat <<EOF > "$WRAPPER_SCRIPT"
+LAUNCHER="/userdata/system/add-ons/$APPNAME/Launcher"
+cat <<EOL > "$LAUNCHER"
 #!/bin/bash
+/userdata/system/add-ons/heroic/extra/heroic-sync.sh &
 unclutter-remote -s
-# Launch Heroic with monitoring
-/userdata/system/add-ons/heroic/monitor_heroic.sh &
-/userdata/system/add-ons/heroic/heroic --no-sandbox
-EOF
+DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic --no-sandbox "\$@"
+EOL
+chmod a+x "$LAUNCHER"
 
-chmod +x "$WRAPPER_SCRIPT"
+# Create launch script
+echo "Creating launching script for Heroic..."
+SYSTEM_LAUNCHER="/userdata/system/add-ons/$APPNAME/SystemLauncher"
+cat <<EOL > "$SYSTEM_LAUNCHER"
+#!/bin/bash
+# Process input file
+ID=\$(cat "\$1" | head -n 1)
+# Execute application
+unclutter-remote -s
+mkdir -p /userdata/system/add-ons/$APPNAME/home 2>/dev/null
+mkdir -p /userdata/system/add-ons/$APPNAME/config 2>/dev/null
+DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic --no-sandbox --no-gui --disable-gpu "heroic://launch/\$ID"
+EOL
+chmod a+x "$SYSTEM_LAUNCHER"
 
 # Create persistent desktop entry
 echo "Creating persistent desktop entry for Heroic..."
@@ -61,7 +73,7 @@ cat <<EOF > "$PERSISTENT_DESKTOP"
 Version=1.0
 Type=Application
 Name=Heroic Games Launcher
-Exec=$WRAPPER_SCRIPT
+Exec=$LAUNCHER
 Icon=/userdata/system/add-ons/heroic/resources/app.asar.unpacked/build/icon.png
 Terminal=false
 Categories=Game;batocera.linux;
@@ -99,17 +111,25 @@ cat <<EOF > "$SYSTEMS_CFG"
 <?xml version="1.0"?>
 <systemList>
   <system>
-        <fullname>Heroic Games</fullname>
+        <fullname>heroic</fullname>
         <name>heroic</name>
-        <manufacturer>PC</manufacturer>
-        <release>2021</release>
-        <hardware>PC</hardware>
+        <manufacturer>Linux</manufacturer>
+        <release>2017</release>
+        <hardware>console</hardware>
         <path>/userdata/roms/heroic</path>
-        <extension>.sh</extension>
-        <command>%ROM%</command>
+        <extension>.TXT</extension>
+        <command>/userdata/system/add-ons/heroic/SystemLauncher %ROM%</command>
         <platform>pc</platform>
         <theme>heroic</theme>
+        <emulators>
+            <emulator name="heroic">
+                <cores>
+                    <core default="true">heroic</core>
+                </cores>
+            </emulator>
+        </emulators>
   </system>
+
 </systemList>
 EOF
 
