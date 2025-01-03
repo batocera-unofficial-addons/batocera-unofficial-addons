@@ -15,6 +15,7 @@ ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/heroic/2
 
 mkdir -p "$ROM_DIR"
 mkdir -p "/userdata/system/configs/heroic"
+mkdir -p "/userdata/system/add-ons/heroic/extra"
 
 # Fetch the latest version of Heroic from GitHub API
 echo "Fetching the latest version of Heroic Games Launcher..."
