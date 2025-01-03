@@ -46,7 +46,7 @@ chmod +x "${INSTALL_DIR}/heroic"
 chmod +x "${INSTALL_DIR}/create_game_launchers.sh"
 chmod +x "${INSTALL_DIR}/monitor_heroic.sh"
 
-LAUNCHER="/userdata/system/add-ons/$APPNAME/Launcher"
+LAUNCHER="/userdata/system/add-ons/heroic/Launcher"
 cat <<EOL > "$LAUNCHER"
 #!/bin/bash
 /userdata/system/add-ons/heroic/extra/heroic-sync.sh &
@@ -57,7 +57,7 @@ chmod a+x "$LAUNCHER"
 
 # Create launch script
 echo "Creating launching script for Heroic..."
-SYSTEM_LAUNCHER="/userdata/system/add-ons/$APPNAME/SystemLauncher"
+SYSTEM_LAUNCHER="/userdata/system/add-ons/heroic/SystemLauncher"
 cat <<EOL > "$SYSTEM_LAUNCHER"
 #!/bin/bash
 # Process input file
