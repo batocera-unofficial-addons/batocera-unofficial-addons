@@ -12,17 +12,6 @@ LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/undertak
 KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/undertaker/extra/UnderTaker141.sh.keys"
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
-# Step 1: Show dialog to confirm
-dialog --title "Install $APPNAME" \
-  --yesno "Do you want to install UnderTaker141?" 10 50
-
-# Check the user's choice
-if [[ $? -ne 0 ]]; then
-  echo "Installation canceled by user."
-  exit 1
-fi
-
-clear
 # Step 2: Check if UnderTaker141 is installed
 if [[ ! -f $APPPATH ]]; then
   echo "$APPNAME is not installed. Downloading and installing..."
