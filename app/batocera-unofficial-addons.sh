@@ -88,6 +88,9 @@ apps=(
     ["PORTMASTER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/portmaster/portmaster.sh | bash"
     ["GREENLIGHT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/greenlight/greenlight.sh | bash"
     ["HEROIC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/heroic.sh | bash"
+    ["YOUTUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/youtubetv.sh | bash"
+    ["NETFLIX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/netflix/netflix.sh | bash"
+    ["IPTVNATOR"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/iptvnator/iptvnator.sh | bash"
 )
 
 descriptions=(
@@ -110,13 +113,16 @@ descriptions=(
     ["PORTMASTER"]="Designed and streamlined for handlehelds, download and install games."
     ["GREENLIGHT"]="An open-source client for xCloud and Xbox home streaming"
     ["HEROIC"]="Heroic Game Launcher for V39/40/41. Epic, GOG and Amazon Games."
+    ["YOUTUBE"]="A YouTube client for Batocera."
+    ["NETFLIX"]="Netflix streaming app for Batocera."
+    ["IPTVNATOR"]="A client for watching IPTV on Batocera."
 )
 
 # Define categories
 declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR"
     ["Patches"]="NVIDIAPATCHER"
 )
 
