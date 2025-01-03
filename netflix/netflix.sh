@@ -22,6 +22,7 @@ if [[ $? -ne 0 ]]; then
   exit 1
 fi
 
+clear
 # Step 2: Check if Chrome is installed
 if [[ ! -f $APPPATH ]]; then
   echo "Google Chrome is not installed. Downloading and installing..."
