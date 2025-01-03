@@ -91,6 +91,7 @@ apps=(
     ["YOUTUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/youtubetv.sh | bash"
     ["NETFLIX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/netflix/netflix.sh | bash"
     ["IPTVNATOR"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/iptvnator/iptvnator.sh | bash"
+    ["FIREFOX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/firefox/firefox.sh | bash"
 )
 
 descriptions=(
@@ -116,13 +117,14 @@ descriptions=(
     ["YOUTUBE"]="A YouTube client for Batocera."
     ["NETFLIX"]="Netflix streaming app for Batocera."
     ["IPTVNATOR"]="A client for watching IPTV on Batocera."
+    ["FIREFOX"]="Mozilla Firefox browser for accessing the web."
 )
 
 # Define categories
 declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX"
     ["Patches"]="NVIDIAPATCHER"
 )
 
