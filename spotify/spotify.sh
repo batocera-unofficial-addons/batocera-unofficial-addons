@@ -71,7 +71,12 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Download the image
 echo "Downloading Spotify logo..."
-curl -L -o /userdata/roms/ports/images/spotify-logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/spotify/extra/spotify-logo.jpg
+curl -L -o /userdata/roms/ports/images/spotify-logo.jpg https://github.com/DTJW92/batocera-unofficial-addons/raw/main/spotify/extra/spotify-logo.jpg
+
+# Download the key file
+echo "Downloading Spotify key file..."
+curl -L -o /userdata/roms/ports/Spotify.sh.keys https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/spotify/extra/Spotify.sh.keys
+
 echo "Adding logo to Spotify entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./Spotify.sh" \
