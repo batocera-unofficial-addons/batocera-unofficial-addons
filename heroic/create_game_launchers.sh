@@ -1,73 +1,188 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# SYNC HEROIC LAUNCHER GAMES TO HEROIC SYSTEM ROMS
+# ---------------------------------------------------
+roms=/userdata/roms/heroic
+images=/userdata/roms/heroic/images
+icons=/userdata/system/add-ons/heroic/config/heroic/icons
+logs_dir=/userdata/system/.config/heroic/GamesConfig
+extra=/userdata/system/add-ons/heroic/extra
+list=$extra/gamelist.txt
+games=$extra/games.txt
+check=$extra/check.txt
+all=$extra/all.txt
+reload=0
 
-# Paths
-WINE_PATH="/usr/wine/ge-custom/bin/wine"
-LAUNCHERS_DIR="/userdata/roms/heroic" # Path for Heroic game launchers
-LOG_DIR="/userdata/system/.config/heroic/GamesConfig" # Directory containing game logs
+# Prepare directories
+mkdir -p "$images" "$extra" 2>/dev/null
+rm -rf "$check" "$all" "$list"
 
-# Ensure the launchers directory exists
-mkdir -p "$LAUNCHERS_DIR"
+# Generate list of game IDs from icons
+ls "$icons" | cut -d "." -f1 > "$list"
+nrgames=$(wc -l < "$list")
 
-# Fetch all lastPlay.log files
-echo "Searching for lastPlay.log files in $LOG_DIR..."
-LOG_FILES=$(find "$LOG_DIR" -type f -iname "*-lastPlay.log")
+# Process each game ID
+if [[ -e "$list" ]]; then
+  if [[ $nrgames -gt 0 ]]; then
+    for gid in $(cat "$list"); do
+      icon=$(ls "$icons" | grep "^$gid" | head -n1)
 
-# Check if any log files are found
-if [ -z "$LOG_FILES" ]; then
-    echo "No lastPlay.log files found!"
-    exit 1
+      # Copy icon to images directory
+      if [[ -n "$icon" ]]; then
+        cp "$icons/$icon" "$images/$icon" 2>/dev/null
+      fi
+
+      # Check all log files matching the game ID
+      game_name=""
+      for log_file in "$logs_dir/$gid"*.log; do
+        if [[ -f "$log_file" ]]; then
+          # Attempt to extract game name from standard log format
+          extracted_name=$(grep -oP '(?<=Preparing download for ")[^"]+' "$log_file" | head -n1)
+          if [[ -z "$extracted_name" ]]; then
+            # Attempt to extract game name from -lastPlay.log format
+            extracted_name=$(grep -oP '(?<=Launching ")[^"]+' "$log_file" | head -n1)
+          fi
+          if [[ -n "$extracted_name" ]]; then
+            game_name="$extracted_name"
+            break
+          fi
+        fi
+      done
+
+      # Fallback to game ID if no name is found
+      if [[ -z "$game_name" ]]; then
+        game_name="$gid"
+        echo "Warning: Could not extract game name for ID $gid."
+      fi
+
+      # Sanitize game name (replace spaces with underscores)
+      sanitized_name=$(echo "$game_name" | tr ' ' '_')
+
+      # Check existing ROMs and remove outdated files
+      find "$roms" -maxdepth 1 -type f -not -name '*.txt' -exec basename {} \; > "$all"
+      dos2unix "$all" 2>/dev/null
+      for thisrom in $(cat "$all"); do
+        romcheck=$(cat "$roms/$thisrom" 2>/dev/null)
+        if [[ -z "$romcheck" || ! -e "$icons/$romcheck.png" ]]; then
+          rm -f "$roms/$thisrom" "$images/$romcheck.png" "$images/$romcheck.jpg"
+          reload=1
+        fi
+      done
+
+      # Create or update the .txt file for the game
+      if [[ "$(grep -w "$gid" "$check" 2>/dev/null)" == "" ]]; then
+        rm -rf "$roms/$sanitized_name.txt" 2>/dev/null
+        echo "$gid" > "$roms/$sanitized_name.txt"
+        echo "$gid" >> "$check"
+      fi
+    done
+  fi
 fi
 
-# Create a launcher for each game
-echo "Creating launchers..."
-echo "$LOG_FILES" | while read -r LOG_FILE; do
-    # Extract the game name from the first line of the log file
-    GAME_NAME=$(head -n 1 "$LOG_FILE" | awk -F'"' '{print $2}')
+# Reload games if necessary
+if [[ -e "$games" ]]; then
+  was=$(wc -l < "$games")
+  if [[ "$nrgames" -gt "$was" || "$reload" -eq 1 ]]; then
+    echo "$nrgames" > "$games"
+    curl http://127.0.0.1:1234/reloadgames
+  fi
+else
+  echo "$nrgames" > "$games"
+  curl http://127.0.0.1:1234/reloadgames
+fi
 
-    if [ -z "$GAME_NAME" ]; then
-        echo "Game name not found in $LOG_FILE, skipping..."
-        continue
-    fi
+# Cleanup temporary files
+rm -rf "$check" "$all" "$list"
+#!/usr/bin/env bash
+# SYNC HEROIC LAUNCHER GAMES TO HEROIC SYSTEM ROMS
+# ---------------------------------------------------
+roms=/userdata/roms/heroic
+images=/userdata/roms/heroic/images
+icons=/userdata/system/add-ons/heroic/config/heroic/icons
+logs_dir=/userdata/system/.config/heroic/GamesConfig
+extra=/userdata/system/add-ons/heroic/extra
+list=$extra/gamelist.txt
+games=$extra/games.txt
+check=$extra/check.txt
+all=$extra/all.txt
+reload=0
 
-    # Replace spaces in the game name with underscores
-    GAME_NAME=$(echo "$GAME_NAME" | tr ' ' '_')
+# Prepare directories
+mkdir -p "$images" "$extra" 2>/dev/null
+rm -rf "$check" "$all" "$list"
 
-    # Extract the launch command from the log file
-    LAUNCH_COMMAND=$(grep "Launch Command:" "$LOG_FILE" | sed 's/Launch Command: //')
+# Generate list of game IDs from icons
+ls "$icons" | cut -d "." -f1 > "$list"
+nrgames=$(wc -l < "$list")
 
-    if [ -z "$LAUNCH_COMMAND" ]; then
-        echo "Launch command not found in $LOG_FILE for $GAME_NAME, skipping..."
-        continue
-    fi
+# Process each game ID
+if [[ -e "$list" ]]; then
+  if [[ $nrgames -gt 0 ]]; then
+    for gid in $(cat "$list"); do
+      icon=$(ls "$icons" | grep "^$gid" | head -n1)
 
-    # Replace any existing --wine argument with the custom wine path
-    LAUNCH_COMMAND=$(echo "$LAUNCH_COMMAND" | sed -E "s|--wine[ ]+[^ ]+|--wine \"$WINE_PATH\"|")
+      # Copy icon to images directory
+      if [[ -n "$icon" ]]; then
+        cp "$icons/$icon" "$images/$icon" 2>/dev/null
+      fi
 
-    # Use the sanitized game name for the launcher
-    LAUNCHER_NAME="$GAME_NAME"
-    LAUNCHER_PATH="${LAUNCHERS_DIR}/${LAUNCHER_NAME}.sh"
+      # Check all log files matching the game ID
+      game_name=""
+      for log_file in "$logs_dir/$gid"*.log; do
+        if [[ -f "$log_file" ]]; then
+          # Attempt to extract game name from standard log format
+          extracted_name=$(grep -oP '(?<=Preparing download for ")[^"]+' "$log_file" | head -n1)
+          if [[ -z "$extracted_name" ]]; then
+            # Attempt to extract game name from -lastPlay.log format
+            extracted_name=$(grep -oP '(?<=Launching ")[^"]+' "$log_file" | head -n1)
+          fi
+          if [[ -n "$extracted_name" ]]; then
+            game_name="$extracted_name"
+            break
+          fi
+        fi
+      done
 
-    # Create the launcher script
-    cat <<EOF > "$LAUNCHER_PATH"
-#!/bin/bash
-export DISPLAY=:0.0
-unclutter-remote -s
+      # Fallback to game ID if no name is found
+      if [[ -z "$game_name" ]]; then
+        game_name="$gid"
+        echo "Warning: Could not extract game name for ID $gid."
+      fi
 
-# Launch the game using the extracted command
-$LAUNCH_COMMAND
+      # Sanitize game name (replace spaces with underscores)
+      sanitized_name=$(echo "$game_name" | tr ' ' '_')
 
-# Wait for the game process (or anti-cheat) to stabilize
-GAME_PID=\$!
-while pgrep -f "$GAME_NAME" > /dev/null; do
-    sleep 1
-done
+      # Check existing ROMs and remove outdated files
+      find "$roms" -maxdepth 1 -type f -not -name '*.txt' -exec basename {} \; > "$all"
+      dos2unix "$all" 2>/dev/null
+      for thisrom in $(cat "$all"); do
+        romcheck=$(cat "$roms/$thisrom" 2>/dev/null)
+        if [[ -z "$romcheck" || ! -e "$icons/$romcheck.png" ]]; then
+          rm -f "$roms/$thisrom" "$images/$romcheck.png" "$images/$romcheck.jpg"
+          reload=1
+        fi
+      done
 
-# Additional delay to ensure full initialization
-sleep 5
-EOF
+      # Create or update the .txt file for the game
+      if [[ "$(grep -w "$gid" "$check" 2>/dev/null)" == "" ]]; then
+        rm -rf "$roms/$sanitized_name.txt" 2>/dev/null
+        echo "$gid" > "$roms/$sanitized_name.txt"
+        echo "$gid" >> "$check"
+      fi
+    done
+  fi
+fi
 
-    chmod +x "$LAUNCHER_PATH"
-    echo "Launcher created: $LAUNCHER_PATH"
-done
+# Reload games if necessary
+if [[ -e "$games" ]]; then
+  was=$(wc -l < "$games")
+  if [[ "$nrgames" -gt "$was" || "$reload" -eq 1 ]]; then
+    echo "$nrgames" > "$games"
+    curl http://127.0.0.1:1234/reloadgames
+  fi
+else
+  echo "$nrgames" > "$games"
+  curl http://127.0.0.1:1234/reloadgames
+fi
 
-echo "All launchers have been created in $LAUNCHERS_DIR!"
+# Cleanup temporary files
+rm -rf "$check" "$all" "$list"
