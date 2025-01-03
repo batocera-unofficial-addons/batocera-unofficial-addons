@@ -6,7 +6,8 @@ APPDIR="/userdata/system/add-ons/google-chrome"
 APPPATH="$APPDIR/GoogleChrome.AppImage"
 CHROME_INSTALLER_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh"
 PORT_SCRIPT="/userdata/roms/ports/Netflix.sh"
-ICON_PATH="/userdata/roms/ports/images/netflix-logo.png"
+ICON_PATH="/userdata/roms/ports/images/netflix-logo.jpg"
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/netflix/extra/netflix-logo.jpg"
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 1: Show dialog to confirm
@@ -46,14 +47,14 @@ chmod +x $PORT_SCRIPT
 
 # Step 4: Download the icon
 echo "Downloading Netflix logo..."
-curl -L -o "$ICON_PATH" "https://github.com/uureel/batocera.pro/raw/main/netflix/extra/icon.png"
+curl -L -o "$ICON_PATH" "$LOGO_URL"
 
 # Step 5: Add Netflix entry to gamelist.xml
 echo "Updating gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./Netflix.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "$APPNAME" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/netflix-logo.png" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/netflix-logo.jpg" \
   "$GAMELIST" > "${GAMELIST}.tmp" && mv "${GAMELIST}.tmp" "$GAMELIST"
 
 # Step 6: Refresh the Ports menu
