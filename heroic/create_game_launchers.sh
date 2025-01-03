@@ -86,9 +86,8 @@ if [[ -e "$list" ]]; then
         fi
       done
 
-      # Create or update the .txt file for the game
-      if [[ "$(grep -w "$gid" "$check" 2>/dev/null)" == "" ]]; then
-        rm -rf "$roms/$sanitized_name.txt" 2>/dev/null
+      # Create or update the .txt file for the game if it does not exist
+      if [[ ! -f "$roms/$sanitized_name.txt" ]]; then
         echo "$gid" > "$roms/$sanitized_name.txt"
         echo "$gid" >> "$check"
       fi
