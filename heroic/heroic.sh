@@ -17,7 +17,7 @@ mkdir -p "/userdata/system/configs/heroic"
 
 # Fetch the latest version of Heroic from GitHub API
 echo "Fetching the latest version of Heroic Games Launcher..."
-HEROIC_URL=$(wget -qO- https://api.github.com/repos/Heroic-Games-Launcher/HeroicGamesLauncher/releases/latest | grep "browser_download_url" | grep "tar.xz" | cut -d '"' -f 4)
+HEROIC_URL=$(wget -qO- https://api.github.com/repos/Heroic-Games-Launcher/HeroicGamesLauncher/releases/latest | grep "browser_download_url" | grep ".AppImage" | cut -d '"' -f 4)
 HEROIC_VERSION=$(basename "$HEROIC_URL" | sed -E 's/Heroic-([^-]+).*/\1/')
 
 if [ -z "$HEROIC_URL" ]; then
@@ -28,7 +28,7 @@ fi
 # Download Heroic
 echo "Downloading Heroic Games Launcher version $HEROIC_VERSION..."
 mkdir -p "$INSTALL_DIR"
-wget --show-progress -qO- "$HEROIC_URL" | tar -xJ -C "$INSTALL_DIR" --strip-components=1
+wget --show-progress -qO- "$HEROIC_URL" -C "$INSTALL_DIR"
 
 # Download supporting scripts
 echo "Downloading create_game_launchers.sh..."
