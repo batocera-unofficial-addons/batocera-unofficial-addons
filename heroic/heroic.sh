@@ -11,6 +11,7 @@ LAUNCHERS_SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/r
 MONITOR_SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/monitor_heroic.sh"
 WRAPPER_SCRIPT="${INSTALL_DIR}/launch_heroic.sh"
 ROM_DIR="/userdata/roms/heroic"
+ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/heroic/2/icon.png"
 
 mkdir -p "$ROM_DIR"
 mkdir -p "/userdata/system/configs/heroic"
@@ -28,7 +29,7 @@ fi
 # Download Heroic
 echo "Downloading Heroic Games Launcher version $HEROIC_VERSION..."
 mkdir -p "$INSTALL_DIR"
-wget --show-progress -qO- "$HEROIC_URL" -C "$INSTALL_DIR"
+wget --show-progress -qO "${INSTALL_DIR}/heroic.AppImage" "$HEROIC_URL"
 
 # Download supporting scripts
 echo "Downloading create_game_launchers.sh..."
@@ -36,6 +37,9 @@ wget --show-progress -qO "${INSTALL_DIR}/create_game_launchers.sh" "$LAUNCHERS_S
 
 echo "Downloading monitor_heroic.sh..."
 wget --show-progress -qO "${INSTALL_DIR}/monitor_heroic.sh" "$MONITOR_SCRIPT_URL"
+
+echo "Downloading icon..."
+wget --show-progress -qO "${INSTALL_DIR}/extra/icon.ping" "$ICON_URL"
 
 # Make scripts executable
 chmod +x "${INSTALL_DIR}/heroic"
@@ -47,7 +51,7 @@ cat <<EOL > "$LAUNCHER"
 #!/bin/bash
 /userdata/system/add-ons/heroic/extra/heroic-sync.sh &
 unclutter-remote -s
-DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic --no-sandbox "\$@"
+DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic.AppImage --no-sandbox "\$@"
 EOL
 chmod a+x "$LAUNCHER"
 
@@ -60,7 +64,7 @@ cat <<EOL > "$SYSTEM_LAUNCHER"
 ID=\$(cat "\$1" | head -n 1)
 # Execute application
 unclutter-remote -s
-DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic --no-sandbox --no-gui --disable-gpu "heroic://launch/\$ID"
+DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic.AppImage --no-sandbox --no-gui --disable-gpu "heroic://launch/\$ID"
 EOL
 chmod a+x "$SYSTEM_LAUNCHER"
 
@@ -72,7 +76,7 @@ Version=1.0
 Type=Application
 Name=Heroic Games Launcher
 Exec=$LAUNCHER
-Icon=/userdata/system/add-ons/heroic/resources/app.asar.unpacked/build/icon.png
+Icon=/userdata/system/add-ons/heroic/exta/icon.png
 Terminal=false
 Categories=Game;batocera.linux;
 EOF
