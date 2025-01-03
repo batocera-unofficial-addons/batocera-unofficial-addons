@@ -6,18 +6,26 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    app_url=$(curl -s https://api.github.com/repos/mattruzzi/Nativefier-YouTube-on-TV-for-Desktop/releases/latest | \
+    app_url=$(curl -s https://api.github.com/repositories/295226865/releases/latest | \
     jq -r ".assets[] | select(.name | contains(\"linux-x64\")) | .browser_download_url")
 elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: arm64 detected."
-    app_url=$(curl -s https://api.github.com/repos/mattruzzi/Nativefier-YouTube-on-TV-for-Desktop/releases/latest | \
+    app_url=$(curl -s https://api.github.com/repositories/295226865/releases/latest | \
     jq -r ".assets[] | select(.name | contains(\"linux-arm64\")) | .browser_download_url")
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
 fi
 
-# Step 2: Download the archive
+# Step 2: Validate app_url
+if [ -z "$app_url" ]; then
+    echo "Error: Failed to fetch the download URL for YouTube TV."
+    echo "Debugging information:"
+    curl -s https://api.github.com/repositories/295226865/releases/latest
+    exit 1
+fi
+
+# Step 3: Download the archive
 echo "Downloading YouTube TV archive from $app_url..."
 app_dir="/userdata/system/add-ons/youtube-tv"
 temp_dir="$app_dir/temp"
@@ -29,7 +37,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Step 3: Extract the downloaded archive
+# Step 4: Extract the downloaded archive
 echo "Extracting YouTube TV files..."
 mkdir -p "$app_dir"
 unzip -o "$temp_dir/youtube-tv.zip" -d "$temp_dir/youtube-tv-extracted"
@@ -40,7 +48,7 @@ chmod a+x "$app_dir/YouTubeonTV"
 rm -rf "$temp_dir"
 echo "Extraction complete. Files moved to $app_dir."
 
-# Step 4: Create a launcher script using the original command
+# Step 5: Create a launcher script using the original command
 echo "Creating YouTube TV script in Ports..."
 ports_dir="/userdata/roms/ports"
 mkdir -p "$ports_dir"
@@ -55,11 +63,11 @@ EOF
 
 chmod +x "$ports_dir/YouTubeTV.sh"
 
-# Step 5: Refresh the Ports menu
+# Step 6: Refresh the Ports menu
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
-# Step 6: Add an entry to gamelist.xml
+# Step 7: Add an entry to gamelist.xml
 echo "Adding YouTube TV entry to gamelist.xml..."
 gamelist_file="$ports_dir/gamelist.xml"
 logo_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/youtubetv/extra/youtubetv-logo.jpg"
@@ -89,4 +97,3 @@ curl http://127.0.0.1:1234/reloadgames
 
 echo
 echo "Installation complete! You can now launch YouTube TV from the Ports menu."
-
