@@ -11,7 +11,6 @@ list=$extra/gamelist.txt
 games=$extra/games.txt
 check=$extra/check.txt
 all=$extra/all.txt
-reload=0
 
 # Prepare directories
 mkdir -p "$images" "$extra" 2>/dev/null
@@ -95,9 +94,6 @@ if [[ -e "$list" ]]; then
   fi
 fi
 
-# Reload games if necessary
-echo "$nrgames" > "$games"
-curl http://127.0.0.1:1234/reloadgames
 
 # Cleanup temporary files
 rm -rf "$check" "$all" "$list"
