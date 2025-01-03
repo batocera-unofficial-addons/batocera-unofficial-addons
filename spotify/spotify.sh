@@ -43,7 +43,7 @@ mkdir -p "$(dirname "$ICON_PATH")"   # Ensure the images directory exists
 
 cat << EOF > $PORT_SCRIPT
 #!/bin/bash
-DISPLAY=:0.0 LD_LIBRARY_PATH=/userdata/system/pro/.dep:\$LD_LIBRARY_PATH $APPPATH --no-sandbox --test-type --disable-gpu --start-fullscreen --force-device-scale-factor=1.5 "play.spotify.com"
+DISPLAY=:0.0 $APPPATH --no-sandbox --test-type --disable-gpu --start-fullscreen --force-device-scale-factor=1.5 "play.spotify.com"
 EOF
 
 chmod +x $PORT_SCRIPT
