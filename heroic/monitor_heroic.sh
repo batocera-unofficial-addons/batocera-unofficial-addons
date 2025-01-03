@@ -11,6 +11,12 @@ is_heroic_running() {
 
 echo "Monitoring Heroic process..."
 
+# Wait for Heroic to start
+echo "Waiting for Heroic to start..."
+until is_heroic_running; do
+    sleep 10
+done
+
 # Loop while Heroic is running
 while true; do
     if is_heroic_running; then
