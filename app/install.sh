@@ -95,6 +95,11 @@ echo "xmlstarlet has been installed and symlinked to /usr/bin."
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
+# Ensure the gamelist.xml exists
+if [ ! -f "/userdata/roms/ports/gamelist.xml" ]; then
+    echo '<?xml version="1.0" encoding="UTF-8"?><gameList></gameList>' > "/userdata/roms/ports/gamelist.xml"
+fi
+
 # Download the image
 echo "Downloading Batocera Unofficial Add-ons logo..."
 curl -L -o /userdata/roms/ports/images/BatoceraUnofficialAddons.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png
