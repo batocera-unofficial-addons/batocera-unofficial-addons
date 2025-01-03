@@ -11,6 +11,8 @@ WRAPPER_SCRIPT="${INSTALL_DIR}/launch_heroic.sh"
 ROM_DIR="/userdata/roms/heroic"
 ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/heroic/2/icon.png"
 
+[ -d "/userdata/system/add-ons/heroic" ] && rm -rf "/userdata/system/add-ons/heroic"
+
 mkdir -p "$ROM_DIR"
 mkdir -p "/userdata/system/configs/heroic"
 mkdir -p "/userdata/system/add-ons/heroic/extra"
