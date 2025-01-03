@@ -4,8 +4,6 @@
 INSTALL_DIR="/userdata/system/add-ons/heroic"
 DESKTOP_FILE="/usr/share/applications/heroic.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/heroic/heroic.desktop"
-COLLECTIONS_DIR="/userdata/system/configs/emulationstation/collections"
-HEROIC_CFG="${COLLECTIONS_DIR}/Heroic.cfg"
 SYSTEMS_CFG="/userdata/system/configs/emulationstation/es_systems_heroic.cfg"
 LAUNCHERS_SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/create_game_launchers.sh"
 MONITOR_SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/monitor_heroic.sh"
