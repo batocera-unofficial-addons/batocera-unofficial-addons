@@ -52,7 +52,7 @@ mkdir -p "${HOME}/.pki/nssdb"
 # Fix MIME issues
 if [ ! -f /usr/share/mime/image/png.xml ]; then
     echo "Fixing MIME database..."
-    sudo update-mime-database /usr/share/mime
+    update-mime-database /usr/share/mime
 fi
 
 # Initialize NSS database
@@ -119,6 +119,8 @@ if ! command -v xmlstarlet &> /dev/null; then
     echo "Error: xmlstarlet is not installed. Install it and re-run the script."
     exit 1
 fi
+
+curl http://127.0.0.1:1234/reloadgames
 
 echo "Adding Stremio to Ports menu..."
 curl -L -o /userdata/roms/ports/images/stremiologo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/stremio/extra/stremiologo.png
