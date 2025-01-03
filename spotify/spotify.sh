@@ -55,7 +55,7 @@ echo "$(date): Launching Spotify"
 # Launch Spotify AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
-    ./Spotify.AppImage --no-sandbox --test-type "$@" > "${log_file}" 2>&1
+    ./Spotify.AppImage --no-sandbox > "${log_file}" 2>&1
     echo "Spotify exited."
 else
     echo "Spotify.AppImage not found or not executable."
