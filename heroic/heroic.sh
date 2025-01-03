@@ -39,10 +39,10 @@ echo "Downloading monitor_heroic.sh..."
 wget --show-progress -qO "${INSTALL_DIR}/monitor_heroic.sh" "$MONITOR_SCRIPT_URL"
 
 echo "Downloading icon..."
-wget --show-progress -qO "${INSTALL_DIR}/extra/icon.ping" "$ICON_URL"
+wget --show-progress -qO "${INSTALL_DIR}/extra/icon.png" "$ICON_URL"
 
 # Make scripts executable
-chmod +x "${INSTALL_DIR}/heroic"
+chmod +x "${INSTALL_DIR}/heroic.AppImage"
 chmod +x "${INSTALL_DIR}/create_game_launchers.sh"
 chmod +x "${INSTALL_DIR}/monitor_heroic.sh"
 
