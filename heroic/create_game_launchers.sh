@@ -97,13 +97,14 @@ fi
 
 # Reload games if necessary
 if [[ -e "$games" ]]; then
-  was=$(wc -l < "$games")
-  if [[ "$nrgames" -gt "$was" || "$reload" -eq 1 ]]; then
+  was=$(cat "$games" | wc -l)
+  if [[ "$nrgames" > "$was" ]] || [[ "$reload" = "1" ]]; then
+    rm -rf "$games" 2>/dev/null
     echo "$nrgames" > "$games"
     curl http://127.0.0.1:1234/reloadgames
   fi
-else
-  echo "$nrgames" > "$games"
+else 
+  echo "$nrgames" > "$games" 
   curl http://127.0.0.1:1234/reloadgames
 fi
 
