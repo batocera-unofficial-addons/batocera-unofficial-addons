@@ -60,8 +60,6 @@ cat <<EOL > "$SYSTEM_LAUNCHER"
 ID=\$(cat "\$1" | head -n 1)
 # Execute application
 unclutter-remote -s
-mkdir -p /userdata/system/add-ons/$APPNAME/home 2>/dev/null
-mkdir -p /userdata/system/add-ons/$APPNAME/config 2>/dev/null
 DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic --no-sandbox --no-gui --disable-gpu "heroic://launch/\$ID"
 EOL
 chmod a+x "$SYSTEM_LAUNCHER"
