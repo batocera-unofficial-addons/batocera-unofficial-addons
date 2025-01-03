@@ -7,7 +7,7 @@ arch=$(uname -m)
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
     appimage_url=$(curl -s https://api.github.com/repos/4gray/iptvnator/releases/latest \
-    | jq -r ".assets[] | select(.name | endswith(\".AppImage\")) | select(.name | contains(\"arm64\") | not) | .browser_download_url")
+    | jq -r ".assets[] | select(.name | endswith(\".AppImage\")) | select(.name | contains(\"arm\") | not) | .browser_download_url")
 elif [ "$arch" == "aarch64" ] || [ "$arch" == "arm64" ]; then
     echo "Architecture: arm64 detected."
     appimage_url=$(curl -s https://api.github.com/repos/4gray/iptvnator/releases/latest \
@@ -91,4 +91,3 @@ curl http://127.0.0.1:1234/reloadgames
 
 echo
 echo "Installation complete! You can now launch IPTVNator from the Ports menu."
-
