@@ -25,6 +25,7 @@ while true; do
         sleep 10 # Wait for 10 seconds before checking again
     else
         echo "Heroic is not running. Exiting."
+        curl http://127.0.0.1:1234/reloadgames
         break
     fi
 done
