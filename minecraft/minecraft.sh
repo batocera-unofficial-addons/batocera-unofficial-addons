@@ -11,7 +11,7 @@ dialog --clear --backtitle "Minecraft Launcher Setup" \
     --title "Select Minecraft Edition" \
     --menu "Choose your Minecraft Edition:" 15 50 4 \
     1 "Java Edition (Lunar Client)" \
-    2 "Eaglercraft" \
+    2 "Eaglercraft (Online and FREE)" \
     3 "Official Java Edition (Controller Support)" \
     4 "Bedrock Edition" 2> /tmp/edition_choice.txt
 
