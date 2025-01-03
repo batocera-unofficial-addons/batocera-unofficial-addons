@@ -93,6 +93,7 @@ apps=(
     ["IPTVNATOR"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/iptvnator/iptvnator.sh | bash"
     ["FIREFOX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/firefox/firefox.sh | bash"
     ["SPOTIFY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/spotify/spotify.sh | bash"
+    ["DOCKER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash"
 )
 
 descriptions=(
@@ -120,6 +121,7 @@ descriptions=(
     ["IPTVNATOR"]="A client for watching IPTV on Batocera."
     ["FIREFOX"]="Mozilla Firefox browser for accessing the web."
     ["SPOTIFY"]="Spotify music streaming client for Batocera."
+    ["DOCKER"]="A tool to manage and run containerized applications."
 )
 
 # Define categories
@@ -127,7 +129,7 @@ declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC"
     ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY"
-    ["Patches"]="NVIDIAPATCHER"
+    ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER"
 )
 
 while true; do
@@ -135,7 +137,7 @@ while true; do
     category_choice=$(dialog --menu "Choose a category" 15 70 4 \
         "Games" "Install games and game-related add-ons" \
         "Utilities" "Install utility apps" \
-        "Patches" "Install patches and fixes" \
+        "Developer Tools" "Install developer and patching tools" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
     # Exit if the user selects "Exit" or cancels
@@ -153,8 +155,8 @@ while true; do
             "Utilities")
                 selected_apps="${categories["Utilities"]}"
                 ;;
-            "Patches")
-                selected_apps="${categories["Patches"]}"
+            "Developer Tools")
+                selected_apps="${categories["Developer Tools"]}"
                 ;;
             *)
                 echo "Invalid choice!"
