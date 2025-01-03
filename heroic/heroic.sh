@@ -138,11 +138,8 @@ EOF
 # Final message
 echo "Heroic Games Launcher setup complete! Installed version $HEROIC_VERSION."
 echo "A desktop entry has been created and will persist across reboots."
-echo "The system needs to reboot in order for Heroic to initialise, rebooting in..."
-for i in {10..1}; do
-    echo "$i"
-    sleep 1
-done
-reboot
-
+echo "The system needs to reboot in order for Heroic to intialise if this is your first time installing. Please reboot to see Heroic on your ES menu."
+echo "Please note; not all themes support Heroic, only confirmed themes so far are ES themes. If you don't see the Heroic option after installing games"
+echo "it's likely it's instead showing up as Commodore 64. Switch to an ES theme to see Heroic properly!"
+sleep 10
 
