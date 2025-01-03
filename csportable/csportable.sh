@@ -38,7 +38,7 @@ mkdir -p "$(dirname "$ICON_PATH")"   # Ensure the images directory exists
 
 cat << EOF > $PORT_SCRIPT
 #!/bin/bash
-DISPLAY=:0.0 LD_LIBRARY_PATH=/userdata/system/pro/.dep:\$LD_LIBRARY_PATH $APPPATH
+DISPLAY=:0.0 $APPPATH
 EOF
 
 chmod +x $PORT_SCRIPT
