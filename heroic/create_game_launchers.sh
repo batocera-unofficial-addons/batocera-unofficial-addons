@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# SYNC HEROIC LAUNCHER GAMES TO HEROIC SYSTEM ROMS
+# SYNC HEROIC LAUNCHER GAMES TO HEROIC SYSTEM ROMS AND GAMELIST
 # ---------------------------------------------------
 roms=/userdata/roms/heroic
 images=/userdata/roms/heroic/images
 icons=/userdata/system/.config/heroic/icons
 logs_dir=/userdata/system/.config/heroic/GamesConfig
 json_dir=/userdata/system/.config/heroic/GamesConfig
+gamelist=/userdata/roms/heroic/gamelist.xml
 extra=/userdata/system/add-ons/heroic/extra
 list=$extra/gamelist.txt
-games=$extra/games.txt
 check=$extra/check.txt
 all=$extra/all.txt
 
@@ -16,12 +16,17 @@ all=$extra/all.txt
 mkdir -p "$images" "$extra" 2>/dev/null
 rm -rf "$check" "$all" "$list"
 
-# Generate list of game IDs from icons
-ls "$icons" | cut -d "." -f1 > "$list"
-nrgames=$(wc -l < "$list")
+# Generate list of ROMs
+find "$roms" -maxdepth 1 -type f -exec basename {} \; | sed 's/\..*//' > "$list"
 
-# Process each game ID
+# Start XML gamelist
+if [[ ! -f "$gamelist" ]]; then
+  echo "<gameList>" > "$gamelist"
+fi
+
+# Check all log files matching the game ID
 if [[ -e "$list" ]]; then
+  nrgames=$(wc -l < "$list")
   if [[ $nrgames -gt 0 ]]; then
     for gid in $(cat "$list"); do
       icon=$(ls "$icons" | grep "^$gid" | head -n1)
@@ -31,14 +36,11 @@ if [[ -e "$list" ]]; then
         cp "$icons/$icon" "$images/$icon" 2>/dev/null
       fi
 
-      # Check all log files matching the game ID
       game_name=""
       for log_file in "$logs_dir/$gid"*.log; do
         if [[ -f "$log_file" ]]; then
-          # Attempt to extract game name from standard log format
           extracted_name=$(grep -oP '(?<=Preparing download for ")[^"]+' "$log_file" | head -n1)
           if [[ -z "$extracted_name" ]]; then
-            # Attempt to extract game name from -lastPlay.log format
             extracted_name=$(grep -oP '(?<=Launching ")[^"]+' "$log_file" | head -n1)
           fi
           if [[ -n "$extracted_name" ]]; then
@@ -48,7 +50,6 @@ if [[ -e "$list" ]]; then
         fi
       done
 
-      # If no name found, check <gameid>.json for "winePrefix"
       if [[ -z "$game_name" ]]; then
         json_file="$json_dir/$gid.json"
         if [[ -f "$json_file" ]]; then
@@ -59,41 +60,59 @@ if [[ -e "$list" ]]; then
         fi
       fi
 
-      # Fallback to game ID if no name is found
       if [[ -z "$game_name" ]]; then
         game_name="$gid"
         echo "Warning: Could not extract game name for ID $gid."
       fi
 
-      # Sanitize game name (replace spaces with underscores)
       sanitized_name=$(echo "$game_name" | tr ' ' '_')
 
-      # Rename icon to sanitized game name
       if [[ -n "$icon" ]]; then
         ext="${icon##*.}"
         mv "$images/$icon" "$images/$sanitized_name.$ext" 2>/dev/null
       fi
 
-      # Check existing ROMs and remove outdated files
       find "$roms" -maxdepth 1 -type f -not -name '*.txt' -exec basename {} \; > "$all"
       dos2unix "$all" 2>/dev/null
       for thisrom in $(cat "$all"); do
         romcheck=$(cat "$roms/$thisrom" 2>/dev/null)
         if [[ -z "$romcheck" || ! -e "$icons/$romcheck.png" ]]; then
           rm -f "$roms/$thisrom" "$images/$romcheck.png" "$images/$romcheck.jpg"
-          reload=1
         fi
       done
 
-      # Create or update the .txt file for the game if it does not exist
       if [[ ! -f "$roms/$sanitized_name.txt" ]]; then
         echo "$gid" > "$roms/$sanitized_name.txt"
         echo "$gid" >> "$check"
+      fi
+
+      # Ensure the gamelist.xml exists
+if [ ! -f "$gamelist" ]; then
+    echo '<?xml version="1.0" encoding="UTF-8"?><gameList></gameList>' > "$gamelist"
+fi
+
+rom_file=$(find "$roms" -name "$sanitized_name.*" | head -n1)
+      image_file=$(find "$images" -name "$sanitized_name.*" | head -n1)
+
+      if [[ -n "$rom_file" && -n "$image_file" ]]; then
+        # Add entry to gamelist.xml
+        xmlstarlet ed -L \
+          -s "/gameList" -t elem -n "game" -v "" \
+          -s "/gameList/game[last()]" -t elem -n "path" -v "$rom_file" \
+          -s "/gameList/game[last()]" -t elem -n "name" -v "$game_name" \
+          -s "/gameList/game[last()]" -t elem -n "image" -v "$image_file" \
+          "$gamelist"
+      else
+        echo "Warning: Missing file for ROM $sanitized_name (rom: $rom_file, image: $image_file)"
       fi
     done
   fi
 fi
 
+# Ensure gamelist.xml ends with a closing tag
+if ! grep -q "</gameList>" "$gamelist"; then
+  echo "</gameList>" >> "$gamelist"
+fi
 
 # Cleanup temporary files
-rm -rf "$check" "$all" "$list"
+rm -rf "$list" "$all" "$check"
