@@ -7,22 +7,9 @@ APPPATH="$APPDIR/CS-Portable.AppImage"
 CS_PORTABLE_INSTALLER_URL="https://ocs-dl.fra1.cdn.digitaloceanspaces.com/data/files/1630461981/CS-Portable-x86-64.AppImage?response-content-disposition=attachment%3B%2520CS-Portable-x86-64.AppImage&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=RWJAQUNCHT7V2NCLZ2AL%2F20250103%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250103T181000Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Signature=192d07312a537d91fea31d03445f9a64032c87f8c09853ff58627fc9ce4e9b36"
 PORT_SCRIPT="/userdata/roms/ports/CS-Portable.sh"
 ICON_PATH="/userdata/roms/ports/images/cs-portable-logo.jpg"
-KEYS_PATH="/userdata/roms/ports/CS-Portable.sh.keys"
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/cs-portable/extra/cs-portable-logo.jpg"
-KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/cs-portable/extra/CS-Portable.sh.keys"
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
-# Step 1: Show dialog to confirm
-dialog --title "Install $APPNAME" \
-  --yesno "Do you want to install CS Portable?" 10 50
-
-# Check the user's choice
-if [[ $? -ne 0 ]]; then
-  echo "Installation canceled by user."
-  exit 1
-fi
-
-clear
 # Step 2: Check if CS Portable is installed
 if [[ ! -f $APPPATH ]]; then
   echo "$APPNAME is not installed. Downloading and installing..."
@@ -46,10 +33,6 @@ chmod +x $PORT_SCRIPT
 # Step 4: Download the icon
 echo "Downloading CS Portable logo..."
 curl -L -o "$ICON_PATH" "$LOGO_URL"
-
-# Step 5: Download the key mapping file
-echo "Downloading key mapping file..."
-curl -L -o "$KEYS_PATH" "$KEYS_URL"
 
 # Step 6: Add CS Portable entry to gamelist.xml
 echo "Updating gamelist.xml..."
