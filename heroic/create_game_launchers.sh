@@ -11,6 +11,7 @@ extra=/userdata/system/add-ons/heroic/extra
 list=$extra/gamelist.txt
 check=$extra/check.txt
 all=$extra/all.txt
+gamelist=$roms/gamelist.xml
 
 # Prepare directories
 mkdir -p "$images" "$extra" 2>/dev/null
