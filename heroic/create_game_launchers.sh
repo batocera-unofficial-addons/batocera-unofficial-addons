@@ -92,7 +92,7 @@ if [ ! -f "$gamelist" ]; then
     echo '<?xml version="1.0" encoding="UTF-8"?><gameList></gameList>' > "$gamelist"
 fi
 
-rom_file=$(find "$roms" -name "$sanitized_name.*" | head -n1)
+rom_file=$(find "$roms" -name "$sanitized_name.*" -exec basename {} \; | head -n1 | sed "s|^|./|")
       image_file=$(find "$images" -name "$sanitized_name.*" | head -n1)
 
       if [[ -n "$rom_file" && -n "$image_file" ]]; then
