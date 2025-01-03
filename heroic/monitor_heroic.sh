@@ -2,7 +2,7 @@
 #!/bin/bash
 
 # Paths
-HEROIC_EXEC="/userdata/system/add-ons/heroic/heroic"
+HEROIC_EXEC="/userdata/system/add-ons/heroic/heroic.AppImage"
 CREATE_LAUNCHERS_SCRIPT="/userdata/system/add-ons/heroic/create_game_launchers.sh"
 
 # Function to check if Heroic is running
