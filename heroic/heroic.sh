@@ -48,7 +48,7 @@ chmod +x "${INSTALL_DIR}/monitor_heroic.sh"
 LAUNCHER="/userdata/system/add-ons/heroic/Launcher"
 cat <<EOL > "$LAUNCHER"
 #!/bin/bash
-/userdata/system/add-ons/heroic/extra/monitor_heroic.sh &
+/userdata/system/add-ons/heroic/monitor_heroic.sh &
 unclutter-remote -s
 DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic.AppImage --no-sandbox "\$@"
 EOL
@@ -75,7 +75,7 @@ Version=1.0
 Type=Application
 Name=Heroic Games Launcher
 Exec=$LAUNCHER
-Icon=/userdata/system/add-ons/heroic/exta/icon.png
+Icon=/userdata/system/add-ons/heroic/extra/icon.png
 Terminal=false
 Categories=Game;batocera.linux;
 EOF
