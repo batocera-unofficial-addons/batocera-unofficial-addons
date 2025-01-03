@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 # Variables
-APPNAME="Netflix"
+APPNAME="Eaglercraft"
 APPDIR="/userdata/system/add-ons/google-chrome"
 APPPATH="$APPDIR/GoogleChrome.AppImage"
 CHROME_INSTALLER_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh"
-PORT_SCRIPT="/userdata/roms/ports/Netflix.sh"
-ICON_PATH="/userdata/roms/ports/images/netflix-logo.jpg"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/netflix/extra/netflix-logo.jpg"
+PORT_SCRIPT="/userdata/roms/ports/Eaglercraft.sh"
+ICON_PATH="/userdata/roms/ports/images/eaglercraft-logo.jpg"
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/eaglercraft-logo.jpg"
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 1: Show dialog to confirm
@@ -40,25 +40,25 @@ mkdir -p "$(dirname "$ICON_PATH")"   # Ensure the images directory exists
 
 cat << EOF > $PORT_SCRIPT
 #!/bin/bash
-DISPLAY=:0.0 LD_LIBRARY_PATH=/userdata/system/pro/.dep:\$LD_LIBRARY_PATH $APPPATH --no-sandbox --test-type --start-fullscreen --force-device-scale-factor=1.6 'netflix.com'
+DISPLAY=:0.0 $APPPATH --no-sandbox --test-type --start-fullscreen --force-device-scale-factor=1.6 'https://eaglercraft.com/mc/1.8.8-wasm/'
 EOF
 
 chmod +x $PORT_SCRIPT
 
 # Step 4: Download the icon
-echo "Downloading Netflix logo..."
+echo "Downloading Eaglercraft logo..."
 curl -L -o "$ICON_PATH" "$LOGO_URL"
 
-# Step 5: Add Netflix entry to gamelist.xml
+# Step 5: Add Eaglercraft entry to gamelist.xml
 echo "Updating gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-  -s "/gameList/game[last()]" -t elem -n "path" -v "./Netflix.sh" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./Eaglercraft.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "$APPNAME" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/netflix-logo.jpg" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/eaglercraft-logo.jpg" \
   "$GAMELIST" > "${GAMELIST}.tmp" && mv "${GAMELIST}.tmp" "$GAMELIST"
 
 # Step 6: Refresh the Ports menu
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
-echo "$APPNAME port setup completed. You can now access Netflix through Ports!"
+echo "$APPNAME port setup completed. You can now access Eaglercraft through Ports!"
