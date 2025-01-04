@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Display dialog message
+dialog --msgbox "You must add a shortcut in ShadPS4 for each game for the 'Update PS4 Shortcut' parser to work." 10 50
+
 # Directory paths
 emulationstation_config_dir="/userdata/system/configs/emulationstation"
 ps4_scripts_dir="/userdata/roms/ps4"
