@@ -11,6 +11,11 @@ LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/csportab
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 2: Check if CS Portable is installed
+if [[ -d $APPDIR ]]; then
+  echo "$APPDIR exists. Removing it to ensure a clean setup..."
+  rm -rf "$APPDIR"
+fi
+
 if [[ ! -d $APPDIR || ! -f "$APPDIR/CS Portable" ]]; then
   echo "$APPNAME is not installed. Downloading and setting up..."
   mkdir -p "$APPDIR"  # Ensure the directory exists
