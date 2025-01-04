@@ -39,7 +39,9 @@ mkdir -p "$(dirname "$ICON_PATH")"   # Ensure the images directory exists
 
 cat << EOF > $PORT_SCRIPT
 #!/bin/bash
-DISPLAY=:0.0 $APPPATH
+export DISPLAY=:0.0 
+cd $APPPATH
+./Plex_Media_Player.AppImage --no-sandbox
 EOF
 
 chmod +x $PORT_SCRIPT
