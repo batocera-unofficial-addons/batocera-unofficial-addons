@@ -3,20 +3,28 @@
 # Variables
 APPNAME="CS Portable"
 APPDIR="/userdata/system/add-ons/csportable"
-APPPATH="$APPDIR/CSPortable.AppImage"
-CS_PORTABLE_INSTALLER_URL="https://ocs-dl.fra1.cdn.digitaloceanspaces.com/data/files/1630461981/CS-Portable-x86-64.AppImage?response-content-disposition=attachment%3B%2520CS-Portable-x86-64.AppImage&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=RWJAQUNCHT7V2NCLZ2AL%2F20250103%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250103T181000Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Signature=192d07312a537d91fea31d03445f9a64032c87f8c09853ff58627fc9ce4e9b36"
+ZIP_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/csportable/extra/CS-Portable-2023.zip"
+ZIP_PATH="$APPDIR/CS-Portable-2023.zip"
 PORT_SCRIPT="/userdata/roms/ports/CSPortable.sh"
 ICON_PATH="/userdata/roms/ports/images/cs-portable-logo.jpg"
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/csportable/extra/cs-portable-logo.jpg"
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 2: Check if CS Portable is installed
-if [[ ! -f $APPPATH ]]; then
-  echo "$APPNAME is not installed. Downloading and installing..."
+if [[ ! -d $APPDIR || ! -f "$APPDIR/CS Portable" ]]; then
+  echo "$APPNAME is not installed. Downloading and setting up..."
   mkdir -p "$APPDIR"  # Ensure the directory exists
-  curl -L -o "$APPPATH" "$CS_PORTABLE_INSTALLER_URL"
-  chmod +x "$APPPATH"
-  echo "$APPNAME installation completed."
+
+  # Download the ZIP file
+  curl -L -o "$ZIP_PATH" "$ZIP_URL"
+
+  # Extract the ZIP file
+  unzip "$ZIP_PATH" -d "$APPDIR"
+
+  # Remove the ZIP file after extraction
+  rm "$ZIP_PATH"
+
+  echo "$APPNAME setup completed."
 fi
 
 # Step 3: Create the ports script using EOF
@@ -25,7 +33,7 @@ mkdir -p "$(dirname "$ICON_PATH")"   # Ensure the images directory exists
 
 cat << EOF > $PORT_SCRIPT
 #!/bin/bash
-DISPLAY=:0.0 $APPPATH
+DISPLAY=:0.0 "$APPDIR/CS Portable"
 EOF
 
 chmod +x $PORT_SCRIPT
