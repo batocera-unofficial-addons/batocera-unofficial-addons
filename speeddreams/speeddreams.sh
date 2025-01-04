@@ -7,7 +7,7 @@ APPPATH="$APPDIR/speed-dreams.AppImage"
 SPEED_DREAMS_INSTALLER_URL="https://altushost-swe.dl.sourceforge.net/project/speed-dreams/2.3.0/speed-dreams-2.3.0-x86_64.AppImage?viasf=1"
 PORT_SCRIPT="/userdata/roms/ports/Speed-Dreams.sh"
 ICON_PATH="/userdata/roms/ports/images/speed-dreams-logo.png"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/speed-dreams/extra/speed-dreams-logo.jpg"
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/speed-dreams/extra/speed-dreams-logo.png"
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 1: Check if Speed Dreams is installed
