@@ -18,6 +18,21 @@ mkdir -p "$images" "$extra" 2>/dev/null
 touch "$processed_list"
 rm -rf "$check" "$all"
 
+# Clean up invalid entries in the processed list
+temp_processed_list="$extra/temp_processed_games.txt"
+touch "$temp_processed_list"
+
+while read -r processed_gid; do
+  if [[ -f "$roms/$processed_gid.txt" ]]; then
+    echo "$processed_gid" >> "$temp_processed_list"
+  else
+    echo "Removing invalid entry: $processed_gid from processed list."
+  fi
+done < "$processed_list"
+
+# Replace the old processed list with the valid one
+mv "$temp_processed_list" "$processed_list"
+
 # Generate list of game IDs from icons
 ls "$icons" | cut -d "." -f1 > "$list"
 
