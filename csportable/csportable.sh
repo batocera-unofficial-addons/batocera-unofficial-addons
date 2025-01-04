@@ -2,8 +2,8 @@
 
 # Variables
 APPNAME="CS Portable"
-APPDIR="/userdata/system/add-ons/cs-portable"
-APPPATH="$APPDIR/CS-Portable.AppImage"
+APPDIR="/userdata/system/add-ons/csportable"
+APPPATH="$APPDIR/CSPortable.AppImage"
 CS_PORTABLE_INSTALLER_URL="https://ocs-dl.fra1.cdn.digitaloceanspaces.com/data/files/1630461981/CS-Portable-x86-64.AppImage?response-content-disposition=attachment%3B%2520CS-Portable-x86-64.AppImage&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=RWJAQUNCHT7V2NCLZ2AL%2F20250103%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250103T181000Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Signature=192d07312a537d91fea31d03445f9a64032c87f8c09853ff58627fc9ce4e9b36"
 PORT_SCRIPT="/userdata/roms/ports/CSPortable.sh"
 ICON_PATH="/userdata/roms/ports/images/cs-portable-logo.jpg"
