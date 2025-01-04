@@ -22,7 +22,7 @@ while true; do
     if is_heroic_running; then
         echo "Heroic is running. Checking launchers..."
         "$CREATE_LAUNCHERS_SCRIPT"
-        sleep 10 # Wait for 10 seconds before checking again
+        sleep 5 # Wait for 10 seconds before checking again
     else
         echo "Heroic is not running. Exiting."
         curl http://127.0.0.1:1234/reloadgames
