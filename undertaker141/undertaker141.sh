@@ -12,14 +12,25 @@ LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/undertak
 KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/undertaker/extra/UnderTaker141.sh.keys"
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
-# Step 2: Check if UnderTaker141 is installed
-if [[ ! -f $APPPATH ]]; then
-  echo "$APPNAME is not installed. Downloading and installing..."
-  mkdir -p "$APPDIR"  # Ensure the directory exists
-  curl -L -o "$APPPATH" "$UNDERTAKER_INSTALLER_URL"
-  chmod +x "$APPPATH"
-  echo "$APPNAME installation completed."
+if [[ -d $APPDIR ]]; then
+  echo "$APPDIR exists. Removing it to ensure a clean setup..."
+  rm -rf "$APPDIR"
 fi
+
+# Ensure the directory exists
+mkdir -p "$APPDIR"
+
+# Download and install
+echo "$APPNAME is not installed. Downloading and setting up..."
+curl -L -o "$APPPATH" "$UNDERTAKER_INSTALLER_URL"
+
+if [[ $? -ne 0 ]]; then
+  echo "Error: Failed to download $APPNAME. Exiting."
+  exit 1
+fi
+
+chmod +x "$APPPATH"
+echo "$APPNAME installation completed successfully."
 
 # Step 3: Create the ports script using EOF
 mkdir -p "$(dirname "$PORT_SCRIPT")"  # Ensure the ports directory exists
