@@ -8,9 +8,9 @@ emulationstation_config_dir="/userdata/system/configs/emulationstation"
 ps4_scripts_dir="/userdata/roms/ps4"
 
 # URLs for files to download
-es_features_url="https://github.com/trashbus99/batocera-unofficial-addons/raw/main/shadps4/es_ps4/es_features_ps4.cfg"
-es_systems_url="https://github.com/trashbus99/batocera-unofficial-addons/raw/main/shadps4/es_ps4/es_systems_ps4.cfg"
-update_script_url="https://github.com/trashbus99/batocera-unofficial-addons/raw/main/shadps4/es_ps4/%2BUPDATE-PS4-SHORTCUTS.sh"
+es_features_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/shadps4/es_ps4/es_features_ps4.cfg"
+es_systems_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/shadps4/es_ps4/es_systems_ps4.cfg"
+update_script_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/shadps4/es_ps4/%2BUPDATE-PS4-SHORTCUTS.sh"
 
 # Create directories if they don't exist
 mkdir -p "$emulationstation_config_dir"
