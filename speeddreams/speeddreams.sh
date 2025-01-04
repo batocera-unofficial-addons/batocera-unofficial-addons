@@ -11,14 +11,25 @@ LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/speed-dr
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 1: Check if Speed Dreams is installed
-if [[ ! -f $APPPATH ]]; then
-  echo "$APPNAME is not installed. Downloading and installing..."
-  mkdir -p "$APPDIR"  # Ensure the directory exists
-  curl -L -o "$APPPATH" "$SPEED_DREAMS_INSTALLER_URL"
-  chmod +x "$APPPATH"
-  echo "$APPNAME installation completed."
+if [[ -d $APPDIR ]]; then
+  echo "$APPDIR exists. Removing it to ensure a clean setup..."
+  rm -rf "$APPDIR"
 fi
 
+# Ensure the directory exists
+mkdir -p "$APPDIR"
+
+# Download and install
+echo "$APPNAME is not installed. Downloading and setting up..."
+curl -L -o "$APPPATH" "$SPEED_DREAMS_INSTALLER_URL"
+
+if [[ $? -ne 0 ]]; then
+  echo "Error: Failed to download $APPNAME. Exiting."
+  exit 1
+fi
+
+chmod +x "$APPPATH"
+echo "$APPNAME installation completed successfully."
 # Step 2: Create the ports script using EOF
 mkdir -p "$(dirname "$PORT_SCRIPT")"  # Ensure the ports directory exists
 mkdir -p "$(dirname "$ICON_PATH")"   # Ensure the images directory exists
