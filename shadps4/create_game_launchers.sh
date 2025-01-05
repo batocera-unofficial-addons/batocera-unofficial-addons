@@ -59,7 +59,7 @@ while read -r processed_game; do
         echo "Game $processed_game no longer exists. Removing from processed list."
         # Remove associated script and keys files
         sanitized_name=$(echo "$processed_game" | tr ' ' '_' | tr -cd 'a-zA-Z0-9_')
-        rm -f "$output_dir/${sanitized_name}.sh" "$output_dir/${sanitized_name}.sh.keys"
+        rm -f "$output_dir/${sanitized_name}.sh" "$output_dir/${sanitized_name}.sh.keys" "$image_dir/${sanitized_name}.png"
 
         # Remove the game entry from gamelist.xml
         xmlstarlet ed -L \
@@ -154,3 +154,6 @@ fi
         echo "$game_code" >> "$processed_list"
     fi
 done
+
+killall -9 emulationstation
+echo "Script execution completed."
