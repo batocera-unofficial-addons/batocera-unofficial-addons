@@ -99,6 +99,9 @@ EOF
 
 chmod +x "$persistent_desktop"
 
+cp "$persistent_desktop" /usr/share/applications/shadps4.desktop
+chmod +x /usr/share/applications/shadps4.desktop
+
 # Ensure desktop entry is restored at startup
 restore_script="$install_dir/restore_desktop_entry.sh"
 cat <<EOF > "$restore_script"
