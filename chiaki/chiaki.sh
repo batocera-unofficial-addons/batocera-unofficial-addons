@@ -22,7 +22,10 @@ mkdir -p /userdata/system/add-ons/chiaki
 mkdir -p /userdata/system/add-ons/chiaki/chiaki-config
 mkdir -p /userdata/system/logs
 mkdir -p /userdata/roms/ports/images
-
+DESKTOP_FILE="/usr/share/applications/chiaki.desktop"
+PERSISTENT_DESKTOP="/userdata/system/configs/chiaki/chiaki.desktop"
+ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/chiaki/extra/icon.png"
+INSTALL_DIR="/userdata/system/add-ons/chiaki"
 # Step 3: Download the AppImage
 echo "Downloading Chiaki AppImage..."
 wget -q --show-progress -O /userdata/system/add-ons/chiaki/Chiaki.AppImage "$appimage_url"
@@ -33,6 +36,9 @@ fi
 
 chmod a+x /userdata/system/add-ons/chiaki/Chiaki.AppImage
 echo "Chiaki AppImage downloaded and marked as executable."
+
+echo "Downloading icon..."
+wget --show-progress -qO "${INSTALL_DIR}/extra/icon.png" "$ICON_URL"
 
 # Step 4: Create the Chiaki launch script
 echo "Creating Chiaki launch script in Ports..."
@@ -45,8 +51,6 @@ export DISPLAY=:0.0
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/chiaki"
-config_dir="${app_dir}/chiaki-config"
-config_symlink="${HOME}/.config/chiaki"
 app_image="${app_dir}/Chiaki.AppImage"
 log_dir="/userdata/system/logs"
 log_file="${log_dir}/chiaki.log"
@@ -58,19 +62,6 @@ mkdir -p "${log_dir}"
 exec &> >(tee -a "$log_file")
 echo "$(date): Launching Chiaki"
 
-# Create persistent directory for Chiaki config
-mkdir -p "${config_dir}"
-
-# Move existing config if present
-if [ -d "${config_symlink}" ] && [ ! -L "${config_symlink}" ]; then
-    mv "${config_symlink}" "${config_dir}"
-fi
-
-# Ensure config directory is symlinked
-if [ ! -L "${config_symlink}" ]; then
-    ln -sf "${config_dir}" "${config_symlink}"
-fi
-
 # Launch Chiaki AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
@@ -80,6 +71,48 @@ fi
 EOF
 
 chmod +x /userdata/roms/ports/Chiaki.sh
+
+# Create persistent desktop entry
+echo "Creating persistent desktop entry for Chiaki..."
+cat <<EOF > "$PERSISTENT_DESKTOP"
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Chiaki-NG
+Exec=/userdata/roms/ports/Chiaki.sh
+Icon=/userdata/system/add-ons/chiaki/extra/icon.png
+Terminal=false
+Categories=Game;batocera.linux;
+EOF
+
+chmod +x "$PERSISTENT_DESKTOP"
+
+cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+chmod +x "$DESKTOP_FILE"
+
+# Ensure the desktop entry is always restored to /usr/share/applications
+echo "Ensuring Chiaki desktop entry is restored at startup..."
+cat <<EOF > "/userdata/system/configs/chiaki/restore_desktop_entry.sh"
+#!/bin/bash
+# Restore Chiaki desktop entry
+if [ ! -f "$DESKTOP_FILE" ]; then
+    echo "Restoring Chiaki desktop entry..."
+    cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+    chmod +x "$DESKTOP_FILE"
+    echo "Chiaki desktop entry restored."
+else
+    echo "Chiaki desktop entry already exists."
+fi
+EOF
+chmod +x "/userdata/system/configs/heroic/restore_desktop_entry.sh"
+
+# Add to startup
+cat <<EOF > "/userdata/system/custom.sh"
+#!/bin/bash
+# Restore Chiaki desktop entry at startup
+bash /userdata/system/configs/chiaki/restore_desktop_entry.sh &
+EOF
+chmod +x "/userdata/system/custom.sh"
 
 # Step 5: Add Chiaki to Ports menu
 if ! command -v xmlstarlet &> /dev/null; then
