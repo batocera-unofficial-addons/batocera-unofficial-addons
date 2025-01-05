@@ -2,10 +2,10 @@
 
 # Variables to update for different apps
 APP_NAME="OpenRGB"
-REPO=""
-AMD_SUFFIX=""
+AMD_SUFFIX="Linux 64-bit"
 ARM_SUFFIX=""
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/openrgb/extra/openrgb-logo.png"
+REPO_BASE_URL="https://gitlab.com/CalcProgrammer1/OpenRGB/-/releases"
 
 # -----------------------------------------------------------------------------------------------------------------
 
@@ -22,11 +22,11 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url=$(curl -s https://api.github.com/repos/$REPO/releases/latest | jq -r ".assets[] | select(.name | endswith(\"$AMD_SUFFIX\")) | .browser_download_url")
+    appimage_url="${REPO_BASE_URL}/${AMD_SUFFIX}"
 elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: arm64 detected."
     if [ -n "$ARM_SUFFIX" ]; then
-        appimage_url=$(curl -s https://api.github.com/repos/$REPO/releases/latest | jq -r ".assets[] | select(.name | endswith(\"$ARM_SUFFIX\")) | .browser_download_url")
+        appimage_url="${REPO_BASE_URL}/${ARM_SUFFIX}"
     else
         echo "No ARM64 AppImage suffix provided. Skipping download. Exiting."
         exit 1
