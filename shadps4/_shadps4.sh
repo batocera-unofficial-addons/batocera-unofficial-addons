@@ -127,9 +127,9 @@ if ! grep -q "$restore_script" "$custom_startup"; then
 fi
 chmod +x "$custom_startup"
 
-# Step 10: Download the logo
-echo "Downloading ShadPS4 logo..."
-curl -L -o "$install_dir/shadps4-icon.png" https://github.com/DTJW92/batocera-unofficial-addons/raw/main/shadps4/extra/shadps4logo.png
+# Step 10: Run ES System Script
+echo "Creating ES System for PS4..."
+curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/shadps4/es_ps4/es_ps4_install.sh | bash
 
 echo
 echo "Installation complete! A desktop entry has been created and will persist across reboots."
