@@ -103,7 +103,7 @@ for game_dir in "$game_data_dir"/*/; do
         keys_path="${output_dir}/${sanitized_name}.sh.keys"
 
         # Copy game image
-        image_file="$game_dir/${game_code}.png"
+        image_file="$game_dir/pic1.png"
         if [ -f "$image_file" ]; then
             cp "$image_file" "$images_dir/${sanitized_name}.png"
         else
@@ -149,3 +149,5 @@ fi
     fi
 done
 
+killall -9 emulationstation
+echo "Script execution completed."
