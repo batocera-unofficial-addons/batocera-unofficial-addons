@@ -18,6 +18,7 @@ DESKTOP_FILE="${DESKTOP_DIR}/${APP_NAME,,}.desktop"
 # Ensure directories exist
 echo "Creating necessary directories..."
 mkdir -p "$APP_CONFIG_DIR" "$ADDONS_DIR/$APP_NAME"
+mkdir -p $ADDONS_DIR/$APP_NAME/extra/
 
 # Step 1: Detect system architecture
 echo "Detecting system architecture..."
