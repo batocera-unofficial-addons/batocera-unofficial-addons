@@ -22,6 +22,7 @@ mkdir -p /userdata/system/add-ons/chiaki
 mkdir -p /userdata/system/add-ons/chiaki/extra
 mkdir -p /userdata/system/logs
 mkdir -p /userdata/roms/ports/images
+mkdir -p /userdata/system/configs/chiaki
 DESKTOP_FILE="/usr/share/applications/chiaki.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/chiaki/chiaki.desktop"
 ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/chiaki/extra/icon.png"
