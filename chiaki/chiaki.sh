@@ -105,7 +105,7 @@ else
     echo "Chiaki desktop entry already exists."
 fi
 EOF
-chmod +x "/userdata/system/configs/heroic/restore_desktop_entry.sh"
+chmod +x "/userdata/system/configs/chiaki/restore_desktop_entry.sh"
 
 # Add to startup
 cat <<EOF > "/userdata/system/custom.sh"
