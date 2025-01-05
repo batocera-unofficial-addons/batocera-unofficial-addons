@@ -46,21 +46,6 @@ rm -f "$install_dir/shadps4.zip"
 chmod a+x "$install_dir/Shadps4-qt.AppImage"
 echo "ShadPS4 AppImage marked as executable."
 
-# Step 7: Create persistent configuration and log directories
-config_dir="$install_dir/shadps4-config"
-log_dir="/userdata/system/logs"
-
-if [ -d "$config_dir" ]; then
-    echo "Configuration directory $config_dir exists. Deleting and recreating it..."
-    rm -rf "$config_dir"
-fi
-
-mkdir -p "$config_dir"
-
-if [ ! -d "$log_dir" ]; then
-    echo "Log directory $log_dir does not exist. Creating it..."
-    mkdir -p "$log_dir"
-fi
 
 # Step 8: Download and set up monitor_shadps4 and create_game_launchers
 echo "Downloading supporting scripts..."
