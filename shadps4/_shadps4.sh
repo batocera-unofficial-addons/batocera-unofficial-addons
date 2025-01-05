@@ -78,7 +78,7 @@ chmod +x "$launchers_script"
 
 # Step 9: Create a persistent desktop entry
 echo "Creating persistent desktop entry for ShadPS4..."
-persistent_desktop="/userdata/system/configs/shadps4/shadps4.desktop"
+persistent_desktop="/userdata/system/add-ons/shadps4/shadps4.desktop"
 launcher_script="$install_dir/launch_shadps4.sh"
 
 # Create the launcher script
@@ -106,7 +106,7 @@ EOF
 chmod +x "$persistent_desktop"
 
 # Ensure desktop entry is restored at startup
-restore_script="/userdata/system/configs/shadps4/restore_desktop_entry.sh"
+restore_script="/userdata/system/add-ons/shadps4/restore_desktop_entry.sh"
 cat <<EOF > "$restore_script"
 #!/bin/bash
 # Restore ShadPS4 desktop entry
