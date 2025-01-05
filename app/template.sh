@@ -6,6 +6,9 @@ REPO=""
 AMD_SUFFIX=""
 ARM_SUFFIX=""
 LOGO_URL=""
+
+# -----------------------------------------------------------------------------------------------------------------
+
 ADDONS_DIR="/userdata/system/add-ons"
 PORTS_DIR="/userdata/roms/ports"
 LOGS_DIR="/userdata/system/logs"
