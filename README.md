@@ -37,9 +37,9 @@
 - Stremio
 - Fightcade
 - BlissOS
+- Brave
 
 ### 📋 Todo
-- Brave
 
 To install:
 
