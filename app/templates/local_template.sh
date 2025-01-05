@@ -5,10 +5,10 @@ APP_NAME=""
 AMD_SUFFIX=""
 ARM_SUFFIX=""
 LOGO_URL=""
+REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main"
 
 # -----------------------------------------------------------------------------------------------------------------
 
-REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main"
 ADDONS_DIR="/userdata/system/add-ons"
 PORTS_DIR="/userdata/roms/ports"
 LOGS_DIR="/userdata/system/logs"
