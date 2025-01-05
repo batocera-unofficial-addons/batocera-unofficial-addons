@@ -1,10 +1,55 @@
-# Batocera Unofficial Add-ons
-Unofficial add-ons for Batocera, in no way affiliated with the Batocera development team! Install at your own risk, you will find no support in the official discord, better to ask for support in our own discord!
+# Unofficial Add-ons for Batocera
 
+**Unofficial add-ons for Batocera, in no way affiliated with the Batocera development team! Install at your own risk. You will find no support in the official Discord—better to ask for support in our own Discord!**
 
+## Add-Ons Status
 
-WIP - DO NOT ATTEMPT TO INSTALL ANYTHING UNTIL THIS README IS COMPLETE, IT WILL MOST LIKELY BREAK YOUR SYSTEM IF YOU TRY TO!<br>
-Estimated release date: Early 2025
+### ✅ Passed
+- Sunshine
+- Moonlight
+- Tailscale
+- Vesktop
+- Wine Manager
+- Switch
+- Port Master
+- Arcade Manager
+- CS Portable
+- Endless Sky
+- Clone Hero
+- Armagetron
+- Greenlight
+- Chrome
+- Minecraft
+- Heroic Launcher
+- YouTube
+- Netflix
+- Firefox
+- Iptvnator
+- Nvidiapatcher
+- Conty
+- Amazon-Luna
+- Spotify
+- Docker
+- ShadPS4
 
-Follow along with the progress via the Batocera Unofficial Add-Ons discord https://discord.gg/5sfHzMuQ
+### 🛠️ Testing
+- Stremio
+- Fightcade
+- Chiaki
+- BlissOS
+
+### 📋 Todo
+- Brave
+
+To install:
+
+```bash
+# Coming soon
+```
+
+Individual install links won't be provided, the app is needed to handle dependencies. Install the app with the above command, then navigate the menus to find the app that you want to install.
+
+---
+
+Follow along with the progress via the **[Batocera Unofficial Add-Ons Discord](https://discord.gg/5sfHzMuQ)**!
 
