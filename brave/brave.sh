@@ -6,6 +6,9 @@ REPO="srevinsaju/Brave-AppImage"
 AMD_SUFFIX="X86_64.AppImage"
 ARM_SUFFIX=""
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/brave/extra/brave-logo.png"
+
+# -----------------------------------------------------------------------------------------------------------------
+
 ADDONS_DIR="/userdata/system/add-ons"
 PORTS_DIR="/userdata/roms/ports"
 LOGS_DIR="/userdata/system/logs"
