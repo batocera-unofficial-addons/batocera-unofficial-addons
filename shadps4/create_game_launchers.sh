@@ -5,7 +5,9 @@ output_dir="/userdata/roms/ps4"
 gamelist_path="/userdata/roms/ps4/gamelist.xml"
 processed_list="/userdata/system/.local/share/shadPS4/processed_games.txt"
 app_image="/userdata/system/add-ons/shadps4/Shadps4-qt.AppImage"
-mkdir -p "$output_dir"
+image_dir="/userdata/system/add-ons/shadps4/images"
+csv_url="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/shadps4/extra/PS4_Title_ID_List.csv"
+mkdir -p "$output_dir" "$image_dir"
 
 # Default .keys content
 keys_content='{
@@ -74,6 +76,10 @@ if [ ! -f "$gamelist_path" ]; then
     echo '<?xml version="1.0" encoding="UTF-8"?><gameList></gameList>' > "$gamelist_path"
 fi
 
+# Download the CSV file
+csv_file="/tmp/PS4_Title_ID_List.csv"
+wget -q -O "$csv_file" "$csv_url"
+
 # Iterate through game data directories
 for game_dir in "$output_dir"/*/; do
     if [ -d "$game_dir" ]; then
@@ -90,13 +96,19 @@ for game_dir in "$output_dir"/*/; do
             continue
         fi
 
-        # Extract game name from pronunciation.xml
-        pronunciation_file="$game_dir/sce_sys/pronunciation.xml"
-        if [ -f "$pronunciation_file" ]; then
-            game_name=$(grep -oP '(?<=<text display="1">).*?(?=</text>)' "$pronunciation_file" | tail -n 1)
+        # Search the CSV for game details
+        csv_entry=$(awk -F ',' -v id="$game_code" '$1 == id {print $0}' "$csv_file")
+        if [ -n "$csv_entry" ]; then
+            game_name=$(echo "$csv_entry" | awk -F ',' '{print $2}')
+            image_url=$(echo "$csv_entry" | awk -F ',' '{print $3}')
+
+            # Download the game image
+            image_file="$image_dir/${sanitized_name}.png"
+            wget -q -O "$image_file" "$image_url"
         else
-            echo "Warning: pronunciation.xml not found for $game_code. Using game code as name."
+            echo "Warning: No entry found for $game_code in CSV. Using game code as name."
             game_name="$game_code"
+            image_file=""
         fi
 
         # Log the extracted game name
@@ -128,12 +140,11 @@ fi
         echo "Keys file created: $keys_path"
 
         # Update gamelist.xml with the new game
-        game_image="${game_dir}/sce_sys/icon0.png"
         xmlstarlet ed -L \
             -s "/gameList" -t elem -n "game" -v "" \
             -s "/gameList/game[last()]" -t elem -n "path" -v "./${sanitized_name}.sh" \
             -s "/gameList/game[last()]" -t elem -n "name" -v "${game_name_escaped}" \
-            -s "/gameList/game[last()]" -t elem -n "image" -v "${game_image}" \
+            -s "/gameList/game[last()]" -t elem -n "image" -v "${image_file}" \
             -s "/gameList/game[last()]" -t elem -n "rating" -v "0" \
             -s "/gameList/game[last()]" -t elem -n "releasedate" -v "19700101T010000" \
             -s "/gameList/game[last()]" -t elem -n "lang" -v "en" \
