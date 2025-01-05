@@ -64,7 +64,7 @@ if [ $? -ne 0 ]; then
     echo "Failed to download $APP_NAME icon."
     exit 1
 fi
-
+mkdir -p $ADDONS_DIR/$APP_NAME/extra/
 # Step 3: Create persistent desktop entry
 echo "Creating persistent desktop entry for $APP_NAME..."
 cat <<EOF > "$PERSISTENT_DESKTOP"
