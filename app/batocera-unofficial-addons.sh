@@ -94,6 +94,8 @@ apps=(
     ["FIREFOX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/firefox/firefox.sh | bash"
     ["SPOTIFY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/spotify/spotify.sh | bash"
     ["DOCKER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash"
+    ["ARCADEMANAGER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/arcademanager/arcademanager.sh | bash"
+    ["CSPORTABLE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/csportable/csportable.sh | bash"
 )
 
 descriptions=(
@@ -103,7 +105,7 @@ descriptions=(
     ["SWITCH"]="Install Nintendo Switch emulation on Batocera."
     ["TAILSCALE"]="A VPN service to secure your Batocera network connections."
     ["WINEMANAGER"]="A wine manager for running Windows games on Batocera."
-    ["SHADPS4"]="Experimental PlayStation 4 streaming support, not guaranteed to work."
+    ["SHADPS4"]="Experimental PlayStation 4 emulator, not guaranteed to work for every game."
     ["CONTY"]="A standalone Linux distro container."
     ["MINECRAFT"]="Minecraft: Java or Bedrock Edition on Batocera."
     ["ARMAGETRON"]="A Tron-style game for Batocera."
@@ -122,13 +124,16 @@ descriptions=(
     ["FIREFOX"]="Mozilla Firefox browser for accessing the web."
     ["SPOTIFY"]="Spotify music streaming client for Batocera."
     ["DOCKER"]="A tool to manage and run containerized applications."
+    ["ARCADEMANAGER"]="A tool to manage arcade ROMs and games in Batocera."
+    ["CSPORTABLE"]="Counter-Strike Portable, a fan-made version of Counter-Strike for Batocera."
 )
+
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER"
     ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER"
 )
 
