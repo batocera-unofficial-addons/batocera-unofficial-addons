@@ -51,5 +51,5 @@ Individual install links won't be provided, the app is needed to handle dependen
 
 ---
 
-Follow along with the progress via the **[Batocera Unofficial Add-Ons Discord](https://discord.gg/5sfHzMuQ)**!
+Request and support via the **[Batocera Unofficial Add-Ons Discord](https://discord.gg/5sfHzMuQ)**!
 
