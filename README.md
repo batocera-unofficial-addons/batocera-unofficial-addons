@@ -31,11 +31,11 @@
 - Spotify
 - Docker
 - ShadPS4
+- Chiaki-NG
 
 ### 🛠️ Testing
 - Stremio
 - Fightcade
-- Chiaki
 - BlissOS
 
 ### 📋 Todo
