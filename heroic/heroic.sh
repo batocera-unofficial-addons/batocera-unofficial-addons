@@ -84,6 +84,9 @@ EOF
 
 chmod +x "$PERSISTENT_DESKTOP"
 
+cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+chmod +x "$DESKTOP_FILE"
+
 # Ensure the desktop entry is always restored to /usr/share/applications
 echo "Ensuring Heroic desktop entry is restored at startup..."
 cat <<EOF > "/userdata/system/configs/heroic/restore_desktop_entry.sh"
