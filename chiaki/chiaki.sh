@@ -19,7 +19,7 @@ fi
 # Step 2: Prepare directories
 echo "Setting up directories..."
 mkdir -p /userdata/system/add-ons/chiaki
-mkdir -p /userdata/system/add-ons/chiaki/chiaki-config
+mkdir -p /userdata/system/add-ons/chiaki/extra
 mkdir -p /userdata/system/logs
 mkdir -p /userdata/roms/ports/images
 DESKTOP_FILE="/usr/share/applications/chiaki.desktop"
