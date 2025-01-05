@@ -133,3 +133,5 @@ curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main
 
 echo
 echo "Installation complete! A desktop entry has been created and will persist across reboots."
+killall -9 emulationstation
+echo "Script execution completed."
