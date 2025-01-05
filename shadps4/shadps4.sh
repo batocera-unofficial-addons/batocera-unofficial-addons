@@ -78,7 +78,7 @@ chmod +x "$launchers_script"
 
 # Step 9: Create a persistent desktop entry
 echo "Creating persistent desktop entry for ShadPS4..."
-persistent_desktop="/userdata/system/add-ons/shadps4/shadps4.desktop"
+persistent_desktop="$install_dir/shadps4.desktop"
 launcher_script="$install_dir/launch_shadps4.sh"
 
 # Create the launcher script
@@ -91,6 +91,15 @@ DISPLAY=:0.0 "$install_dir/Shadps4-qt.AppImage" "\$@"
 EOF
 chmod +x "$launcher_script"
 
+# Step 9.1: Download and set up the icon
+echo "Downloading ShadPS4 icon..."
+icon_dir="$install_dir/extra"
+mkdir -p "$icon_dir"
+icon_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/shadps4/extra/shadps4-icon.png"
+icon_path="$icon_dir/shadps4-icon.png"
+
+wget -q --show-progress -O "$icon_path" "$icon_url"
+
 # Create the desktop entry
 cat <<EOF > "$persistent_desktop"
 [Desktop Entry]
@@ -98,7 +107,7 @@ Version=1.0
 Type=Application
 Name=ShadPS4 Emulator
 Exec=$launcher_script
-Icon=$install_dir/shadps4-icon.png
+Icon=$icon_path
 Terminal=false
 Categories=Game;batocera.linux;
 EOF
@@ -106,7 +115,7 @@ EOF
 chmod +x "$persistent_desktop"
 
 # Ensure desktop entry is restored at startup
-restore_script="/userdata/system/add-ons/shadps4/restore_desktop_entry.sh"
+restore_script="$install_dir/restore_desktop_entry.sh"
 cat <<EOF > "$restore_script"
 #!/bin/bash
 # Restore ShadPS4 desktop entry
