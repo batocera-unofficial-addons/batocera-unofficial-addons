@@ -2,10 +2,10 @@
 
 # Variables to update for different apps
 APP_NAME="OpenRGB"
-AMD_SUFFIX=""
+AMD_SUFFIX="OpenRGB_0.9_x86_64_b5f46e3.AppImage"
 ARM_SUFFIX=""
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/openrgb/extra/openrgb-logo.png"
-REPO_BASE_URL="https://openrgb.org/releases/release_0.9/OpenRGB_0.9_x86_64_b5f46e3.AppImage"
+REPO_BASE_URL="https://openrgb.org/releases/release_0.9/"
 
 # -----------------------------------------------------------------------------------------------------------------
 
