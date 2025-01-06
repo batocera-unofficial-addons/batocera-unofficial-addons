@@ -6,6 +6,7 @@ REPO_BASE_URL="https://web.fightcade.com/download/"
 AMD_SUFFIX="Fightcade-linux-latest.tar.gz"
 ARM_SUFFIX=""
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/extra/fightcade-logo.png"
+SYM_WINE_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/sym_wine.sh"
 # Directories
 ADDONS_DIR="/userdata/system/add-ons"
 PORTS_DIR="/userdata/roms/ports"
@@ -13,6 +14,7 @@ LOGS_DIR="/userdata/system/logs"
 GAME_LIST="/userdata/roms/ports/gamelist.xml"
 PORT_SCRIPT="${PORTS_DIR}/${APP_NAME}.sh"
 LOGO_PATH="${PORTS_DIR}/images/${APP_NAME,,}-logo.png"
+SYM_WINE_SCRIPT="${ADDONS_DIR}/${APP_NAME,,}/extra/sym_wine.sh"
 
 # Ensure directories exist
 echo "Creating necessary directories..."
@@ -107,7 +109,7 @@ fi
 echo "lib.zip downloaded, extracted, and cleaned up successfully in $LIB_DIR."
 
 # Create the directory for the bin files
-BIN_DIR="$ADDONS_DIR/${APP_NAME,,}/bin"
+BIN_DIR="$ADDONS_DIR/${APP_NAME,,}/usr/bin"
 mkdir -p "$BIN_DIR"
 
 # Download the wine AppImage and save it as "wine"
@@ -129,6 +131,17 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "wine AppImage downloaded and saved as 'wine' in $BIN_DIR."
+
+echo "Downloading sym_wine.sh..."
+wget -q --show-progress -O "$SYM_WINE_SCRIPT" "$SYM_WINE_URL"
+
+if [ $? -ne 0 ]; then
+    echo "Failed to download sym_wine.sh."
+    exit 1
+fi
+
+# Make sym_wine.sh executable
+chmod +x "$SYM_WINE_SCRIPT"
 
 # Define the emulator directory
 EMULATOR_DIR="$ADDONS_DIR/${APP_NAME,,}/${APP_NAME}/emulator"
@@ -193,6 +206,8 @@ mkdir -p "\${log_dir}"
 # Append all output to the log file
 exec &> >(tee -a "\$log_file")
 echo "\$(date): Launching $APP_NAME"
+
+${ADDONS_DIR}/${APP_NAME,,}/extra/sym_wine.sh &
 
 if [ -x "\${app_dir}/Fightcade2.sh" ]; then
     cd "\${app_dir}"
