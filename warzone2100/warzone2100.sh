@@ -6,7 +6,6 @@ AMD_SUFFIX="download?id=1GnUk2BsU6N2zX-XmEtPjcCjz6a4hm9d-&export=download&confir
 ARM_SUFFIX=""
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/warzone2100/extra/warzone-logo.png"
 REPO_BASE_URL="https://drive.usercontent.google.com"
-"
 
 # -----------------------------------------------------------------------------------------------------------------
 
@@ -84,7 +83,7 @@ echo "\$(date): Launching $APP_NAME"
 # Launch AppImage
 if [ -x "\${app_image}" ]; then
     cd "\${app_dir}"
-    ./${APP_NAME,,}.AppImage "\$@" > "\${log_file}" 2>&1
+    ./"${APP_NAME,,}.AppImage" "\$@" > "\${log_file}" 2>&1
     echo "$APP_NAME exited."
 else
     echo "$APP_NAME.AppImage not found or not executable."
