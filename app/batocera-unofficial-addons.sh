@@ -160,11 +160,13 @@ while true; do
         "Developer Tools" "Install developer and patching tools" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
-    # Exit if the user selects "Exit" or cancels
-    if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
-        echo "Exiting the installer."
-        exit 0
-    fi
+# Exit if the user selects "Exit" or cancels
+if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
+    dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
+    sleep 5  # Pause for 3 seconds to let the user read the message
+    clear
+    exit 0
+fi
 
     # Based on category, show the corresponding apps
     while true; do
