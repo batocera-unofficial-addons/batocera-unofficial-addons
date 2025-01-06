@@ -83,7 +83,7 @@ echo "\$(date): Launching $APP_NAME"
 # Launch AppImage
 if [ -x "\${app_image}" ]; then
     cd "\${app_dir}"
-    ./\${APP_NAME,,}.AppImage "$@" > "\${log_file}" 2>&1
+    ./${APP_NAME,,}.AppImage "$@" > "\${log_file}" 2>&1
     echo "$APP_NAME exited."
 else
     echo "$APP_NAME.AppImage not found or not executable."
