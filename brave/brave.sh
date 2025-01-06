@@ -68,8 +68,8 @@ export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
 
 # Directories and file paths
-app_dir="$ADDONS_DIR/$APP_NAME"
-app_image="${app_dir}/${APP_NAME,,}.AppImage"
+app_dir="$ADDONS_DIR/${APP_NAME,,}"
+app_image="\${app_dir}/${APP_NAME,,}.AppImage"
 log_dir="$LOGS_DIR"
 log_file="\${log_dir}/${APP_NAME,,}.log"
 
@@ -83,7 +83,7 @@ echo "\$(date): Launching $APP_NAME"
 # Launch AppImage
 if [ -x "\${app_image}" ]; then
     cd "\${app_dir}"
-    ./\${APP_NAME,,}.AppImage "$@" > "\${log_file}" 2>&1
+    ./${APP_NAME,,}.AppImage --no-sandbox > "\${log_file}" 2>&1
     echo "$APP_NAME exited."
 else
     echo "$APP_NAME.AppImage not found or not executable."

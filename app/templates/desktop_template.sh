@@ -60,7 +60,7 @@ echo "$APP_NAME AppImage downloaded and marked as executable."
 
 # Step 2.5: Download the application icon
 echo "Downloading $APP_NAME icon..."
-wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/extra/${APP_NAME,,}-icon.png" "$ICON_PATH"
+wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/extra/${APP_NAME,,}-icon.png" "$ICON_URL"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download $APP_NAME icon."
