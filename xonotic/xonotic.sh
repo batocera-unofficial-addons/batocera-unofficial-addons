@@ -4,7 +4,7 @@
 APP_NAME="Xonotic"
 AMD_SUFFIX="xonotic-0.8.6.zip"
 ARM_SUFFIX=""
-LOGO_URL=""
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/xonotic/extra/xonotic-logo.jpg"
 REPO_BASE_URL="https://dl.unvanquished.net/share/xonotic/release"
 
 # -----------------------------------------------------------------------------------------------------------------
