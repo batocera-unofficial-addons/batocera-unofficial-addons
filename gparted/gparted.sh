@@ -4,7 +4,7 @@
 APP_NAME="GParted"
 AMD_SUFFIX="gparted-x86_64.AppImage"
 ARM_SUFFIX="gparted.AppImage"
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/gparted/extra/gparted-icon.png"
+ICON_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/gparted/extra/gparted-icon.png"
 REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/gparted/"
 
 # -----------------------------------------------------------------------------------------------------------------
