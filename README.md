@@ -37,6 +37,7 @@
 - Warzone 2100
 - Brave
 - Fightcade
+- SuperTuxKart
 
 ### 🛠️ Testing
 - Stremio
