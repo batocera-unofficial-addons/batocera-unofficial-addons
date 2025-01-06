@@ -3,7 +3,7 @@
 
 # Variables to update for different apps
 APP_NAME="Fightcade"
-REPO_BASE_URL="https://web.fightcade.com/download"
+REPO_BASE_URL="https://web.fightcade.com/download/"
 AMD_SUFFIX="Fightcade-linux-latest.tar.gz"
 ARM_SUFFIX=""
 ICON_URL=""
