@@ -101,6 +101,7 @@ apps=(
     ["WARZONE2100"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/warzone2100/warzone2100.sh | bash"
     ["XONOTIC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/xonotic/xonotic.sh | bash"
     ["FIGHTCADE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/fightcade.sh | bash"
+    ["SUPERTUXKART"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertuxkart/supertuxkart.sh | bash"
 )
 
 descriptions=(
@@ -136,13 +137,14 @@ descriptions=(
     ["WARZONE2100"]="Warzone 2100, a real-time strategy and tactics game."
     ["XONOTIC"]="Xonotic, a fast-paced open-source arena shooter game."
     ["FIGHTCADE"]="Fightcade is a matchmaking platform that allows you to play classic arcade games online with players worldwide."
+    ["SUPERTUXKART"]="SuperTuxKart is a fun, free, and open-source kart racing game featuring various characters, tracks, and game modes."
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART"
     ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB"
     ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER"
 )
