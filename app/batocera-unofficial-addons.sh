@@ -130,14 +130,18 @@ descriptions=(
     ["DOCKER"]="A tool to manage and run containerized applications."
     ["ARCADEMANAGER"]="A tool to manage arcade ROMs and games in Batocera."
     ["CSPORTABLE"]="Counter-Strike Portable, a fan-made version of Counter-Strike for Batocera."
+    ["BRAVE"]="Brave browser, a privacy-focused web browser."
+    ["OPENRGB"]="OpenRGB, a tool for managing RGB lighting on various devices."
+    ["WARZONE2100"]="Warzone 2100, a real-time strategy and tactics game."
+    ["XONOTIC"]="Xonotic, a fast-paced open-source arena shooter game."
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB"
     ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER"
 )
 
