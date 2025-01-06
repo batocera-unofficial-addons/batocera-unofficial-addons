@@ -119,6 +119,7 @@ for game_dir in "$output_dir"/*/; do
 
         # Generate script content
         script_content="#/bin/bash
+ulimit -H -n 819200 && ulimit -S -n 819200
 #------------------------------------------------
 if [ -x \"${app_image}\" ]; then
     batocera-mouse show
