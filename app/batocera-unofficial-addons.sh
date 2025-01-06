@@ -107,40 +107,40 @@ apps=(
 )
 
 descriptions=(
-    ["SUNSHINE"]="A game streaming app to use with Batocera for remote play."
-    ["MOONLIGHT"]="Game streaming software for PC gaming on your Batocera machine."
-    ["NVIDIAPATCHER"]="Patch for enabling NVIDIA GPU support in Batocera."
-    ["SWITCH"]="Install Nintendo Switch emulation on Batocera."
-    ["TAILSCALE"]="A VPN service to secure your Batocera network connections."
-    ["WINEMANAGER"]="A wine manager for running Windows games on Batocera."
-    ["SHADPS4"]="Experimental PlayStation 4 emulator, not guaranteed to work for every game."
-    ["CONTY"]="A standalone Linux distro container."
-    ["MINECRAFT"]="Minecraft: Java or Bedrock Edition on Batocera."
-    ["ARMAGETRON"]="A Tron-style game for Batocera."
-    ["CLONEHERO"]="A Guitar Hero clone for Batocera, works with guitar controllers."
-    ["VESKTOP"]="A Discord application for Batocera."
-    ["ENDLESS-SKY"]="A space exploration game for Batocera."
-    ["CHIAKI"]="An open-source PlayStation Remote Play client for streaming PS4 and PS5 games."
-    ["CHROME"]="Google Chrome browser for accessing the web."
-    ["AMAZON-LUNA"]="Amazon Luna game streaming service client."
-    ["PORTMASTER"]="Designed and streamlined for handlehelds, download and install games."
-    ["GREENLIGHT"]="An open-source client for xCloud and Xbox home streaming"
-    ["HEROIC"]="Heroic Game Launcher for V39/40/41. Epic, GOG and Amazon Games."
-    ["YOUTUBE"]="A YouTube client for Batocera."
+    ["SUNSHINE"]="Game streaming app for remote play on Batocera."
+    ["MOONLIGHT"]="Stream PC games on Batocera."
+    ["NVIDIAPATCHER"]="Enable NVIDIA GPU support on Batocera."
+    ["SWITCH"]="Nintendo Switch emulator for Batocera."
+    ["TAILSCALE"]="VPN service for secure Batocera connections."
+    ["WINEMANAGER"]="Manage Windows games with Wine on Batocera."
+    ["SHADPS4"]="Experimental PS4 streaming client."
+    ["CONTY"]="Standalone Linux distro container."
+    ["MINECRAFT"]="Minecraft: Java or Bedrock Edition."
+    ["ARMAGETRON"]="Tron-style light cycle game."
+    ["CLONEHERO"]="Guitar Hero clone for Batocera."
+    ["VESKTOP"]="Discord client for Batocera."
+    ["ENDLESS-SKY"]="Space exploration game."
+    ["CHIAKI"]="PS4/PS5 Remote Play client."
+    ["CHROME"]="Google Chrome web browser."
+    ["AMAZON-LUNA"]="Amazon Luna game streaming client."
+    ["PORTMASTER"]="Download and manage games on handhelds."
+    ["GREENLIGHT"]="Client for xCloud and Xbox streaming."
+    ["HEROIC"]="Epic, GOG, and Amazon Games launcher."
+    ["YOUTUBE"]="YouTube client for Batocera."
     ["NETFLIX"]="Netflix streaming app for Batocera."
-    ["IPTVNATOR"]="A client for watching IPTV on Batocera."
-    ["FIREFOX"]="Mozilla Firefox browser for accessing the web."
-    ["SPOTIFY"]="Spotify music streaming client for Batocera."
-    ["DOCKER"]="A tool to manage and run containerized applications."
-    ["ARCADEMANAGER"]="A tool to manage arcade ROMs and games in Batocera."
-    ["CSPORTABLE"]="Counter-Strike Portable, a fan-made version of Counter-Strike for Batocera."
-    ["BRAVE"]="Brave browser, a privacy-focused web browser."
-    ["OPENRGB"]="OpenRGB, a tool for managing RGB lighting on various devices."
-    ["WARZONE2100"]="Warzone 2100, a real-time strategy and tactics game."
-    ["XONOTIC"]="Xonotic, a fast-paced open-source arena shooter game."
-    ["FIGHTCADE"]="Fightcade is a matchmaking platform that allows you to play classic arcade games online with players worldwide."
-    ["SUPERTUXKART"]="SuperTuxKart is a fun, free, and open-source kart racing game featuring various characters, tracks, and game modes."
-    ["OPENRA"]="OpenRA is a modernized open-source reimplementation of classic real-time strategy games like Command & Conquer and Red Alert."
+    ["IPTVNATOR"]="IPTV client for watching live TV."
+    ["FIREFOX"]="Mozilla Firefox browser."
+    ["SPOTIFY"]="Spotify music streaming client."
+    ["DOCKER"]="Manage and run containerized apps."
+    ["ARCADEMANAGER"]="Manage arcade ROMs and games."
+    ["CSPORTABLE"]="Fan-made portable Counter-Strike."
+    ["BRAVE"]="Privacy-focused Brave browser."
+    ["OPENRGB"]="Manage RGB lighting on devices."
+    ["WARZONE2100"]="Real-time strategy and tactics game."
+    ["XONOTIC"]="Fast-paced open-source arena shooter."
+    ["FIGHTCADE"]="Play classic arcade games online."
+    ["SUPERTUXKART"]="Free and open-source kart racer."
+    ["OPENRA"]="Modernized RTS for Command & Conquer."
 )
 
 
@@ -170,13 +170,13 @@ while true; do
     while true; do
         case "$category_choice" in
             "Games")
-                selected_apps="${categories["Games"]}"
+                selected_apps=$(echo "${categories["Games"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Utilities")
-                selected_apps="${categories["Utilities"]}"
+                selected_apps=$(echo "${categories["Utilities"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Developer Tools")
-                selected_apps="${categories["Developer Tools"]}"
+                selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             *)
                 echo "Invalid choice!"
