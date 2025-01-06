@@ -103,7 +103,7 @@ exec &> >(tee -a "\$log_file")
 echo "\$(date): Launching $APP_NAME"
 
 # Launch Xonotic
-    {$xono} "\$@" > "\${log_file}" 2>&1
+    \${xono} "\$@" > "\${log_file}" 2>&1
     echo "$APP_NAME exited."
 else
     echo "$APP_NAME not found or not executable."
