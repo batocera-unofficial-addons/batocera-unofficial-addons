@@ -32,12 +32,15 @@
 - Docker
 - ShadPS4
 - Chiaki-NG
+- OpenRGB
+- Xonotic
+- Warzone 2100
+- Brave
 
 ### 🛠️ Testing
 - Stremio
 - Fightcade
 - BlissOS
-- Brave
 
 ### 📋 Todo
 
@@ -51,5 +54,5 @@ Individual install links won't be provided, the app is needed to handle dependen
 
 ---
 
-Request and support via the **[Batocera Unofficial Add-Ons Discord](https://discord.gg/5sfHzMuQ)**!
+Request and support via the **[Batocera Unofficial Add-Ons Discord](https://discord.gg/Uc9BVbDH9e)**!
 
