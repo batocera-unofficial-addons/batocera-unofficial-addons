@@ -3,7 +3,7 @@
 # Variables for SuperTuxKart
 APP_NAME="SuperTuxKart"
 ARCHIVE_URL="https://github.com/supertuxkart/stk-code/releases/download/1.4/SuperTuxKart-1.4-linux-x86_64.tar.xz"
-LOGO_URL=""
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/supertuxkart/extra/supertuxkart-logo.png"
 
 # Directories
 ADDONS_DIR="/userdata/system/add-ons"
