@@ -2,10 +2,10 @@
 
 # Variables to update for different apps
 APP_NAME="Viber"
-AMD_SUFFIX="viber.AppImage"
+AMD_SUFFIX=""
 ARM_SUFFIX=""
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/viber/extra/viber-logo.png"
-REPO_BASE_URL="https://download.cdn.viber.com/desktop/Linux/"
+REPO_BASE_URL="https://download.cdn.viber.com/desktop/Linux/viber.AppImage"
 
 # -----------------------------------------------------------------------------------------------------------------
 
