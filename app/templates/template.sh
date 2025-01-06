@@ -43,15 +43,15 @@ fi
 
 # Step 2: Download the AppImage
 echo "Downloading $APP_NAME AppImage from $appimage_url..."
-mkdir -p "$ADDONS_DIR/$APP_NAME"
-wget -q --show-progress -O "$ADDONS_DIR/$APP_NAME/${APP_NAME}.AppImage" "$appimage_url"
+mkdir -p "$ADDONS_DIR/${APP_NAME,,}"
+wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.AppImage" "$appimage_url"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download $APP_NAME AppImage."
     exit 1
 fi
 
-chmod a+x "$ADDONS_DIR/$APP_NAME/${APP_NAME}.AppImage"
+chmod a+x "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.AppImage"
 echo "$APP_NAME AppImage downloaded and marked as executable."
 
 # Create persistent log directory
@@ -66,11 +66,10 @@ cat << EOF > "$PORT_SCRIPT"
 # Environment setup
 export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
-export HOME="$ADDONS_DIR/$APP_NAME"
 
 # Directories and file paths
 app_dir="$ADDONS_DIR/$APP_NAME"
-app_image="\${app_dir}/${APP_NAME}.AppImage"
+app_image="${app_dir}/${APP_NAME,,}.AppImage"
 log_dir="$LOGS_DIR"
 log_file="\${log_dir}/${APP_NAME,,}.log"
 
@@ -84,7 +83,7 @@ echo "\$(date): Launching $APP_NAME"
 # Launch AppImage
 if [ -x "\${app_image}" ]; then
     cd "\${app_dir}"
-    ./\${app_image} "$@" > "\${log_file}" 2>&1
+    ./\${APP_NAME,,}.AppImage "$@" > "\${log_file}" 2>&1
     echo "$APP_NAME exited."
 else
     echo "$APP_NAME.AppImage not found or not executable."
