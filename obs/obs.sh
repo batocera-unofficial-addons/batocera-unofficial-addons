@@ -4,7 +4,7 @@
 APP_NAME="OBS"
 AMD_SUFFIX="download?id=11Nk8on_WdFAV6MuQqhugxm7okENPv7sj&export=download&authuser=0&confirm=t&uuid=968556f0-a20a-4f03-a037-e5f999e6f2c1&at=APvzH3rQ2MdC-UuEVlq1_gTT-d9v:1736149388417"
 ARM_SUFFIX=""
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/obs/extra/obs-logo.png"
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/obs/extra/obs-logo.jpg"
 REPO_BASE_URL="https://drive.usercontent.google.com"
 
 # -----------------------------------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@ PORTS_DIR="/userdata/roms/ports"
 LOGS_DIR="/userdata/system/logs"
 GAME_LIST="/userdata/roms/ports/gamelist.xml"
 PORT_SCRIPT="${PORTS_DIR}/${APP_NAME}.sh"
-LOGO_PATH="${PORTS_DIR}/images/${APP_NAME,,}-logo.png"
+LOGO_PATH="${PORTS_DIR}/images/${APP_NAME,,}-logo.jpg"
 
 # Step 1: Detect system architecture
 echo "Detecting system architecture..."
