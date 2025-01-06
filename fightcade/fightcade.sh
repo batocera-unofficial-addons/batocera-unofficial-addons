@@ -49,7 +49,7 @@ fi
 # Step 2: Download
 echo "Downloading $APP_NAME from $appimage_url..."
 mkdir -p "$ADDONS_DIR/${APP_NAME,,}"
-wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}/Fightcade-linux-latest.tar.gz" "$appimage_url"
+wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}" "$appimage_url"
 
 # Extract the downloaded tar.gz file
 echo "Extracting $APP_NAME tar.gz file..."
