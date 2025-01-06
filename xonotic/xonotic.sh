@@ -91,7 +91,7 @@ export DISPLAY=:0.0
 
 # Directories and file paths
 app_dir="$ADDONS_DIR/${APP_NAME,,}"
-xono="\$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}/$APP_NAME/xonotic-linux-sdl.sh"
+xono="\${app_dir}/$APP_NAME/xonotic-linux-sdl.sh"
 log_dir="$LOGS_DIR"
 log_file="\${log_dir}/${APP_NAME,,}.log"
 
@@ -103,7 +103,7 @@ exec &> >(tee -a "\$log_file")
 echo "\$(date): Launching $APP_NAME"
 
 # Launch Xonotic
-    {$xono} "\$@" > "\${log_file}" 2>&1
+    \${xono} "\$@" > "\${log_file}" 2>&1
     echo "$APP_NAME exited."
 else
     echo "$APP_NAME not found or not executable."
