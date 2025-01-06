@@ -38,9 +38,9 @@
 - Brave
 - Fightcade
 - SuperTuxKart
+- OpenRA
 
 ### 🛠️ Testing
-- Stremio
 - BlissOS
 
 ### 📋 Todo
