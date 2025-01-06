@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Variables to update for different apps
@@ -6,15 +5,14 @@ APP_NAME="Fightcade"
 REPO_BASE_URL="https://web.fightcade.com/download/"
 AMD_SUFFIX="Fightcade-linux-latest.tar.gz"
 ARM_SUFFIX=""
-ICON_URL=""
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/extra/fightcade-logo.png"
 # Directories
 ADDONS_DIR="/userdata/system/add-ons"
-CONFIGS_DIR="/userdata/system/configs"
-DESKTOP_DIR="/usr/share/applications"
-CUSTOM_SCRIPT="/userdata/system/custom.sh"
-APP_CONFIG_DIR="${CONFIGS_DIR}/${APP_NAME,,}"
-PERSISTENT_DESKTOP="${APP_CONFIG_DIR}/${APP_NAME,,}.desktop"
-DESKTOP_FILE="${DESKTOP_DIR}/${APP_NAME,,}.desktop"
+PORTS_DIR="/userdata/roms/ports"
+LOGS_DIR="/userdata/system/logs"
+GAME_LIST="/userdata/roms/ports/gamelist.xml"
+PORT_SCRIPT="${PORTS_DIR}/${APP_NAME}.sh"
+LOGO_PATH="${PORTS_DIR}/images/${APP_NAME,,}-logo.png"
 
 # Ensure directories exist
 echo "Creating necessary directories..."
@@ -49,7 +47,7 @@ fi
 # Step 2: Download
 echo "Downloading $APP_NAME from $appimage_url..."
 mkdir -p "$ADDONS_DIR/${APP_NAME,,}"
-wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}/Fightcade-linux-latest.tar.gz" "$appimage_url"
+wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/Fightcade-linux-latest.tar.gz" "$appimage_url"
 
 # Extract the downloaded tar.gz file
 echo "Extracting $APP_NAME tar.gz file..."
@@ -138,7 +136,7 @@ cd "$EMULATOR_DIR"
 
 # Download the JSON file archive
 echo "Downloading json.zip into $EMULATOR_DIR..."
-wget -q --show-progress -O "json.zip" "https://archive.org/download/Fightcade_Json/json.zip"
+wget -q --show-progress -O "json.zip" "https://fightcade.download/fc2json.zip"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download json.zip."
@@ -154,19 +152,16 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Move JSON files to the emulator directory
-echo "Moving JSON files to $EMULATOR_DIR..."
-mv ./json/* . 2>/dev/null
-
-if [ $? -ne 0 ]; then
-    echo "Failed to move JSON files."
-    exit 1
+if [ -d "./json" ]; then
+    mv ./json/* . 2>/dev/null
+else
+    mv ./* . 2>/dev/null
 fi
-sleep 2
+
 
 # Remove the extracted json directory and the zip file
 echo "Cleaning up extracted files..."
-rm -r "./json" 2>/dev/null
+[ -d "./json" ] && rm -r "./json"
 rm "json.zip" 2>/dev/null
 
 if [ $? -ne 0 ]; then
@@ -176,49 +171,55 @@ fi
 
 echo "JSON files downloaded, extracted, moved, and cleaned up successfully in $EMULATOR_DIR."
 
-# Step 3: Create persistent desktop entry
-echo "Creating persistent desktop entry for $APP_NAME..."
-cat <<EOF > "$PERSISTENT_DESKTOP"
-#!/usr/bin/env xdg-open
-[Desktop Entry]
-Version=1.0
-Type=Application
-Terminal=false
-Exec=/userdata/system/add-ons/fightcade/Fightcade/Fightcade2.sh
-Name=Fightcade
-Comment=Fightcade
-Categories=Game;Emulator;ArcadeGame
-Icon=/userdata/system/add-ons/fightcade/Fightcade/fc2-electron/resources/app/icon.png
-EOF
-
-chmod +x "$PERSISTENT_DESKTOP"
-
-cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
-chmod +x "$DESKTOP_FILE"
-
-# Ensure the desktop entry is always restored to /usr/share/applications
-echo "Ensuring $APP_NAME desktop entry is restored at startup..."
-cat <<EOF > "${APP_CONFIG_DIR}/restore_desktop_entry.sh"
+# Step 3: Create the app launch script
+echo "Creating $APP_NAME script in Ports..."
+mkdir -p "$PORTS_DIR"
+cat << EOF > "$PORT_SCRIPT"
 #!/bin/bash
-# Restore $APP_NAME desktop entry
-if [ ! -f "$DESKTOP_FILE" ]; then
-    echo "Restoring $APP_NAME desktop entry..."
-    cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
-    chmod +x "$DESKTOP_FILE"
-    echo "$APP_NAME desktop entry restored."
+
+# Environment setup
+export \$(cat /proc/1/environ | tr '\0' '\n')
+export DISPLAY=:0.0
+export HOME=${ADDONS_DIR}/${APP_NAME,,}
+
+# Directories and file paths
+app_dir="$ADDONS_DIR/${APP_NAME,,}/${APP_NAME}"
+log_dir="$LOGS_DIR"
+log_file="\${log_dir}/${APP_NAME,,}.log"
+
+# Ensure log directory exists
+mkdir -p "\${log_dir}"
+
+# Append all output to the log file
+exec &> >(tee -a "\$log_file")
+echo "\$(date): Launching $APP_NAME"
+
+if [ -x "\${app_dir}/Fightcade2.sh" ]; then
+    cd "\${app_dir}"
+    ./Fightcade2.sh
+    echo "$APP_NAME exited."
 else
-    echo "$APP_NAME desktop entry already exists."
+    echo "$APP_NAME not found or not executable."
+    exit 1
 fi
 EOF
-chmod +x "${APP_CONFIG_DIR}/restore_desktop_entry.sh"
 
-# Add to startup
-echo "Adding desktop entry restore script to startup..."
-cat <<EOF > "$CUSTOM_SCRIPT"
-#!/bin/bash
-# Restore $APP_NAME desktop entry at startup
-bash "${APP_CONFIG_DIR}/restore_desktop_entry.sh" &
-EOF
-chmod +x "$CUSTOM_SCRIPT"
+chmod +x "$PORT_SCRIPT"
 
-echo "$APP_NAME desktop entry creation complete."
+# Step 4: Refresh the Ports menu
+echo "Refreshing Ports menu..."
+curl http://127.0.0.1:1234/reloadgames
+
+# Download the logo
+echo "Downloading $APP_NAME logo..."
+curl -L -o "$LOGO_PATH" "$LOGO_URL"
+echo "Adding logo to $APP_NAME entry in gamelist.xml..."
+xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./${APP_NAME}.sh" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/${APP_NAME,,}-logo.png" \
+  "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
+curl http://127.0.0.1:1234/reloadgames
+
+echo
+echo "Installation complete! You can now launch $APP_NAME from the Ports menu."
