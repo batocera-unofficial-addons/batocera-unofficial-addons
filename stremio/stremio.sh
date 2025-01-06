@@ -1,138 +1,72 @@
-#!/bin/bash
 
-# Step 1: Detect system architecture
-echo "Detecting system architecture..."
-arch=$(uname -m)
+#!/usr/bin/env bash
 
-if [ "$arch" == "x86_64" ]; then
-    echo "Architecture: x86_64 detected."
-    appimage_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/stremio/Stremio+4.4.20.AppImage"
-else
-    echo "Unsupported architecture: $arch. Exiting."
+# Variables
+APPNAME="Stremio"
+APPDIR="/userdata/system/add-ons/google-chrome"
+APPPATH="$APPDIR/GoogleChrome.AppImage"
+CHROME_INSTALLER_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh"
+PORT_SCRIPT="/userdata/roms/ports/Stremio.sh"
+ICON_PATH="/userdata/roms/ports/images/stremio-logo.jpg"
+KEYS_PATH="/userdata/roms/ports/Stremio.sh.keys"
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/stremio/extra/stremiologo.png"
+KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/netflix/extra/Netflix.sh.keys"
+GAMELIST="/userdata/roms/ports/gamelist.xml"
+
+# Step 1: Show dialog to confirm
+dialog --title "Install $APPNAME" \
+  --yesno "This app requires you to install Google Chrome first.\nProceed with the setup?" 10 50
+
+# Check the user's choice
+if [[ $? -ne 0 ]]; then
+  echo "Installation canceled by user."
+  exit 1
+fi
+
+clear
+# Step 2: Check if Chrome is installed
+if [[ ! -f $APPPATH ]]; then
+  echo "Google Chrome is not installed. Downloading and installing..."
+  mkdir -p "$APPDIR"  # Ensure the directory exists
+  curl -L -o "$APPDIR/chrome.sh" "$CHROME_INSTALLER_URL"
+  chmod +x "$APPDIR/chrome.sh"
+  echo "Running the Google Chrome installer..."
+  bash "$APPDIR/chrome.sh"
+  if [[ ! -f $APPPATH ]]; then
+    echo "Google Chrome installation failed. Exiting."
     exit 1
+  fi
 fi
 
-# Step 2: Prepare directories
-echo "Setting up directories..."
-mkdir -p /userdata/system/add-ons/stremio
-mkdir -p /userdata/system/add-ons/stremio/stremio-config
-mkdir -p /userdata/system/logs
-mkdir -p /userdata/roms/ports/images
+# Step 3: Create the ports script using EOF
+mkdir -p "$(dirname "$PORT_SCRIPT")"  # Ensure the ports directory exists
+mkdir -p "$(dirname "$ICON_PATH")"   # Ensure the images directory exists
 
-# Step 3: Download the AppImage
-echo "Downloading Stremio AppImage..."
-wget -q --show-progress -O /userdata/system/add-ons/stremio/Stremio.AppImage "$appimage_url"
-if [ $? -ne 0 ]; then
-    echo "Failed to download Stremio AppImage. Exiting."
-    exit 1
-fi
-
-chmod a+x /userdata/system/add-ons/stremio/Stremio.AppImage
-echo "Stremio AppImage downloaded and marked as executable."
-
-# Step 4: Create the Stremio launch script
-echo "Creating Stremio launch script in Ports..."
-cat << 'EOF' > /userdata/roms/ports/Stremio.sh
+cat << EOF > $PORT_SCRIPT
 #!/bin/bash
-
-# Environment setup
-export $(cat /proc/1/environ | tr '\0' '\n')
-export DISPLAY=:0
-export NSS_DB="/userdata/system/add-ons/stremio/stremio/.pki/nssdb"
-export LD_LIBRARY_PATH="/userdata/system/add-ons/stremio/lib:$LD_LIBRARY_PATH"
-export STREMIO_LOCALFILES_DIR="/userdata/system/add-ons/stremio/stremio-config"
-export HOME="/userdata/system/add-ons/stremio"
-
-# Create necessary directories
-mkdir -p "${NSS_DB}"
-mkdir -p /userdata/system/add-ons/stremio/.stremio-server/localFiles
-mkdir -p "${STREMIO_LOCALFILES_DIR}"
-mkdir -p "${HOME}/.pki/nssdb"
-
-# Fix MIME issues
-if [ ! -f /usr/share/mime/image/png.xml ]; then
-    echo "Fixing MIME database..."
-    update-mime-database /usr/share/mime
-fi
-
-# Initialize NSS database
-if [ ! -f "${NSS_DB}/cert9.db" ]; then
-    echo "Initializing NSS database at ${NSS_DB}..."
-    certutil -d sql:"${NSS_DB}" -N --empty-password
-fi
-
-# Kill processes occupying specific ports
-kill_process_on_port() {
-    port=$1
-    pid=$(lsof -ti :$port)
-    if [ -n "$pid" ]; then
-        echo "Killing process on port $port (PID: $pid)..."
-        sudo kill -9 $pid
-    fi
-}
-
-PORTS=("11470" "12470" "11471" "11472")
-for port in "${PORTS[@]}"; do
-    kill_process_on_port $port
-done
-
-# Directories and file paths
-app_dir="/userdata/system/add-ons/stremio"
-config_dir="${app_dir}/stremio-config"
-config_symlink="${HOME}/.config/stremio"
-app_image="${app_dir}/Stremio.AppImage"
-log_dir="/userdata/system/logs"
-log_file="${log_dir}/stremio.log"
-
-# Ensure log directory exists
-mkdir -p "${log_dir}"
-
-# Redirect output to the log file
-exec &> >(tee -a "${log_file}")
-echo "$(date): Launching Stremio"
-
-# Create persistent directory for Stremio config
-mkdir -p "${config_dir}"
-
-# Handle config symlink
-if [ -d "${config_symlink}" ] && [ ! -L "${config_symlink}" ]; then
-    mv "${config_symlink}" "${config_dir}"
-fi
-if [ ! -L "${config_symlink}" ]; then
-    ln -sf "${config_dir}" "${config_symlink}"
-fi
-
-# Launch Stremio with the correct NSS library preloaded
-if [ -x "${app_image}" ]; then
-    cd "${app_dir}"
-    LD_PRELOAD=/usr/lib/libnssutil3.so ./Stremio.AppImage --no-sandbox --enable-logging > "${log_file}" 2>&1
-else
-    echo "Error: Stremio.AppImage not found or not executable at ${app_image}"
-fi
-
+DISPLAY=:0.0 $APPPATH --no-sandbox --test-type --start-fullscreen --force-device-scale-factor=1.6 'web.stremio.com/'
 EOF
 
-chmod +x /userdata/roms/ports/Stremio.sh
+chmod +x $PORT_SCRIPT
 
-# Step 5: Add Stremio to Ports menu
-if ! command -v xmlstarlet &> /dev/null; then
-    echo "Error: xmlstarlet is not installed. Install it and re-run the script."
-    exit 1
-fi
+# Step 4: Download the icon
+echo "Downloading Stremio logo..."
+curl -L -o "$ICON_PATH" "$LOGO_URL"
 
-curl http://127.0.0.1:1234/reloadgames
+# Step 5: Download the key mapping file
+echo "Downloading key mapping file..."
+curl -L -o "$KEYS_PATH" "$KEYS_URL"
 
-echo "Adding Stremio to Ports menu..."
-curl -L -o /userdata/roms/ports/images/stremiologo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/stremio/extra/stremiologo.png
+# Step 6: Add Netflix entry to gamelist.xml
+echo "Updating gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./Stremio.sh" \
-  -s "/gameList/game[last()]" -t elem -n "name" -v "Stremio" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/stremiologo.png" \
-  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+  -s "/gameList/game[last()]" -t elem -n "name" -v "$APPNAME" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/stremio-logo.jpg" \
+  "$GAMELIST" > "${GAMELIST}.tmp" && mv "${GAMELIST}.tmp" "$GAMELIST"
 
-# Step 6: Refresh the Ports menu
+# Step 7: Refresh the Ports menu
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
-echo
-echo "Installation complete! You can now launch Stremio from the Ports menu."
+echo "$APPNAME port setup completed. You can now access $APPNAME through Ports!"
