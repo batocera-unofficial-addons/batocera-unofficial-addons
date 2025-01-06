@@ -69,7 +69,7 @@ export DISPLAY=:0.0
 
 # Directories and file paths
 app_dir="$ADDONS_DIR/${APP_NAME,,}"
-app_image="${app_dir}/${APP_NAME,,}.AppImage"
+app_image="\${app_dir}/${APP_NAME,,}.AppImage"
 log_dir="$LOGS_DIR"
 log_file="\${log_dir}/${APP_NAME,,}.log"
 
