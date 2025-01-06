@@ -17,8 +17,8 @@ DESKTOP_FILE="${DESKTOP_DIR}/${APP_NAME,,}.desktop"
 
 # Ensure directories exist
 echo "Creating necessary directories..."
-mkdir -p "$APP_CONFIG_DIR" "$ADDONS_DIR/$APP_NAME"
-mkdir -p $ADDONS_DIR/$APP_NAME/extra/
+mkdir -p "$APP_CONFIG_DIR" "$ADDONS_DIR/${APP_NAME,,}"
+mkdir -p $ADDONS_DIR/${APP_NAME,,}/extra
 
 # Step 1: Detect system architecture
 echo "Detecting system architecture..."
@@ -47,20 +47,20 @@ fi
 
 # Step 2: Download the AppImage
 echo "Downloading $APP_NAME AppImage from $appimage_url..."
-mkdir -p "$ADDONS_DIR/$APP_NAME"
-wget -q --show-progress -O "$ADDONS_DIR/$APP_NAME/${APP_NAME}.AppImage" "$appimage_url"
+mkdir -p "$ADDONS_DIR/${APP_NAME,,}"
+wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.AppImage" "$appimage_url"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download $APP_NAME AppImage."
     exit 1
 fi
 
-chmod a+x "$ADDONS_DIR/$APP_NAME/${APP_NAME}.AppImage"
+chmod a+x "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.AppImage"
 echo "$APP_NAME AppImage downloaded and marked as executable."
 
 # Step 2.5: Download the application icon
 echo "Downloading $APP_NAME icon..."
-wget -q --show-progress -O "$ADDONS_DIR/$APP_NAME/extra/${APP_NAME,,}-icon.png" "$ICON_PATH"
+wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/extra/${APP_NAME,,}-icon.png" "$ICON_PATH"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download $APP_NAME icon."
@@ -77,8 +77,8 @@ cat <<EOF > "$PERSISTENT_DESKTOP"
 Version=1.0
 Type=Application
 Name=$APP_NAME
-Exec=$ADDONS_DIR/$APP_NAME/${APP_NAME}.AppImage
-Icon=$ADDONS_DIR/$APP_NAME/extra/${APP_NAME,,}-icon.png
+Exec=$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.AppImage
+Icon=$ADDONS_DIR/${APP_NAME,,}/extra/${APP_NAME,,}-icon.png
 Terminal=false
 Categories=Game;batocera.linux;
 EOF
