@@ -4,7 +4,7 @@
 APP_NAME="OBS"
 AMD_SUFFIX="download?id=11Nk8on_WdFAV6MuQqhugxm7okENPv7sj&export=download&authuser=0&confirm=t&uuid=968556f0-a20a-4f03-a037-e5f999e6f2c1&at=APvzH3rQ2MdC-UuEVlq1_gTT-d9v:1736149388417"
 ARM_SUFFIX=""
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/warzone2100/extra/warzone-logo.png"
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/obs/extra/obs-logo.png"
 REPO_BASE_URL="https://drive.usercontent.google.com"
 
 # -----------------------------------------------------------------------------------------------------------------
