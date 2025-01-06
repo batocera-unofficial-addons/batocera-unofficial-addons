@@ -36,10 +36,10 @@
 - Xonotic
 - Warzone 2100
 - Brave
+- Fightcade
 
 ### 🛠️ Testing
 - Stremio
-- Fightcade
 - BlissOS
 
 ### 📋 Todo
