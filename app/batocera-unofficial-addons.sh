@@ -103,7 +103,9 @@ apps=(
     ["FIGHTCADE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/fightcade.sh | bash"
     ["SUPERTUXKART"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertuxkart/supertuxkart.sh | bash"
     ["OPENRA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/openra/openra.sh | bash"
-
+    ["ASSAULTCUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/assaultcube/assaultcube.sh | bash"
+    ["OBS"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/obs/obs.sh | bash"
+    ["SUPERTUX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertux/supertux.sh | bash"
 )
 
 descriptions=(
@@ -141,14 +143,17 @@ descriptions=(
     ["FIGHTCADE"]="Play classic arcade games online."
     ["SUPERTUXKART"]="Free and open-source kart racer."
     ["OPENRA"]="Modernized RTS for Command & Conquer."
+    ["ASSAULTCUBE"]="Multiplayer first-person shooter game."
+    ["OBS"]="Streaming and video recording software."
+    ["SUPERTUX"]="2D platformer starring Tux the Linux mascot."
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS"
     ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER"
 )
 
