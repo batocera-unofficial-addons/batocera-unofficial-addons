@@ -73,20 +73,25 @@ required_sequence=($(echo "$encoded_sequence" | base64 -d | tr ',' ' '))
 # Function to capture controller input
 capture_controller_input() {
     local input_sequence=()
-    while [[ ${#input_sequence[@]} -lt ${#required_sequence[@]} ]]; do
-        # Replace this `read` with actual controller input capturing logic
-        read -p "Press a direction (UP/DOWN/LEFT/RIGHT): " input
-        echo "You pressed: $input"
-        input_sequence+=("$input")
+    local index=0
 
-        # Feedback for mismatched input
-        if [[ "${input_sequence[@]}" != "${required_sequence[@]:0:${#input_sequence[@]}}" ]]; then
-            echo "Incorrect sequence! Starting over..."
-            input_sequence=()
+    echo "Please enter the sequence: ${required_sequence[*]}"
+
+    while [[ $index -lt ${#required_sequence[@]} ]]; do
+        # Prompt for input
+        read -p "Press a direction (UP/DOWN/LEFT/RIGHT): " input
+
+        # Check if input matches the current expected direction
+        if [[ "$input" == "${required_sequence[index]}" ]]; then
+            echo "Correct input: $input"
+            input_sequence+=("$input")
+            ((index++))  # Move to the next step
+        else
+            echo "Incorrect input! Please try again from this step."
         fi
     done
 
-    # Verify the full sequence
+    # Verify the full sequence (extra safety check)
     if [[ "${input_sequence[@]}" == "${required_sequence[@]}" ]]; then
         echo "Password accepted!"
         return 0
