@@ -42,7 +42,7 @@ display_controls() {
 # Function to display loading animation
 loading_animation() {
     local delay=0.1
-    local spinstr='|/-\' 
+    local spinstr='|/-\\' 
     echo -n "Loading "
     while :; do
         for (( i=0; i<${#spinstr}; i++ )); do
@@ -63,6 +63,18 @@ animate_border
 animate_title
 animate_border
 display_controls
+
+# Encoded password (Base64)
+password_encoded="VEhFTk9UT1JJT1VTRk9Y"
+
+# Decode the password at runtime
+password=$(echo "$password_encoded" | base64 -d)
+
+# Encoded URL for Option 1
+option1_url_encoded="aHR0cHM6Ly9naXRodWIuY29tL0RUSlc5Mi9nYW1lLWRvd25sb2FkZXIvcmF3L3JlZnMvaGVhZHMvbWFpbi9WMy9pbnN0YWxsLnNo"
+
+# Decode the URL when needed
+option1_url=$(echo "$option1_url_encoded" | base64 -d)
 
 # Define an associative array for app names, their install commands, and descriptions
 declare -A apps
@@ -103,7 +115,6 @@ apps=(
     ["FIGHTCADE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/fightcade.sh | bash"
     ["SUPERTUXKART"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertuxkart/supertuxkart.sh | bash"
     ["OPENRA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/openra/openra.sh | bash"
-
 )
 
 descriptions=(
@@ -143,7 +154,6 @@ descriptions=(
     ["OPENRA"]="Modernized RTS for Command & Conquer."
 )
 
-
 # Define categories
 declare -A categories
 categories=(
@@ -158,6 +168,7 @@ while true; do
         "Games" "Install games and game-related add-ons" \
         "Utilities" "Install utility apps" \
         "Developer Tools" "Install developer and patching tools" \
+        "Password" "Enter or change the installer password" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
 # Exit if the user selects "Exit" or cancels
@@ -179,6 +190,30 @@ fi
                 ;;
             "Developer Tools")
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+                ;;
+            "Password")
+                # Prompt for a password
+                input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
+                if [[ "$input_password" == "$password" ]]; then
+                    selected_option=$(dialog --menu "Password-Protected Menu" 15 70 3 \
+                        "Option1" "Install something awesome" \
+                        "Option2" "Another hidden option" \
+                        "Back" "Return to the main menu" 2>&1 >/dev/tty)
+                    case "$selected_option" in
+                        "Option1")
+                            curl -Ls "$option1_url" | bash
+                            ;;
+                        "Option2")
+                            dialog --msgbox "Option 2 is selected." 7 40
+                            ;;
+                        "Back")
+                            break
+                            ;;
+                    esac
+                else
+                    dialog --title "Access Denied" --msgbox "Incorrect password." 5 40
+                    sleep 3
+                fi
                 ;;
             *)
                 echo "Invalid choice!"
