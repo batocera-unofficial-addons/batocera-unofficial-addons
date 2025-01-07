@@ -29,6 +29,7 @@ You will find no support in the official Discord—better to ask for support in 
 - Minecraft
 - Moonlight
 - Netflix
+- Nvidiaclocker
 - Nvidiapatcher
 - OBS
 - OpenRA
@@ -52,6 +53,7 @@ You will find no support in the official Discord—better to ask for support in 
 - BlissOS
 
 ### 📋 Todo
+- Hydra
 
 To install:
 
