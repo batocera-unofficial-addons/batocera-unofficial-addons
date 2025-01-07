@@ -1,13 +1,5 @@
 #!/bin/bash
 
-# Start the watch process and save its PID
-/userdata/system/add-ons/.dep/watch &
-WATCH_PID=$!
-cleanup() {
-    kill $WATCH_PID 2>/dev/null
-}
-trap cleanup EXIT
-
 # Function to display animated title with colors
 animate_title() {
     local text="BATOCERA UNOFFICIAL ADD-ONS INSTALLER"
