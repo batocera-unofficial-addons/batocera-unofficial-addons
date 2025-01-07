@@ -76,6 +76,16 @@ chmod +x "$ADDONS_DIR/${APP_NAME,,}/extra/monitor-hydra.sh"
 chmod +x "$ADDONS_DIR/${APP_NAME,,}/extra/aria2-sync.sh"
 chmod +x "$ADDONS_DIR/${APP_NAME,,}/usr/bin/aria2c"
 
+launcher_script="$ADDONS_DIR/${APP_NAME,,}/extra/launcher"
+cat <<EOF > "$launcher_script"
+#!/bin/bash
+# Start monitor script
+"$ADDONS_DIR/${APP_NAME,,}/extra/monitor-hydra.sh" &
+# Launch the ShadPS4 AppImage
+DISPLAY=:0.0 "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.AppImage" --no-sandbox "\$@"
+EOF
+chmod +x "$launcher_script"
+
 # Step 3: Create persistent desktop entry
 echo "Creating persistent desktop entry for $APP_NAME..."
 cat <<EOF > "$PERSISTENT_DESKTOP"
@@ -83,7 +93,7 @@ cat <<EOF > "$PERSISTENT_DESKTOP"
 Version=1.0
 Type=Application
 Name=$APP_NAME
-Exec=$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.AppImage --no-sandbox && $ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}/extra/monitor-hydra.sh &
+Exec=$launcher_script
 Icon=$ADDONS_DIR/${APP_NAME,,}/extra/${APP_NAME,,}-icon.png
 Terminal=false
 Categories=Game;batocera.linux;
