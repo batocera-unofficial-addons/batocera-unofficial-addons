@@ -6,8 +6,7 @@ REPO="hydralauncher/hydra"
 AMD_SUFFIX=".AppImage"
 ARM_SUFFIX=""
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hydra/extra/hydra-icon.png"
-MONITOR_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hydra/extra/monitor-hydra.sh"
-SYNC_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hydra/extra/aria2-sync.sh"
+SYNC_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hydra/extra/hydra"
 BIN_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hydra/extra/aria2c"
 
 # -----------------------------------------------------------------------------------------------------------------
@@ -62,12 +61,11 @@ chmod a+x "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.AppImage"
 echo "$APP_NAME AppImage downloaded and marked as executable."
 
 echo "Downloading necessary scripts..."
-wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/extra/monitor-hydra.sh" "$MONITOR_URL"
-wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/extra/aria2-sync.sh" "$SYNC_URL"
+wget -q --show-progress -O "/userdata/system/services/hydra" "$SYNC_URL"
 wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/usr/bin/aria2c" "$BIN_URL"
-chmod +x "$ADDONS_DIR/${APP_NAME,,}/extra/monitor-hydra.sh"
-chmod +x "$ADDONS_DIR/${APP_NAME,,}/extra/aria2-sync.sh"
+chmod +x "/userdata/system/services/hydra"
 chmod +x "$ADDONS_DIR/${APP_NAME,,}/usr/bin/aria2c"
+batocera-services enable hydra
 
 # Step 3: Create the app launch script
 echo "Creating $APP_NAME script in Ports..."
@@ -76,31 +74,35 @@ cat << EOF > "$PORT_SCRIPT"
 #!/bin/bash
 
 # Environment setup
-export \$(cat /proc/1/environ | tr '\0' '\n')
+export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
 
 # Directories and file paths
 app_dir="$ADDONS_DIR/${APP_NAME,,}"
-app_image="\${app_dir}/${APP_NAME,,}.AppImage"
+app_image="${app_dir}/${APP_NAME,,}.AppImage"
 log_dir="$LOGS_DIR"
-log_file="\${log_dir}/${APP_NAME,,}.log"
+log_file="${log_dir}/${APP_NAME,,}.log"
 
 # Ensure log directory exists
-mkdir -p "\${log_dir}"
+mkdir -p "${log_dir}"
 
 # Append all output to the log file
-exec &> >(tee -a "\$log_file")
-echo "\$(date): Launching $APP_NAME"
-/userdata/system/add-ons/hydra/extra/monitor-hydra.sh &
+exec &> >(tee -a "$log_file")
+echo "$(date): Launching $APP_NAME"
+batocera-services start hydra
+
 # Launch AppImage
-if [ -x "\${app_image}" ]; then
-    cd "\${app_dir}"
-    ./${APP_NAME,,}.AppImage --no-sandbox "\$@" > "\${log_file}" 2>&1
+if [ -x "${app_image}" ]; then
+    cd "${app_dir}"
+    "./${APP_NAME,,}.AppImage" --no-sandbox "$@" > "${log_file}" 2>&1
     echo "$APP_NAME exited."
 else
     echo "$APP_NAME.AppImage not found or not executable."
     exit 1
 fi
+
+# Stop hydra service when the process exits
+batocera-services stop hydra
 EOF
 
 chmod +x "$PORT_SCRIPT"
