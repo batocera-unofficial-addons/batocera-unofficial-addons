@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Path to the setup script
-SETUP_SCRIPT="/userdata/system/add-ons/hydra/extra/sync-aria2.sh"
+SETUP_SCRIPT="/userdata/system/add-ons/hydra/extra/aria2-sync.sh"
 
 # Initial delay to allow hydra.AppImage to initialize
 echo "Waiting 10 seconds before starting monitoring..."
