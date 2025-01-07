@@ -56,7 +56,7 @@ You will find no support in the official Discord—better to ask for support in 
 To install:
 
 ```bash
-# Coming soon
+curl -L bit.ly/BUAinstaller | bash
 
 ```
 
