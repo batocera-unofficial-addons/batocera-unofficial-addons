@@ -16,6 +16,7 @@
 - Conty
 - CS Portable
 - Docker
+- Disney+
 - Endless Sky
 - Firefox
 - Fightcade
@@ -37,6 +38,7 @@
 - SuperTuxKart
 - Switch
 - Tailscale
+- Twitch
 - Vesktop
 - Warzone 2100
 - Wine Manager
