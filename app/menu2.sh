@@ -29,6 +29,7 @@ option1_url=$(echo "$option1_url_encoded" | base64 -d)
 
 # Main execution
 clear
+capture_input &
 
 while true; do
     input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
@@ -49,5 +50,4 @@ while true; do
         sleep 3
     fi
 done
-capture_input
 clear
