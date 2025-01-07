@@ -44,7 +44,7 @@ export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
 
 # Launch AssaultCube
-cd "$ADDONS_DIR/${APP_NAME,,}/AssaultCube_v1.3.0.2_LockdownEdition_RC1"
+cd "$ADDONS_DIR/${APP_NAME,,}"
 ./assaultcube.sh "\$@"
 EOF
 
