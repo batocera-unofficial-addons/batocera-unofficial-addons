@@ -7,7 +7,7 @@ TARGET_PATH="/usr/bin/aria2c"
 # Function to clean up the symlink and stop aria2c on exit
 cleanup() {
     echo "Stopping aria2c and removing symlink..."
-    pkill -f "aria2c --enable-rpc" 2>/dev/null
+    pkill -f "aria2c" 2>/dev/null
     if [ -L "$TARGET_PATH" ]; then
         rm -f "$TARGET_PATH"
         echo "Symlink removed."
