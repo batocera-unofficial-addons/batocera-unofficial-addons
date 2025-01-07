@@ -65,7 +65,7 @@ animate_border
 display_controls
 
 # Encoded password (Base64)
-password_encoded="VEhFTk9UT1JJT1VTRk9Y"
+password_encoded="VVAgVVAgRE9XTiBET1dOIExFRlQgUklHSFQgTEVGVCBSSUdIVA=="
 
 # Decode the password at runtime
 password=$(echo "$password_encoded" | base64 -d)
