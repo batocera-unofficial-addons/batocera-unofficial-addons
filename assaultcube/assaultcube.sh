@@ -2,8 +2,8 @@
 
 # Variables specific to AssaultCube
 APP_NAME="AssaultCube"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/assaultcube/extra/assaultcube-logo.png" # Replace with actual logo URL
-FILE_URL="https://altushost-swe.dl.sourceforge.net/project/stuntrally/3.3/StuntRally-3.3-Linux.txz" # Update with actual file URL
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/assaultcube/extra/assaultcube-logo.png"
+FILE_URL="https://github.com/assaultcube/AC/releases/download/v1.3.0.2/AssaultCube_v1.3.0.2_LockdownEdition_RC1.tar.bz2"
 
 ADDONS_DIR="/userdata/system/add-ons"
 PORTS_DIR="/userdata/roms/ports"
@@ -44,7 +44,7 @@ export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
 
 # Launch AssaultCube
-cd "$ADDONS_DIR/${APP_NAME,,}/AssaultCube_v1.3.0.2_LockdownEdition_RC1"
+cd "$ADDONS_DIR/${APP_NAME,,}"
 ./assaultcube.sh "\$@"
 EOF
 
@@ -52,7 +52,7 @@ chmod +x "$PORT_SCRIPT"
 
 # Step 4: Refresh the Ports menu
 echo "Refreshing Ports menu..."
-curl -s http://127.0.0.1:1234/reloadgames
+curl http://127.0.0.1:1234/reloadgames
 
 # Step 5: Download the logo
 echo "Downloading logo..."
@@ -65,7 +65,6 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/${APP_NAME,,}-logo.png" \
   "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
-curl -s http://127.0.0.1:1234/reloadgames
-
+curl http://127.0.0.1:1234/reloadgames
 echo
 echo "Installation complete! You can now launch $APP_NAME from the Ports menu."

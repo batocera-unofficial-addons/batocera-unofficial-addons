@@ -42,7 +42,7 @@ display_controls() {
 # Function to display loading animation
 loading_animation() {
     local delay=0.1
-    local spinstr='|/-\\' 
+    local spinstr='|/-\' 
     echo -n "Loading "
     while :; do
         for (( i=0; i<${#spinstr}; i++ )); do
@@ -64,43 +64,6 @@ animate_title
 animate_border
 display_controls
 
-# Encoded button sequence (controller input)
-encoded_sequence="VVAuVVAsRE9XTixET1dOLExFRlQsUklHSFQsTEVGVCxSSUdIVA=="
-
-# Decode the button sequence at runtime
-required_sequence=($(echo "$encoded_sequence" | base64 -d | tr ',' ' '))
-
-# Function to capture controller input
-capture_controller_input() {
-    local input_sequence=()
-    while [[ ${#input_sequence[@]} -lt ${#required_sequence[@]} ]]; do
-        # Replace this read with actual controller input capturing logic
-        read -p "Press a direction (UP/DOWN/LEFT/RIGHT): " input
-        echo "You pressed: $input"
-        input_sequence+=("$input")
-
-        # Feedback for mismatched input
-        if [[ "${input_sequence[@]}" != "${required_sequence[@]:0:${#input_sequence[@]}}" ]]; then
-            echo "Incorrect sequence! Starting over..."
-            input_sequence=()
-        fi
-    done
-
-    # Verify the full sequence
-    if [[ "${input_sequence[@]}" == "${required_sequence[@]}" ]]; then
-        echo "Password accepted!"
-        return 0
-    else
-        echo "Access denied!"
-        return 1
-    fi
-}
-
-# Encoded URL for Option 1
-option1_url_encoded="aHR0cHM6Ly9naXRodWIuY29tL0RUSlc5Mi9nYW1lLWRvd25sb2FkZXIvcmF3L3JlZnMvaGVhZHMvbWFpbi9WMy9pbnN0YWxsLnNo"
-
-# Decode the URL when needed
-option1_url=$(echo "$option1_url_encoded" | base64 -d)
 # Define an associative array for app names, their install commands, and descriptions
 declare -A apps
 declare -A descriptions
@@ -200,16 +163,16 @@ while true; do
         "Games" "Install games and game-related add-ons" \
         "Utilities" "Install utility apps" \
         "Developer Tools" "Install developer and patching tools" \
-        "Password" "Enter or change the installer password" \
+        "Secret Menu" "Enter the password to access the secret menu" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
-    # Exit if the user selects "Exit" or cancels
-    if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
-        dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
-        sleep 5  # Pause for 3 seconds to let the user read the message
-        clear
-        exit 0
-    fi
+# Exit if the user selects "Exit" or cancels
+if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
+    dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
+    sleep 5  # Pause for 3 seconds to let the user read the message
+    clear
+    exit 0
+fi
 
     # Based on category, show the corresponding apps
     while true; do
@@ -223,25 +186,8 @@ while true; do
             "Developer Tools")
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
-            "Password")
-                # Prompt for a password
-                input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
-                if [[ "$input_password" == "$password" ]]; then
-                    selected_option=$(dialog --menu "Password-Protected Menu" 15 70 3 \
-                        "BGD" "Install something awesome" \
-                        "Back" "Return to the main menu" 2>&1 >/dev/tty)
-                    case "$selected_option" in
-                        "BGD")
-                            curl -Ls "$option1_url" | bash
-                            ;;
-                        "Back")
-                            break
-                            ;;
-                    esac
-                else
-                    dialog --title "Access Denied" --msgbox "Incorrect password." 5 40
-                    sleep 3
-                fi
+            "Secret Menu")
+                curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/menu2.sh | bash
                 ;;
             *)
                 echo "Invalid choice!"
@@ -253,7 +199,7 @@ while true; do
         app_list=()
         app_list+=("Return" "Return to the main menu" OFF)  # Add Return option
         for app in $selected_apps; do
-            app_list+=("$app" "Description unavailable" OFF)
+            app_list+=("$app" "${descriptions[$app]}" OFF)
         done
 
         # Show dialog checklist with descriptions
@@ -272,7 +218,7 @@ while true; do
 
         # Install selected apps
         for choice in $choices; do
-            applink="$choice"
+            applink="$(echo "${apps[$choice]}" | awk '{print $3}')"
             rm /tmp/.app 2>/dev/null
             wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O "/tmp/.app" "$applink"
             if [[ -s "/tmp/.app" ]]; then 
@@ -283,7 +229,7 @@ while true; do
                 sed 's,:1234,,g' /tmp/.app | bash
                 echo -e "\n\n$choice DONE.\n\n"
             else 
-                echo "Error: couldn't download installer for $choice"
+                echo "Error: couldn't download installer for ${apps[$choice]}"
             fi
         done
     done

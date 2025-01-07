@@ -5,40 +5,43 @@
 ## Add-Ons Status
 
 ### ✅ Passed
-- Sunshine
+- Amazon-Luna
+- Armagetron
+- Arcade Manager
+- Assault Cube
+- Brave
+- Chiaki-NG
+- Chrome
+- Clone Hero
+- Conty
+- CS Portable
+- Docker
+- Endless Sky
+- Firefox
+- Fightcade
+- Greenlight
+- Heroic Launcher
+- Iptvnator
+- Minecraft
 - Moonlight
+- Netflix
+- Nvidiapatcher
+- OBS
+- OpenRA
+- OpenRGB
+- Port Master
+- ShadPS4
+- Spotify
+- Sunshine
+- SuperTux
+- SuperTuxKart
+- Switch
 - Tailscale
 - Vesktop
-- Wine Manager
-- Switch
-- Port Master
-- Arcade Manager
-- CS Portable
-- Endless Sky
-- Clone Hero
-- Armagetron
-- Greenlight
-- Chrome
-- Minecraft
-- Heroic Launcher
-- YouTube
-- Netflix
-- Firefox
-- Iptvnator
-- Nvidiapatcher
-- Conty
-- Amazon-Luna
-- Spotify
-- Docker
-- ShadPS4
-- Chiaki-NG
-- OpenRGB
-- Xonotic
 - Warzone 2100
-- Brave
-- Fightcade
-- SuperTuxKart
-- OpenRA
+- Wine Manager
+- Xonotic
+- YouTube
 
 ### 🛠️ Testing
 - BlissOS
@@ -49,6 +52,7 @@ To install:
 
 ```bash
 # Coming soon
+
 ```
 
 Individual install links won't be provided, the app is needed to handle dependencies. Install the app with the above command, then navigate the menus to find the app that you want to install.
