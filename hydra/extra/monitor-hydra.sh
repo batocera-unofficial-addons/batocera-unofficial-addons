@@ -21,7 +21,7 @@ start_symlink_script() {
 # Function to stop the aria2c process and cleanup
 stop_symlink_script() {
     echo "Stopping aria2c process..."
-    pkill -f "aria2c --enable-rpc" 2>/dev/null
+    pkill -f aria2c 2>/dev/null
     if [ -n "$SETUP_PID" ]; then
         kill "$SETUP_PID" 2>/dev/null
     fi
