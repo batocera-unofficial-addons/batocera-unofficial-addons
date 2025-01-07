@@ -39,6 +39,9 @@
 - Fightcade
 - SuperTuxKart
 - OpenRA
+- Assault Cube
+- SuperTux
+- OBS
 
 ### 🛠️ Testing
 - BlissOS
