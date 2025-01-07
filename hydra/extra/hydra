@@ -1,0 +1,67 @@
+case "$1" in
+    start)
+        echo "Starting aria2c service..."
+
+        # Extract packages in /userdata/system/Games/Hydra in the background
+        if [ -d "/userdata/system/Games/Hydra" ]; then
+            (for archive in /userdata/system/Games/Hydra/*; do
+                if [ -f "$archive" ]; then
+                    echo "Extracting $archive..."
+                    7zz x "$archive" -o"/userdata/system/Games/Hydra/" && echo "$archive extracted successfully."
+                fi
+            done) &
+            echo "Extraction started in the background."
+        fi
+
+        # Symlink aria2c if it doesn't already exist
+        if [ ! -f "/usr/bin/aria2c" ]; then
+            ln -s /userdata/system/add-ons/hydra/usr/bin/aria2c /usr/bin/aria2c && echo "Symlink created."
+        else
+            echo "Symlink already exists."
+        fi
+
+        # Start aria2c with the specified parameters
+        if command -v aria2c > /dev/null; then
+            aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --rpc-listen-port=6800 > /var/log/aria2c.log 2>&1 &
+            echo "aria2c started successfully."
+        else
+            echo "aria2c not found or not executable."
+            exit 1
+        fi
+        ;;
+    stop)
+        echo "Stopping aria2c service..."
+        # Stop aria2c process
+        pkill -f "aria2c" && echo "aria2c stopped." || echo "aria2c is not running."
+        # Stop hydra process
+        pkill -f "hydra" && echo "Hydra process stopped." || echo "Hydra process is not running."
+        ;;
+    restart)
+        "$0" stop
+        "$0" start
+        ;;
+    status)
+        if pgrep -f "aria2c" > /dev/null; then
+            echo "aria2c is running."
+            exit 0
+        else
+            echo "aria2c is stopped."
+            exit 1
+        fi
+        ;;
+    uninstall)
+        echo "Uninstalling aria2c service..."
+        "$0" stop
+        # Remove the symlink
+        if [ -L "/usr/bin/aria2c" ]; then
+            rm -f "/usr/bin/aria2c" && echo "Symlink removed."
+        fi
+        echo "aria2c uninstalled successfully."
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status|uninstall}"
+        exit 1
+        ;;
+esac
+
+exit $?
