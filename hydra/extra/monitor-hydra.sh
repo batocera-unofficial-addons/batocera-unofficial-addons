@@ -3,7 +3,7 @@
 # Path to the setup script
 SETUP_SCRIPT="/userdata/system/add-ons/hydra/extra/aria2-sync.sh"
 
-# Initial delay to allow hydra.AppImage to initialize
+# Initial delay to allow Hydra to initialize
 echo "Waiting 10 seconds before starting monitoring..."
 sleep 10
 
@@ -31,18 +31,19 @@ stop_symlink_script() {
 # Trap exit to ensure cleanup
 trap stop_symlink_script EXIT
 
-# Monitor the hydra.AppImage process
-echo "Monitoring hydra.AppImage process..."
+# Monitor the Hydra launcher process
+echo "Monitoring Hydra launcher process..."
 while true; do
-    if pgrep -f "hydra.AppImage" > /dev/null; then
+    if pgrep -f "/userdata/roms/ports/Hydra.sh" > /dev/null; then
         if [ -z "$SETUP_PID" ]; then
             start_symlink_script
         fi
     else
         if [ -n "$SETUP_PID" ]; then
-            echo "hydra.AppImage closed. Cleaning up aria2c..."
+            echo "Hydra launcher closed. Cleaning up aria2c..."
             stop_symlink_script
             SETUP_PID=""
+            pkill -f hydra
         fi
     fi
     sleep 1
