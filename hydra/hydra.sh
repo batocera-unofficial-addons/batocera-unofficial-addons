@@ -20,7 +20,7 @@ LOGO_PATH="${PORTS_DIR}/images/${APP_NAME,,}-logo.png"
 
 # Ensure directories exist
 echo "Creating necessary directories..."
-mkdir -p "$APP_CONFIG_DIR" "$ADDONS_DIR/${APP_NAME,,}/extra" "$ADDONS_DIR/${APP_NAME,,}/usr/bin"
+mkdir -p "/userdata/system/services" "$ADDONS_DIR/${APP_NAME,,}/usr/bin"
 
 
 # Step 1: Detect system architecture and fetch the latest release
