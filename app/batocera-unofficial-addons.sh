@@ -64,43 +64,6 @@ animate_title
 animate_border
 display_controls
 
-# Encoded button sequence (controller input)
-encoded_sequence="VVAuVVAsRE9XTixET1dOLExFRlQsUklHSFQsTEVGVCxSSUdIVA=="
-
-# Decode the button sequence at runtime
-required_sequence=($(echo "$encoded_sequence" | base64 -d | tr ',' ' '))
-
-# Function to capture controller input
-capture_controller_input() {
-    local input_sequence=()
-    while [[ ${#input_sequence[@]} -lt ${#required_sequence[@]} ]]; do
-        # Replace this read with actual controller input capturing logic
-        read -p "Press a direction (UP/DOWN/LEFT/RIGHT): " input
-        echo "You pressed: $input"
-        input_sequence+=("$input")
-
-        # Feedback for mismatched input
-        if [[ "${input_sequence[@]}" != "${required_sequence[@]:0:${#input_sequence[@]}}" ]]; then
-            echo "Incorrect sequence! Starting over..."
-            input_sequence=()
-        fi
-    done
-
-    # Verify the full sequence
-    if [[ "${input_sequence[@]}" == "${required_sequence[@]}" ]]; then
-        echo "Password accepted!"
-        return 0
-    else
-        echo "Access denied!"
-        return 1
-    fi
-}
-
-# Encoded URL for Option 1
-option1_url_encoded="aHR0cHM6Ly9naXRodWIuY29tL0RUSlc5Mi9nYW1lLWRvd25sb2FkZXIvcmF3L3JlZnMvaGVhZHMvbWFpbi9WMy9pbnN0YWxsLnNo"
-
-# Decode the URL when needed
-option1_url=$(echo "$option1_url_encoded" | base64 -d)
 # Define an associative array for app names, their install commands, and descriptions
 declare -A apps
 declare -A descriptions
@@ -224,24 +187,7 @@ while true; do
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Password")
-                # Prompt for a password
-                input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
-                if [[ "$input_password" == "$password" ]]; then
-                    selected_option=$(dialog --menu "Password-Protected Menu" 15 70 3 \
-                        "BGD" "Install something awesome" \
-                        "Back" "Return to the main menu" 2>&1 >/dev/tty)
-                    case "$selected_option" in
-                        "BGD")
-                            curl -Ls "$option1_url" | bash
-                            ;;
-                        "Back")
-                            break
-                            ;;
-                    esac
-                else
-                    dialog --title "Access Denied" --msgbox "Incorrect password." 5 40
-                    sleep 3
-                fi
+                curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/menu2.sh | bash
                 ;;
             *)
                 echo "Invalid choice!"
@@ -274,7 +220,7 @@ while true; do
         for choice in $choices; do
             applink="$choice"
             rm /tmp/.app 2>/dev/null
-            wget --tries=10 --no-check-certificate --no-cache --no-cookies -O "/tmp/.app" "$applink" 2>> wget_error.log
+            wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O "/tmp/.app" "$applink"
             if [[ -s "/tmp/.app" ]]; then 
                 dos2unix /tmp/.app 2>/dev/null
                 chmod 777 /tmp/.app 2>/dev/null
