@@ -84,7 +84,8 @@ capture_controller_input() {
         # Check for empty input
         if [[ -z "$input" ]]; then
             echo "No input detected! Please press a valid direction."
-            continue  # Skip this iteration and re-prompt
+            sleep 1  # Give the user a moment before re-prompting
+            continue
         fi
 
         # Check if input matches the current expected direction
@@ -93,7 +94,8 @@ capture_controller_input() {
             input_sequence+=("$input")
             ((index++))  # Move to the next step
         else
-            echo "Incorrect input! Expected: ${required_sequence[index]}. Try again."
+            echo "Incorrect input! Try again."
+            sleep 1  # Pause briefly to prevent rapid looping
         fi
     done
 
