@@ -69,6 +69,10 @@ fi
 EOF
 
 chmod +x /userdata/roms/ports/IPTVNator.sh
+KEYS_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/netflix/extra/Netflix.sh.keys"
+# Step 5: Download the key mapping file
+echo "Downloading key mapping file..."
+curl -L -o "/userdata/roms/ports/IPTVNator.sh.keys" "$KEYS_URL"
 
 # Step 5: Refresh the Ports menu
 echo "Refreshing Ports menu..."
