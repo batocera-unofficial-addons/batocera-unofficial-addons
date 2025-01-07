@@ -158,6 +158,7 @@ while true; do
         "Games" "Install games and game-related add-ons" \
         "Utilities" "Install utility apps" \
         "Developer Tools" "Install developer and patching tools" \
+        "Secret Menu" "Enter the password to access the secret menu" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
 # Exit if the user selects "Exit" or cancels
@@ -179,6 +180,9 @@ fi
                 ;;
             "Developer Tools")
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+                ;;
+            "Secret Menu")
+                curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/menu2.sh | bash
                 ;;
             *)
                 echo "Invalid choice!"
