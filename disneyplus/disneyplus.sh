@@ -61,7 +61,7 @@ echo "Updating gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./DisneyPlus.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "$APPNAME" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/disneyplus-logo.jpg" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/disneyplus-logo.png" \
   "$GAMELIST" > "${GAMELIST}.tmp" && mv "${GAMELIST}.tmp" "$GAMELIST"
 
 # Step 7: Refresh the Ports menu
