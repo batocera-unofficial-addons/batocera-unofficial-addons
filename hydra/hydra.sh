@@ -5,18 +5,19 @@ APP_NAME="Hydra"
 REPO="hydralauncher/hydra"
 AMD_SUFFIX=".AppImage"
 ARM_SUFFIX=""
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hydra/extra/hydra-icon.png"
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hydra/extra/hydra-icon.png"
 MONITOR_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hydra/extra/monitor-hydra.sh"
 SYNC_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hydra/extra/aria2-sync.sh"
 BIN_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hydra/extra/aria2c"
-# Directories
+
+# -----------------------------------------------------------------------------------------------------------------
+
 ADDONS_DIR="/userdata/system/add-ons"
-CONFIGS_DIR="/userdata/system/configs"
-DESKTOP_DIR="/usr/share/applications"
-CUSTOM_SCRIPT="/userdata/system/custom.sh"
-APP_CONFIG_DIR="${CONFIGS_DIR}/${APP_NAME,,}"
-PERSISTENT_DESKTOP="${APP_CONFIG_DIR}/${APP_NAME,,}.desktop"
-DESKTOP_FILE="${DESKTOP_DIR}/${APP_NAME,,}.desktop"
+PORTS_DIR="/userdata/roms/ports"
+LOGS_DIR="/userdata/system/logs"
+GAME_LIST="/userdata/roms/ports/gamelist.xml"
+PORT_SCRIPT="${PORTS_DIR}/${APP_NAME}.sh"
+LOGO_PATH="${PORTS_DIR}/images/${APP_NAME,,}-logo.png"
 
 # Ensure directories exist
 echo "Creating necessary directories..."
@@ -60,14 +61,6 @@ fi
 chmod a+x "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.AppImage"
 echo "$APP_NAME AppImage downloaded and marked as executable."
 
-# Step 2.5: Download the application icon
-echo "Downloading $APP_NAME icon..."
-wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/extra/${APP_NAME,,}-icon.png" "$ICON_URL"
-
-if [ $? -ne 0 ]; then
-    echo "Failed to download $APP_NAME icon."
-    exit 1
-fi
 echo "Downloading necessary scripts..."
 wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/extra/monitor-hydra.sh" "$MONITOR_URL"
 wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/extra/aria2-sync.sh" "$SYNC_URL"
@@ -76,55 +69,56 @@ chmod +x "$ADDONS_DIR/${APP_NAME,,}/extra/monitor-hydra.sh"
 chmod +x "$ADDONS_DIR/${APP_NAME,,}/extra/aria2-sync.sh"
 chmod +x "$ADDONS_DIR/${APP_NAME,,}/usr/bin/aria2c"
 
-launcher_script="$ADDONS_DIR/${APP_NAME,,}/extra/launcher"
-cat <<EOF > "$launcher_script"
+# Step 3: Create the app launch script
+echo "Creating $APP_NAME script in Ports..."
+mkdir -p "$PORTS_DIR"
+cat << EOF > "$PORT_SCRIPT"
 #!/bin/bash
-# Start monitor script
-"$ADDONS_DIR/${APP_NAME,,}/extra/monitor-hydra.sh" &
-# Launch the ShadPS4 AppImage
-DISPLAY=:0.0 "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.AppImage" --no-sandbox "\$@"
-EOF
-chmod +x "$launcher_script"
 
-# Step 3: Create persistent desktop entry
-echo "Creating persistent desktop entry for $APP_NAME..."
-cat <<EOF > "$PERSISTENT_DESKTOP"
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=$APP_NAME
-Exec=$launcher_script
-Icon=$ADDONS_DIR/${APP_NAME,,}/extra/${APP_NAME,,}-icon.png
-Terminal=false
-Categories=Game;batocera.linux;
-EOF
+# Environment setup
+export \$(cat /proc/1/environ | tr '\0' '\n')
+export DISPLAY=:0.0
 
-chmod +x "$PERSISTENT_DESKTOP"
+# Directories and file paths
+app_dir="$ADDONS_DIR/${APP_NAME,,}"
+app_image="\${app_dir}/${APP_NAME,,}.AppImage"
+log_dir="$LOGS_DIR"
+log_file="\${log_dir}/${APP_NAME,,}.log"
 
-cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
-chmod +x "$DESKTOP_FILE"
+# Ensure log directory exists
+mkdir -p "\${log_dir}"
 
-# Ensure the desktop entry is always restored to /usr/share/applications
-echo "Ensuring $APP_NAME desktop entry is restored at startup..."
-cat <<EOF > "${APP_CONFIG_DIR}/restore_desktop_entry.sh"
-#!/bin/bash
-# Restore $APP_NAME desktop entry
-if [ ! -f "$DESKTOP_FILE" ]; then
-    echo "Restoring $APP_NAME desktop entry..."
-    cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
-    chmod +x "$DESKTOP_FILE"
-    echo "$APP_NAME desktop entry restored."
+# Append all output to the log file
+exec &> >(tee -a "\$log_file")
+echo "\$(date): Launching $APP_NAME"
+/userdata/system/add-ons/hydra/extra/monitor-hydra.sh &
+# Launch AppImage
+if [ -x "\${app_image}" ]; then
+    cd "\${app_dir}"
+    ./${APP_NAME,,}.AppImage --no-sandbox "\$@" > "\${log_file}" 2>&1
+    echo "$APP_NAME exited."
 else
-    echo "$APP_NAME desktop entry already exists."
+    echo "$APP_NAME.AppImage not found or not executable."
+    exit 1
 fi
 EOF
-chmod +x "${APP_CONFIG_DIR}/restore_desktop_entry.sh"
 
-if ! grep -q "${APP_CONFIG_DIR}/restore_desktop_entry.sh" "$CUSTOM_SCRIPT"; then
-    echo "Adding desktop entry restore script to startup..."
-    echo "bash \"${APP_CONFIG_DIR}/restore_desktop_entry.sh\" &" >> "$CUSTOM_SCRIPT"
-else
-    echo "Restore script already exists in $CUSTOM_SCRIPT."
-fi
+chmod +x "$PORT_SCRIPT"
 
-echo "$APP_NAME desktop entry creation complete."
+# Step 4: Refresh the Ports menu
+echo "Refreshing Ports menu..."
+curl http://127.0.0.1:1234/reloadgames
+
+# Download the logo
+echo "Downloading $APP_NAME logo..."
+curl -L -o "$LOGO_PATH" "$LOGO_URL"
+echo "Adding logo to $APP_NAME entry in gamelist.xml..."
+xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./${APP_NAME}.sh" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/${APP_NAME,,}-logo.png" \
+  "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
+curl http://127.0.0.1:1234/reloadgames
+
+echo
+echo "Installation complete! You can now launch $APP_NAME from the Ports menu."
