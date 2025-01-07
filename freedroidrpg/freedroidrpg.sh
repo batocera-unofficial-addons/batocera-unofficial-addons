@@ -4,7 +4,7 @@
 APP_NAME="FreedroidRPG"
 AMD_SUFFIX="freedroidRPG-1.0-x86_64.AppImage"
 ARM_SUFFIX=""
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/freedroidrpg/extra/freedroidrpg-logo.png"
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/freedroidrpg/extra/freedroidrpg-logo.jpg"
 REPO_BASE_URL="https://ftp.osuosl.org/pub/freedroid/freedroidRPG-1.0"
 
 # -----------------------------------------------------------------------------------------------------------------
