@@ -255,11 +255,12 @@ while true; do
         if [ $? -eq 1 ]; then
             break  # Return to main menu
         fi
+        
+# If "Return" is selected, go back to the main menu
+if [[ "$choices" == *"Return"* ]]; then
+    continue  # Go back to the main menu
+fi
 
-        # If "Return" is selected, go back to the main menu
-        if [[ "$choices" == *"Return"* ]]; then
-            break  # Return to the main menu
-        fi
 
         # Install selected apps
         for choice in $choices; do
