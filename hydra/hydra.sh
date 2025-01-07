@@ -95,7 +95,7 @@ echo "$(date): Launching $APP_NAME"
 batocera-services start hydra &
 
 # Launch AppImage
-if [ -x "${app_image}" ]; then
+if [ -x "\${app_image}" ]; then
     cd "\${app_dir}"
     "./${APP_NAME,,}.AppImage" --no-sandbox "\$@" > "\${log_file}" 2>&1 &
     app_pid=\$!
