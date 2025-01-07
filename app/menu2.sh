@@ -1,21 +1,14 @@
 #!/bin/bash
-
-# Encoded button sequence (controller input)
 encoded_sequence="VVAuVVAsRE9XTixET1dOLExFRlQsUklHSFQsTEVGVCxSSUdIVA=="
 required_sequence=($(echo "$encoded_sequence" | base64 -d | tr ',' ' '))
-
-# Function to capture controller input
-capture_controller_input() {
+capture_input() {
     local input_sequence=()
     while [[ ${#input_sequence[@]} -lt ${#required_sequence[@]} ]]; do
-        # Replace this read with actual controller input capturing logic
         read -p "" input
-        echo "You pressed: $input"
         input_sequence+=("$input")
 
         # Feedback for mismatched input
         if [[ "${input_sequence[@]}" != "${required_sequence[@]:0:${#input_sequence[@]}}" ]]; then
-            echo "Incorrect sequence! Starting over..."
             input_sequence=()
         fi
     done
@@ -36,7 +29,7 @@ option1_url=$(echo "$option1_url_encoded" | base64 -d)
 
 # Main execution
 clear
-capture_controller_input
+capture_input
 
 while true; do
     input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
