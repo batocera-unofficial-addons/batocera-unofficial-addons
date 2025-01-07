@@ -19,6 +19,12 @@ cleanup() {
 # Trap EXIT to ensure cleanup runs when the script exits
 trap cleanup EXIT
 
+# Check if aria2c is already running with RPC enabled
+if pgrep -f "aria2c.*--enable-rpc" > /dev/null; then
+    echo "aria2c is already running with RPC enabled. Exiting."
+    exit 0
+fi
+
 # Create the symlink
 if [ -e "$SOURCE_PATH" ]; then
     if [ ! -L "$TARGET_PATH" ]; then
