@@ -75,38 +75,6 @@ if [ $? -ne 0 ]; then
     echo "Failed to download $APP_NAME."
     exit 1
 fi
-# Create the directory for the lib files
-LIB_DIR="$ADDONS_DIR/${APP_NAME,,}/lib"
-mkdir -p "$LIB_DIR"
-
-# Download lib.zip into the lib directory
-echo "Downloading lib.zip into $LIB_DIR..."
-wget -c -q --show-progress -O "$LIB_DIR/lib.zip" "https://archive.org/download/lib_20240806/lib.zip"
-
-if [ $? -ne 0 ]; then
-    echo "Failed to download lib.zip."
-    exit 1
-fi
-
-# Extract the lib.zip file
-echo "Extracting lib.zip into $LIB_DIR..."
-unzip -q "$LIB_DIR/lib.zip" -d "$LIB_DIR"
-
-if [ $? -ne 0 ]; then
-    echo "Failed to extract lib.zip."
-    exit 1
-fi
-
-# Remove the lib.zip file after extraction
-echo "Cleaning up lib.zip..."
-rm "$LIB_DIR/lib.zip"
-
-if [ $? -ne 0 ]; then
-    echo "Failed to remove lib.zip."
-    exit 1
-fi
-
-echo "lib.zip downloaded, extracted, and cleaned up successfully in $LIB_DIR."
 
 # Create the directory for the bin files
 BIN_DIR="$ADDONS_DIR/${APP_NAME,,}/usr/bin"
