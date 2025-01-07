@@ -63,39 +63,26 @@
         {
             "trigger": "pageup",
             "type": "exec",
-            "target": [
-                "batocera-audio setSystemVolume -5"
-            ]
+            "target": "batocera-audio setSystemVolume -5"
         },
         {
             "trigger": "pagedown",
             "type": "exec",
-            "target": [
-                "batocera-audio setSystemVolume +5"
-            ]
+            "target": "batocera-audio setSystemVolume +5"
         },
         {
             "trigger": "l2",
             "type": "exec",
-            "target": [
-                "batocera-audio setSystemVolume -5"
-            ]
+            "target": "batocera-audio setSystemVolume -5"
         },
         {
             "trigger": "r2",
             "type": "exec",
-            "target": [
-                "batocera-audio setSystemVolume +5"
-            ]
+            "target": "batocera-audio setSystemVolume +5"
         },
         {
             "trigger": "joystick2",
             "type": "mouse"
-        },
-        {
-            "trigger": "joystick2press",
-            "type": "mouse",
-            "target": "BTN_LEFT"
         },
         {
             "trigger": [
@@ -107,6 +94,11 @@
                 "KEY_LEFTALT",
                 "KEY_F4"
             ]
+        },
+        {
+            "trigger": "r3",
+            "type": "key",
+            "target": "BTN_LEFT"
         }
     ]
 }
