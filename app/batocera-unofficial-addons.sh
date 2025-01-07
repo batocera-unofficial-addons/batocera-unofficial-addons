@@ -187,7 +187,7 @@ fi
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Secret Menu")
-                curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/menu2.sh | bash
+                curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/menu2.sh | bash
                 ;;
             *)
                 echo "Invalid choice!"
