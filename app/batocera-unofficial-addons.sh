@@ -274,7 +274,7 @@ while true; do
         for choice in $choices; do
             applink="$choice"
             rm /tmp/.app 2>/dev/null
-            wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O "/tmp/.app" "$applink"
+            wget --tries=10 --no-check-certificate --no-cache --no-cookies -O "/tmp/.app" "$applink" 2>> wget_error.log
             if [[ -s "/tmp/.app" ]]; then 
                 dos2unix /tmp/.app 2>/dev/null
                 chmod 777 /tmp/.app 2>/dev/null
