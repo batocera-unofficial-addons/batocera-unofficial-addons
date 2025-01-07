@@ -221,10 +221,10 @@ while true; do
                 input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
                 if [[ "$input_password" == "$password" ]]; then
                     selected_option=$(dialog --menu "Password-Protected Menu" 15 70 3 \
-                        "Option1" "Install something awesome" \
+                        "BGD" "Install something awesome" \
                         "Back" "Return to the main menu" 2>&1 >/dev/tty)
                     case "$selected_option" in
-                        "Option1")
+                        "BGD")
                             curl -Ls "$option1_url" | bash
                             ;;
                         "Back")
