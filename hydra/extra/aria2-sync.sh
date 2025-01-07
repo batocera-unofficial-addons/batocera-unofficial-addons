@@ -32,9 +32,11 @@ else
     exit 1
 fi
 
+sleep 1
+
 # Start aria2c with the required configuration
 echo "Starting aria2c with RPC enabled..."
-aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --rpc-listen-port=6800 &
+aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --rpc-listen-port=6800 --rpc-secret="528dcf8948c340dfcac15c1efd768f12" &
 ARIA2C_PID=$!
 
 # Wait for aria2c to start
