@@ -2,8 +2,8 @@
 
 # Variables specific to AssaultCube
 APP_NAME="AssaultCube"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/assaultcube/extra/assaultcube-logo.png" # Replace with actual logo URL
-FILE_URL="https://altushost-swe.dl.sourceforge.net/project/stuntrally/3.3/StuntRally-3.3-Linux.txz" # Update with actual file URL
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/assaultcube/extra/assaultcube-logo.png"
+FILE_URL="https://github.com/assaultcube/AC/releases/download/v1.3.0.2/AssaultCube_v1.3.0.2_LockdownEdition_RC1.tar.bz2"
 
 ADDONS_DIR="/userdata/system/add-ons"
 PORTS_DIR="/userdata/roms/ports"
