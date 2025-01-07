@@ -96,12 +96,6 @@ capture_controller_input() {
     fi
 }
 
-# Call the controller-based input function
-if ! capture_controller_input; then
-    dialog --title "Access Denied" --msgbox "Incorrect input sequence." 5 40
-    exit 1
-fi
-
 # Encoded URL for Option 1
 option1_url_encoded="aHR0cHM6Ly9naXRodWIuY29tL0RUSlc5Mi9nYW1lLWRvd25sb2FkZXIvcmF3L3JlZnMvaGVhZHMvbWFpbi9WMy9pbnN0YWxsLnNo"
 
@@ -205,42 +199,47 @@ while true; do
     # Exit if the user selects "Exit" or cancels
     if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
         dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
-        sleep 5  # Pause for 3 seconds to let the user read the message
+        sleep 5
         clear
         exit 0
     fi
 
-    # Based on category, show the corresponding apps
-    while true; do
-        case "$category_choice" in
-            "Games")
-                selected_apps=$(echo "${categories["Games"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
-                ;;
-            "Utilities")
-                selected_apps=$(echo "${categories["Utilities"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
-                ;;
-            "Developer Tools")
-                selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
-                ;;
-            "Password")
-                selected_option=$(dialog --menu "Password-Protected Menu" 15 70 3 \
-                    "Option1" "Install something awesome" \
-                    "Back" "Return to the main menu" 2>&1 >/dev/tty)
-                case "$selected_option" in
-                    "BGD")
-                        curl -Ls "$option1_url" | bash
-                        ;;
-                    "Back")
-                        break
-                        ;;
-                esac
-                ;;
-            *)
-                echo "Invalid choice!"
-                exit 1
-                ;;
-        esac
+    # Handle password-protected menu
+    if [[ "$category_choice" == "Password" ]]; then
+        if capture_controller_input; then
+            # Password accepted, show the password menu
+            selected_option=$(dialog --menu "Password-Protected Menu" 15 70 3 \
+                "BGD" "Install something awesome" \
+                "Back" "Return to the main menu" 2>&1 >/dev/tty)
 
+            if [[ "$selected_option" == "Option1" ]]; then
+                curl -Ls "$option1_url" | bash
+            elif [[ "$selected_option" == "Back" ]]; then
+                continue
+            fi
+        else
+            # Password denied
+            dialog --title "Access Denied" --msgbox "Incorrect input sequence." 5 40
+        fi
+        continue
+    fi
+
+    # Based on category, show the corresponding apps
+    case "$category_choice" in
+        "Games")
+            selected_apps=$(echo "${categories["Games"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+            ;;
+        "Utilities")
+            selected_apps=$(echo "${categories["Utilities"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+            ;;
+        "Developer Tools")
+            selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+            ;;
+        *)
+            echo "Invalid choice!"
+            exit 1
+            ;;
+    esac
         # Prepare array for dialog command, with descriptions
         app_list=()
         app_list+=("Return" "Return to the main menu" OFF)  # Add Return option
