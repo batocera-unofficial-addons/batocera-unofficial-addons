@@ -71,7 +71,7 @@ fi
 echo "Downloading necessary scripts..."
 wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/extra/monitor-hydra.sh" "$MONITOR_URL"
 wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/extra/aria2-sync.sh" "$SYNC_URL"
-wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/usr/bin/aria2" "$BIN_URL"
+wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/usr/bin/aria2c" "$BIN_URL"
 chmod +x "$ADDONS_DIR/${APP_NAME,,}/extra/monitor-hydra.sh"
 chmod +x "$ADDONS_DIR/${APP_NAME,,}/extra/aria2-sync.sh"
 chmod +x "$ADDONS_DIR/${APP_NAME,,}/usr/bin/aria2c"
