@@ -52,7 +52,7 @@ chmod +x "$PORT_SCRIPT"
 
 # Step 4: Refresh the Ports menu
 echo "Refreshing Ports menu..."
-curl -s http://127.0.0.1:1234/reloadgames
+curl http://127.0.0.1:1234/reloadgames
 
 # Step 5: Download the logo
 echo "Downloading logo..."
@@ -65,7 +65,6 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/${APP_NAME,,}-logo.png" \
   "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
-curl -s http://127.0.0.1:1234/reloadgames
-
+curl http://127.0.0.1:1234/reloadgames
 echo
 echo "Installation complete! You can now launch $APP_NAME from the Ports menu."
