@@ -64,18 +64,43 @@ animate_title
 animate_border
 display_controls
 
-# Encoded password (Base64)
-password_encoded="VVAgVVAgRE9XTiBET1dOIExFRlQgUklHSFQgTEVGVCBSSUdIVA=="
+# Encoded button sequence (controller input)
+encoded_sequence="VVAuVVAsRE9XTixET1dOLExFRlQsUklHSFQsTEVGVCxSSUdIVA=="
 
-# Decode the password at runtime
-password=$(echo "$password_encoded" | base64 -d)
+# Decode the button sequence at runtime
+required_sequence=($(echo "$encoded_sequence" | base64 -d | tr ',' ' '))
+
+# Function to capture controller input
+capture_controller_input() {
+    local input_sequence=()
+    while [[ ${#input_sequence[@]} -lt ${#required_sequence[@]} ]]; do
+        # Replace this `read` with actual controller input capturing logic
+        read -p "Press a direction (UP/DOWN/LEFT/RIGHT): " input
+        echo "You pressed: $input"
+        input_sequence+=("$input")
+
+        # Feedback for mismatched input
+        if [[ "${input_sequence[@]}" != "${required_sequence[@]:0:${#input_sequence[@]}}" ]]; then
+            echo "Incorrect sequence! Starting over..."
+            input_sequence=()
+        fi
+    done
+
+    # Verify the full sequence
+    if [[ "${input_sequence[@]}" == "${required_sequence[@]}" ]]; then
+        echo "Password accepted!"
+        return 0
+    else
+        echo "Access denied!"
+        return 1
+    fi
+}
 
 # Encoded URL for Option 1
 option1_url_encoded="aHR0cHM6Ly9naXRodWIuY29tL0RUSlc5Mi9nYW1lLWRvd25sb2FkZXIvcmF3L3JlZnMvaGVhZHMvbWFpbi9WMy9pbnN0YWxsLnNo"
 
 # Decode the URL when needed
 option1_url=$(echo "$option1_url_encoded" | base64 -d)
-
 # Define an associative array for app names, their install commands, and descriptions
 declare -A apps
 declare -A descriptions
@@ -171,13 +196,13 @@ while true; do
         "Password" "Enter or change the installer password" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
-# Exit if the user selects "Exit" or cancels
-if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
-    dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
-    sleep 5  # Pause for 3 seconds to let the user read the message
-    clear
-    exit 0
-fi
+    # Exit if the user selects "Exit" or cancels
+    if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
+        dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
+        sleep 5  # Pause for 3 seconds to let the user read the message
+        clear
+        exit 0
+    fi
 
     # Based on category, show the corresponding apps
     while true; do
@@ -221,7 +246,7 @@ fi
         app_list=()
         app_list+=("Return" "Return to the main menu" OFF)  # Add Return option
         for app in $selected_apps; do
-            app_list+=("$app" "${descriptions[$app]}" OFF)
+            app_list+=("$app" "Description unavailable" OFF)
         done
 
         # Show dialog checklist with descriptions
@@ -240,7 +265,7 @@ fi
 
         # Install selected apps
         for choice in $choices; do
-            applink="$(echo "${apps[$choice]}" | awk '{print $3}')"
+            applink="$choice"
             rm /tmp/.app 2>/dev/null
             wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O "/tmp/.app" "$applink"
             if [[ -s "/tmp/.app" ]]; then 
@@ -251,7 +276,7 @@ fi
                 sed 's,:1234,,g' /tmp/.app | bash
                 echo -e "\n\n$choice DONE.\n\n"
             else 
-                echo "Error: couldn't download installer for ${apps[$choice]}"
+                echo "Error: couldn't download installer for $choice"
             fi
         done
     done
