@@ -28,7 +28,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-mkdir -p ~/add-ons/.dep 2>/dev/null && cd ~/add-ons/.dep && wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O ~/add-ons/.dep/dep.zip https://github.com/DTJW92/batocera-unofficial-addons/raw/main/.dep/dep.zip && yes "y" &&wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O ~/add-ons/.dep/watch https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/.dep/watch | unzip -oq ~/add-ons/.dep/dep.zip && cd ~/
+mkdir -p ~/add-ons/.dep 2>/dev/null && cd ~/add-ons/.dep && wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O ~/add-ons/.dep/dep.zip https://github.com/DTJW92/batocera-unofficial-addons/raw/main/.dep/dep.zip && yes "y" | unzip -oq ~/add-ons/.dep/dep.zip && wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O ~/add-ons/.dep/watch https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/.dep/watch && cd ~/
 chmod 777 ~/add-ons/.dep/* && for file in /userdata/system/add-ons/.dep/lib*; do ln -s "$file" "/usr/lib/$(basename $file)"; done
 # Step 2: Remove the .sh extension
 SCRIPT_WITHOUT_EXTENSION="${SCRIPT_PATH%.sh}"
