@@ -42,7 +42,7 @@ display_controls() {
 # Function to display loading animation
 loading_animation() {
     local delay=0.1
-    local spinstr='|/-\\' 
+    local spinstr='|/-\' 
     echo -n "Loading "
     while :; do
         for (( i=0; i<${#spinstr}; i++ )); do
@@ -103,9 +103,7 @@ apps=(
     ["FIGHTCADE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/fightcade.sh | bash"
     ["SUPERTUXKART"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertuxkart/supertuxkart.sh | bash"
     ["OPENRA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/openra/openra.sh | bash"
-    ["ASSAULTCUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/assaultcube/assaultcube.sh | bash"
-    ["OBS"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/obs/obs.sh | bash"
-    ["SUPERTUX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertux/supertux.sh | bash"
+
 )
 
 descriptions=(
@@ -143,17 +141,14 @@ descriptions=(
     ["FIGHTCADE"]="Play classic arcade games online."
     ["SUPERTUXKART"]="Free and open-source kart racer."
     ["OPENRA"]="Modernized RTS for Command & Conquer."
-    ["ASSAULTCUBE"]="Multiplayer first-person shooter game."
-    ["OBS"]="Streaming and video recording software."
-    ["SUPERTUX"]="2D platformer starring Tux the Linux mascot."
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB"
     ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER"
 )
 
@@ -163,16 +158,15 @@ while true; do
         "Games" "Install games and game-related add-ons" \
         "Utilities" "Install utility apps" \
         "Developer Tools" "Install developer and patching tools" \
-        "Password" "Enter or change the installer password" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
-    # Exit if the user selects "Exit" or cancels
-    if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
-        dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
-        sleep 5  # Pause for 3 seconds to let the user read the message
-        clear
-        exit 0
-    fi
+# Exit if the user selects "Exit" or cancels
+if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
+    dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
+    sleep 5  # Pause for 3 seconds to let the user read the message
+    clear
+    exit 0
+fi
 
     # Based on category, show the corresponding apps
     while true; do
@@ -186,9 +180,6 @@ while true; do
             "Developer Tools")
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
-            "Password")
-                curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/menu2.sh | bash
-                ;;
             *)
                 echo "Invalid choice!"
                 exit 1
@@ -199,7 +190,7 @@ while true; do
         app_list=()
         app_list+=("Return" "Return to the main menu" OFF)  # Add Return option
         for app in $selected_apps; do
-            app_list+=("$app" "Description unavailable" OFF)
+            app_list+=("$app" "${descriptions[$app]}" OFF)
         done
 
         # Show dialog checklist with descriptions
@@ -218,7 +209,7 @@ while true; do
 
         # Install selected apps
         for choice in $choices; do
-            applink="$choice"
+            applink="$(echo "${apps[$choice]}" | awk '{print $3}')"
             rm /tmp/.app 2>/dev/null
             wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O "/tmp/.app" "$applink"
             if [[ -s "/tmp/.app" ]]; then 
@@ -229,7 +220,7 @@ while true; do
                 sed 's,:1234,,g' /tmp/.app | bash
                 echo -e "\n\n$choice DONE.\n\n"
             else 
-                echo "Error: couldn't download installer for $choice"
+                echo "Error: couldn't download installer for ${apps[$choice]}"
             fi
         done
     done
