@@ -73,33 +73,20 @@ required_sequence=($(echo "$encoded_sequence" | base64 -d | tr ',' ' '))
 # Function to capture controller input
 capture_controller_input() {
     local input_sequence=()
-    local index=0
-
-    echo "Please enter the sequence: ${required_sequence[*]}"
-
-    while [[ $index -lt ${#required_sequence[@]} ]]; do
-        # Prompt for input
+    while [[ ${#input_sequence[@]} -lt ${#required_sequence[@]} ]]; do
+        # Replace this read with actual controller input capturing logic
         read -p "Press a direction (UP/DOWN/LEFT/RIGHT): " input
+        echo "You pressed: $input"
+        input_sequence+=("$input")
 
-        # Check for empty input
-        if [[ -z "$input" ]]; then
-            echo "No input detected! Please press a valid direction."
-            sleep 1  # Give the user a moment before re-prompting
-            continue
-        fi
-
-        # Check if input matches the current expected direction
-        if [[ "$input" == "${required_sequence[index]}" ]]; then
-            echo "Correct input: $input"
-            input_sequence+=("$input")
-            ((index++))  # Move to the next step
-        else
-            echo "Incorrect input! Try again."
-            sleep 1  # Pause briefly to prevent rapid looping
+        # Feedback for mismatched input
+        if [[ "${input_sequence[@]}" != "${required_sequence[@]:0:${#input_sequence[@]}}" ]]; then
+            echo "Incorrect sequence! Starting over..."
+            input_sequence=()
         fi
     done
 
-    # Verify the full sequence (extra safety check)
+    # Verify the full sequence
     if [[ "${input_sequence[@]}" == "${required_sequence[@]}" ]]; then
         echo "Password accepted!"
         return 0
@@ -206,53 +193,55 @@ while true; do
         "Games" "Install games and game-related add-ons" \
         "Utilities" "Install utility apps" \
         "Developer Tools" "Install developer and patching tools" \
-        "Password" "Access the password-protected menu" \
+        "Password" "Enter or change the installer password" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
     # Exit if the user selects "Exit" or cancels
     if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
         dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
-        sleep 5
+        sleep 5  # Pause for 3 seconds to let the user read the message
         clear
         exit 0
     fi
 
-    # Handle password-protected menu
-    if [[ "$category_choice" == "Password" ]]; then
-        if capture_controller_input; then
-            # Password accepted, show the password menu
-            selected_option=$(dialog --menu "Password-Protected Menu" 15 70 3 \
-                "BGD" "Install something awesome" \
-                "Back" "Return to the main menu" 2>&1 >/dev/tty)
-
-            if [[ "$selected_option" == "Option1" ]]; then
-                curl -Ls "$option1_url" | bash
-            elif [[ "$selected_option" == "Back" ]]; then
-                continue
-            fi
-        else
-            # Password denied
-            dialog --title "Access Denied" --msgbox "Incorrect input sequence." 5 40
-        fi
-        continue
-    fi
-
     # Based on category, show the corresponding apps
-    case "$category_choice" in
-        "Games")
-            selected_apps=$(echo "${categories["Games"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
-            ;;
-        "Utilities")
-            selected_apps=$(echo "${categories["Utilities"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
-            ;;
-        "Developer Tools")
-            selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
-            ;;
-        *)
-            echo "Invalid choice!"
-            exit 1
-            ;;
-    esac
+    while true; do
+        case "$category_choice" in
+            "Games")
+                selected_apps=$(echo "${categories["Games"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+                ;;
+            "Utilities")
+                selected_apps=$(echo "${categories["Utilities"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+                ;;
+            "Developer Tools")
+                selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+                ;;
+            "Password")
+                # Prompt for a password
+                input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
+                if [[ "$input_password" == "$password" ]]; then
+                    selected_option=$(dialog --menu "Password-Protected Menu" 15 70 3 \
+                        "Option1" "Install something awesome" \
+                        "Back" "Return to the main menu" 2>&1 >/dev/tty)
+                    case "$selected_option" in
+                        "Option1")
+                            curl -Ls "$option1_url" | bash
+                            ;;
+                        "Back")
+                            break
+                            ;;
+                    esac
+                else
+                    dialog --title "Access Denied" --msgbox "Incorrect password." 5 40
+                    sleep 3
+                fi
+                ;;
+            *)
+                echo "Invalid choice!"
+                exit 1
+                ;;
+        esac
+
         # Prepare array for dialog command, with descriptions
         app_list=()
         app_list+=("Return" "Return to the main menu" OFF)  # Add Return option
@@ -268,12 +257,11 @@ while true; do
         if [ $? -eq 1 ]; then
             break  # Return to main menu
         fi
-        
-# If "Return" is selected, go back to the main menu
-if [[ "$choices" == *"Return"* ]]; then
-    continue  # Go back to the main menu
-fi
 
+        # If "Return" is selected, go back to the main menu
+        if [[ "$choices" == *"Return"* ]]; then
+            break  # Return to main menu
+        fi
 
         # Install selected apps
         for choice in $choices; do
@@ -292,3 +280,4 @@ fi
             fi
         done
     done
+done
