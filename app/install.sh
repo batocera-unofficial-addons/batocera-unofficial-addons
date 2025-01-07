@@ -103,8 +103,6 @@ fi
 # Download the image
 echo "Downloading Batocera Unofficial Add-ons logo..."
 curl -L -o /userdata/roms/ports/images/BatoceraUnofficialAddons.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png
-curl -L -o /userdata/system/add-ons/.dep/watch https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/.dep/watch
-chmod +x /userdata/system/add-ons/.dep/watch
 echo "Adding logo to Batocera Unofficial Add-ons entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./BatoceraUnofficialAddOns.sh" \
