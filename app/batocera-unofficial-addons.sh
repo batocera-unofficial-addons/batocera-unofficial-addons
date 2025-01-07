@@ -81,13 +81,19 @@ capture_controller_input() {
         # Prompt for input
         read -p "Press a direction (UP/DOWN/LEFT/RIGHT): " input
 
+        # Check for empty input
+        if [[ -z "$input" ]]; then
+            echo "No input detected! Please press a valid direction."
+            continue  # Skip this iteration and re-prompt
+        fi
+
         # Check if input matches the current expected direction
         if [[ "$input" == "${required_sequence[index]}" ]]; then
             echo "Correct input: $input"
             input_sequence+=("$input")
             ((index++))  # Move to the next step
         else
-            echo "Incorrect input! Please try again from this step."
+            echo "Incorrect input! Expected: ${required_sequence[index]}. Try again."
         fi
     done
 
