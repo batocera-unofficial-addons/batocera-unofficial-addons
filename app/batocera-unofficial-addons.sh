@@ -96,6 +96,12 @@ capture_controller_input() {
     fi
 }
 
+# Call the controller-based input function
+if ! capture_controller_input; then
+    dialog --title "Access Denied" --msgbox "Incorrect input sequence." 5 40
+    exit 1
+fi
+
 # Encoded URL for Option 1
 option1_url_encoded="aHR0cHM6Ly9naXRodWIuY29tL0RUSlc5Mi9nYW1lLWRvd25sb2FkZXIvcmF3L3JlZnMvaGVhZHMvbWFpbi9WMy9pbnN0YWxsLnNo"
 
@@ -193,7 +199,7 @@ while true; do
         "Games" "Install games and game-related add-ons" \
         "Utilities" "Install utility apps" \
         "Developer Tools" "Install developer and patching tools" \
-        "Password" "Enter the secret menu" \
+        "Password" "Access the password-protected menu" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
     # Exit if the user selects "Exit" or cancels
@@ -217,24 +223,17 @@ while true; do
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Password")
-                # Prompt for a password
-                input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
-                if [[ "$input_password" == "$password" ]]; then
-                    selected_option=$(dialog --menu "Password-Protected Menu" 15 70 3 \
-                        "Option1" "Install something awesome" \
-                        "Back" "Return to the main menu" 2>&1 >/dev/tty)
-                    case "$selected_option" in
-                        "Option1")
-                            curl -Ls "$option1_url" | bash
-                            ;;
-                        "Back")
-                            break
-                            ;;
-                    esac
-                else
-                    dialog --title "Access Denied" --msgbox "Incorrect password." 5 40
-                    sleep 3
-                fi
+                selected_option=$(dialog --menu "Password-Protected Menu" 15 70 3 \
+                    "Option1" "Install something awesome" \
+                    "Back" "Return to the main menu" 2>&1 >/dev/tty)
+                case "$selected_option" in
+                    "BGD")
+                        curl -Ls "$option1_url" | bash
+                        ;;
+                    "Back")
+                        break
+                        ;;
+                esac
                 ;;
             *)
                 echo "Invalid choice!"
@@ -260,7 +259,7 @@ while true; do
 
         # If "Return" is selected, go back to the main menu
         if [[ "$choices" == *"Return"* ]]; then
-            break  # Return to main menu
+            break  # Return to the main menu
         fi
 
         # Install selected apps
