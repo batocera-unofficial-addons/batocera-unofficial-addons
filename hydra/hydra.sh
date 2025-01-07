@@ -73,6 +73,9 @@ mkdir -p "$PORTS_DIR"
 cat << EOF > "$PORT_SCRIPT"
 #!/bin/bash
 
+# Trap signals for cleanup
+trap 'echo "Caught termination signal. Stopping Hydra..."; batocera-services stop hydra; exit' SIGTERM SIGINT
+
 # Environment setup
 export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
@@ -89,15 +92,19 @@ mkdir -p "\${log_dir}"
 # Append all output to the log file
 exec &> >(tee -a "\$log_file")
 echo "$(date): Launching $APP_NAME"
-batocera-services start hydra
+batocera-services start hydra &
 
 # Launch AppImage
-if [ -x "\${app_image}" ]; then
+if [ -x "${app_image}" ]; then
     cd "\${app_dir}"
-    "./${APP_NAME,,}.AppImage" --no-sandbox "\$@" > "\${log_file}" 2>&1
+    "./${APP_NAME,,}.AppImage" --no-sandbox "\$@" > "\${log_file}" 2>&1 &
+    app_pid=\$!
+    echo "$APP_NAME launched with PID \$app_pid."
+    wait \$app_pid
     echo "$APP_NAME exited."
 else
     echo "$APP_NAME.AppImage not found or not executable."
+    batocera-services stop hydra
     exit 1
 fi
 
