@@ -74,7 +74,7 @@ cat << EOF > "$PORT_SCRIPT"
 #!/bin/bash
 
 # Environment setup
-export $(cat /proc/1/environ | tr '\0' '\n')
+export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
 
 # Directories and file paths
