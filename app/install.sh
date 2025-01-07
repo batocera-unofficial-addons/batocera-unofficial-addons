@@ -28,8 +28,9 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-mkdir -p ~/add-ons/.dep 2>/dev/null && cd ~/add-ons/.dep && wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O ~/add-ons/.dep/dep.zip https://github.com/DTJW92/batocera-unofficial-addons/raw/main/.dep/dep.zip && yes "y" | unzip -oq ~/add-ons/.dep/dep.zip && wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O ~/add-ons/.dep/watch https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/.dep/watch && cd ~/
+mkdir -p ~/add-ons/.dep 2>/dev/null && cd ~/add-ons/.dep && wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O ~/add-ons/.dep/dep.zip https://github.com/DTJW92/batocera-unofficial-addons/raw/main/.dep/dep.zip && yes "y" | unzip -oq ~/add-ons/.dep/dep.zip && cd ~/
 chmod 777 ~/add-ons/.dep/* && for file in /userdata/system/add-ons/.dep/lib*; do ln -s "$file" "/usr/lib/$(basename $file)"; done
+
 # Step 2: Remove the .sh extension
 SCRIPT_WITHOUT_EXTENSION="${SCRIPT_PATH%.sh}"
 mv "$SCRIPT_PATH" "$SCRIPT_WITHOUT_EXTENSION"
@@ -102,7 +103,7 @@ fi
 # Download the image
 echo "Downloading Batocera Unofficial Add-ons logo..."
 curl -L -o /userdata/roms/ports/images/BatoceraUnofficialAddons.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png
-
+curl -L -o /userdata/system/add-ons/.dep/watch https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/.dep/watch
 echo "Adding logo to Batocera Unofficial Add-ons entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./BatoceraUnofficialAddOns.sh" \
