@@ -46,11 +46,20 @@ echo "Categories=Game;batocera.linux;" >> "$shortcut"
 echo "Name=7zip" >> "$shortcut"
 cp "$shortcut" /usr/share/applications/
 
-# Add to custom.sh for autostart
+# Create persistent desktop script
+persistent_script="$extradir/startup.sh"
+echo "#!/bin/bash" > "$persistent_script"
+echo "if [ ! -f /usr/share/applications/$(basename "$shortcut") ]; then" >> "$persistent_script"
+echo "    cp $shortcut /usr/share/applications/" >> "$persistent_script"
+echo "fi" >> "$persistent_script"
+chmod +x "$persistent_script"
+
+# Add persistent script to custom.sh
 csh="/userdata/system/custom.sh"
-if ! grep -q "$launcher" "$csh"; then
-    echo "$launcher &" >> "$csh"
+if ! grep -q "$persistent_script" "$csh"; then
+    echo "$persistent_script &" >> "$csh"
 fi
 
 # Finish
 echo "$APPNAME installed successfully."
+
