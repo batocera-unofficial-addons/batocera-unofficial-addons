@@ -36,6 +36,7 @@ echo "Type=Application" >> "$shortcut"
 echo "Categories=Game;batocera.linux;" >> "$shortcut"
 echo "Name=7zip" >> "$shortcut"
 chmod +x "$shortcut"
+cp "$shortcut" /usr/share/applications/
 
 # Create persistent desktop script
 persistent_script="$extradir/startup.sh"
