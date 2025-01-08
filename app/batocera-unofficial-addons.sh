@@ -100,6 +100,7 @@ apps=(
     ["QBITTORRENT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/qbittorrent/qbittorrent.sh | bash"
     ["SHADPS4"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/shadps4/shadps4.sh | bash"
     ["SPOTIFY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/spotify/spotify.sh | bash"
+    ["STEPMANIA"}="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/stepmania/stepmania.sh | bash"
     ["SUNSHINE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/sunshine/sunshine.sh | bash"
     ["SUPERTUX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertux/supertux.sh | bash"
     ["SUPERTUXKART"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertuxkart/supertuxkart.sh | bash"
@@ -159,13 +160,14 @@ descriptions=(
     ["NVIDACLOCKER"]="A cli and ports porgram to overclock Nviva GPUs"
     ["7ZIP"]="A free and open-source file archiver"
     ["QBITTORRENT"]="Free and open-source BitTorrent client"
+    ["STEPMANIA"]="A dancemat compatible rhythm video game and engine"
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDOMRPG"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDOMRPG STEPMANIA"
     ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT"
     ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER NVIDIACLOCKER"
 )
