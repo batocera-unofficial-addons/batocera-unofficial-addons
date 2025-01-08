@@ -70,38 +70,38 @@ batocera-services enable hydra
 # Step 3: Create the app launch script
 echo "Creating $APP_NAME script in Ports..."
 mkdir -p "$PORTS_DIR"
-cat << "EOF" > "$PORT_SCRIPT"
+cat << EOF > "$PORT_SCRIPT"
 #!/bin/bash
 
 # Environment setup
-export $(cat /proc/1/environ | tr '\0' '\n')
+export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/hydra"
-app_image="${app_dir}/hydra.AppImage"
+app_image="\${app_dir}/hydra.AppImage"
 log_dir="/userdata/system/logs"
-log_file="${log_dir}/hydra.log"
+log_file="\${log_dir}/hydra.log"
 
 # Ensure log directory exists
-mkdir -p "${log_dir}"
+mkdir -p "\${log_dir}"
 
 # Append all output to the log file
-exec &> >(tee -a "${log_file}")
-echo "$(date): Launching Hydra"
+exec &> >(tee -a "\${log_file}")
+echo "\$(date): Launching Hydra"
 
 # Start Hydra service
 batocera-services start hydra &
 
 # Launch AppImage
-if [ -x "${app_image}" ]; then
-    cd "${app_dir}"
-    "./hydra.AppImage" --no-sandbox > "${log_file}" 2>&1 &
-    app_pid=$!
-    echo "Hydra started with PID $app_pid."
+if [ -x "\${app_image}" ]; then
+    cd "\${app_dir}"
+    "./hydra.AppImage" --no-sandbox > "\${log_file}" 2>&1 &
+    app_pid=\$!
+    echo "Hydra started with PID \$app_pid."
 
     # Wait for the AppImage process to exit
-    wait $app_pid
+    wait \$app_pid
     echo "Hydra exited."
 else
     echo "hydra.AppImage not found or not executable."
@@ -111,7 +111,7 @@ fi
 
 # Stop Hydra service when the AppImage process exits
 batocera-services stop hydra
-"EOF"
+EOF
 
 chmod +x "$PORT_SCRIPT"
 
