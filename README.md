@@ -3,7 +3,7 @@
  <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/DTJW92/batocera-unofficial-addons?style=for-the-badge"> <a href="https://www.buymeacoffee.com/TheNotoriousFOX" target="_blank">
     <img src="https://cdn.buymeacoffee.com/buttons/v2/default-orange.png" 
          alt="Buy Me A Beer" 
-         height="30" 
+         height="28" 
          width="120">
 </a>
 
