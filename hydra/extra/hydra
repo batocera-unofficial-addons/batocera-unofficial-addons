@@ -6,6 +6,18 @@ extract_packages() {
     if [ -d "/userdata/system/Games/Hydra" ]; then
         for archive in /userdata/system/Games/Hydra/*; do
             if [ -f "$archive" ]; then
+                # Skip if there is a corresponding .aria2c file
+                if [ -f "$archive.aria2c" ]; then
+                    echo "Skipping $archive as it has a corresponding .aria2c file."
+                    continue
+                fi
+
+                # Check if the archive download is complete by ensuring it is not being written to
+                if lsof "$archive" > /dev/null; then
+                    echo "$archive is still being downloaded. Skipping."
+                    continue
+                fi
+
                 echo "Extracting $archive..."
                 7zz x "$archive" -o"/userdata/system/Games/Hydra/" && echo "$archive extracted successfully."
                 rm -f "$archive" && echo "$archive deleted after extraction."
@@ -21,27 +33,25 @@ extract_packages() {
 start_aria2c() {
     echo "Starting aria2c service..."
 
-    # Check if the existing symlink points to the correct target
-    if [ -L "/usr/bin/aria2c" ]; then
-        if [ "$(readlink -f /usr/bin/aria2c)" != "/userdata/system/add-ons/hydra/usr/bin/aria2c" ]; then
-            echo "Symlink exists but points to the wrong target. Recreating..."
-            rm -f "/usr/bin/aria2c"
-            ln -s /userdata/system/add-ons/hydra/usr/bin/aria2c /usr/bin/aria2c && echo "Symlink recreated."
-        else
-            echo "Symlink already exists and is correct."
-        fi
-    else
-        echo "Creating new symlink for aria2c."
+    # Check if aria2c is already running
+    if pgrep -f "aria2c" > /dev/null; then
+        echo "aria2c is already running. Skipping start."
+        return
+    fi
+
+    # Symlink aria2c if it doesn't already exist
+    if [ ! -f "/usr/bin/aria2c" ]; then
         ln -s /userdata/system/add-ons/hydra/usr/bin/aria2c /usr/bin/aria2c && echo "Symlink created."
+    else
+        echo "Symlink already exists."
     fi
 
     # Start aria2c with the specified parameters
     if command -v aria2c > /dev/null; then
-        echo "Starting aria2c process..."
         aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --rpc-listen-port=6800 > /var/log/aria2c.log 2>&1 &
         echo "aria2c started successfully."
     else
-        echo "Error: aria2c not found or not executable. Please ensure it is installed and accessible."
+        echo "aria2c not found or not executable."
         exit 1
     fi
 }
