@@ -73,42 +73,43 @@ mkdir -p "$PORTS_DIR"
 cat << EOF > "$PORT_SCRIPT"
 #!/bin/bash
 
-# Trap signals for cleanup
-trap 'echo "Caught termination signal. Stopping Hydra..."; batocera-services stop hydra; exit' SIGTERM SIGINT
-
 # Environment setup
-export \$(cat /proc/1/environ | tr '\0' '\n')
+export \$(cat /proc/1/environ | tr '\0' '\n') 
 export DISPLAY=:0.0
 
 # Directories and file paths
-app_dir="$ADDONS_DIR/${APP_NAME,,}"
+app_dir="$ADDONS_DIR/${APP_NAME,,}" 
 app_image="\${app_dir}/${APP_NAME,,}.AppImage"
-log_dir="$LOGS_DIR"
-log_file="\${log_dir}/${APP_NAME,,}.log"
+log_dir="$LOGS_DIR" 
+log_file="\${log_dir}/${APP_NAME,,}.log" 
 
 # Ensure log directory exists
 mkdir -p "\${log_dir}"
 
 # Append all output to the log file
 exec &> >(tee -a "\$log_file")
-echo "$(date): Launching $APP_NAME"
-batocera-services start hydra &
+echo "\$(date): Launching ${APP_NAME}" 
+
+# Start Hydra service
+batocera-services start hydra
 
 # Launch AppImage
 if [ -x "\${app_image}" ]; then
     cd "\${app_dir}"
     "./${APP_NAME,,}.AppImage" --no-sandbox "\$@" > "\${log_file}" 2>&1 &
     app_pid=\$!
-    echo "$APP_NAME launched with PID \$app_pid."
+    echo "${APP_NAME} started with PID \$app_pid."
+
+    # Wait for the AppImage process to exit
     wait \$app_pid
-    echo "$APP_NAME exited."
+    echo "${APP_NAME} exited."
 else
-    echo "$APP_NAME.AppImage not found or not executable."
+    echo "${APP_NAME}.AppImage not found or not executable."
     batocera-services stop hydra
     exit 1
 fi
 
-# Stop hydra service when the process exits
+# Stop Hydra service when the AppImage process exits
 batocera-services stop hydra
 EOF
 
