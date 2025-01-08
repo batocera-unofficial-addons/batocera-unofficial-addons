@@ -21,7 +21,6 @@ mkdir -p "$extradir"
 cd "$extradir"
 echo "Downloading $APPNAME..."
 curl --progress-bar -O "$APPLINK"
-unzip -oq rufus.zip -d "$appdir"
 curl --progress-bar -L -o "icon.png" "$ICON"
 
 # Create Desktop Shortcut
