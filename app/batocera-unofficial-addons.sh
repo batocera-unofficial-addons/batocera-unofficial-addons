@@ -69,6 +69,7 @@ declare -A apps
 declare -A descriptions
 
 apps=(
+    ["7ZIP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/7zip/7zip.sh | bash"
     ["AMAZON-LUNA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/amazonluna/amazonluna.sh | bash"
     ["ARMAGETRON"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/armagetron/armagetron.sh | bash"
     ["ARCADEMANAGER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/arcademanager/arcademanager.sh | bash"
@@ -155,6 +156,7 @@ descriptions=(
     ["DISNEYPLUS"]="Disney+ streaming app for Batocera."
     ["TWITCH"]="Twitch streaming app for Batocera."
     ["NVIDACLOCKER"]="A cli and ports porgram to overclock Nviva GPUs"
+    ["7ZIP"]="A free and open-source file archiver"
 )
 
 
@@ -162,7 +164,7 @@ descriptions=(
 declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDOMRPG"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP"
     ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER NVIDIACLOCKER"
 )
 
