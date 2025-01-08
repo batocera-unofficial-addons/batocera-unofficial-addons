@@ -90,7 +90,7 @@ echo "Creating symlink for xmlstarlet in /usr/bin..."
 ln -sf /userdata/system/add-ons/.dep/xmlstarlet /usr/bin/xmlstarlet
 
 echo "xmlstarlet has been installed and symlinked to /usr/bin."
-
+mkdir -p "/userdata/roms/ports/images"
 # Step 10: Refresh the Ports menu
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
