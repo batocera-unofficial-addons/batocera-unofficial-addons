@@ -8,6 +8,7 @@ You will find no support in the official Discord—better to ask for support in 
 ## Add-Ons Status
 
 ### ✅ Passed
+- 7zip
 - Amazon-Luna
 - Armagetron
 - Arcade Manager
@@ -35,8 +36,10 @@ You will find no support in the official Discord—better to ask for support in 
 - OpenRA
 - OpenRGB
 - Port Master
+- qBittorrent
 - ShadPS4
 - Spotify
+- Stepmania
 - Sunshine
 - SuperTux
 - SuperTuxKart
@@ -48,6 +51,7 @@ You will find no support in the official Discord—better to ask for support in 
 - Wine Manager
 - Xonotic
 - YouTube
+  
 
 ### 🛠️ Testing
 - BlissOS
