@@ -8,7 +8,7 @@ APPLINK="https://github.com/ivan-hc/qbittorrent-appimage/releases/download/conti
 APPHOME="ivan-hc/qbittorrent-appimage"
 APPPATH="/userdata/system/add-ons/qbittorrent/qbittorrent.AppImage"
 ICON="https://e7.pngegg.com/pngimages/380/378/png-clipart-qbittorrent-comparison-of-bittorrent-clients-others-blue-trademark.png"
-COMMAND='$APPPATH'
+COMMAND="/userdata/system/add-ons/qbittorrent/qbittorrent.AppImage"
 
 # Define paths
 add_ons="/userdata/system/add-ons"
