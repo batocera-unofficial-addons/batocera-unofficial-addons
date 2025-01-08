@@ -4,8 +4,8 @@
 
 # App Info
 APPNAME="qBittorrent"
-APPLINK="https://www.fosshub.com/qBittorrent.html?dwl=qbittorrent-5.0.3_x86_64.AppImage"
-APPHOME="qbittorrent.org v5.0.3"
+APPLINK="https://github.com/ivan-hc/qbittorrent-appimage/releases/download/continuous/qBittorrent_5.0.0-1-archimage3.4.4-2-x86_64.AppImage"
+APPHOME="ivan-hc/qbittorrent-appimage"
 APPPATH="/userdata/system/add-ons/qbittorrent/qbittorrent.AppImage"
 ICON="https://e7.pngegg.com/pngimages/380/378/png-clipart-qbittorrent-comparison-of-bittorrent-clients-others-blue-trademark.png"
 COMMAND='$APPPATH'
