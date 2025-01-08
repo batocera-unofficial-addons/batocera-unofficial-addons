@@ -6,7 +6,7 @@
 APPNAME="7zip"
 APPLINK="https://www.7-zip.org/a/7z2409-x64.exe"
 APPHOME="7-zip.org v24.09"
-
+ICON="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/7zip/extra/7zip-icon.png"
 # Launcher Command
 COMMAND='batocera-wine lutris play /userdata/system/add-ons/7zip/7zFM.exe 2>/dev/null'
 
@@ -26,6 +26,7 @@ echo "$COMMAND" > "$command_file"
 cd "$extradir"
 echo "Downloading $APPNAME..."
 curl --progress-bar -O "$APPLINK"
+curl --progress-bar -O "$ICON"
 
 # Create Launcher Script
 launcher="$appdir/Launcher"
