@@ -4,7 +4,7 @@
 
 # App Info
 APPNAME="7zip"
-APPLINK="https://www.7-zip.org/a/7z2409-x64.exe"
+APPLINK="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/7zip/extra/7zip.zip"
 APPHOME="7-zip.org v24.09"
 ICON="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/7zip/extra/7zip-icon.png"
 # Launcher Command
