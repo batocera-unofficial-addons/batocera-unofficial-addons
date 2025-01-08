@@ -1,5 +1,5 @@
 #!/bin/bash
-
+mkdir -p "/userdata/roms/ports/images" # fix for existing downloads
 # Function to display animated title with colors
 animate_title() {
     local text="BATOCERA UNOFFICIAL ADD-ONS INSTALLER"
