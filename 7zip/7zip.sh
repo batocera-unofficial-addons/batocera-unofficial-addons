@@ -1,14 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # 7zip Installer for Batocera
 
 # App Info
 APPNAME="7zip"
 APPLINK="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/7zip/extra/7zip.zip"
-APPHOME="7-zip.org v24.09"
+APPHOME="7-zip.org v22.01"
+APPPATH="/userdata/system/add-ons/7zip/7zip.AppImage"
 ICON="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/7zip/extra/7zip-icon.png"
 # Launcher Command
-COMMAND='batocera-wine lutris play /userdata/system/add-ons/7zip/7z2409-x64.exe 2>/dev/null'
+COMMAND='batocera-wine lutris play /userdata/system/add-ons/7zip/7zFM.exe 2>/dev/null'
 
 # Define paths
 add_ons="/userdata/system/add-ons"
@@ -26,25 +27,24 @@ echo "$COMMAND" > "$command_file"
 cd "$extradir"
 echo "Downloading $APPNAME..."
 curl --progress-bar -O "$APPLINK"
+unzip -oq 7zip.zip -d "$appdir"
 curl --progress-bar -L -o "7zip-icon.png" "$ICON"
-
 # Create Launcher Script
 launcher="$appdir/Launcher"
 echo "#!/bin/bash" > "$launcher"
-echo "batocera-wine lutris play $appdir/7z2409-x64.exe" >> "$launcher"
+echo "batocera-wine lutris play $appdir/7zFM.exe" >> "$launcher"
 chmod +x "$launcher"
 
 # Create Desktop Shortcut
 shortcut="$extradir/7zip.desktop"
 echo "[Desktop Entry]" > "$shortcut"
 echo "Version=1.0" >> "$shortcut"
-echo "Icon=$extradir/7zip-icon.png" >> "$shortcut"
+echo "Icon=$extradir/icon.png" >> "$shortcut"
 echo "Exec=$launcher" >> "$shortcut"
 echo "Terminal=false" >> "$shortcut"
 echo "Type=Application" >> "$shortcut"
 echo "Categories=Game;batocera.linux;" >> "$shortcut"
 echo "Name=7zip" >> "$shortcut"
-cp "$shortcut" /usr/share/applications/
 
 # Create persistent desktop script
 persistent_script="$extradir/startup.sh"
@@ -62,4 +62,3 @@ fi
 
 # Finish
 echo "$APPNAME installed successfully."
-
