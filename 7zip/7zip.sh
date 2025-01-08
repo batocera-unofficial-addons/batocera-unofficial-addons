@@ -6,7 +6,6 @@
 APPNAME="7zip"
 APPLINK="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/7zip/extra/7zip.zip"
 APPHOME="7-zip.org v22.01"
-APPPATH="/userdata/system/add-ons/7zip/7zip.AppImage"
 ICON="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/7zip/extra/7zip-icon.png"
 COMMAND='batocera-wine lutris play /userdata/system/add-ons/7zip/7zip/7zFM.exe 2>/dev/null'
 
