@@ -1,5 +1,5 @@
 #!/bin/bash
-
+mkdir -p "/userdata/roms/ports/images" # fix for existing downloads
 # Function to display animated title with colors
 animate_title() {
     local text="BATOCERA UNOFFICIAL ADD-ONS INSTALLER"
@@ -69,80 +69,103 @@ declare -A apps
 declare -A descriptions
 
 apps=(
-    ["SUNSHINE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/sunshine/sunshine.sh | bash"
-    ["MOONLIGHT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/moonlight/moonlight.sh | bash"
-    ["NVIDIAPATCHER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/nvidiapatch/nvidiapatch.sh | bash"
-    ["SWITCH"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/switch/switch.sh | bash"
-    ["TAILSCALE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/tailscale/tailscale.sh | bash"
-    ["WINEMANAGER"]="curl -Ls links.gregoryc.dev/wine-manager | bash"
-    ["SHADPS4"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/shadps4/shadps4.sh | bash"
-    ["CONTY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/conty/conty.sh | bash"
-    ["MINECRAFT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/minecraft/minecraft.sh | bash"
+    ["7ZIP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/7zip/7zip.sh | bash"
+    ["AMAZON-LUNA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/amazonluna/amazonluna.sh | bash"
     ["ARMAGETRON"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/armagetron/armagetron.sh | bash"
-    ["CLONEHERO"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/clonehero/clonehero.sh | bash"
-    ["VESKTOP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vesktop/vesktop.sh | bash"
-    ["ENDLESS-SKY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/endlesssky/endlesssky.sh | bash"
+    ["ARCADEMANAGER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/arcademanager/arcademanager.sh | bash"
+    ["ASSAULTCUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/assaultcube/assaultcube.sh | bash"
+    ["BRAVE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/brave/brave.sh | bash"
     ["CHIAKI"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/chiaki/chiaki.sh | bash"
     ["CHROME"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh | bash"
-    ["AMAZON-LUNA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/amazonluna/amazonluna.sh | bash"
-    ["PORTMASTER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/portmaster/portmaster.sh | bash"
+    ["CLONEHERO"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/clonehero/clonehero.sh | bash"
+    ["CONTY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/conty/conty.sh | bash"
+    ["CSPORTABLE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/csportable/csportable.sh | bash"
+    ["DISNEYPLUS"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/disneyplus/disneyplus.sh | bash"
+    ["DOCKER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash"
+    ["ENDLESS-SKY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/endlesssky/endlesssky.sh | bash"
+    ["FIREFOX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/firefox/firefox.sh | bash"
+    ["FIGHTCADE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/fightcade.sh | bash"
+    ["FREEDOMRPG"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/freedomrpg/freedomrpg.sh | bash"
     ["GREENLIGHT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/greenlight/greenlight.sh | bash"
     ["HEROIC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/heroic.sh | bash"
-    ["YOUTUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/youtubetv.sh | bash"
-    ["NETFLIX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/netflix/netflix.sh | bash"
     ["IPTVNATOR"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/iptvnator/iptvnator.sh | bash"
-    ["FIREFOX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/firefox/firefox.sh | bash"
-    ["SPOTIFY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/spotify/spotify.sh | bash"
-    ["DOCKER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash"
-    ["ARCADEMANAGER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/arcademanager/arcademanager.sh | bash"
-    ["CSPORTABLE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/csportable/csportable.sh | bash"
-    ["BRAVE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/brave/brave.sh | bash"
+    ["MINECRAFT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/minecraft/minecraft.sh | bash"
+    ["MOONLIGHT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/moonlight/moonlight.sh | bash"
+    ["NETFLIX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/netflix/netflix.sh | bash"
+    ["NVIDIAPATCHER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/nvidiapatch/nvidiapatch.sh | bash"
+    ["OBS"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/obs/obs.sh | bash"
+    ["OPENRA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/openra/openra.sh | bash"
     ["OPENRGB"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/openrgb/openrgb.sh | bash"
+    ["PORTMASTER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/portmaster/portmaster.sh | bash"
+    ["SHADPS4"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/shadps4/shadps4.sh | bash"
+    ["SPOTIFY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/spotify/spotify.sh | bash"
+    ["SUNSHINE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/sunshine/sunshine.sh | bash"
+    ["SUPERTUX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertux/supertux.sh | bash"
+    ["SUPERTUXKART"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertuxkart/supertuxkart.sh | bash"
+    ["SWITCH"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/switch/switch.sh | bash"
+    ["TAILSCALE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/tailscale/tailscale.sh | bash"
+    ["TWITCH"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/twitch/twitch.sh | bash"
+    ["VESKTOP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vesktop/vesktop.sh | bash"
     ["WARZONE2100"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/warzone2100/warzone2100.sh | bash"
+    ["WINEMANAGER"]="curl -Ls links.gregoryc.dev/wine-manager | bash"
     ["XONOTIC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/xonotic/xonotic.sh | bash"
+    ["YOUTUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/youtubetv.sh | bash"
+    ["NVIDIACLOCKER"]="curl -Ls https://raw.githubusercontent.com/nicolai-6/batocera-nvidia-clocker/refs/heads/main/install.sh | bash"
 )
 
+
 descriptions=(
-    ["SUNSHINE"]="A game streaming app to use with Batocera for remote play."
-    ["MOONLIGHT"]="Game streaming software for PC gaming on your Batocera machine."
-    ["NVIDIAPATCHER"]="Patch for enabling NVIDIA GPU support in Batocera."
-    ["SWITCH"]="Install Nintendo Switch emulation on Batocera."
-    ["TAILSCALE"]="A VPN service to secure your Batocera network connections."
-    ["WINEMANAGER"]="A wine manager for running Windows games on Batocera."
-    ["SHADPS4"]="Experimental PlayStation 4 emulator, not guaranteed to work for every game."
-    ["CONTY"]="A standalone Linux distro container."
-    ["MINECRAFT"]="Minecraft: Java or Bedrock Edition on Batocera."
-    ["ARMAGETRON"]="A Tron-style game for Batocera."
-    ["CLONEHERO"]="A Guitar Hero clone for Batocera, works with guitar controllers."
-    ["VESKTOP"]="A Discord application for Batocera."
-    ["ENDLESS-SKY"]="A space exploration game for Batocera."
-    ["CHIAKI"]="An open-source PlayStation Remote Play client for streaming PS4 and PS5 games."
-    ["CHROME"]="Google Chrome browser for accessing the web."
-    ["AMAZON-LUNA"]="Amazon Luna game streaming service client."
-    ["PORTMASTER"]="Designed and streamlined for handlehelds, download and install games."
-    ["GREENLIGHT"]="An open-source client for xCloud and Xbox home streaming"
-    ["HEROIC"]="Heroic Game Launcher for V39/40/41. Epic, GOG and Amazon Games."
-    ["YOUTUBE"]="A YouTube client for Batocera."
+    ["SUNSHINE"]="Game streaming app for remote play on Batocera."
+    ["MOONLIGHT"]="Stream PC games on Batocera."
+    ["NVIDIAPATCHER"]="Enable NVIDIA GPU support on Batocera."
+    ["SWITCH"]="Nintendo Switch emulator for Batocera."
+    ["TAILSCALE"]="VPN service for secure Batocera connections."
+    ["WINEMANAGER"]="Manage Windows games with Wine on Batocera."
+    ["SHADPS4"]="Experimental PS4 streaming client."
+    ["CONTY"]="Standalone Linux distro container."
+    ["MINECRAFT"]="Minecraft: Java or Bedrock Edition."
+    ["ARMAGETRON"]="Tron-style light cycle game."
+    ["CLONEHERO"]="Guitar Hero clone for Batocera."
+    ["VESKTOP"]="Discord client for Batocera."
+    ["ENDLESS-SKY"]="Space exploration game."
+    ["CHIAKI"]="PS4/PS5 Remote Play client."
+    ["CHROME"]="Google Chrome web browser."
+    ["AMAZON-LUNA"]="Amazon Luna game streaming client."
+    ["PORTMASTER"]="Download and manage games on handhelds."
+    ["GREENLIGHT"]="Client for xCloud and Xbox streaming."
+    ["HEROIC"]="Epic, GOG, and Amazon Games launcher."
+    ["YOUTUBE"]="YouTube client for Batocera."
     ["NETFLIX"]="Netflix streaming app for Batocera."
-    ["IPTVNATOR"]="A client for watching IPTV on Batocera."
-    ["FIREFOX"]="Mozilla Firefox browser for accessing the web."
-    ["SPOTIFY"]="Spotify music streaming client for Batocera."
-    ["DOCKER"]="A tool to manage and run containerized applications."
-    ["ARCADEMANAGER"]="A tool to manage arcade ROMs and games in Batocera."
-    ["CSPORTABLE"]="Counter-Strike Portable, a fan-made version of Counter-Strike for Batocera."
-    ["BRAVE"]="Brave browser, a privacy-focused web browser."
-    ["OPENRGB"]="OpenRGB, a tool for managing RGB lighting on various devices."
-    ["WARZONE2100"]="Warzone 2100, a real-time strategy and tactics game."
-    ["XONOTIC"]="Xonotic, a fast-paced open-source arena shooter game."
+    ["IPTVNATOR"]="IPTV client for watching live TV."
+    ["FIREFOX"]="Mozilla Firefox browser."
+    ["SPOTIFY"]="Spotify music streaming client."
+    ["DOCKER"]="Manage and run containerized apps."
+    ["ARCADEMANAGER"]="Manage arcade ROMs and games."
+    ["CSPORTABLE"]="Fan-made portable Counter-Strike."
+    ["BRAVE"]="Privacy-focused Brave browser."
+    ["OPENRGB"]="Manage RGB lighting on devices."
+    ["WARZONE2100"]="Real-time strategy and tactics game."
+    ["XONOTIC"]="Fast-paced open-source arena shooter."
+    ["FIGHTCADE"]="Play classic arcade games online."
+    ["SUPERTUXKART"]="Free and open-source kart racer."
+    ["OPENRA"]="Modernized RTS for Command & Conquer."
+    ["ASSAULTCUBE"]="Multiplayer first-person shooter game."
+    ["OBS"]="Streaming and video recording software."
+    ["SUPERTUX"]="2D platformer starring Tux the Linux mascot."
+    ["FREEDOMRPG"]="Open-source role-playing game for Batocera."
+    ["DISNEYPLUS"]="Disney+ streaming app for Batocera."
+    ["TWITCH"]="Twitch streaming app for Batocera."
+    ["NVIDACLOCKER"]="A cli and ports porgram to overclock Nviva GPUs"
+    ["7ZIP"]="A free and open-source file archiver"
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB"
-    ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDOMRPG"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP"
+    ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER NVIDIACLOCKER"
 )
 
 while true; do
@@ -151,25 +174,31 @@ while true; do
         "Games" "Install games and game-related add-ons" \
         "Utilities" "Install utility apps" \
         "Developer Tools" "Install developer and patching tools" \
+        "Secret Menu" "Enter the password to access the secret menu" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
-    # Exit if the user selects "Exit" or cancels
-    if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
-        echo "Exiting the installer."
-        exit 0
-    fi
+# Exit if the user selects "Exit" or cancels
+if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
+    dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
+    sleep 5  # Pause for 3 seconds to let the user read the message
+    clear
+    exit 0
+fi
 
     # Based on category, show the corresponding apps
     while true; do
         case "$category_choice" in
             "Games")
-                selected_apps="${categories["Games"]}"
+                selected_apps=$(echo "${categories["Games"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Utilities")
-                selected_apps="${categories["Utilities"]}"
+                selected_apps=$(echo "${categories["Utilities"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Developer Tools")
-                selected_apps="${categories["Developer Tools"]}"
+                selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+                ;;
+            "Secret Menu")
+                curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/menu2.sh | bash
                 ;;
             *)
                 echo "Invalid choice!"

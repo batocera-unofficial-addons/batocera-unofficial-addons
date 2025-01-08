@@ -1,0 +1,123 @@
+#!/bin/bash
+
+# Function to extract packages in /userdata/system/Games/Hydra
+extract_packages() {
+    echo "Checking for archives to extract..."
+    if [ -d "/userdata/system/Games/Hydra" ]; then
+        for archive in /userdata/system/Games/Hydra/*; do
+            if [ -f "$archive" ]; then
+                # Skip if there is a corresponding .aria2c file
+                if [ -f "$archive.aria2c" ]; then
+                    echo "Skipping $archive as it has a corresponding .aria2c file."
+                    continue
+                fi
+
+                # Check if the archive download is complete by ensuring it is not being written to
+                if lsof "$archive" > /dev/null; then
+                    echo "$archive is still being downloaded. Skipping."
+                    continue
+                fi
+
+                echo "Extracting $archive..."
+                7zz x "$archive" -o"/userdata/system/Games/Hydra/" && echo "$archive extracted successfully."
+                rm -f "$archive" && echo "$archive deleted after extraction."
+            fi
+        done
+        echo "All extraction processes completed."
+    else
+        echo "No archives found in /userdata/system/Games/Hydra."
+    fi
+}
+
+# Function to start aria2c service
+start_aria2c() {
+    echo "Starting aria2c service..."
+
+    # Check if aria2c is already running
+    if pgrep -f "aria2c" > /dev/null; then
+        echo "aria2c is already running. Skipping start."
+        return
+    fi
+
+    # Symlink aria2c if it doesn't already exist
+    if [ ! -f "/usr/bin/aria2c" ]; then
+        ln -s /userdata/system/add-ons/hydra/usr/bin/aria2c /usr/bin/aria2c && echo "Symlink created."
+    else
+        echo "Symlink already exists."
+    fi
+
+    # Start aria2c with the specified parameters
+    if command -v aria2c > /dev/null; then
+        aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --rpc-listen-port=6800 > /var/log/aria2c.log 2>&1 &
+        echo "aria2c started successfully."
+    else
+        echo "aria2c not found or not executable."
+        exit 1
+    fi
+}
+
+# Function to stop aria2c service
+stop_aria2c() {
+    echo "Stopping aria2c service..."
+    # Stop aria2c process
+    pkill -f "aria2c" && echo "aria2c stopped." || echo "aria2c is not running."
+    # Stop hydra process
+    pkill -f "hydra" && echo "Hydra process stopped." || echo "Hydra process is not running."
+}
+
+# Function to restart aria2c service
+restart_aria2c() {
+    stop_aria2c
+    start_aria2c
+}
+
+# Function to check status of aria2c service
+check_status() {
+    if pgrep -f "aria2c" > /dev/null; then
+        echo "aria2c is running."
+        exit 0
+    else
+        echo "aria2c is stopped."
+        exit 1
+    fi
+}
+
+# Function to uninstall aria2c service
+uninstall_aria2c() {
+    echo "Uninstalling aria2c service..."
+    stop_aria2c
+    # Remove the symlink
+    if [ -L "/usr/bin/aria2c" ]; then
+        rm -f "/usr/bin/aria2c" && echo "Symlink removed."
+    fi
+    echo "aria2c uninstalled successfully."
+}
+
+# Infinite loop to keep the service running
+while true; do
+    case "$1" in
+        start)
+            extract_packages &
+            start_aria2c
+            ;;
+        stop)
+            stop_aria2c
+            ;;
+        restart)
+            restart_aria2c
+            ;;
+        status)
+            check_status
+            ;;
+        uninstall)
+            uninstall_aria2c
+            ;;
+        *)
+            echo "Usage: $0 {start|stop|restart|status|uninstall}"
+            exit 1
+            ;;
+    esac
+
+    # Sleep for a certain period before the next check (e.g., 10 seconds)
+    sleep 10
+done

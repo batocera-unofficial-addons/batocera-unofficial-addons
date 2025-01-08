@@ -104,9 +104,7 @@ EOF
 chmod +x "/userdata/system/configs/heroic/restore_desktop_entry.sh"
 
 # Add to startup
-cat <<EOF > "/userdata/system/custom.sh"
-#!/bin/bash
-# Restore Heroic desktop entry at startup
+cat <<EOF >> "/userdata/system/custom.sh"
 bash /userdata/system/configs/heroic/restore_desktop_entry.sh &
 EOF
 chmod +x "/userdata/system/custom.sh"

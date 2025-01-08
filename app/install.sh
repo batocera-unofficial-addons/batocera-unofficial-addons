@@ -90,7 +90,7 @@ echo "Creating symlink for xmlstarlet in /usr/bin..."
 ln -sf /userdata/system/add-ons/.dep/xmlstarlet /usr/bin/xmlstarlet
 
 echo "xmlstarlet has been installed and symlinked to /usr/bin."
-
+mkdir -p "/userdata/roms/ports/images"
 # Step 10: Refresh the Ports menu
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
@@ -103,7 +103,6 @@ fi
 # Download the image
 echo "Downloading Batocera Unofficial Add-ons logo..."
 curl -L -o /userdata/roms/ports/images/BatoceraUnofficialAddons.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png
-
 echo "Adding logo to Batocera Unofficial Add-ons entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./BatoceraUnofficialAddOns.sh" \
