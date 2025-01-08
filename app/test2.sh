@@ -4,8 +4,8 @@
 
 # App Info
 APPNAME="qBittorrent"
-APPLINK="https://github.com/ivan-hc/qbittorrent-appimage/releases/download/continuous/qBittorrent_5.0.0-1-archimage3.4.4-2-x86_64.AppImage"
-APPHOME="ivan-hc/qbittorrent-appimage"
+APPLINK="https://github.com/c0re100/qBittorrent-Enhanced-Edition/releases/download/release-5.0.3.10/qBittorrent-Enhanced-Edition-x86_64.AppImage"
+APPHOME="c0re100/qBittorrent-Enhanced-Edition"
 APPPATH="/userdata/system/add-ons/qbittorrent/qbittorrent.AppImage"
 ICON="https://e7.pngegg.com/pngimages/380/378/png-clipart-qbittorrent-comparison-of-bittorrent-clients-others-blue-trademark.png"
 COMMAND="/userdata/system/add-ons/qbittorrent/qbittorrent.AppImage"
@@ -22,8 +22,8 @@ mkdir -p "$extradir"
 cd "$extradir"
 echo "Downloading $APPNAME..."
 curl --progress-bar -L -O "$APPLINK"
-chmod +x qBittorrent_5.0.0-1-archimage3.4.4-2-x86_64.AppImage
-mv qBittorrent_5.0.0-1-archimage3.4.4-2-x86_64.AppImage "$APPPATH"
+chmod +x qBittorrent-Enhanced-Edition-x86_64.AppImage
+mv qBittorrent-Enhanced-Edition-x86_64.AppImage "$APPPATH"
 curl --progress-bar -L -o "icon.png" "$ICON"
 
 # Create Desktop Shortcut
