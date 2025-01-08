@@ -28,7 +28,7 @@ cd "$extradir"
 echo "Downloading $APPNAME..."
 curl --progress-bar -O "$APPLINK"
 unzip -oq 7zip.zip -d "$appdir"
-curl --progress-bar -L -o "7zip-icon.png" "$ICON"
+curl --progress-bar -L -o "icon.png" "$ICON"
 # Create Launcher Script
 launcher="$appdir/Launcher"
 echo "#!/bin/bash" > "$launcher"
