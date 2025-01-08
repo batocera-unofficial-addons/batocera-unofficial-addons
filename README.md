@@ -1,6 +1,6 @@
 # Unofficial Add-ons for Batocera
 <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/DTJW92/batocera-unofficial-addons?style=for-the-badge"> <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/DTJW92/batocera-unofficial-addons?style=for-the-badge">
- <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/DTJW92/batocera-unofficial-addons?style=for-the-badge"> <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="TheNotoriousFOX" data-color="#ff7b00" data-emoji="🍺"  data-font="Poppins" data-text="Buy me a beer" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#FFDD00" ></script>
+ <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/DTJW92/batocera-unofficial-addons?style=for-the-badge"> 
 
 **Unofficial add-ons for Batocera, in no way affiliated with the Batocera development team! Install at your own risk.<br>
 You will find no support in the official Discord—better to ask for support in our own Discord!**
