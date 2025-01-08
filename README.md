@@ -4,7 +4,7 @@
     <img src="https://cdn.buymeacoffee.com/buttons/v2/default-orange.png" 
          alt="Buy Me A Beer" 
          height="28" 
-         width="125">
+         width="140">
 </a>
 
 **Unofficial add-ons for Batocera, in no way affiliated with the Batocera development team! Install at your own risk.<br>
