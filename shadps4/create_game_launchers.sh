@@ -155,6 +155,3 @@ fi
         echo "$game_code" >> "$processed_list"
     fi
 done
-
-killall -9 emulationstation
-echo "Script execution completed."
