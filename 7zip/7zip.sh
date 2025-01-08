@@ -8,7 +8,7 @@ APPLINK="https://www.7-zip.org/a/7z2409-x64.exe"
 APPHOME="7-zip.org v24.09"
 ICON="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/7zip/extra/7zip-icon.png"
 # Launcher Command
-COMMAND='batocera-wine lutris play /userdata/system/add-ons/7zip/7zFM.exe 2>/dev/null'
+COMMAND='batocera-wine lutris play /userdata/system/add-ons/7zip/7z2409-x64.exe 2>/dev/null'
 
 # Define paths
 add_ons="/userdata/system/add-ons"
@@ -31,14 +31,14 @@ curl --progress-bar -O "$ICON"
 # Create Launcher Script
 launcher="$appdir/Launcher"
 echo "#!/bin/bash" > "$launcher"
-echo "batocera-wine lutris play $appdir/7zFM.exe" >> "$launcher"
+echo "batocera-wine lutris play $appdir/7z2409-x64.exe" >> "$launcher"
 chmod +x "$launcher"
 
 # Create Desktop Shortcut
 shortcut="$extradir/7zip.desktop"
 echo "[Desktop Entry]" > "$shortcut"
 echo "Version=1.0" >> "$shortcut"
-echo "Icon=$extradir/icon.png" >> "$shortcut"
+echo "Icon=$extradir/7zip-icon.png" >> "$shortcut"
 echo "Exec=$launcher" >> "$shortcut"
 echo "Terminal=false" >> "$shortcut"
 echo "Type=Application" >> "$shortcut"
