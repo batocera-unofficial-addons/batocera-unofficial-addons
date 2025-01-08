@@ -7,7 +7,7 @@ APPNAME="Rufus"
 APPLINK="https://github.com/pbatard/rufus/releases/download/v4.6/rufus-4.6.exe"
 APPHOME="rufus v4.6"
 ICON="https://rufus.ie/pics/rufus-128.png"
-COMMAND='batocera-wine lutris play /userdata/system/add-ons/rufus/rufus/rufus.exe 2>/dev/null'
+COMMAND='batocera-wine lutris play /userdata/system/add-ons/rufus/extra/rufus-4.6.exe 2>/dev/null'
 
 # Define paths
 add_ons="/userdata/system/add-ons"
