@@ -21,7 +21,7 @@ mkdir -p "$extradir"
 # Download and install the app
 cd "$extradir"
 echo "Downloading $APPNAME..."
-curl --progress-bar -O "$APPLINK"
+curl --progress-bar -L -O "$APPLINK"
 chmod +x qBittorrent_5.0.0-1-archimage3.4.4-2-x86_64.AppImage
 mv qBittorrent_5.0.0-1-archimage3.4.4-2-x86_64.AppImage "$APPPATH"
 curl --progress-bar -L -o "icon.png" "$ICON"
