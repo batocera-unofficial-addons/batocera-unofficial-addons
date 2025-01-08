@@ -10,7 +10,7 @@
 **Unofficial add-ons for Batocera, in no way affiliated with the Batocera development team! Install at your own risk.<br>
 You will find no support in the official Discord—better to ask for support in our own Discord!**
 
-**Contributions welcome, please provide evidence of your addition working to speed up the process**
+**Contributions welcome, please provide evidence of your addition working to speed up the process.**
 
 ## Add-Ons Status
 
