@@ -22,8 +22,8 @@ mkdir -p "$extradir"
 cd "$extradir"
 echo "Downloading $APPNAME..."
 curl --progress-bar -O "$APPLINK"
-chmod +x qbittorrent-5.0.3_x86_64.AppImage
-mv qbittorrent-5.0.3_x86_64.AppImage "$APPPATH"
+chmod +x qBittorrent_5.0.0-1-archimage3.4.4-2-x86_64.AppImage
+mv qBittorrent_5.0.0-1-archimage3.4.4-2-x86_64.AppImage "$APPPATH"
 curl --progress-bar -L -o "icon.png" "$ICON"
 
 # Create Desktop Shortcut
