@@ -28,9 +28,6 @@ animate_border() {
 
 # Function to display controls
 display_controls() {
-  # Clear the screen
-clear
-
 # Display the ASCII art
 echo "                                                              ⠈⠻⠷⠄                      "
 echo "                                                       ⣀⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣀     "
