@@ -29,6 +29,7 @@ animate_border() {
 # Function to display controls
 display_controls() {
 # Display the ASCII art
+echo -ne "\e[1;36m"
 echo "                                                              ⠈⠻⠷⠄                      "
 echo "                                                       ⣀⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣀     "
 echo "                                                     ⣰⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⣿⣿⣿⣆   "
@@ -44,7 +45,7 @@ echo " | |  | | '_ \\ / _ \\|  _|  _| |/ __| |/ _\` | |   / /\\ \\ / _\` |/ _\` 
 echo " | |__| | | | | (_) | | | | | | (__| | (_| | |  / ____ \\ (_| | (_| |      | |__| | | | \\__ \\"
 echo "  \\____/|_| |_|\\___/|_| |_| |_|\\___|_|\\__,_|_| /_/    \\_\\\___|\\___ |       \\____/|_| |_|___/"
 echo "                                                                                            "
-echo ""
+ echo -e "\e[0m"
     echo -e "\e[1;33m"  # Set color to green
     echo "Controls:"
     echo "  Navigate with up-down-left-right"
