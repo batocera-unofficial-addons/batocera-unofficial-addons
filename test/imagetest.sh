@@ -3,7 +3,7 @@
 # Function to display animated title with colors
 animate_title() {
     local text="BATOCERA UNOFFICIAL ADD-ONS INSTALLER"
-    local delay=0.03
+    local delay=0.01
     local length=${#text}
 
     echo -ne "\e[1;36m"  # Set color to cyan
@@ -21,7 +21,7 @@ animate_border() {
 
     for (( i=0; i<width; i++ )); do
         echo -n "$char"
-        sleep 0.02
+        sleep 0.01
     done
     echo -e
 }
