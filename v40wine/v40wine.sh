@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define URLs for split files
-URL_PART1="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/v40wine/ge-customv40.tar.xz.0011"
+URL_PART1="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/v40wine/ge-customv40.tar.xz.001"
 URL_PART2="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/v40wine/ge-customv40.tar.xz.002"
 
 # Define the download directory and target extraction path
