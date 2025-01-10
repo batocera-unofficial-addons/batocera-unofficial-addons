@@ -28,9 +28,19 @@ if [[ ! -f "ge-customv40.tar.xz" ]]; then
     exit 1
 fi
 
-# Extract the .tar.xz archive
+# Decompress the .xz file
+echo "Decompressing the .xz file..."
+xz -d ge-customv40.tar.xz
+
+# Verify the decompressed file exists
+if [[ ! -f "ge-customv40.tar" ]]; then
+    echo "Error: Decompression failed."
+    exit 1
+fi
+
+# Extract the .tar archive
 echo "Extracting the archive..."
-tar -xf ge-customv40.tar.xz -C "$EXTRACT_DIR"
+tar -xf ge-customv40.tar -C "$EXTRACT_DIR"
 
 # Check if extraction was successful
 if [[ $? -eq 0 ]]; then
