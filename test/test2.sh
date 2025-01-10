@@ -121,4 +121,4 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
 curl http://127.0.0.1:1234/reloadgames
 
 echo
-echo "Installation complete! You can now launch $APP_
+echo "Installation complete! You can now launch $APP_NAME from the Ports menu."
