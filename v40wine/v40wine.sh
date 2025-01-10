@@ -14,8 +14,8 @@ mkdir -p "$EXTRACT_DIR"
 
 # Download the split files
 echo "Downloading split files..."
-curl -o "$DOWNLOAD_DIR/ge-customv40.tar.xz.001" "$URL_PART1"
-curl -o "$DOWNLOAD_DIR/ge-customv40.tar.xz.002" "$URL_PART2"
+curl -L -o "$DOWNLOAD_DIR/ge-customv40.tar.xz.001" "$URL_PART1"
+curl -L -o "$DOWNLOAD_DIR/ge-customv40.tar.xz.002" "$URL_PART2"
 
 # Combine the files into a single archive
 cd "$DOWNLOAD_DIR"
