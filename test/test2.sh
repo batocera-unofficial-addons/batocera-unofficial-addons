@@ -40,12 +40,51 @@ fi
 echo "Cleaning up..."
 rm -f "$TAR_FILE"
 
-# Step 3: Update ambermoon.cfg for fullscreen
-if [ -f "$CONFIG_FILE" ]; then
-    echo "Configuring $APP_NAME for fullscreen mode..."
-    sed -i 's/"Fullscreen": false,/"Fullscreen": true,/' "$CONFIG_FILE"
+# Step 3: Create ambermoon.cfg if it doesn't exist
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Creating default configuration file for $APP_NAME..."
+    cat << EOF > "$CONFIG_FILE"
+{
+  "UsePatcher": true,
+  "PatcherTimeout": 1250,
+  "UseProxyForPatcher": false,
+  "PatcherProxy": "",
+  "WindowX": 0,
+  "WindowY": 0,
+  "MonitorIndex": 0,
+  "Fullscreen": true,
+  "UseDataPath": false,
+  "DataPath": "/userdata/system/add-ons/ambermoon",
+  "SaveOption": 0,
+  "GameVersionIndex": 1,
+  "LegacyMode": false,
+  "Music": true,
+  "Volume": 100,
+  "ExternalMusic": false,
+  "BattleSpeed": 0,
+  "AutoDerune": true,
+  "EnableCheats": false,
+  "ShowButtonTooltips": true,
+  "ShowFantasyIntro": true,
+  "ShowIntro": false,
+  "GraphicFilter": 0,
+  "GraphicFilterOverlay": 0,
+  "Effects": 0,
+  "ShowPlayerStatsTooltips": true,
+  "ShowPyrdacorLogo": true,
+  "ShowFloor": true,
+  "ShowCeiling": true,
+  "ShowFog": true,
+  "ExtendedSavegameSlots": true,
+  "AdditionalSavegameSlots": [],
+  "ShowSaveLoadMessage": false,
+  "Movement3D": 0,
+  "TurnWithArrowKeys": true,
+  "Language": 0
+}
+EOF
 else
-    echo "Configuration file not found. Skipping fullscreen configuration."
+    echo "Configuration file already exists. Skipping creation."
 fi
 
 # Step 4: Create the app launch script
@@ -82,4 +121,4 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
 curl http://127.0.0.1:1234/reloadgames
 
 echo
-echo "Installation complete! You can now launch $APP_NAME from the Ports menu."
+echo "Installation complete! You can now launch $APP_
