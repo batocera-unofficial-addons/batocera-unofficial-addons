@@ -12,6 +12,7 @@ GAME_LIST="/userdata/roms/ports/gamelist.xml"
 PORT_SCRIPT="${PORTS_DIR}/${APP_NAME}.sh"
 LOGO_PATH="${PORTS_DIR}/images/${APP_NAME,,}-logo.png"
 CONFIG_FILE="${ADDONS_DIR}/${APP_NAME,,}/ambermoon.cfg"
+TAR_FILE="$ADDONS_DIR/${APP_NAME,,}/Ambermoon.tar.gz"
 
 # Step 1: Create necessary directories
 echo "Setting up directories..."
@@ -19,7 +20,7 @@ mkdir -p "$ADDONS_DIR/${APP_NAME,,}" "$PORTS_DIR" "$LOGS_DIR" "$PORTS_DIR/images
 
 # Step 2: Download and extract Ambermoon
 echo "Downloading $APP_NAME..."
-wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/Ambermoon.tar.gz" "$FILE_URL"
+wget -q --show-progress -O "$TAR_FILE" "$FILE_URL"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download $APP_NAME. Exiting."
@@ -28,12 +29,16 @@ fi
 
 # Extract the downloaded file
 echo "Extracting $APP_NAME..."
-tar -xzvf "$ADDONS_DIR/${APP_NAME,,}/Ambermoon.tar.gz" -C "$ADDONS_DIR/${APP_NAME,,}"
+tar -xzvf "$TAR_FILE" -C "$ADDONS_DIR/${APP_NAME,,}"
 
 if [ $? -ne 0 ]; then
     echo "Failed to extract $APP_NAME. Exiting."
     exit 1
 fi
+
+# Remove the .tar.gz file after extraction
+echo "Cleaning up..."
+rm -f "$TAR_FILE"
 
 # Step 3: Update ambermoon.cfg for fullscreen
 if [ -f "$CONFIG_FILE" ]; then
