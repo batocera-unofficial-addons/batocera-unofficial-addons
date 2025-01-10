@@ -71,7 +71,7 @@ declare -A descriptions
 apps=(
     ["7ZIP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/7zip/7zip.sh | bash"
     ["AMAZON-LUNA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/amazonluna/amazonluna.sh | bash"
-    ["AMBERMOON"}="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/ambermoon/ambermoon.sh | bash"
+    ["AMBERMOON"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/ambermoon/ambermoon.sh | bash"
     ["ARMAGETRON"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/armagetron/armagetron.sh | bash"
     ["ARCADEMANAGER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/arcademanager/arcademanager.sh | bash"
     ["ASSAULTCUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/assaultcube/assaultcube.sh | bash"
