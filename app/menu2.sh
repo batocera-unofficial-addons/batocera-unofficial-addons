@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Encoded button sequence (controller input)
+
 encoded_sequence="VVAuVVAsRE9XTixET1dOLExFRlQsUklHSFQsTEVGVCxSSUdIVA=="
 
-# Decode the button sequence at runtime
+
 required_sequence=($(echo "$encoded_sequence" | base64 -d | tr ',' ' '))
 
-# Function to capture controller input
+
 capture_input() {
     local input_sequence=()
     while [[ ${#input_sequence[@]} -lt ${#required_sequence[@]} ]]; do
@@ -15,14 +15,14 @@ capture_input() {
         echo "You pressed: $input"
         input_sequence+=("$input")
 
-        # Feedback for mismatched input
+        
         if [[ "${input_sequence[@]}" != "${required_sequence[@]:0:${#input_sequence[@]}}" ]]; then
             echo "Incorrect! Starting over..."
             input_sequence=()
         fi
     done
 
-    # Verify the full sequence
+  
     if [[ "${input_sequence[@]}" == "${required_sequence[@]}" ]]; then
         echo "Password accepted!"
         return 0
