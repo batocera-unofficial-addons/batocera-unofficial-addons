@@ -112,5 +112,5 @@ xmlstarlet ed --inplace \
     -s "/gameList/game[last()]" -t elem -n hidden -v "false" \
     "${PORTS_GAMELIST}"
 echo "Plex entry added to ports gamelist.xml."
-
+curl http://127.0.0.1:1234/reloadgames
 echo "Plex setup completed successfully."
