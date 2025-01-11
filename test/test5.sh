@@ -26,8 +26,8 @@ echo "Adding Flathub repository..."
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo 
 clear
 echo "Installing Plex..."
-flatpak install -y flathub tv.plex.PlexHTPC 
-clear
+flatpak install -y --noninteractive flathub tv.plex.PlexHTPC &> /dev/null
+tput reset
 echo "Updating Batocera Flatpaks..."
 batocera-flatpak-update 
 clear
