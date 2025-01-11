@@ -114,7 +114,8 @@ apps=(
     ["XONOTIC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/xonotic/xonotic.sh | bash"
     ["YOUTUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/youtubetv.sh | bash"
     ["NVIDIACLOCKER"]="curl -Ls https://raw.githubusercontent.com/nicolai-6/batocera-nvidia-clocker/refs/heads/main/install.sh | bash"
-    ["V40WINE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/v40wine/v40wine.sh | bash"
+    ["CUSTOMWINE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/wine-custom/wine.sh | bash"
+    ["GPARTED"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/gparted/gparted.sh | bash"
 )
 
 
@@ -164,7 +165,8 @@ descriptions=(
     ["QBITTORRENT"]="Free and open-source BitTorrent client"
     ["STEPMANIA"]="A dancemat compatible rhythm video game and engine"
     ["AMBERMOON"]="Ambermoon.net, a port of the classic"
-    ["V40WINE"]="Wine GE Custom from Batocera V40"
+    ["CUSTOMWINE"]="Download Wine/Proton versions"
+    ["GPARTED"]="Linux partition manager"
 )
 
 
@@ -172,8 +174,8 @@ descriptions=(
 declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDOMRPG STEPMANIA AMBERMOON"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT"
-    ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER NVIDIACLOCKER V40WINE"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE"
+    ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER NVIDIACLOCKER"
 )
 
 while true; do
