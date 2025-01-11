@@ -47,7 +47,7 @@ show_menu() {
         if [[ -f /tmp/capture_result && "$(cat /tmp/capture_result)" == "Password accepted!" ]]; then
             break
         else
-            dialog --title "Incorrect" --msgbox "Waiting for the correct sequence..." 5 40
+            dialog --title "Incorrect" --msgbox "Waiting for the correct password..." 5 40
         fi
     done
 
