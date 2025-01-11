@@ -20,13 +20,13 @@ fi
 
 # Add Flathub repository and install Plex
 echo "Adding Flathub repository..."
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo &
 
 echo "Installing Plex..."
-flatpak install -y flathub tv.plex.PlexHTPC
+flatpak install -y flathub tv.plex.PlexHTPC &
 
 echo "Updating Batocera Flatpaks..."
-batocera-flatpak-update
+batocera-flatpak-update &
 
 # Ensure Plex is listed in flatpak gamelist.xml and set it as hidden
 hide_plex_in_flatpak() {
