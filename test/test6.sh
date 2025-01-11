@@ -1,8 +1,5 @@
 #!/bin/bash
 
-set -e
-set -o pipefail
-
 # Set the application name
 APPNAME="Plex"
 
@@ -21,16 +18,35 @@ if ! command -v xmlstarlet &> /dev/null; then
     exit 1
 fi
 
+# Spinner function to show progress
+show_spinner() {
+    local PID=$1 # Process ID to monitor
+    local SPINNER='|/-\' # Spinner characters
+    local DELAY=0.1 # Delay between frames
+    local i=0
+    while kill -0 "$PID" 2>/dev/null; do
+        printf "\rInstalling Plex... %s" "${SPINNER:i++%${#SPINNER}:1}"
+        sleep "$DELAY"
+    done
+    printf "\rInstalling Plex... Done!           \n"
+}
+
 # Add Flathub repository and install Plex
-echo "Adding Flathub repository..."
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo 
-clear
-echo "Installing Plex..."
-flatpak install -y --noninteractive flathub tv.plex.PlexHTPC &> /dev/null
-tput reset
-echo "Updating Batocera Flatpaks..."
-batocera-flatpak-update 
-clear
+install_plex() {
+    echo "Adding Flathub repository..."
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+    echo "Installing Plex..."
+    # Run flatpak install in the background and monitor with spinner
+    flatpak install -y flathub tv.plex.PlexHTPC &> /tmp/plex_install.log &
+    show_spinner $!
+
+    echo "Updating Batocera Flatpaks..."
+    batocera-flatpak-update &> /dev/null
+
+    echo "Plex installation completed successfully."
+}
+
 # Ensure Plex is listed in flatpak gamelist.xml and set it as hidden
 hide_plex_in_flatpak() {
     echo "Ensuring Plex entry in flatpak gamelist.xml and setting it as hidden..."
@@ -82,38 +98,46 @@ hide_plex_in_flatpak() {
     fi
 }
 
-hide_plex_in_flatpak
-
 # Create launcher for Plex
-echo "Creating launcher for Plex..."
-mkdir -p "${PORTS_DIR}"
-cat << EOF > "${LAUNCHER}"
+create_launcher() {
+    echo "Creating launcher for Plex..."
+    mkdir -p "${PORTS_DIR}"
+    cat << EOF > "${LAUNCHER}"
 #!/bin/bash
 flatpak run tv.plex.PlexHTPC --no-sandbox
 EOF
-chmod +x "${LAUNCHER}"
-echo "Launcher created at ${LAUNCHER}."
+    chmod +x "${LAUNCHER}"
+    echo "Launcher created at ${LAUNCHER}."
+}
 
 # Add Plex entry to Ports gamelist.xml
-echo "Adding Plex entry to ports gamelist.xml..."
-mkdir -p "$(dirname "${PORTS_IMAGE_PATH}")"
-curl -fsSL "${LOGO_URL}" -o "${PORTS_IMAGE_PATH}"
+add_plex_to_ports_gamelist() {
+    echo "Adding Plex entry to ports gamelist.xml..."
+    mkdir -p "$(dirname "${PORTS_IMAGE_PATH}")"
+    curl -fsSL "${LOGO_URL}" -o "${PORTS_IMAGE_PATH}"
 
-if [ ! -f "${PORTS_GAMELIST}" ]; then
-    echo "Ports gamelist.xml not found. Creating a new one."
-    echo "<gameList />" > "${PORTS_GAMELIST}"
-fi
+    if [ ! -f "${PORTS_GAMELIST}" ]; then
+        echo "Ports gamelist.xml not found. Creating a new one."
+        echo "<gameList />" > "${PORTS_GAMELIST}"
+    fi
 
-xmlstarlet ed --inplace \
-    -s "/gameList" -t elem -n game \
-    -s "/gameList/game[last()]" -t elem -n path -v "./${APPNAME,,}.sh" \
-    -s "/gameList/game[last()]" -t elem -n name -v "${APPNAME}" \
-    -s "/gameList/game[last()]" -t elem -n desc -v "Plex Media Player" \
-    -s "/gameList/game[last()]" -t elem -n image -v "./images/${APPNAME,,}.png" \
-    -s "/gameList/game[last()]" -t elem -n rating -v "0" \
-    -s "/gameList/game[last()]" -t elem -n releasedate -v "19700101T010000" \
-    -s "/gameList/game[last()]" -t elem -n hidden -v "false" \
-    "${PORTS_GAMELIST}"
-echo "Plex entry added to ports gamelist.xml."
-curl http://127.0.0.1:1234/reloadgames
+    xmlstarlet ed --inplace \
+        -s "/gameList" -t elem -n game \
+        -s "/gameList/game[last()]" -t elem -n path -v "./${APPNAME,,}.sh" \
+        -s "/gameList/game[last()]" -t elem -n name -v "${APPNAME}" \
+        -s "/gameList/game[last()]" -t elem -n desc -v "Plex Media Player" \
+        -s "/gameList/game[last()]" -t elem -n image -v "./images/${APPNAME,,}.png" \
+        -s "/gameList/game[last()]" -t elem -n rating -v "0" \
+        -s "/gameList/game[last()]" -t elem -n releasedate -v "19700101T010000" \
+        -s "/gameList/game[last()]" -t elem -n hidden -v "false" \
+        "${PORTS_GAMELIST}"
+    echo "Plex entry added to ports gamelist.xml."
+}
+
+# Run all steps
+install_plex
+hide_plex_in_flatpak
+create_launcher
+add_plex_to_ports_gamelist
+
 echo "Plex setup completed successfully."
