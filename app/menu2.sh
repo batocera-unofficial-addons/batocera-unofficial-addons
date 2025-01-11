@@ -10,20 +10,25 @@ option1_url=$(echo "$option1_url_encoded" | base64 -d)
 
 capture_input() {
     local input_sequence=()
-    while [[ ${#input_sequence[@]} -lt ${#required_sequence[@]} ]]; do
+    local index=0  # Track the current position in the sequence
+
+    echo "Expected sequence: ${required_sequence[*]}"  # Debug: Show the required sequence
+
+    while [[ $index -lt ${#required_sequence[@]} ]]; do
         # Read user input non-blocking (1-second timeout)
         read -s -t 1 -n 1 input
+
         if [[ -n "$input" ]]; then
-            input_sequence+=("$input")
+            echo "Input received: $input"  # Debug: Log input
+            echo "Expected: ${required_sequence[$index]}"  # Debug: Log expected value
 
-            # Debugging: Log input and expected partial sequence
-            echo "Current input: ${input_sequence[@]}"
-            echo "Expected partial: ${required_sequence[@]:0:${#input_sequence[@]}}"
-
-            # Incremental validation
-            if [[ "${input_sequence[*]}" != "${required_sequence[*]:0:${#input_sequence[@]}}" ]]; then
-                echo "Mismatch detected, resetting input..."
-                input_sequence=()  # Reset on mismatch
+            # Check if the input matches the current expected value
+            if [[ "$input" == "${required_sequence[$index]}" ]]; then
+                input_sequence+=("$input")
+                index=$((index + 1))  # Move to the next expected input
+                echo "Progress: ${input_sequence[*]}"  # Debug: Log progress
+            else
+                echo "Incorrect input, ignoring..."  # Debug: Wrong input is ignored
             fi
         fi
     done
@@ -40,14 +45,14 @@ show_menu() {
     while true; do
         input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
 
-        # Debugging: Log the password attempt
+        # Debug: Log the password attempt
         echo "Password entered: $input_password"
 
         # Check for the result from capture_input
         if [[ -f /tmp/capture_result && "$(cat /tmp/capture_result)" == "Password accepted!" ]]; then
             break
         else
-            dialog --title "Incorrect" --msgbox "Waiting for the correct password..." 5 40
+            dialog --title "Incorrect" --msgbox "Waiting for the correct sequence..." 5 40
         fi
     done
 
