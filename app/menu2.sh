@@ -30,10 +30,8 @@ capture_input() {
 }
 
 show_menu() {
-    # Hide terminal output while showing the password box
-    exec 3>&1  # Save stdout
+
     input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 1>&3)
-    exec 3>&-  # Restore stdout
 
     # Convert the required sequence into a string for password comparison
     local password=$(IFS=','; echo "${required_sequence[*]}")
