@@ -16,18 +16,20 @@ capture_input() {
         if [[ -n "$input" ]]; then
             input_sequence+=("$input")
 
+            # Debugging: Log input and expected partial sequence
+            echo "Current input: ${input_sequence[@]}"
+            echo "Expected partial: ${required_sequence[@]:0:${#input_sequence[@]}}"
+
             # Incremental validation
-            local partial_sequence=$(IFS=','; echo "${input_sequence[*]}")
-            local expected_partial=$(IFS=','; echo "${required_sequence[@]:0:${#input_sequence[@]}}")
-            
-            if [[ "$partial_sequence" != "$expected_partial" ]]; then
+            if [[ "${input_sequence[*]}" != "${required_sequence[*]:0:${#input_sequence[@]}}" ]]; then
+                echo "Mismatch detected, resetting input..."
                 input_sequence=()  # Reset on mismatch
             fi
         fi
     done
 
     # Final validation
-    if [[ "${input_sequence[@]}" == "${required_sequence[@]}" ]]; then
+    if [[ "${input_sequence[*]}" == "${required_sequence[*]}" ]]; then
         echo "Password accepted!" > /tmp/capture_result
     else
         echo "Access denied!" > /tmp/capture_result
@@ -37,6 +39,9 @@ capture_input() {
 show_menu() {
     while true; do
         input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
+
+        # Debugging: Log the password attempt
+        echo "Password entered: $input_password"
 
         # Check for the result from capture_input
         if [[ -f /tmp/capture_result && "$(cat /tmp/capture_result)" == "Password accepted!" ]]; then
@@ -62,11 +67,10 @@ show_menu() {
     esac
 }
 
-# Start input capturing in the background
+# Main execution flow
 > /tmp/capture_result  # Clear previous result
 capture_input &
 
-# Show the menu while waiting for the correct sequence
 show_menu
 
 # Clean up temporary files
