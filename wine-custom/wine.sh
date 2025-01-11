@@ -39,7 +39,7 @@ case $CHOICE in
         ;;
     6)
         echo "You chose V40 stock wine."
-        curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/main/v40wine/v40wine.sh
+        curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/main/v40wine/v40wine.sh | bash
      *)
         echo "Invalid choice or no choice made. Exiting."
         ;;
