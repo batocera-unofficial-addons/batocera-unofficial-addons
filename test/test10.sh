@@ -18,18 +18,17 @@ if ! command -v xmlstarlet &> /dev/null; then
     exit 1
 fi
 
-# Progress bar function
-show_progress_bar() {
-    local LOGFILE=$1 # Log file to monitor
-    local TOTAL_STEPS=$2 # Estimated number of progress steps
-    local PROGRESS=0
+# Progress bar function using percentage from log
+show_progress_bar_from_log() {
+    local LOGFILE=$1  # Log file to monitor
+    local PROGRESS=0  # Initial progress
 
-    while kill -0 "$3" 2>/dev/null; do
+    while kill -0 "$2" 2>/dev/null; do
         if [ -f "$LOGFILE" ]; then
-            local CURRENT_LINES=$(wc -l < "$LOGFILE")
-            PROGRESS=$((CURRENT_LINES * 100 / TOTAL_STEPS))
-            if [ "$PROGRESS" -gt 100 ]; then
-                PROGRESS=100
+            # Extract the latest percentage from the log file
+            PROGRESS=$(grep -oE '[0-9]+%' "$LOGFILE" | tail -n 1 | tr -d '%')
+            if [ -z "$PROGRESS" ]; then
+                PROGRESS=0
             fi
             printf "\r[%-50s] %d%%" "$(printf '#%.0s' $(seq 1 $((PROGRESS / 2))))" "$PROGRESS"
         fi
@@ -46,11 +45,10 @@ install_plex() {
 
     echo "Installing Plex..."
     local LOGFILE=/tmp/plex_install.log
-    local TOTAL_STEPS=500 # Estimated number of lines in the log
 
     # Run flatpak install in the background and monitor with progress bar
     flatpak install -y flathub tv.plex.PlexHTPC &> "$LOGFILE" &
-    show_progress_bar "$LOGFILE" "$TOTAL_STEPS" $!
+    show_progress_bar_from_log "$LOGFILE" $!
 
     echo "Updating Batocera Flatpaks..."
     batocera-flatpak-update &> /dev/null
