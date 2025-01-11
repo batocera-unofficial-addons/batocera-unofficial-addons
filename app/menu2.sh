@@ -12,23 +12,21 @@ capture_input() {
     local input_sequence=()
     local index=0  # Track the current position in the sequence
 
-    echo "Expected sequence: ${required_sequence[*]}"  # Debug: Show the required sequence
+    echo "Expected: ${required_sequence[*]}" > /tmp/debug_log  # Debug: Log required sequence
 
     while [[ $index -lt ${#required_sequence[@]} ]]; do
-        # Read user input non-blocking (1-second timeout)
-        read -s -t 1 -n 1 input
-
-        if [[ -n "$input" ]]; then
-            echo "Input received: $input"  # Debug: Log input
-            echo "Expected: ${required_sequence[$index]}"  # Debug: Log expected value
+        # Read input from a virtual file descriptor (FIFO)
+        if read -r input < /tmp/sequence_input; then
+            echo "Input received: $input" >> /tmp/debug_log  # Debug: Log input
+            echo "Expected: ${required_sequence[$index]}" >> /tmp/debug_log  # Debug: Log expected value
 
             # Check if the input matches the current expected value
             if [[ "$input" == "${required_sequence[$index]}" ]]; then
                 input_sequence+=("$input")
                 index=$((index + 1))  # Move to the next expected input
-                echo "Progress: ${input_sequence[*]}"  # Debug: Log progress
+                echo "Progress: ${input_sequence[*]}" >> /tmp/debug_log  # Debug: Log progress
             else
-                echo "Incorrect input, ignoring..."  # Debug: Wrong input is ignored
+                echo "Incorrect input, ignoring..." >> /tmp/debug_log  # Debug: Wrong input is ignored
             fi
         fi
     done
@@ -42,17 +40,22 @@ capture_input() {
 }
 
 show_menu() {
+    mkfifo /tmp/sequence_input  # Create a named pipe for sequence input
+
+    # Start capture_input in the background
+    capture_input &
+
     while true; do
         input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
 
-        # Debug: Log the password attempt
-        echo "Password entered: $input_password"
+        # Send the password box input to the sequence handler
+        echo "$input_password" > /tmp/sequence_input
 
         # Check for the result from capture_input
         if [[ -f /tmp/capture_result && "$(cat /tmp/capture_result)" == "Password accepted!" ]]; then
             break
         else
-            dialog --title "Incorrect" --msgbox "Waiting for the correct sequence..." 5 40
+            dialog --title "Incorrect" --msgbox "Waiting for the correct password..." 5 40
         fi
     done
 
@@ -70,13 +73,9 @@ show_menu() {
             echo "Returning to the main menu..."
             ;;
     esac
+
+    rm -f /tmp/sequence_input /tmp/capture_result  # Clean up temporary files
 }
 
 # Main execution flow
-> /tmp/capture_result  # Clear previous result
-capture_input &
-
 show_menu
-
-# Clean up temporary files
-rm -f /tmp/capture_result
