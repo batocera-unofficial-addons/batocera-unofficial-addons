@@ -134,6 +134,7 @@ apps=(
     ["CUSTOMWINE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/wine-custom/wine.sh | bash"
     ["GPARTED"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/gparted/gparted.sh | bash"
     ["YARG"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/yarg/yarg.sh | bash"
+    ["PLEX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/plex/plex.sh | bash"
 )
 
 
@@ -186,6 +187,8 @@ descriptions=(
     ["CUSTOMWINE"]="Download Wine/Proton versions"
     ["GPARTED"]="Linux partition manager"
     ["YARG"]="Yet Another Rhythm Game"
+    ["PLEX"]="Plex Media Player for streaming movies, TV shows, and music."
+
 )
 
 
@@ -193,7 +196,7 @@ descriptions=(
 declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDOMRPG STEPMANIA AMBERMOON YARG"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE"
+    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX"
     ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER NVIDIACLOCKER"
 )
 
