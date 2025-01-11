@@ -133,6 +133,7 @@ apps=(
     ["NVIDIACLOCKER"]="curl -Ls https://raw.githubusercontent.com/nicolai-6/batocera-nvidia-clocker/refs/heads/main/install.sh | bash"
     ["CUSTOMWINE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/wine-custom/wine.sh | bash"
     ["GPARTED"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/gparted/gparted.sh | bash"
+    ["YARG"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/yarg/yarg.sh | bash"
 )
 
 
@@ -184,13 +185,14 @@ descriptions=(
     ["AMBERMOON"]="Ambermoon.net, a port of the classic"
     ["CUSTOMWINE"]="Download Wine/Proton versions"
     ["GPARTED"]="Linux partition manager"
+    ["YARG"]="Yet Another Rhythm Game"
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDOMRPG STEPMANIA AMBERMOON"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDOMRPG STEPMANIA AMBERMOON YARG"
     ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE"
     ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER NVIDIACLOCKER"
 )
