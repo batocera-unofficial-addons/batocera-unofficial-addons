@@ -9,8 +9,8 @@ DOWNLOAD_FILE="steamy.exe"
 # Fetch aria2c
 echo "Downloading aria2c..."
 wget -q "$ARIA2C_URL" -O /userdata/system/add-ons/.dep/aria2c && chmod +x /userdata/system/add-ons/.dep/aria2c
-if [ ! -f "aria2c" ]; then
-    echo "Failed to download aria2c. Exiting."
+if ! command -v aria2c &> /dev/null; then
+    echo "Failed to symlink or execute aria2c. Exiting."
     exit 1
 fi
 
@@ -24,13 +24,8 @@ if [ -f "$DOWNLOAD_DIR/$DOWNLOAD_FILE" ]; then
     echo "$DOWNLOAD_FILE downloaded successfully to $DOWNLOAD_DIR."
 else
     echo "Download failed or $DOWNLOAD_FILE not found."
-    # Cleanup aria2c and exit
-    rm -f /userdata/system/add-ons/.dep/aria2c
     exit 1
 fi
-
-# Cleanup aria2c
-rm -f aria2c
 
 # Output success message
 echo ""
