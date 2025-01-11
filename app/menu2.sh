@@ -10,13 +10,11 @@ capture_input() {
     local input_sequence=()
     while [[ ${#input_sequence[@]} -lt ${#required_sequence[@]} ]]; do
         # Simulate or capture controller input
-        read -p "Press a button: " input
-        echo "You pressed: $input"
+        read -p "" input
         input_sequence+=("$input")
 
         # Incremental validation of the input sequence
         if [[ "$(echo "${input_sequence[@]}")" != "$(echo "${required_sequence[@]:0:${#input_sequence[@]}}")" ]]; then
-            echo "Incorrect sequence! Starting over..."
             input_sequence=()
         fi
     done
