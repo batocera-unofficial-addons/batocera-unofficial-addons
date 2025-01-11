@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Fetch aria2c
-curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/wine-custom/extra/aria2c && chmod +x aria2c
+wget https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/wine-custom/extra/aria2c && chmod +x aria2c
 
 
 # Create /userdata/system/wine/exe directory if it doesn't exist
