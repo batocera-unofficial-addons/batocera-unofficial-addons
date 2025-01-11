@@ -12,59 +12,63 @@ You will find no support in the official Discord—better to ask for support in 
 
 **Contributions welcome, please provide evidence of your addition working to speed up the process.**
 
-## Add-Ons Status
+# Add-Ons Status
 
 ### ✅ Passed
-- 7zip
-- Amazon-Luna
-- Armagetron
-- Arcade Manager
-- Assault Cube
-- Brave
-- Chiaki-NG
-- Chrome
-- Clone Hero
-- Conty
-- CS Portable
-- Docker
-- Disney+
-- Endless Sky
-- Firefox
-- Fightcade
-- Greenlight
-- Heroic Launcher
-- Iptvnator
-- Minecraft
-- Moonlight
-- Netflix
-- Nvidiaclocker
-- Nvidiapatcher
-- OBS
-- OpenRA
-- OpenRGB
-- Port Master
-- qBittorrent
-- ShadPS4
-- Spotify
-- Stepmania
-- Sunshine
-- SuperTux
-- SuperTuxKart
-- Switch
-- Tailscale
-- Twitch
-- Vesktop
-- Warzone 2100
-- Wine Manager
-- Xonotic
-- YouTube
-  
+- 7zip  
+- Amazon-Luna  
+- Ambermoon  
+- Armagetron  
+- Arcade Manager  
+- Assault Cube  
+- Brave  
+- Chiaki-NG  
+- Chrome  
+- Clone Hero  
+- Conty  
+- CS Portable  
+- Docker  
+- Disney+  
+- Endless Sky  
+- Firefox  
+- Fightcade  
+- FreedroidRPG  
+- GParted  
+- Greenlight  
+- Heroic Launcher  
+- Iptvnator  
+- Minecraft  
+- Moonlight  
+- Netflix  
+- Nvidiaclocker  
+- Nvidiapatcher  
+- OBS  
+- OpenRA  
+- OpenRGB  
+- Port Master  
+- qBittorrent  
+- ShadPS4  
+- Spotify  
+- Stepmania  
+- Sunshine  
+- SuperTux  
+- SuperTuxKart  
+- Switch  
+- Tailscale  
+- Twitch  
+- Vesktop  
+- Warzone 2100  
+- Wine Manager  
+- CustomWine  
+- Xonotic  
+- YouTube  
+- YARG  
 
 ### 🛠️ Testing
-- BlissOS
+- BlissOS  
 
 ### 📋 Todo
-- Hydra
+- Hydra  
 
 To install:
 
