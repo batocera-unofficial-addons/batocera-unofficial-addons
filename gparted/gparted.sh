@@ -79,7 +79,7 @@ chmod +x "${APP_CONFIG_DIR}/restore_desktop_entry.sh"
 
 # Add restore script to startup
 if ! grep -q "${APP_CONFIG_DIR}/restore_desktop_entry.sh" "$CUSTOM_SCRIPT"; then
-    echo \"${APP_CONFIG_DIR}/restore_desktop_entry.sh\" &" >> "$CUSTOM_SCRIPT"
+    echo "\"${APP_CONFIG_DIR}/restore_desktop_entry.sh\" &" >> "$CUSTOM_SCRIPT"
 fi
 
 echo "$APPNAME setup complete."
