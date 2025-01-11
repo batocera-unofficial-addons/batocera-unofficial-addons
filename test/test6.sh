@@ -43,7 +43,7 @@ chmod a+x "$LAUNCHER"
 
 # Download application icon
 ICON_PATH="${BASE_DIR}/extra/icon.png"
-curl -s -o "$ICON_PATH" "https://github.com/trashbus99/profork/raw/master/${APPNAME,,}/extra/icon.png"
+curl -s -o "$ICON_PATH" "https://e7.pngegg.com/pngimages/216/38/png-clipart-viber-android-google-play-viber-purple-text-thumbnail.png"
 
 # Create desktop shortcut
 SHORTCUT="${BASE_DIR}/extra/${APPNAME,,}.desktop"
