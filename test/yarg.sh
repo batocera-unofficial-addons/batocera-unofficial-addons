@@ -32,7 +32,7 @@ if [ -z "$appimage_url" ]; then
 fi
 
 # Step 2: Download the application
-echo "Downloading $APP_NAME application from $appimage_url..."
+echo "Downloading $APP_NAME application..."
 mkdir -p "$ADDONS_DIR/${APP_NAME,,}"
 wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.AppImage" "$appimage_url"
 
