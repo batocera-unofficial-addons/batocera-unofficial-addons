@@ -44,7 +44,8 @@ You will find no support in the official Discord—better to ask for support in 
 - Nvidiapatcher  
 - OBS  
 - OpenRA  
-- OpenRGB  
+- OpenRGB
+- Plex
 - Port Master  
 - qBittorrent  
 - ShadPS4  
