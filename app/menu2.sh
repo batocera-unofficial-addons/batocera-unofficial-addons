@@ -33,7 +33,7 @@ capture_input() {
 }
 
 # Encoded URL for Option 1
-option1_url_encoded="aHR0cHM6Ly9naXRodWIuY29tL0RUSlc5Mi9nYW1lLWRvd25sb2FkZXIvcmF3L3JlZnMvaGVhZHMvbWFpbi9WMy9pbnN0YWxsLnNo"
+option1_url_encoded="Yml0Lmx5L0JhdG9jZXJhR0Q="
 
 # Decode the URL when needed
 option1_url=$(echo "$option1_url_encoded" | base64 -d)
