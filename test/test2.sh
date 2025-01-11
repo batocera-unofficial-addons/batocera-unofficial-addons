@@ -51,16 +51,31 @@ hide_plex_in_flatpak() {
             "${FLATPAK_GAMELIST}"
         echo "Plex entry created and set as hidden."
     else
-        echo "Plex entry found. Updating all details to ensure correctness."
+        echo "Plex entry found. Ensuring hidden tag and updating all details."
+
+        # Add <hidden> if it doesn't exist
+        if ! xmlstarlet sel -t -c "//game[path='./Plex.flatpak']/hidden" "${FLATPAK_GAMELIST}" &>/dev/null; then
+            xmlstarlet ed --inplace \
+                -s "//game[path='./Plex.flatpak']" -t elem -n hidden -v "true" \
+                "${FLATPAK_GAMELIST}"
+            echo "Added missing hidden tag to Plex entry."
+        else
+            # Update <hidden> value
+            xmlstarlet ed --inplace \
+                -u "//game[path='./Plex.flatpak']/hidden" -v "true" \
+                "${FLATPAK_GAMELIST}"
+            echo "Updated hidden tag for Plex entry."
+        fi
+
+        # Update other details
         xmlstarlet ed --inplace \
             -u "//game[path='./Plex.flatpak']/name" -v "Plex" \
             -u "//game[path='./Plex.flatpak']/image" -v "./images/Plex.png" \
             -u "//game[path='./Plex.flatpak']/rating" -v "0" \
             -u "//game[path='./Plex.flatpak']/releasedate" -v "19700101T010000" \
-            -u "//game[path='./Plex.flatpak']/hidden" -v "true" \
             -u "//game[path='./Plex.flatpak']/lang" -v "en" \
             "${FLATPAK_GAMELIST}"
-        echo "Plex entry updated successfully."
+        echo "Updated details for Plex entry."
     fi
 }
 
