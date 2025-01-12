@@ -16,6 +16,15 @@ PORT_SCRIPT="${PORTS_DIR}/${APP_NAME}.sh"
 LOGO_PATH="${PORTS_DIR}/images/${APP_NAME,,}-logo.png"
 SYM_WINE_SCRIPT="${ADDONS_DIR}/${APP_NAME,,}/extra/sym_wine.sh"
 
+# Remove existing directory for a clean install
+if [ -d "$ADDONS_DIR/${APP_NAME,,}" ]; then
+  echo "Directory $ADDONS_DIR/${APP_NAME,,} exists. Removing it..."
+  rm -rf "$ADDONS_DIR/${APP_NAME,,}"
+  echo "Directory $ADDONS_DIR/${APP_NAME,,} has been removed."
+else
+  echo "Directory $ADDONS_DIR/${APP_NAME,,} does not exist. Continuing..."
+fi
+
 # Ensure directories exist
 echo "Creating necessary directories..."
 mkdir -p "$ADDONS_DIR/${APP_NAME,,}/extra"
