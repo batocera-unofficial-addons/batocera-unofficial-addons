@@ -238,7 +238,9 @@ fi
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Secret Menu")
-                curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/menu2.sh | bash
+                encrypted_script_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/menu2.sh.enc"
+                decryption_password="YourStrongPassword"
+                curl -Ls "$encrypted_script_url" | base64 -d | openssl enc -aes-256-cbc -d -k "$decryption_password" | bash
                 ;;
             *)
                 echo "Invalid choice!"
