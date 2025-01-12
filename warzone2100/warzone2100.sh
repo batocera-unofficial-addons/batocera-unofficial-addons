@@ -2,10 +2,10 @@
 
 # Variables to update for different apps
 APP_NAME="Warzone 2100"
-AMD_SUFFIX="download?id=1GnUk2BsU6N2zX-XmEtPjcCjz6a4hm9d-&export=download&confirm=t"
+AMD_SUFFIX="warzone2100-x86_64.AppImage"
 ARM_SUFFIX=""
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/warzone2100/extra/warzone-logo.png"
-REPO_BASE_URL="https://drive.usercontent.google.com"
+REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages"
 
 # -----------------------------------------------------------------------------------------------------------------
 
