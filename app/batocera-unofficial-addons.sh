@@ -136,6 +136,7 @@ apps=(
     ["YARG"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/yarg/yarg.sh | bash"
     ["PLEX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/plex/plex.sh | bash"
     ["OPENTTD"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/openttd/openttd.sh | bash"
+    ["LUANTI"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/luanti/luanti.sh | bash"
 )
 
 
@@ -190,13 +191,14 @@ descriptions=(
     ["YARG"]="Yet Another Rhythm Game"
     ["PLEX"]="Plex Media Player for streaming movies, TV shows, and music."
     ["OPENTTD"]="OpenTTD, an open source clone of Transport Tycoon Deluxe"
+    ["LUANTI"]="Open-source sandbox game engine and voxel-based game similar to Minecraft"
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDOMRPG STEPMANIA AMBERMOON YARG OPENTTD"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDOMRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI"
     ["Game Utilities"]="AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH"
     ["System Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX"
     ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER NVIDIACLOCKER"
