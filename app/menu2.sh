@@ -15,7 +15,10 @@ show_menu() {
     while true; do
         input_password=$(dialog --passwordbox "Enter the password to access the menu:" 8 40 2>&1 >/dev/tty)
 
-        if [[ "$input_password" == "$correct_password" ]]; then
+        if [[ $? -ne 0 ]]; then
+            # User pressed Cancel, return to the calling script
+            break
+        elif [[ "$input_password" == "$correct_password" ]]; then
             dialog --menu "Password-Protected Menu" 15 70 3 \
                 "BGD" "Install something awesome" \
                 "Back" "Return to the main menu" 2>&1 >/dev/tty | while read selected_option; do
