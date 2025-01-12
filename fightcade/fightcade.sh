@@ -82,7 +82,7 @@ mkdir -p "$BIN_DIR"
 
 # Download the wine AppImage and save it as "wine"
 echo "Downloading wine AppImage into $BIN_DIR as 'wine'..."
-wget -c -q --show-progress -O "$BIN_DIR/wine" "https://github.com/mmtrt/WINE_AppImage/releases/download/continuous-staging_ge_proton/wine-staging_ge-proton_8-26-x86_64.AppImage"
+wget -c -q --show-progress -O "$BIN_DIR/wine" "https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/wine-staging_ge-proton_8-26-x86_64.AppImage"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download the wine AppImage."
