@@ -18,7 +18,6 @@ SYM_WINE_SCRIPT="${ADDONS_DIR}/${APP_NAME,,}/extra/sym_wine.sh"
 
 # Ensure directories exist
 echo "Creating necessary directories..."
-mkdir -p "$APP_CONFIG_DIR" "$ADDONS_DIR/${APP_NAME,,}"
 mkdir -p "$ADDONS_DIR/${APP_NAME,,}/extra"
 
 # Step 1: Detect system architecture
