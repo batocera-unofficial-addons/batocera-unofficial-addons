@@ -102,7 +102,7 @@ apps=(
     ["DOCKER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash"
     ["ENDLESS-SKY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/endlesssky/endlesssky.sh | bash"
     ["FIREFOX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/firefox/firefox.sh | bash"
- #   ["FIGHTCADE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/fightcade.sh | bash"
+    ["FIGHTCADE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/fightcade.sh | bash"
     ["FREEDOMRPG"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/freedomrpg/freedomrpg.sh | bash"
     ["GREENLIGHT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/greenlight/greenlight.sh | bash"
     ["HEROIC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/heroic/heroic.sh | bash"
@@ -170,7 +170,7 @@ descriptions=(
     ["OPENRGB"]="Manage RGB lighting on devices."
     ["WARZONE2100"]="Real-time strategy and tactics game."
     ["XONOTIC"]="Fast-paced open-source arena shooter."
-#    ["FIGHTCADE"]="Play classic arcade games online."
+    ["FIGHTCADE"]="Play classic arcade games online."
     ["SUPERTUXKART"]="Free and open-source kart racer."
     ["OPENRA"]="Modernized RTS for Command & Conquer."
     ["ASSAULTCUBE"]="Multiplayer first-person shooter game."
@@ -195,16 +195,18 @@ descriptions=(
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI SWITCH HEROIC CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDOMRPG STEPMANIA AMBERMOON YARG"
-    ["Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDOMRPG STEPMANIA AMBERMOON YARG"
+    ["Game Utilities"]="AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH"
+    ["System Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX"
     ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER NVIDIACLOCKER"
 )
 
 while true; do
     # Show category menu
     category_choice=$(dialog --menu "Choose a category" 15 70 4 \
-        "Games" "Install games and game-related add-ons" \
-        "Utilities" "Install utility apps" \
+        "Games" "Install Linux native games" \
+        "Game Utilities" "Install game related add-ons" \
+        "System Utilities" "Install utility apps" \
         "Developer Tools" "Install developer and patching tools" \
         "Secret Menu" "Enter the password to access the secret menu" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
@@ -223,8 +225,11 @@ fi
             "Games")
                 selected_apps=$(echo "${categories["Games"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
-            "Utilities")
-                selected_apps=$(echo "${categories["Utilities"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+            "Game Utilities")
+                selected_apps=$(echo "${categories["Game Utilities"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+                ;;
+            "System Utilities")
+                selected_apps=$(echo "${categories["System Utilities"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Developer Tools")
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
