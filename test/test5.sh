@@ -56,53 +56,27 @@ install_parsec() {
     echo "Parsec installation completed successfully."
 }
 
-# Ensure Parsec is listed in flatpak gamelist.xml and set it as hidden
-hide_parsec_in_flatpak() {
-    echo "Ensuring Parsec entry in flatpak gamelist.xml and setting it as hidden..."
+# Overwrite the flatpak gamelist.xml with Parsec entry
+update_flatpak_gamelist() {
+    echo "Updating flatpak gamelist.xml with Parsec entry..."
 
     if [ ! -f "${FLATPAK_GAMELIST}" ]; then
-        echo "Flatpak gamelist.xml not found. Creating a new one."
         echo "<gameList />" > "${FLATPAK_GAMELIST}"
     fi
 
-    if ! xmlstarlet sel -t -c "//game[path='./Parsec Cloud, Inc..flatpak']" "${FLATPAK_GAMELIST}" &>/dev/null; then
-        echo "Parsec entry not found. Creating a new entry."
-        xmlstarlet ed --inplace \
-            -s "/gameList" -t elem -n game \
-            -s "/gameList/game[last()]" -t elem -n path -v "./Parsec Cloud, Inc..flatpak" \
-            -s "/gameList/game[last()]" -t elem -n name -v "Parsec Cloud, Inc." \
-            -s "/gameList/game[last()]" -t elem -n image -v "./images/Parsec Cloud, Inc..png" \
-            -s "/gameList/game[last()]" -t elem -n rating -v "" \
-            -s "/gameList/game[last()]" -t elem -n releasedate -v "" \
-            -s "/gameList/game[last()]" -t elem -n hidden -v "true" \
-            "${FLATPAK_GAMELIST}"
-        echo "Parsec entry created and set as hidden."
-    else
-        echo "Parsec entry found. Ensuring hidden tag and updating all details."
+    xmlstarlet ed --inplace \
+        -d "/gameList/game[path='./Parsec Cloud, Inc..flatpak']" \
+        -s "/gameList" -t elem -n game \
+        -s "/gameList/game[last()]" -t elem -n path -v "./Parsec Cloud, Inc..flatpak" \
+        -s "/gameList/game[last()]" -t elem -n name -v "Parsec Cloud, Inc." \
+        -s "/gameList/game[last()]" -t elem -n image -v "./images/Parsec Cloud, Inc..png" \
+        -s "/gameList/game[last()]" -t elem -n rating -v "" \
+        -s "/gameList/game[last()]" -t elem -n releasedate -v "" \
+        -s "/gameList/game[last()]" -t elem -n hidden -v "true" \
+        -s "/gameList/game[last()]" -t elem -n lang -v "en" \
+        "${FLATPAK_GAMELIST}"
 
-        # Add <hidden> if it doesn't exist
-        if ! xmlstarlet sel -t -c "//game[path='./Parsec Cloud, Inc..flatpak']/hidden" "${FLATPAK_GAMELIST}" &>/dev/null; then
-            xmlstarlet ed --inplace \
-                -s "//game[path='./Parsec Cloud, Inc..flatpak']" -t elem -n hidden -v "true" \
-                "${FLATPAK_GAMELIST}"
-            echo "Added missing hidden tag to Parsec entry."
-        else
-            # Update <hidden> value
-            xmlstarlet ed --inplace \
-                -u "//game[path='./Parsec Cloud, Inc..flatpak']/hidden" -v "true" \
-                "${FLATPAK_GAMELIST}"
-            echo "Updated hidden tag for Parsec entry."
-        fi
-
-        # Update other details
-        xmlstarlet ed --inplace \
-            -u "//game[path='./Parsec Cloud, Inc..flatpak']/name" -v "Parsec Cloud, Inc." \
-            -u "//game[path='./Parsec Cloud, Inc..flatpak']/image" -v "./images/Parsec Cloud, Inc..png" \
-            -u "//game[path='./Parsec Cloud, Inc..flatpak']/rating" -v "" \
-            -u "//game[path='./Parsec Cloud, Inc..flatpak']/releasedate" -v "" \
-            "${FLATPAK_GAMELIST}"
-        echo "Updated details for Parsec entry."
-    fi
+    echo "Flatpak gamelist.xml updated with Parsec entry."
 }
 
 # Create launcher for Parsec
@@ -111,7 +85,9 @@ create_launcher() {
     mkdir -p "${PORTS_DIR}"
     cat << EOF > "${LAUNCHER}"
 #!/bin/bash
-flatpak run com.parsecgaming.parsec
+set -x  # Enable debugging
+flatpak run com.parsecgaming.parsec &> /userdata/system/logs/parsec_debug.txt
+set +x  # Disable debugging
 EOF
     chmod +x "${LAUNCHER}"
     echo "Launcher created at ${LAUNCHER}."
@@ -124,7 +100,6 @@ add_parsec_to_ports_gamelist() {
     curl -fsSL "${LOGO_URL}" -o "${PORTS_IMAGE_PATH}"
 
     if [ ! -f "${PORTS_GAMELIST}" ]; then
-        echo "Ports gamelist.xml not found. Creating a new one."
         echo "<gameList />" > "${PORTS_GAMELIST}"
     fi
 
@@ -143,7 +118,7 @@ add_parsec_to_ports_gamelist() {
 
 # Run all steps
 install_parsec
-hide_parsec_in_flatpak
+update_flatpak_gamelist
 create_launcher
 add_parsec_to_ports_gamelist
 
