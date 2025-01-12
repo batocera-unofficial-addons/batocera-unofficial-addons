@@ -65,17 +65,16 @@ hide_parsec_in_flatpak() {
         echo "<gameList />" > "${FLATPAK_GAMELIST}"
     fi
 
-    if ! xmlstarlet sel -t -c "//game[path='Parsec Cloud, Inc..flatpak']" "${FLATPAK_GAMELIST}" &>/dev/null; then
+    if ! xmlstarlet sel -t -c "//game[path='./Parsec Cloud, Inc..flatpak']" "${FLATPAK_GAMELIST}" &>/dev/null; then
         echo "Parsec entry not found. Creating a new entry."
         xmlstarlet ed --inplace \
             -s "/gameList" -t elem -n game \
             -s "/gameList/game[last()]" -t elem -n path -v "./Parsec Cloud, Inc..flatpak" \
             -s "/gameList/game[last()]" -t elem -n name -v "Parsec Cloud, Inc." \
             -s "/gameList/game[last()]" -t elem -n image -v "./images/Parsec Cloud, Inc..png" \
-            -s "/gameList/game[last()]" -t elem -n rating -v "0" \
-            -s "/gameList/game[last()]" -t elem -n releasedate -v "19700101T010000" \
+            -s "/gameList/game[last()]" -t elem -n rating -v "" \
+            -s "/gameList/game[last()]" -t elem -n releasedate -v "" \
             -s "/gameList/game[last()]" -t elem -n hidden -v "true" \
-            -s "/gameList/game[last()]" -t elem -n lang -v "en" \
             "${FLATPAK_GAMELIST}"
         echo "Parsec entry created and set as hidden."
     else
@@ -97,11 +96,10 @@ hide_parsec_in_flatpak() {
 
         # Update other details
         xmlstarlet ed --inplace \
-            -u "//game[path='./Parsec Cloud, Inc..flatpak']/name" -v "Parsec" \
-            -u "//game[path='./Parsec Cloud, Inc..flatpak']/image" -v "./images/Parsec.png" \
-            -u "//game[path='./Parsec Cloud, Inc..flatpak']/rating" -v "0" \
-            -u "//game[path='./Parsec Cloud, Inc..flatpak']/releasedate" -v "19700101T010000" \
-            -u "//game[path='./Parsec Cloud, Inc..flatpak']/lang" -v "en" \
+            -u "//game[path='./Parsec Cloud, Inc..flatpak']/name" -v "Parsec Cloud, Inc." \
+            -u "//game[path='./Parsec Cloud, Inc..flatpak']/image" -v "./images/Parsec Cloud, Inc..png" \
+            -u "//game[path='./Parsec Cloud, Inc..flatpak']/rating" -v "" \
+            -u "//game[path='./Parsec Cloud, Inc..flatpak']/releasedate" -v "" \
             "${FLATPAK_GAMELIST}"
         echo "Updated details for Parsec entry."
     fi
