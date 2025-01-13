@@ -102,7 +102,7 @@ mkdir -p /userdata/system/configs/evmapy 2>/dev/null
 rm /userdata/system/configs/emulationstation/es_features_steam2.cfg 2>/dev/null
 
 echo "Downloading parsers and custom systems..."
-  wget -q --tries=50 --no-check-certificate --no-cache --no-cookies -O /userdata/roms/steam2/+UPDATE-STEAM-SHORTCUTS.sh https://github.com/trashbus99/profork/raw/master/steam/shortcuts/%2BUPDATE-STEAM-SHORTCUTS.sh
+  wget -q --tries=50 --no-check-certificate --no-cache --no-cookies -O /userdata/roms/steam2/+UPDATE-STEAM-SHORTCUTS.sh https://github.com/trashbus99/batocera-unofficial-addons/raw/main/arch/shortcuts/%2BUPDATE-STEAM-SHORTCUTS.sh
   dos2unix /userdata/roms/steam2/+UPDATE-STEAM-SHORTCUTS.sh 2>/dev/null
   chmod 777 /userdata/roms/steam2/+UPDATE-STEAM-SHORTCUTS.sh 2>/dev/null
 
@@ -123,8 +123,8 @@ echo "Downloading parsers and custom systems..."
         wait
             dos2unix /userdata/system/configs/emulationstation/*.cfg 2>/dev/null
             dos2unix /userdata/system/configs/evmapy/*.keys 2>/dev/null
-            dos2unix /userdata/system/pro/steam/batocera-conty-patcher.sh 2>/dev/null
-                chmod 777 /userdata/system/pro/steam/batocera-conty-patcher.sh 2>/dev/null
+            dos2unix /userdata/system/add-ons/arch/batocera-conty-patcher.sh 2>/dev/null
+                chmod 777 /userdata/system/add-ons/arch/batocera-conty-patcher.sh 2>/dev/null
 
 # lutris
 if [[ -e /userdata/system/configs/emulationstation/es_systems_lutris.cfg ]]; then 
@@ -148,7 +148,7 @@ if [[ -e /userdata/system/configs/emulationstation/es_systems_heroic2.cfg ]]; th
             dos2unix /userdata/system/configs/evmapy/*.keys 2>/dev/null
 fi 
 
-rm /userdata/system/pro/steam/prepare.sh 2>/dev/null
+rm /userdata/system/add-ons/arch/prepare.sh 2>/dev/null
 dos2unix /userdata/roms/conty/*.sh 2>/dev/null
 chmod 777 /userdata/roms/conty/*.sh 2>/dev/null
 
