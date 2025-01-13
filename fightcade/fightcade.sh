@@ -183,6 +183,9 @@ mkdir -p "\${log_dir}"
 exec &> >(tee -a "\$log_file")
 echo "\$(date): Launching $APP_NAME"
 
+# Cleanup on exit
+trap 'pkill "fc2-electron"; echo "\$(date): Cleaned up fc2-electron processes." >> "\$log_file"' EXIT
+
 ${ADDONS_DIR}/${APP_NAME,,}/extra/sym_wine.sh &
 
 if [ -x "\${app_dir}/Fightcade2.sh" ]; then
