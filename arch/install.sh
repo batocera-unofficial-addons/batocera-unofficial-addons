@@ -64,7 +64,7 @@ display_controls() {
     echo "This Will install Steam, Heroic-Games Launcher, Lutris,"
     echo "and more apps in an Arch container with"
     echo "a new system appearing in ES called Arch Container or"
-    echo "Linux depending on your theme in ~/pro/steam"  
+    echo "Linux depending on your theme in /userdata/system/add-ons/arch"  
     echo 
     sleep 10  # Delay for 10 seconds
 }
@@ -105,9 +105,9 @@ mkdir -p /userdata/roms/steam2
 ###############
 
 # Step 3: Download conty.sh with download percentage indicator
-rm /userdata/system/pro/steam/prepare.sh 2>/dev/null
-rm /userdata/system/pro/steam/conty.s* 2>/dev/null
-echo "Downloading 3-part zip file to /userdata/system/pro/steam and combining....."
+rm /userdata/system/add-ons/arch/prepare.sh 2>/dev/null
+rm /userdata/system/add-ons/arch/conty.s* 2>/dev/null
+echo "Downloading 3-part zip file to /userdata/system/add-ons/arch and combining....."
 
 # Create the target directory if it doesn't exist
 mkdir -p /userdata/system/add-ons/arch
