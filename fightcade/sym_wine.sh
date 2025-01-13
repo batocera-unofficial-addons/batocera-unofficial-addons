@@ -21,7 +21,7 @@ is_fc2_electron_running() {
 }
 
 # Main loop
-sleep 5
+sleep 10
 echo "Symlink created. Monitoring fc2-electron process..."
 while true; do
     if is_fc2_electron_running; then
