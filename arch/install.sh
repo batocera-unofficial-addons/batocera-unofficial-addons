@@ -105,46 +105,53 @@ mkdir -p /userdata/roms/steam2
 ###############
 
 # Step 3: Download conty.sh with download percentage indicator
-rm /userdata/system/add-ons/arch/prepare.sh 2>/dev/null
-rm /userdata/system/add-ons/arch/conty.s* 2>/dev/null
-echo "Downloading 3-part zip file to /userdata/system/add-ons/arch and combining....."
 
-# Create the target directory if it doesn't exist
+
+# Step 3: Download conty.sh parts with progress indicator
+echo "Preparing to download conty.sh parts..."
+
+# Ensure the target directory exists
 mkdir -p /userdata/system/add-ons/arch
+cd /userdata/system/add-ons/arch || { echo "Failed to access /userdata/system/add-ons/arch"; exit 1; }
+
+# Clean any previous downloads
+rm -f conty_part_* conty.sh
+                                                                                                                                                                                                                 echo "Downloading conty.sh parts to /userdata/system/add-ons/arch..."
 
 # Download each part with progress messages
-echo "Downloading conty.zip parts..."
-
-# Download the split files with a progress bar
-for i in 001 002 003; do
-  curl -L --progress-bar -o conty.zip.$i https://github.com/trashbus99/profork/releases/download/r1/conty.zip.$i
+for i in 1 2 3; do
+  echo "Downloading conty_part_$i..."
+  curl -L --progress-bar -o "conty_part_$i" "https://github.com/trashbus99/profork/releases/download/r1/conty_part_$i" || { echo "Download failed for conty_part_$i"; exit 1; }
 done
 
-echo "Combining parts into conty.zip..."
-# Combine the parts
-cat conty.zip.* > conty.zip
+# Verify all parts exist
+for i in 1 2 3; do
+  if [ ! -f "conty_part_$i" ]; then
+    echo "Error: conty_part_$i not found."
+    exit 1
+  fi
+done
 
-echo "Cleaning up split files..."
-# Remove the split parts
-rm conty.zip.00*
+echo "Combining conty_part_1, conty_part_2, and conty_part_3 into conty.sh..."
+cat conty_part_1 conty_part_2 conty_part_3 > conty.sh || { echo "Failed to combine parts."; exit 1; }
 
-echo "Extracting conty.zip..."
-# Extract the combined zip
-unzip -o conty.zip
 
-# Check if conty.sh exists after extraction
+# Verify the combined file exists
 if [ -f "conty.sh" ]; then
-  echo "Extraction complete: conty.sh is ready."
+  echo "Combination complete: conty.sh is ready."
 else
-  echo "Error: conty.sh was not found after extraction."
+  echo "Error: conty.sh was not created."
+  exit 1
 fi
 
-echo "Cleaning up conty.zip..."
-# Optionally remove the zip file after extraction
-rm conty.zip
+# Clean up split parts
+echo "Cleaning up part files..."
+rm -f conty_part_*
 
-echo "Done!"
+# Make conty.sh executable
+chmod +x conty.sh || { echo "Failed to make conty.sh executable."; exit 1; }
 
+echo "Download, combination, and setup of conty.sh complete."
 
 ###############
 
