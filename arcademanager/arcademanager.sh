@@ -59,7 +59,7 @@ cat <<EOF > "$PERSISTENT_DESKTOP"
 Version=1.0
 Type=Application
 Name=$APPNAME
-Exec=$ADDONS_DIR/${APPNAME,,}/${APPNAME,,}.AppImage
+Exec=$ADDONS_DIR/${APPNAME,,}/${APPNAME,,}.AppImage --no-sandbox
 Icon=$ADDONS_DIR/${APPNAME,,}/extra/${APPNAME,,}-icon.png
 Terminal=false
 Categories=Utility;batocera.linux;
