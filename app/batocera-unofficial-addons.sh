@@ -137,6 +137,7 @@ apps=(
     ["PLEX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/plex/plex.sh | bash"
     ["OPENTTD"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/openttd/openttd.sh | bash"
     ["LUANTI"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/luanti/luanti.sh | bash"
+    ["PARSEC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/parsec/parsec.sh | bash"
 )
 
 
@@ -192,6 +193,7 @@ descriptions=(
     ["PLEX"]="Plex Media Player for streaming movies, TV shows, and music."
     ["OPENTTD"]="OpenTTD, an open source clone of Transport Tycoon Deluxe"
     ["LUANTI"]="Open-source sandbox game engine and voxel-based game similar to Minecraft"
+    ["PARSEC"]="Remote desktop and game-streaming application"
 )
 
 
@@ -199,7 +201,7 @@ descriptions=(
 declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI"
-    ["Game Utilities"]="AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH"
+    ["Game Utilities"]="AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC"
     ["System Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX"
     ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER NVIDIACLOCKER"
 )
