@@ -156,7 +156,7 @@ chmod +x "$DOWNLOAD_FILE"
 
 
 # Update shortcuts
-wget -q --tries=30 --no-check-certificate --no-cache --no-cookies --tries=50 -O /tmp/update_shortcuts.sh hhttps://github.com/DTJW92/batocera-unofficial-addons/raw/main/arch/update-shortcuts.sh
+wget -q --tries=30 --no-check-certificate --no-cache --no-cookies --tries=50 -O /tmp/update_shortcuts.sh https://github.com/DTJW92/batocera-unofficial-addons/raw/main/arch/update-shortcuts.sh
 dos2unix /tmp/update_shortcuts.sh 2>/dev/null
 chmod 777 /tmp/update_shortcuts.sh 2>/dev/null
 bash /tmp/update_shortcuts.sh 
