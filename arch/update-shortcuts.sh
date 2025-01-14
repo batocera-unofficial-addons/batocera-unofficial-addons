@@ -119,7 +119,7 @@ echo "Downloading parsers and custom systems..."
     wget -q --tries=50 --no-check-certificate --no-cache --no-cookies -O /userdata/system/configs/evmapy/steam2.keys https://github.com/trashbus99/profork/raw/master/steam/shortcuts/es_configs/keys/steam2.keys &
     wget -q --tries=50 --no-check-certificate --no-cache --no-cookies -O /userdata/system/configs/evmapy/steam.keys https://github.com/trashbus99/profork/raw/master/steam/shortcuts/es_configs/keys/steam.keys &
     #
-    wget -q --tries=50 --no-check-certificate --no-cache --no-cookies -O /userdata/system/pro/steam/batocera-conty-patcher.sh https://github.com/trashbus99/profork/raw/master/steam/build/batocera-conty-patcher.sh &
+    wget -q --tries=50 --no-check-certificate --no-cache --no-cookies -O /userdata/system/add-ons/arch/batocera-conty-patcher.sh https://github.com/trashbus99/profork/raw/master/steam/build/batocera-conty-patcher.sh &
         wait
             dos2unix /userdata/system/configs/emulationstation/*.cfg 2>/dev/null
             dos2unix /userdata/system/configs/evmapy/*.keys 2>/dev/null
