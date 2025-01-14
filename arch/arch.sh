@@ -42,10 +42,10 @@ while true; do
     clear
 
     case $CHOICE in
-        "Install Arch Container")
+        "Install")
             install_arch_container
             ;;
-        "Uninstall Arch Container")
+        "Uninstall")
             uninstall_arch_container
             ;;
         "Update Shortcuts")
