@@ -4,13 +4,14 @@
 APPNAME="Parsec"
 
 # Define paths
-ADDONS_DIR="/userdata/system/add-ons"
+ADDONS_DIR="/userdata/system/add-ons/parsec"
 PORTS_DIR="/userdata/roms/ports"
 FLATPAK_GAMELIST="/userdata/roms/flatpak/gamelist.xml"
 PORTS_GAMELIST="/userdata/roms/ports/gamelist.xml"
 LOGO_URL="https://dotesports.com/wp-content/uploads/2021/09/09081441/Parsec-logo-1.png"
-LAUNCHER="${PORTS_DIR}/${APPNAME,,}.sh"
+LAUNCHER="${ADDONS_DIR}/launcher"
 PORTS_IMAGE_PATH="/userdata/roms/ports/images/${APPNAME,,}.png"
+PORTS_SHORTCUT="${PORTS_DIR}/${APPNAME}.sh
 
 # Ensure xmlstarlet is installed
 if ! command -v xmlstarlet &> /dev/null; then
@@ -82,17 +83,30 @@ update_flatpak_gamelist() {
 # Create launcher for Parsec
 create_launcher() {
     echo "Creating launcher for Parsec..."
-    mkdir -p "${PORTS_DIR}"
+    mkdir -p "${ADDONS_DIR}"
     cat << EOF > "${LAUNCHER}"
 #!/bin/bash
-set -x  # Enable debugging
-flatpak run com.parsecgaming.parsec &> /userdata/system/logs/parsec_debug.txt
-set +x  # Disable debugging
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+echo "Environment Variables:" > /userdata/system/logs/parsec_env.txt
+env >> /userdata/system/logs/parsec_env.txt
+echo "Launching Parsec..." >> /userdata/system/logs/parsec_debug.txt
+/usr/bin/flatpak run com.parsecgaming.parsec
 EOF
     chmod +x "${LAUNCHER}"
     echo "Launcher created at ${LAUNCHER}."
 }
 
+create_shortcut() {
+    echo "Creating shortcut for Parsec..."
+    mkdir -p "${PORTS_DIR}"
+    cat << EOF > "${PORTS_SHORTCUT}"
+#!/bin/bash
+cd /userdata/system/add-ons/parsec
+./launcher
+EOF
+    chmod +x "${PORTS_SHORTCUT}"
+    echo "Shortcut created at ${PORTS_SHORTCUT}."
+}
 # Add Parsec entry to Ports gamelist.xml
 add_parsec_to_ports_gamelist() {
     echo "Adding Parsec entry to ports gamelist.xml..."
@@ -105,7 +119,7 @@ add_parsec_to_ports_gamelist() {
 
     xmlstarlet ed --inplace \
         -s "/gameList" -t elem -n game \
-        -s "/gameList/game[last()]" -t elem -n path -v "./${APPNAME,,}.sh" \
+        -s "/gameList/game[last()]" -t elem -n path -v "./${APPNAME}.sh" \
         -s "/gameList/game[last()]" -t elem -n name -v "${APPNAME}" \
         -s "/gameList/game[last()]" -t elem -n desc -v "Parsec Cloud Gaming" \
         -s "/gameList/game[last()]" -t elem -n image -v "./images/${APPNAME,,}.png" \
@@ -120,6 +134,7 @@ add_parsec_to_ports_gamelist() {
 install_parsec
 update_flatpak_gamelist
 create_launcher
+create_shortcut
 add_parsec_to_ports_gamelist
 
 echo "Parsec setup completed successfully."
