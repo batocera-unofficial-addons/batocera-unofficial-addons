@@ -63,7 +63,7 @@ while IFS= read -r line; do
 #------------------------------------------------
 batocera-mouse show
 #------------------------------------------------
-/userdata/system/addo-ons/arch/conty.sh \\
+/userdata/system/add-ons/arch/conty.sh \\
 --bind /userdata/system/containers/storage /var/lib/containers/storage \\
 --bind /userdata/system/flatpak /var/lib/flatpak \\
 --bind /userdata/system/etc/passwd /etc/passwd \\
