@@ -4,8 +4,8 @@ echo
 echo "Updating shortcuts/launchers..."
 echo
 
-github_url="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/arch/shortcuts/
-"
+github_url="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/arch/shortcuts/"
+
 target_directory="/userdata/roms/conty/"
 # List of .sh files to download
 sh_files=(
