@@ -1,86 +1,86 @@
+
 #!/bin/bash
 
-# Step 1: Detect system architecture
-echo "Detecting system architecture..."
+# Define variables
+APPNAME="ArcadeManager"
+REPO_BASE_URL="https://github.com/cosmo0/arcade-manager/releases/download/v7.1/"
+AMD_SUFFIX="ArcadeManager-7.1-linux-x64.AppImage"
+ARM_SUFFIX="ArcadeManager-7.1-linux-arm64.AppImage"
+ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/arcademanager/extra/icon.png"
+
+# Directories
+ADDONS_DIR="/userdata/system/add-ons"
+CONFIGS_DIR="/userdata/system/configs"
+DESKTOP_DIR="/usr/share/applications"
+CUSTOM_SCRIPT="/userdata/system/custom.sh"
+APP_CONFIG_DIR="${CONFIGS_DIR}/${APPNAME,,}"
+PERSISTENT_DESKTOP="${APP_CONFIG_DIR}/${APPNAME,,}.desktop"
+DESKTOP_FILE="${DESKTOP_DIR}/${APPNAME,,}.desktop"
+
+# Ensure directories exist
+mkdir -p "$APP_CONFIG_DIR" "$ADDONS_DIR/${APPNAME,,}/extra"
+
+# Detect system architecture
 arch=$(uname -m)
+case "$arch" in
+    x86_64)
+        appimage_url="${REPO_BASE_URL}${AMD_SUFFIX}"
+        ;;
+    aarch64)
+        if [ -n "$ARM_SUFFIX" ]; then
+            appimage_url="${REPO_BASE_URL}${ARM_SUFFIX}"
+        else
+            echo "No ARM64 AppImage available. Exiting."
+            exit 1
+        fi
+        ;;
+    *)
+        echo "Unsupported architecture: $arch. Exiting."
+        exit 1
+        ;;
+esac
 
-if [ "$arch" == "x86_64" ]; then
-    echo "Architecture: x86_64 detected."
-    appimage_url="https://github.com/cosmo0/arcade-manager/releases/download/v7.1/ArcadeManager-7.1-linux-x64.AppImage"
-elif [ "$arch" == "aarch64" ]; then
-    echo "Architecture: arm64 detected."
-    appimage_url="https://github.com/cosmo0/arcade-manager/releases/download/v7.1/ArcadeManager-7.1-linux-arm64.AppImage"
-else
-    echo "Unsupported architecture: $arch. Exiting."
+# Download the AppImage
+if ! wget -q --show-progress -O "$ADDONS_DIR/${APPNAME,,}/${APPNAME,,}.AppImage" "$appimage_url"; then
+    echo "Failed to download $APPNAME AppImage. Exiting."
+    exit 1
+fi
+chmod a+x "$ADDONS_DIR/${APPNAME,,}/${APPNAME,,}.AppImage"
+
+# Download the application icon
+if ! wget -q --show-progress -O "$ADDONS_DIR/${APPNAME,,}/extra/${APPNAME,,}-icon.png" "$ICON_URL"; then
+    echo "Failed to download $APPNAME icon. Exiting."
     exit 1
 fi
 
-# Step 2: Download the AppImage
-echo "Downloading Arcade Manager AppImage from $appimage_url..."
-mkdir -p /userdata/system/add-ons/arcade-manager
-wget -q --show-progress -O /userdata/system/add-ons/arcade-manager/ArcadeManager.AppImage "$appimage_url"
+# Create persistent desktop entry
+cat <<EOF > "$PERSISTENT_DESKTOP"
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=$APPNAME
+Exec=$ADDONS_DIR/${APPNAME,,}/${APPNAME,,}.AppImage
+Icon=$ADDONS_DIR/${APPNAME,,}/extra/${APPNAME,,}-icon.png
+Terminal=false
+Categories=Utility;batocera.linux;
+EOF
+chmod +x "$PERSISTENT_DESKTOP"
+cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+chmod +x "$DESKTOP_FILE"
 
-if [ $? -ne 0 ]; then
-    echo "Failed to download Arcade Manager AppImage."
-    exit 1
-fi
-
-chmod a+x /userdata/system/add-ons/arcade-manager/ArcadeManager.AppImage
-echo "Arcade Manager AppImage downloaded and marked as executable."
-
-# Step 3: Create the Arcade Manager Script
-echo "Creating Arcade Manager script in Ports..."
-mkdir -p /userdata/roms/ports
-cat << 'EOF' > /userdata/roms/ports/ArcadeManager.sh
+# Create restore script
+cat <<EOF > "${APP_CONFIG_DIR}/restore_desktop_entry.sh"
 #!/bin/bash
-
-# Environment setup
-export $(cat /proc/1/environ | tr '\0' '\n')
-export DISPLAY=:0.0
-
-# Directories and file paths
-app_dir="/userdata/system/add-ons/arcade-manager"
-app_image="${app_dir}/ArcadeManager.AppImage"
-log_dir="/userdata/system/logs"
-log_file="${log_dir}/arcade-manager.log"
-
-# Ensure log directory exists
-mkdir -p "${log_dir}"
-
-# Append all output to the log file
-exec &> >(tee -a "$log_file")
-echo "$(date): Launching Arcade Manager"
-
-# Launch Arcade Manager AppImage
-if [ -x "${app_image}" ]; then
-    cd "${app_dir}"
-    ./ArcadeManager.AppImage > "${log_file}" 2>&1
-    echo "Arcade Manager exited."
-else
-    echo "ArcadeManager.AppImage not found or not executable."
-    exit 1
+if [ ! -f "$DESKTOP_FILE" ]; then
+    cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+    chmod +x "$DESKTOP_FILE"
 fi
 EOF
+chmod +x "${APP_CONFIG_DIR}/restore_desktop_entry.sh"
 
-chmod +x /userdata/roms/ports/ArcadeManager.sh
+# Add restore script to startup
+if ! grep -q "${APP_CONFIG_DIR}/restore_desktop_entry.sh" "$CUSTOM_SCRIPT"; then
+    echo "\"${APP_CONFIG_DIR}/restore_desktop_entry.sh\" &" >> "$CUSTOM_SCRIPT"
+fi
 
-# Step 4: Refresh the Ports menu
-echo "Refreshing Ports menu..."
-curl http://127.0.0.1:1234/reloadgames
-
-# Download the image
-echo "Downloading Arcade Manager logo..."
-curl -L -o /userdata/roms/ports/images/ArcadeManager_Logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/arcademanager/extra/icon.png
-
-echo "Adding logo to Arcade Manager entry in gamelist.xml..."
-xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-  -s "/gameList/game[last()]" -t elem -n "path" -v "./ArcadeManager.sh" \
-  -s "/gameList/game[last()]" -t elem -n "name" -v "ArcadeManager" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/ArcadeManager_Logo.png" \
-  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
-
-
-curl http://127.0.0.1:1234/reloadgames
-
-echo
-echo "Installation complete! You can now launch Arcade Manager from the Ports menu."
+echo "$APPNAME setup complete."
