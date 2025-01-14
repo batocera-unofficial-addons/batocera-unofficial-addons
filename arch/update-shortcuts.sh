@@ -23,7 +23,7 @@ sh_files=(
 "Microsoft-Edge.sh"
 "Moonlight.sh"
 "Minecraft-Bedrock.sh"
-"OBS Studio.sh"
+# "OBS Studio.sh"
 "Parsec.sh"
 "Peazip.sh"
 "Protonup-Qt.sh"
