@@ -18,18 +18,22 @@ create_symlinks() {
                         [[ "$folder" == "lib" ]] && target_dir="/usr/lib"
 
                         symlink_target="$target_dir/$(basename "$file")"
-                        if [ ! -L "$symlink_target" ]; then
+                        if [ -e "$symlink_target" ]; then
+                            if [ -L "$symlink_target" ]; then
+                                echo "Symlink already exists: $symlink_target. Skipping."
+                            else
+                                echo "File exists at target location: $symlink_target. Skipping."
+                            fi
+                        else
                             echo "Creating symlink: $symlink_target -> $file"
                             ln -s "$file" "$symlink_target"
-                        else
-                            echo "Symlink already exists: $symlink_target. Skipping."
                         fi
                     fi
                 done
             fi
         done
 
-        # Handle files in .dep (handling it as originally designed)
+        # Handle files in .dep
         for file in "$DEP_DIR"/*; do
             if [ -f "$file" ]; then
                 # Check if the filename contains "lib"
@@ -40,11 +44,15 @@ create_symlinks() {
                 fi
 
                 # Create symlink if it doesn't already exist
-                if [ ! -L "$symlink_target" ]; then
+                if [ -e "$symlink_target" ]; then
+                    if [ -L "$symlink_target" ]; then
+                        echo "Symlink already exists: $symlink_target. Skipping."
+                    else
+                        echo "File exists at target location: $symlink_target. Skipping."
+                    fi
+                else
                     echo "Creating symlink: $symlink_target -> $file"
                     ln -s "$file" "$symlink_target"
-                else
-                    echo "Symlink already exists: $symlink_target. Skipping."
                 fi
             fi
         done
@@ -75,7 +83,7 @@ remove_symlinks() {
                             echo "Removing symlink: $symlink_target"
                             rm "$symlink_target"
                         else
-                            echo "Symlink does not exist: $symlink_target. Skipping."
+                            echo "Not a symlink or does not exist: $symlink_target. Skipping."
                         fi
                     fi
                 done
@@ -97,7 +105,7 @@ remove_symlinks() {
                     echo "Removing symlink: $symlink_target"
                     rm "$symlink_target"
                 else
-                    echo "Symlink does not exist: $symlink_target. Skipping."
+                    echo "Not a symlink or does not exist: $symlink_target. Skipping."
                 fi
             fi
         done
