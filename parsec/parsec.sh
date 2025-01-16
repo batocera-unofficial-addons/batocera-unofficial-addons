@@ -11,7 +11,7 @@ PORTS_GAMELIST="/userdata/roms/ports/gamelist.xml"
 LOGO_URL="https://dotesports.com/wp-content/uploads/2021/09/09081441/Parsec-logo-1.png"
 LAUNCHER="${ADDONS_DIR}/launcher"
 PORTS_IMAGE_PATH="/userdata/roms/ports/images/${APPNAME,,}.png"
-PORTS_SHORTCUT="${PORTS_DIR}/${APPNAME}.sh
+PORTS_SHORTCUT="${PORTS_DIR}/${APPNAME}.sh"
 
 # Ensure xmlstarlet is installed
 if ! command -v xmlstarlet &> /dev/null; then
