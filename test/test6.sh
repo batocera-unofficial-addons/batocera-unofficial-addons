@@ -3,7 +3,7 @@
 
 # Variables to update for different apps
 APP_NAME="KDE-Utilities"
-REPO="KDE-utils-appimage"
+REPO="ivan-hc/KDE-utils-appimage"
 AMD_SUFFIX=".AppImage"
 ARM_SUFFIX=""
 LOGO_URL="https://static1.makeuseofimages.com/wordpress/wp-content/uploads/2022/11/KDE-Logo-Background-Featured.jpg"
