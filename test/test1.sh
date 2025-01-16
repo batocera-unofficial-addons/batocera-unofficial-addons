@@ -2,11 +2,11 @@
 #!/bin/bash
 
 # Variables to update for different apps
-APP_NAME=""
-REPO=""
-AMD_SUFFIX=""
+APP_NAME="Bottles"
+REPO="ivan-hc/Bottles-appimage"
+AMD_SUFFIX=".AppImage"
 ARM_SUFFIX=""
-LOGO_URL=""
+LOGO_URL="https://repository-images.githubusercontent.com/106949285/4761125e-2a62-48d1-84b1-dbee120c4205"
 
 # -----------------------------------------------------------------------------------------------------------------
 
