@@ -5,9 +5,20 @@ URL="https://github.com/trashbus99/profork/releases/download/r1/Zelda2_Remake.ws
 KEYS_URL=""  # Leave empty if no keys file is needed
 DEST_DIR="/userdata/roms/windows"
 MESSAGE="Zelda 2 PC Remake - Needs Enable DXVK in Adv settings for game and change video mode resolution to 1280x720x60 for best results"  # Leave empty if no message is needed
+GAME_LIST="/userdata/roms/windows/gamelist.xml"
+APP_NAME="Zelda 2 PC Remake"
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/extra/zelda2logo.jpg"
+LOGO_PATH="/userdata/roms/windows/images/zelda2-logo.jpg"
 
 # Ensure destination directory exists
 mkdir -p "$DEST_DIR"
+mkdir -p "$(dirname "$LOGO_PATH")"
+
+# Ensure gamelist.xml exists
+if [[ ! -f "$GAME_LIST" ]]; then
+  echo "<?xml version=\"1.0\"?>\n<gameList></gameList>" > "$GAME_LIST"
+  echo "Created new gamelist.xml"
+fi
 
 # Download the main .wsquashfs file
 wget -O "$DEST_DIR/$(basename "$URL")" "$URL"
@@ -28,6 +39,23 @@ fi
 # Show message using dialog if MESSAGE is set
 if [[ -n "$MESSAGE" ]]; then
   dialog --msgbox "$MESSAGE" 6 50
+fi
+
+# Add game entry to gamelist.xml
+if [[ -f "$GAME_LIST" ]]; then
+  echo "Downloading $APP_NAME logo..."
+  curl -L -o "$LOGO_PATH" "$LOGO_URL"
+  echo "Adding $APP_NAME entry to gamelist.xml..."
+  xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+    -s "/gameList/game[last()]" -t elem -n "path" -v "./$(basename "$URL")" \
+    -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \
+    -s "/gameList/game[last()]" -t elem -n "image" -v "./images/zelda2-logo.jpg" \
+    "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
+  
+  # Reload game list
+  curl http://127.0.0.1:1234/reloadgames
+else
+  echo "Game list file not found: $GAME_LIST"
 fi
 
 # Clear dialog box after execution
