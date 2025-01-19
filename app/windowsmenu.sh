@@ -2,7 +2,7 @@
 
 # Define game options (populate with actual download links later)
 GAMES=(
-    "Zelda 2 Remake" "A fan made remake of Zelda II" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/zelda2.sh"
+    "Zelda2Remake" "A fan made remake of Zelda II" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/zelda2.sh"
     "2" "Description" "https://example.com/example.sh"
     "3" "Description" "https://example.com/example.sh"
     "4" "Description" "https://example.com/example.sh"
