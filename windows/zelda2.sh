@@ -18,6 +18,7 @@ mkdir -p "$(dirname "$LOGO_PATH")"
 if [[ ! -f "$GAME_LIST" ]]; then
   echo "<?xml version=\"1.0\"?>\n<gameList></gameList>" > "$GAME_LIST"
   echo "Created new gamelist.xml"
+  chmod +w /userdata/roms/windows/gamelist.xml
 fi
 
 # Download the main .wsquashfs file
