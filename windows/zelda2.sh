@@ -42,16 +42,19 @@ if [[ -n "$MESSAGE" ]]; then
   dialog --msgbox "$MESSAGE" 6 50
 fi
 
+curl http://127.0.0.1:1234/reloadgames
 # Add game entry to gamelist.xml
 if [[ -f "$GAME_LIST" ]]; then
-  echo "Downloading $APP_NAME logo..."
-  curl -L -o "$LOGO_PATH" "$LOGO_URL"
-  echo "Adding $APP_NAME entry to gamelist.xml..."
-  xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-    -s "/gameList/game[last()]" -t elem -n "path" -v "./$(basename "$URL")" \
-    -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \
-    -s "/gameList/game[last()]" -t elem -n "image" -v "./images/zelda2-logo.jpg" \
-    "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
+# Download the logo
+echo "Downloading $APP_NAME logo..."
+curl -L -o "$LOGO_PATH" "$LOGO_URL"
+echo "Adding logo to $APP_NAME entry in gamelist.xml..."
+xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./Zelda2_Remake.wsquashfs" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/zelda2-logo.jpg" \
+  "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
+curl http://127.0.0.1:1234/reloadgames
   
   # Reload game list
   curl http://127.0.0.1:1234/reloadgames
