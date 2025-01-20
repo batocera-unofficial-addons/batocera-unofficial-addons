@@ -22,7 +22,7 @@ if [[ ! -f "$GAME_LIST" ]]; then
 fi
 
 # Download the main .wsquashfs file
-wget -O "$DEST_DIR/$(basename "$URL")" "$URL"
+wget -q -O "$DEST_DIR/$(basename "$URL")" "$URL"
 if [[ $? -ne 0 ]]; then
   echo "Error downloading $URL"
   exit 1
