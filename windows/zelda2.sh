@@ -14,13 +14,6 @@ LOGO_PATH="/userdata/roms/windows/images/zelda2-logo.jpg"
 mkdir -p "$DEST_DIR"
 mkdir -p "$(dirname "$LOGO_PATH")"
 
-# Ensure gamelist.xml exists
-if [[ ! -f "$GAME_LIST" ]]; then
-  echo "<?xml version=\"1.0\"?>\n<gameList></gameList>" > "$GAME_LIST"
-  echo "Created new gamelist.xml"
-  chmod +w /userdata/roms/windows/gamelist.xml
-fi
-
 # Download the main .wsquashfs file
 wget -q --show-progress -O "$DEST_DIR/$(basename "$URL")" "$URL"
 if [[ $? -ne 0 ]]; then
@@ -43,6 +36,12 @@ if [[ -n "$MESSAGE" ]]; then
 fi
 
 curl http://127.0.0.1:1234/reloadgames
+
+# Ensure the gamelist.xml exists
+if [ ! -f "/userdata/roms/windows/gamelist.xml" ]; then
+    echo '<?xml version="1.0" encoding="UTF-8"?><gameList></gameList>' > "/userdata/roms/windows/gamelist.xml"
+fi
+
 # Add game entry to gamelist.xml
 if [[ -f "$GAME_LIST" ]]; then
 # Download the logo
