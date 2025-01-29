@@ -48,7 +48,7 @@ install_parsec() {
     local LOGFILE=/tmp/parsec_install.log
 
     # Run flatpak install in the background and monitor with progress bar
-    flatpak install -y flathub com.parsecgaming.parsec &> "$LOGFILE" &
+    flatpak install --system -y flathub com.parsecgaming.parsec &> "$LOGFILE" &
     show_progress_bar_from_log "$LOGFILE" $!
 
     echo "Updating Batocera Flatpaks..."
