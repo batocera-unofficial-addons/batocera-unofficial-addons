@@ -4,7 +4,7 @@
 SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/symlinks.sh"  # URL for symlink_manager.sh
 BATOCERA_ADDONS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/BatoceraUnofficialAddOns_ARM64.sh"  # URL for batocera-unofficial-addons.sh
 KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/keys.txt"  # URL for keys.txt
-XMLSTARLET_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/xmlstarlet_arm64"  # URL for xmlstarlet
+XMLSTARLET_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/xmlstarlet-arm64"  # URL for xmlstarlet
 
 # Destination path to download the script
 DOWNLOAD_DIR="/userdata/system/services/"
