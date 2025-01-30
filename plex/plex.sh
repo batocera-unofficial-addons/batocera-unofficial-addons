@@ -49,7 +49,7 @@ install_plex() {
     local LOGFILE=/tmp/plex_install.log
 
     # Run flatpak install in the background and monitor with progress bar
-    flatpak install -y flathub tv.plex.PlexHTPC &> "$LOGFILE" &
+    flatpak install --system -y flathub tv.plex.PlexHTPC &> "$LOGFILE" &
     show_progress_bar_from_log "$LOGFILE" $!
 
     echo "Updating Batocera Flatpaks..."
