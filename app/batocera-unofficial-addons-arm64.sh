@@ -112,7 +112,7 @@ declare -A categories
 categories=(
     ["Games"]=""
     ["Game Utilities"]="PORTMASTER CHIAKI"
-    ["System Utilities"]="TAILSCALE CONTY VESKTOP IPTVNATOR"
+    ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR"
     ["Developer Tools"]="CONTY DOCKER"
 )
 
