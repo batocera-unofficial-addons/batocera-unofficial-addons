@@ -24,7 +24,7 @@ rm -rf "$ZIP_FILE" "$TEMP_DIR"
 
 # Copy extracted files to the destination directory
 echo "Copying extracted files..."
-cp -r "$TEMP_DIR"/* "$DEST_DIR"
+cp -r "$TEMP_DIR"/freej2me/* "$DEST_DIR"
 
 # Creating symbolic links
 echo "Creating symbolic links..."
