@@ -1,7 +1,7 @@
 #!/bin/bash
 
 APPNAME="Freej2me"
-TEMP_DIR="/tmp/${APPNAME,,}"
+TEMP_DIR="/tmp/"
 ZIP_FILE="$TEMP_DIR/${APPNAME,,}.zip"
 DEST_DIR="/"
 
@@ -33,17 +33,17 @@ create_symlink() {
     ln -s "$target" "$link"
 }
 
-create_symlink "/userdata/system/add-ons/configs/BUA/AntiMicroX" "/opt/AntiMicroX"
-create_symlink "/userdata/system/add-ons/configs/BUA/AntiMicroX/antimicrox" "/usr/bin/antimicrox"
-create_symlink "/userdata/system/add-ons/configs/BUA/${APPNAME}" "/opt/${APPNAME}"
-create_symlink "/userdata/system/add-ons/configs/BUA/python2.7" "/usr/lib/python2.7"
+create_symlink "/userdata/system/configs/BUA/AntiMicroX" "/opt/AntiMicroX"
+create_symlink "/userdata/system/configs/BUA/AntiMicroX/antimicrox" "/usr/bin/antimicrox"
+create_symlink "/userdata/system/configs/BUA/${APPNAME}" "/opt/${APPNAME}"
+create_symlink "/userdata/system/configs/BUA/python2.7" "/usr/lib/python2.7"
 
 # Set specific permissions
 echo "Setting specific permissions..."
-chmod 777 /userdata/system/add-ons/configs/BUA/${APPNAME,,}/${APPNAME,,}.sh
-chmod 777 /userdata/system/add-ons/configs/BUA/python2.7/site-packages/configgen/emulatorlauncher.sh
-chmod 777 /userdata/system/add-ons/configs/BUA/AntiMicroX/antimicrox
-chmod 777 /userdata/system/add-ons/configs/BUA/AntiMicroX/antimicrox.sh
+chmod 777 /userdata/system/configs/BUA/${APPNAME,,}/${APPNAME,,}.sh
+chmod 777 /userdata/system/configs/BUA/python2.7/site-packages/configgen/emulatorlauncher.sh
+chmod 777 /userdata/system/configs/BUA/AntiMicroX/antimicrox
+chmod 777 /userdata/system/configs/BUA/AntiMicroX/antimicrox.sh
 
 # Remove the ZIP file and clean up the temporary directory
 echo "Cleaning up temporary files..."
