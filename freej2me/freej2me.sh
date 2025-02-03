@@ -22,9 +22,12 @@ chmod -R 777 "$TEMP_DIR"
 echo "Cleaning up temporary files..."
 rm -rf "$ZIP_FILE" "$TEMP_DIR"
 
-# Copy extracted files to the destination directory
 echo "Copying extracted files..."
-cp -r "$TEMP_DIR"/freej2me/* "$DEST_DIR"
+if [ -d "$TEMP_DIR/freej2me" ]; then
+    cp -r "$TEMP_DIR/freej2me/"* "$DEST_DIR"
+else
+    cp -r "$TEMP_DIR/"* "$DEST_DIR"
+fi
 
 # Creating symbolic links
 echo "Creating symbolic links..."
