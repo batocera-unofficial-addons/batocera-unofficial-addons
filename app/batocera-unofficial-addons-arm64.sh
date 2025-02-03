@@ -93,6 +93,7 @@ apps=(
     ["PORTMASTER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/portmaster/portmaster.sh | bash"
     ["TAILSCALE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/tailscale/tailscale.sh | bash"
     ["VESKTOP"]="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vesktop/vesktop.sh | bash"
+    ["LUANTI"]="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/luanti/luanti.sh | bash"
 )
 
 
@@ -104,13 +105,14 @@ descriptions=(
     ["PORTMASTER"]="Download and manage games on handhelds."
     ["IPTVNATOR"]="IPTV client for watching live TV."
     ["DOCKER"]="Manage and run containerized apps."
+    ["LUANTI"]="Open-source sandbox game engine and voxel-based game similar to Minecraft"
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]=""
+    ["Games"]="LUANTI"
     ["Game Utilities"]="PORTMASTER CHIAKI"
     ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR"
     ["Developer Tools"]="CONTY DOCKER"
