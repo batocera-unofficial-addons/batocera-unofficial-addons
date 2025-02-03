@@ -11,7 +11,7 @@ mkdir -p "$TEMP_DIR"
 
 # Download the file
 echo "Downloading the ${APPNAME,,}.zip file..."
-curl -L -o "$ZIP_FILE" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/${APPNAME,,}/extra/${APPNAME,,}.zip"
+curl -L -o "$ZIP_FILE" "https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/freej2me.zip"
 
 # Extract the file and set permissions
 echo "Extracting files and adjusting permissions..."
@@ -33,17 +33,17 @@ create_symlink() {
     ln -s "$target" "$link"
 }
 
-create_symlink "/userdata/system/add-ons/configs/bat-drl/AntiMicroX" "/opt/AntiMicroX"
-create_symlink "/userdata/system/add-ons/configs/bat-drl/AntiMicroX/antimicrox" "/usr/bin/antimicrox"
-create_symlink "/userdata/system/add-ons/configs/bat-drl/${APPNAME}" "/opt/${APPNAME}"
-create_symlink "/userdata/system/add-ons/configs/bat-drl/python2.7" "/usr/lib/python2.7"
+create_symlink "/userdata/system/add-ons/configs/BUA/AntiMicroX" "/opt/AntiMicroX"
+create_symlink "/userdata/system/add-ons/configs/BUA/AntiMicroX/antimicrox" "/usr/bin/antimicrox"
+create_symlink "/userdata/system/add-ons/configs/BUA/${APPNAME}" "/opt/${APPNAME}"
+create_symlink "/userdata/system/add-ons/configs/BUA/python2.7" "/usr/lib/python2.7"
 
 # Set specific permissions
 echo "Setting specific permissions..."
-chmod 777 /userdata/system/add-ons/configs/bat-drl/${APPNAME,,}/${APPNAME,,}.sh
-chmod 777 /userdata/system/add-ons/configs/bat-drl/python2.7/site-packages/configgen/emulatorlauncher.sh
-chmod 777 /userdata/system/add-ons/configs/bat-drl/AntiMicroX/antimicrox
-chmod 777 /userdata/system/add-ons/configs/bat-drl/AntiMicroX/antimicrox.sh
+chmod 777 /userdata/system/add-ons/configs/BUA/${APPNAME,,}/${APPNAME,,}.sh
+chmod 777 /userdata/system/add-ons/configs/BUA/python2.7/site-packages/configgen/emulatorlauncher.sh
+chmod 777 /userdata/system/add-ons/configs/BUA/AntiMicroX/antimicrox
+chmod 777 /userdata/system/add-ons/configs/BUA/AntiMicroX/antimicrox.sh
 
 # Remove the ZIP file and clean up the temporary directory
 echo "Cleaning up temporary files..."
