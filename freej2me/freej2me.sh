@@ -16,11 +16,22 @@ curl -L -o "$ZIP_FILE" "https://github.com/DTJW92/batocera-unofficial-addons/rel
 # Extract the file and set permissions
 echo "Extracting files and adjusting permissions..."
 unzip -o "$ZIP_FILE" -d "$TEMP_DIR"
-chmod -R 777 "$TEMP_DIR"
 
-# Copy extracted files to the destination directory
-echo "Copying extracted files..."
-cp -r "$TEMP_DIR"/* "$DEST_DIR"
+# Move the extracted contents directly into the base directory /
+echo "Moving extracted files to $DEST_DIR..."
+shopt -s dotglob  # Ensure hidden files are included
+mv -f "$TEMP_DIR"/* "$DEST_DIR"
+
+# Clean up unnecessary directory structure if extraction created an extra folder
+if [ -d "$TEMP_DIR/${APPNAME}" ]; then
+    echo "Fixing directory structure..."
+    mv -f "$TEMP_DIR/${APPNAME}"/* "$DEST_DIR"
+    rm -rf "$TEMP_DIR/${APPNAME}"
+fi
+
+# Set full permissions for extracted files
+echo "Setting permissions..."
+chmod -R 777 "$DEST_DIR"
 
 # Creating symbolic links
 echo "Creating symbolic links..."
