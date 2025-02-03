@@ -1,7 +1,7 @@
 #!/bin/bash
 
 APPNAME="Freej2me"
-TEMP_DIR="/userdata/tmp/"
+TEMP_DIR="/userdata/tmp"
 ZIP_FILE="$TEMP_DIR/${APPNAME,,}.zip"
 DEST_DIR="/"
 
