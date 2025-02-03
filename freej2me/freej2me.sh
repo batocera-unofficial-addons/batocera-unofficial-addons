@@ -11,7 +11,7 @@ mkdir -p "$TEMP_DIR"
 
 # Download the file
 echo "Downloading the ${APPNAME,,}.zip file..."
-curl -L -o "$ZIP_FILE" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/${APPNAME}/extra/${APPNAME,,}.zip"
+curl -L -o "$ZIP_FILE" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/${APPNAME,,}/extra/${APPNAME,,}.zip"
 
 # Extract the file and set permissions
 echo "Extracting files and adjusting permissions..."
