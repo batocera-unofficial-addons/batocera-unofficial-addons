@@ -29,10 +29,6 @@ if [ -d "$TEMP_DIR/${APPNAME}" ]; then
     rm -rf "$TEMP_DIR/${APPNAME}"
 fi
 
-# Set full permissions for extracted files
-echo "Setting permissions..."
-chmod -R 777 "$DEST_DIR"
-
 # Creating symbolic links
 echo "Creating symbolic links..."
 create_symlink() {
