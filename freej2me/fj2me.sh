@@ -18,9 +18,9 @@ echo "Extracting files and adjusting permissions..."
 unzip -o "$ZIP_FILE" -d "$TEMP_DIR"
 chmod -R 777 "$TEMP_DIR"
 
-# Remove the ZIP file and clean up the temporary directory
-echo "Cleaning up temporary files..."
-rm -rf "$ZIP_FILE" "$TEMP_DIR"
+# Delete the ZIP file immediately after extraction to prevent it from being copied
+echo "Removing ZIP file..."
+rm -f "$ZIP_FILE"
 
 echo "Copying extracted files..."
 if [ -d "$TEMP_DIR/freej2me" ]; then
@@ -28,6 +28,10 @@ if [ -d "$TEMP_DIR/freej2me" ]; then
 else
     cp -r "$TEMP_DIR/"* "$DEST_DIR"
 fi
+
+# Remove the temporary directory after copying files
+echo "Cleaning up temporary files..."
+rm -rf "$TEMP_DIR"
 
 # Creating symbolic links
 echo "Creating symbolic links..."
