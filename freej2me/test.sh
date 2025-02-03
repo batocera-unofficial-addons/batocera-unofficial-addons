@@ -51,7 +51,7 @@ create_symlink "/userdata/system/configs/BUA/python2.7" "/usr/lib/python2.7"
 
 # Set specific permissions
 echo "Setting specific permissions..."
-chmod 777 /userdata/system/configs/BUA/${APPNAME,,}/${APPNAME,,}.sh
+chmod 777 /userdata/system/configs/BUA/Freej2me/freej2me.sh
 chmod 777 /userdata/system/configs/BUA/python2.7/site-packages/configgen/emulatorlauncher.sh
 chmod 777 /userdata/system/configs/BUA/AntiMicroX/antimicrox
 chmod 777 /userdata/system/configs/BUA/AntiMicroX/antimicrox.sh
