@@ -1,7 +1,7 @@
 #!/bin/bash
 
 APPNAME="Freej2me"
-TEMP_DIR="/tmp/"
+TEMP_DIR="/userdata/tmp/"
 ZIP_FILE="$TEMP_DIR/${APPNAME,,}.zip"
 DEST_DIR="/"
 
@@ -17,6 +17,10 @@ curl -L -o "$ZIP_FILE" "https://github.com/DTJW92/batocera-unofficial-addons/rel
 echo "Extracting files and adjusting permissions..."
 unzip -o "$ZIP_FILE" -d "$TEMP_DIR"
 chmod -R 777 "$TEMP_DIR"
+
+# Remove the ZIP file and clean up the temporary directory
+echo "Cleaning up temporary files..."
+rm -rf "$ZIP_FILE" "$TEMP_DIR"
 
 # Copy extracted files to the destination directory
 echo "Copying extracted files..."
@@ -44,10 +48,6 @@ chmod 777 /userdata/system/configs/BUA/${APPNAME,,}/${APPNAME,,}.sh
 chmod 777 /userdata/system/configs/BUA/python2.7/site-packages/configgen/emulatorlauncher.sh
 chmod 777 /userdata/system/configs/BUA/AntiMicroX/antimicrox
 chmod 777 /userdata/system/configs/BUA/AntiMicroX/antimicrox.sh
-
-# Remove the ZIP file and clean up the temporary directory
-echo "Cleaning up temporary files..."
-rm -rf "$ZIP_FILE" "$TEMP_DIR"
 
 # Check if the Java directory already exists
 if [ -d "/userdata/system/add-ons/java" ]; then
