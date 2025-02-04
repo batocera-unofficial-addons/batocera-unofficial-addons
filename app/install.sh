@@ -28,8 +28,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-mkdir -p ~/add-ons/.dep 2>/dev/null && cd ~/add-ons/.dep && wget --tries=10 --no-check-certificate --no-cache --no-cookies -q -O ~/add-ons/.dep/dep.zip https://github.com/DTJW92/batocera-unofficial-addons/raw/main/.dep/dep.zip && yes "y" | unzip -oq ~/add-ons/.dep/dep.zip && cd ~/
-chmod 777 ~/add-ons/.dep/* && for file in /userdata/system/add-ons/.dep/lib*; do ln -s "$file" "/usr/lib/$(basename $file)"; done
+# Download base dependencies
+curl -L https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/app/dep.sh | bash
 
 # Step 2: Remove the .sh extension
 SCRIPT_WITHOUT_EXTENSION="${SCRIPT_PATH%.sh}"
@@ -90,7 +90,7 @@ echo "Creating symlink for xmlstarlet in /usr/bin..."
 ln -sf /userdata/system/add-ons/.dep/xmlstarlet /usr/bin/xmlstarlet
 
 echo "xmlstarlet has been installed and symlinked to /usr/bin."
-
+mkdir -p "/userdata/roms/ports/images"
 # Step 10: Refresh the Ports menu
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames

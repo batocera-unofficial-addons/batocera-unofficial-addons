@@ -16,10 +16,18 @@ PORT_SCRIPT="${PORTS_DIR}/${APP_NAME}.sh"
 LOGO_PATH="${PORTS_DIR}/images/${APP_NAME,,}-logo.png"
 SYM_WINE_SCRIPT="${ADDONS_DIR}/${APP_NAME,,}/extra/sym_wine.sh"
 
+# Remove existing directory for a clean install
+if [ -d "$ADDONS_DIR/${APP_NAME,,}" ]; then
+  echo "Directory $ADDONS_DIR/${APP_NAME,,} exists. Removing it..."
+  rm -rf "$ADDONS_DIR/${APP_NAME,,}"
+  echo "Directory $ADDONS_DIR/${APP_NAME,,} has been removed."
+else
+  echo "Directory $ADDONS_DIR/${APP_NAME,,} does not exist. Continuing..."
+fi
+
 # Ensure directories exist
 echo "Creating necessary directories..."
-mkdir -p "$APP_CONFIG_DIR" "$ADDONS_DIR/${APP_NAME,,}"
-mkdir -p $ADDONS_DIR/${APP_NAME,,}/extra
+mkdir -p "$ADDONS_DIR/${APP_NAME,,}/extra"
 
 # Step 1: Detect system architecture
 echo "Detecting system architecture..."
@@ -82,7 +90,7 @@ mkdir -p "$BIN_DIR"
 
 # Download the wine AppImage and save it as "wine"
 echo "Downloading wine AppImage into $BIN_DIR as 'wine'..."
-wget -c -q --show-progress -O "$BIN_DIR/wine" "https://github.com/mmtrt/WINE_AppImage/releases/download/continuous-staging_ge_proton/wine-staging_ge-proton_8-26-x86_64.AppImage"
+wget -c -q --show-progress -O "$BIN_DIR/wine" "https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/wine-staging_ge-proton_8-26-x86_64.AppImage"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download the wine AppImage."

@@ -11,10 +11,9 @@ fi
 
 
 # Define variables
-FILE_ID="1ZGLOM7KeAHg1ZbJXRsotLXHw2ZlGjz4u"
 DESTINATION_DIR="$HOME/cli"
 FILENAME="cli2.tar.gz"
-DOWNLOAD_URL="https://drive.usercontent.google.com/download?id=${FILE_ID}&confirm=t"
+DOWNLOAD_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/cli.tar.gz"
 
 # Create the destination directory if it doesn't exist
 mkdir -p "$DESTINATION_DIR"

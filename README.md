@@ -1,59 +1,75 @@
 # Unofficial Add-ons for Batocera
-<img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/DTJW92/batocera-unofficial-addons?style=for-the-badge"> <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/DTJW92/batocera-unofficial-addons?style=for-the-badge">
- <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/DTJW92/batocera-unofficial-addons?style=for-the-badge">
+<img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/DTJW92/batocera-unofficial-addons?style=for-the-badge"> <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/DTJW92/batocera-unofficial-addons?style=for-the-badge"> 
+ <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/DTJW92/batocera-unofficial-addons?style=for-the-badge"> <a href="https://www.buymeacoffee.com/TheNotoriousFOX" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-orange.png" 
+         alt="Buy Me A Beer" 
+         height="28" 
+         width="140">
+</a>
 
 **Unofficial add-ons for Batocera, in no way affiliated with the Batocera development team! Install at your own risk.<br>
 You will find no support in the official Discord—better to ask for support in our own Discord!**
 
-## Add-Ons Status
+**Contributions welcome, please provide evidence of your addition working to speed up the process.**
+
+# Add-Ons Status
 
 ### ✅ Passed
-- Amazon-Luna
-- Armagetron
-- Arcade Manager
-- Assault Cube
-- Brave
-- Chiaki-NG
-- Chrome
-- Clone Hero
-- Conty
-- CS Portable
-- Docker
-- Disney+
-- Endless Sky
-- Firefox
-- Fightcade
-- Greenlight
-- Heroic Launcher
-- Iptvnator
-- Minecraft
-- Moonlight
-- Netflix
-- Nvidiaclocker
-- Nvidiapatcher
-- OBS
-- OpenRA
+- 7zip  
+- Amazon-Luna  
+- Ambermoon  
+- Armagetron  
+- Arcade Manager  
+- Assault Cube  
+- Brave  
+- Chiaki-NG  
+- Chrome  
+- Clone Hero  
+- Conty  
+- CS Portable  
+- Docker  
+- Disney+  
+- Endless Sky  
+- Firefox  
+- Fightcade  
+- FreedroidRPG  
+- GParted  
+- Greenlight  
+- Heroic Launcher  
+- Iptvnator  
+- Minecraft  
+- Moonlight  
+- Netflix  
+- Nvidiaclocker  
+- Nvidiapatcher  
+- OBS  
+- OpenRA  
 - OpenRGB
-- Port Master
-- ShadPS4
-- Spotify
-- Sunshine
-- SuperTux
-- SuperTuxKart
-- Switch
-- Tailscale
-- Twitch
-- Vesktop
-- Warzone 2100
-- Wine Manager
-- Xonotic
-- YouTube
+- Plex
+- Port Master  
+- qBittorrent  
+- ShadPS4  
+- Spotify  
+- Stepmania  
+- Sunshine  
+- SuperTux  
+- SuperTuxKart  
+- Switch  
+- Tailscale  
+- Twitch  
+- Vesktop  
+- Warzone 2100  
+- Wine Manager  
+- CustomWine  
+- Xonotic  
+- YouTube  
+- YARG  
 
 ### 🛠️ Testing
-- BlissOS
+- BlissOS  
 
 ### 📋 Todo
-- Hydra
+- Hydra  
 
 To install:
 
