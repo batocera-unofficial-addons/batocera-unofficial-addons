@@ -10,8 +10,6 @@ COMMAND='mkdir -p /userdata/system/add-ons/'$APPNAME'/home /userdata/system/add-
 HOME=/userdata/system/add-ons/'$APPNAME'/home XDG_CONFIG_HOME=/userdata/system/add-ons/'$APPNAME'/config QT_SCALE_FACTOR="1" GDK_SCALE="1" XDG_DATA_HOME=/userdata/system/add-ons/'$APPNAME'/home DISPLAY=:0.0 /userdata/system/add-ons/'$APPNAME'/'$APPNAME'.AppImage --no-sandbox'
 
 # Prepare Paths and Files
-mkdir -p /userdata/system/add-ons/{extra,$APPNAME,$APPNAME/extra}
-rm -rf /userdata/system/add-ons/$APPNAME
 mkdir -p /userdata/system/add-ons/$APPNAME/extra
 echo "$COMMAND" > /userdata/system/add-ons/$APPNAME/extra/command
 
