@@ -44,17 +44,17 @@ create_symlink() {
     ln -s "$target" "$link"
 }
 
-create_symlink "/userdata/system/configs/BUA/AntiMicroX" "/opt/AntiMicroX"
-create_symlink "/userdata/system/configs/BUA/AntiMicroX/antimicrox" "/usr/bin/antimicrox"
-create_symlink "/userdata/system/configs/BUA/${APPNAME}" "/opt/${APPNAME}"
-create_symlink "/userdata/system/configs/BUA/python2.7" "/usr/lib/python2.7"
+create_symlink "/userdata/system/configs/bat-drl/AntiMicroX" "/opt/AntiMicroX"
+create_symlink "/userdata/system/configs/bat-drl/AntiMicroX/antimicrox" "/usr/bin/antimicrox"
+create_symlink "/userdata/system/configs/bat-drl/${APPNAME}" "/opt/${APPNAME}"
+create_symlink "/userdata/system/configs/bat-drl/python2.7" "/usr/lib/python2.7"
 
 # Set specific permissions
 echo "Setting specific permissions..."
-chmod 777 /userdata/system/configs/BUA/Freej2me/freej2me.sh
-chmod 777 /userdata/system/configs/BUA/python2.7/site-packages/configgen/emulatorlauncher.sh
-chmod 777 /userdata/system/configs/BUA/AntiMicroX/antimicrox
-chmod 777 /userdata/system/configs/BUA/AntiMicroX/antimicrox.sh
+chmod 777 /userdata/system/configs/bat-drl/Freej2me/freej2me.sh
+chmod 777 /userdata/system/configs/bat-drl/python2.7/site-packages/configgen/emulatorlauncher.sh
+chmod 777 /userdata/system/configs/bat-drl/AntiMicroX/antimicrox
+chmod 777 /userdata/system/configs/bat-drl/AntiMicroX/antimicrox.sh
 
 # Check if the Java directory already exists
 if [ -d "/userdata/system/add-ons/java" ]; then
