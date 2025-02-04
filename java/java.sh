@@ -14,7 +14,7 @@ mkdir -p /userdata/system/add-ons/$APPNAME/extra
 echo "$COMMAND" > /userdata/system/add-ons/$APPNAME/extra/command
 
 # Download Necessary Files
-wget -q -O /userdata/system/add-ons/$APPNAME/extra/icon.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/$APPNAME/extra/icon.png
+wget -O /userdata/system/add-ons/$APPNAME/extra/icon.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/$APPNAME/extra/icon.png
 
 # Check System Compatibility
 if [[ "$(uname -a | grep 'x86_64')" == "" ]]; then 
