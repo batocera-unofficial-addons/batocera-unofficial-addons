@@ -72,7 +72,7 @@ loading_animation() {
     spinner_pid=$!
     sleep 3  # Adjust for how long the spinner runs
     kill $spinner_pid
-    echo "Done!"
+    echo "Done!"d
 }
 
 # Main script execution
@@ -99,7 +99,7 @@ apps=(
     ["CONTY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/conty/conty.sh | bash"
     ["CSPORTABLE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/csportable/csportable.sh | bash"
     ["DISNEYPLUS"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/disneyplus/disneyplus.sh | bash"
-    ["DOCKER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash"
+    ["CLITOOLS"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/cli.sh | bash"
     ["ENDLESS-SKY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/endlesssky/endlesssky.sh | bash"
     ["FIREFOX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/firefox/firefox.sh | bash"
     ["FIGHTCADE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/fightcade.sh | bash"
@@ -175,7 +175,7 @@ descriptions=(
     ["FIREFOX"]="Mozilla Firefox browser."
     # ["JAVA-RUNTIME"]="Install the Java Runtime on your batocera."
     ["SPOTIFY"]="Spotify music streaming client."
-    ["DOCKER"]="Manage and run containerized apps."
+    ["CLITOOLS"]="Various CLI tools including Docker, ZSH, Git etc."
     ["ARCADEMANAGER"]="Manage arcade ROMs and games."
     ["CSPORTABLE"]="Fan-made portable Counter-Strike."
     ["BRAVE"]="Privacy-focused Brave browser."
@@ -215,7 +215,7 @@ categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI"
     ["Game Utilities"]="AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC #JAVA-RUNTIME #FREEJ2ME"
     ["System Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO"
-    ["Developer Tools"]="NVIDIAPATCHER CONTY DOCKER NVIDIACLOCKER"
+    ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER"
 )
 
 while true; do
