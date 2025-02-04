@@ -14,7 +14,7 @@ mkdir -p $TEMP_DIR
 
 # Download the drl file
 echo "Downloading the freej2me.drl file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/batocera-unofficial-addons.add/raw/refs/heads/main/Freej2me/extra/freej2me.zip"
+curl -L -o $DRL_FILE "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/Freej2me/extra/freej2me.zip"
 
 # Extract the drl file with a progress bar and change permissions for each extracted file
 echo "Extracting the drl file and setting permissions for each file..."
