@@ -14,7 +14,7 @@ mkdir -p /userdata/system/add-ons/$APPNAME/extra
 echo "$COMMAND" > /userdata/system/add-ons/$APPNAME/extra/command
 
 # Download Necessary Files
-curl -Lo /userdata/system/add-ons/$APPNAME/extra/icon.png \
+curl -s -Lo /userdata/system/add-ons/$APPNAME/extra/icon.png \
     https://github.com/DTJW92/batocera-unofficial-addons/raw/main/$APPNAME/extra/icon.png || { echo "Download failed! Exiting..."; exit 1; }
 
 # Check System Compatibility
@@ -28,7 +28,7 @@ mkdir -p /userdata/system/add-ons/$APPNAME/extra/downloads
 cd /userdata/system/add-ons/$APPNAME/extra/downloads
 
 for part in java.tar.bz2.partaa java.tar.bz2.partab; do
-    curl --progress-bar --remote-name --location \
+    curl -s --progress-bar --remote-name --location \
         https://github.com/DTJW92/batocera-unofficial-addons/raw/main/$APPNAME/extra/$part || { echo "Download failed! Exiting..."; exit 1; }
 done
 
