@@ -22,7 +22,7 @@ mkdir -p "$DESTINATION_DIR"
 curl -L "${DOWNLOAD_URL}" -o "${FILENAME}"
 
 # Extract the contents to the destination directory
-tar -xzvf "${FILENAME}" -C "${DESTINATION_DIR}"
+tar -xzvf "${FILENAME}" --strip-components=1 -C "${DESTINATION_DIR}"
 
 
 # Modify the run script: change enter_zsh=1 to enter_zsh=0
@@ -34,12 +34,12 @@ chmod +x /userdata/system/services/docker
 # Add the command to ~/custom.sh before starting Docker and Portainer
 # echo "bash /userdata/system/cli/run &" >> ~/custom.sh
 
-cd ~/cli
+cd userdata/system/cli
 chmod +x run
 
 clear
 echo "Starting Docker.."
-~/cli/run
+./run
 
 clear
 
