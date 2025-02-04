@@ -59,6 +59,9 @@ echo "Deleting the freej2me.zip file from the root directory..."
 rm -rf $TEMP_DIR/freej2me.zip
 rm -rf /freej2me.zip
 
+# Rename es_system_j2me.cfg to es_systems_j2me.cfg
+mv /userdata/system/configs/emulationstation/es_system_j2me.cfg /userdata/system/configs/emulationstation/es_systems_j2me.cfg
+
 # Clean up the temporary directory
 echo "Cleaning up temporary directory..."
 rm -rf $TEMP_DIR
