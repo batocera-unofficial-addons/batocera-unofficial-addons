@@ -11,7 +11,7 @@ fi
 
 
 # Define variables
-DESTINATION_DIR="$HOME/cli"
+DESTINATION_DIR="$HOME"
 FILENAME="cli2.tar.gz"
 DOWNLOAD_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/cli.tar.gz"
 
@@ -22,7 +22,7 @@ mkdir -p "$DESTINATION_DIR"
 curl -L "${DOWNLOAD_URL}" -o "${FILENAME}"
 
 # Extract the contents to the destination directory
-tar -xzvf "${FILENAME}" --strip-components=1 -C "${DESTINATION_DIR}"
+tar -xzvf "${FILENAME}" -C "${DESTINATION_DIR}"
 
 
 # Modify the run script: change enter_zsh=1 to enter_zsh=0
