@@ -26,7 +26,7 @@ tar -xzvf "${FILENAME}" -C "${DESTINATION_DIR}"
 
 
 # Modify the run script: change enter_zsh=1 to enter_zsh=0
-sed -i 's/enter_zsh=1/enter_zsh=0/' "${DESTINATION_DIR}/run"
+sed -i 's/enter_zsh=1/enter_zsh=0/' "${DESTINATION_DIR}/cli/run"
 
 wget https://github.com/DTJW92/batocera-unofficial-addons/raw/main/docker/docker -O /userdata/system/services/docker
 chmod +x /userdata/system/services/docker
