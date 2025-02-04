@@ -32,14 +32,20 @@ cp -r $TEMP_DIR/* $DEST_DIR
 echo "Creating symbolic links..."
 
 # Function to create a symbolic link and replace it if it already exists
+# Function to create a symbolic link and remove the target if it already exists
 create_symlink() {
-    local target=$1
-    local link=$2
-    if [ -e "$link" ]; then
-        echo "Replacing existing symbolic link: $link"
-        rm -f "$link"
+    local target="$1"
+    local link="$2"
+
+    # Remove existing file or directory
+    if [ -e "$link" ] || [ -L "$link" ]; then
+        echo "Removing existing link or file: $link"
+        rm -rf "$link"
     fi
+
+    # Create the new symbolic link
     ln -s "$target" "$link"
+    echo "Created symlink: $link → $target"
 }
 
 create_symlink "/userdata/system/configs/bat-drl/AntiMicroX" "/opt/AntiMicroX"
