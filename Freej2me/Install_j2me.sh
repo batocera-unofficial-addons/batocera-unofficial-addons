@@ -81,3 +81,4 @@ echo "Saving changes..."
 batocera-save-overlay 300
 
 echo "Installation completed successfully."
+killall -9 emulationstation
