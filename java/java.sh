@@ -81,7 +81,7 @@ mkdir $pro/$appname/extra 2>/dev/null
 command=$pro/$appname/extra/command; rm $command 2>/dev/null;
 echo "$COMMAND" >> $command 2>/dev/null 
 # --------------------------------------------------------------------
-wget -q -O $pro/$appname/extra/icon.png https://github.com/DRLEdition19/batocera-unofficial-addons.add/raw/main/$appname/extra/icon.png
+wget -q -O $pro/$appname/extra/icon.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/$appname/extra/icon.png
 # --------------------------------------------------------------------
 # // end of dependencies 
 #
@@ -275,7 +275,7 @@ mkdir -p $temp 2>/dev/null
 # --------------------------------------------------------------------
 echo
 echo -e "${G}DOWNLOADING${W} JAVA-RUNTIME 19.0.1 PACKAGE [ 1+1 / 2 ] . . ."
-url=https://github.com/DRLEdition19/batocera-unofficial-addons.add/raw/main/
+url=https://github.com/DTJW92/batocera-unofficial-addons/raw/main/
 p1=java.tar.bz2.partaa
 p2=java.tar.bz2.partab
 cd $temp
