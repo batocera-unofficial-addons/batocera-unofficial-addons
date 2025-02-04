@@ -1,42 +1,42 @@
 #!/bin/bash
 
-# Mensagem de boas-vindas
-echo "Seja bem vindo ao instalador automático do emulador de jogos J2me by DRL Edition."
+# Welcome message
+echo "Welcome to the automatic installer for the J2ME game emulator by DRL Edition."
 
-# Diretório temporário para download
+# Temporary directory for download
 TEMP_DIR="/userdata/tmp/freej2me"
 DRL_FILE="$TEMP_DIR/freej2me.zip"
 DEST_DIR="/"
 
-# Cria o diretório temporário
-echo "Criando diretório temporário para download..."
+# Create the temporary directory
+echo "Creating temporary directory for download..."
 mkdir -p $TEMP_DIR
 
-# Faz o download do arquivo drl 
-echo "Fazendo download do arquivo freej2me.drl..."
+# Download the drl file
+echo "Downloading the freej2me.drl file..."
 curl -L -o $DRL_FILE "https://github.com/DRLEdition19/batocera-unofficial-addons.add/raw/refs/heads/main/Freej2me/extra/freej2me.zip"
 
-# Extrai o arquivo drl com barra de progresso e altera permissões de cada arquivo extraído
-echo "Extraindo o arquivo drl e definindo permissões para cada arquivo..."
+# Extract the drl file with a progress bar and change permissions for each extracted file
+echo "Extracting the drl file and setting permissions for each file..."
 unzip -o $DRL_FILE -d $TEMP_DIR | while IFS= read -r file; do
     if [ -f "$TEMP_DIR/$file" ]; then
         chmod 777 "$TEMP_DIR/$file"
     fi
 done
 
-# Copia os arquivos extraídos para o diretório raiz, substituindo os existentes
-echo "Copiando arquivos extraídos para o diretório raiz..."
+# Copy the extracted files to the root directory, replacing existing ones
+echo "Copying extracted files to the root directory..."
 cp -r $TEMP_DIR/* $DEST_DIR
 
-# Cria links simbólicos
-echo "Criando links simbólicos..."
+# Create symbolic links
+echo "Creating symbolic links..."
 
-# Função para criar link simbólico e substituir se já existir
+# Function to create a symbolic link and replace it if it already exists
 create_symlink() {
     local target=$1
     local link=$2
     if [ -e "$link" ]; then
-        echo "Substituindo link simbólico existente: $link"
+        echo "Replacing existing symbolic link: $link"
         rm -f "$link"
     fi
     ln -s "$target" "$link"
@@ -47,34 +47,34 @@ create_symlink "/userdata/system/configs/bat-drl/AntiMicroX/antimicrox" "/usr/bi
 create_symlink "/userdata/system/configs/bat-drl/Freej2me" "/opt/Freej2me"
 create_symlink "/userdata/system/configs/bat-drl/python2.7" "/usr/lib/python2.7"
 
-# Define permissões para arquivos específicos
-echo "Definindo permissões para arquivos específicos..."
+# Set permissions for specific files
+echo "Setting permissions for specific files..."
 chmod 777 /media/SHARE/system/configs/bat-drl/Freej2me/freej2me.sh
 chmod 777 /media/SHARE/system/configs/bat-drl/python2.7/site-packages/configgen/emulatorlauncher.sh
 chmod 777 /userdata/system/configs/bat-drl/AntiMicroX/antimicrox
 chmod 777 /userdata/system/configs/bat-drl/AntiMicroX/antimicrox.sh
 
-# Exclui o arquivo freej2me.zip do diretório raiz
-echo "Excluindo o arquivo freej2me.zip do diretório raiz..."
+# Delete the freej2me.zip file from the root directory
+echo "Deleting the freej2me.zip file from the root directory..."
 rm -rf $TEMP_DIR/freej2me.zip
 rm -rf /freej2me.zip
 
-# Limpa o diretório temporário
-echo "Limpando diretório temporário..."
+# Clean up the temporary directory
+echo "Cleaning up temporary directory..."
 rm -rf $TEMP_DIR
 
-# Verifica se o diretório /userdata/system/pro/java existe
-if [ -d "/userdata/system/pro/java" ]; then
-    echo "O diretório /userdata/system/drl/java já existe. Finalizando o script."
+# Check if the /userdata/system/pro/java directory exists
+if [ -d "/userdata/system/add-ons/java" ]; then
+    echo "The directory /userdata/system/add-ons/java already exists. Exiting script."
     exit 0
 fi
 
-# Executa o script java.sh se o diretório /userdata/system/pro/java não existir
-echo "Executando o script java.sh..."
-curl -L "https://raw.githubusercontent.com/DRLEdition19/batocera-unofficial-addons.add/refs/heads/main/java/java.sh" | bash
+# Execute the java.sh script if the /userdata/system/pro/java directory does not exist
+echo "Executing the java.sh script..."
+curl -L "https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/java/java.sh" | bash
 
-# Salva as alterações
-echo "Salvando alterações..."
+# Save changes
+echo "Saving changes..."
 batocera-save-overlay 300
 
-echo "Instalação concluída com sucesso."
+echo "Installation completed successfully."
