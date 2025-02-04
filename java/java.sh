@@ -35,7 +35,7 @@ done
 # Merge and Extract Java Files
 cat java.tar.bz2.parta* > java.tar.gz
 mkdir -p /userdata/system/add-ons/java
-tar -xjf java.tar.gz -C /userdata/system/add-ons/java || { echo "Extraction failed! Exiting..."; exit 1; }
+tar -xjf java.tar.gz --strip-components=1 -C /userdata/system/add-ons/java
 
 # Update Profile and Bashrc
 for file in /userdata/system/.profile /userdata/system/.bashrc; do
