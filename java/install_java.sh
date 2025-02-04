@@ -14,7 +14,7 @@ mkdir -p /userdata/system/add-ons/$APPNAME/extra
 echo "$COMMAND" > /userdata/system/add-ons/$APPNAME/extra/command
 
 # Download Necessary Files
-wget -O /userdata/system/add-ons/$APPNAME/extra/icon.png \
+curl -Lo /userdata/system/add-ons/$APPNAME/extra/icon.png \
     https://github.com/DTJW92/batocera-unofficial-addons/raw/main/$APPNAME/extra/icon.png || { echo "Download failed! Exiting..."; exit 1; }
 
 # Check System Compatibility
