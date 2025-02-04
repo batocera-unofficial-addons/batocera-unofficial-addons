@@ -12,7 +12,7 @@ fi
 
 # Define variables
 DESTINATION_DIR="$HOME"
-FILENAME="cli2.tar.gz"
+FILENAME="cli.tar.gz"
 DOWNLOAD_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/cli.tar.gz"
 
 # Create the destination directory if it doesn't exist
