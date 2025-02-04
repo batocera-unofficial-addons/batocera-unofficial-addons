@@ -32,7 +32,7 @@ wget https://github.com/DTJW92/batocera-unofficial-addons/raw/main/docker/docker
 chmod +x /userdata/system/services/docker
 
 # Add the command to ~/custom.sh before starting Docker and Portainer
-# echo "bash /userdata/system/cli/run &" >> ~/custom.sh
+echo "bash /userdata/system/cli/run &" >> ~/custom.sh
 
 cd userdata/system/cli
 chmod +x run
