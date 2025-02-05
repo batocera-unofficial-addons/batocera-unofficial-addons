@@ -29,7 +29,6 @@ if [ $? -ne 0 ]; then
 fi
 
 # Download base dependencies
-curl -L https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/app/dep.sh | bash
 curl -L https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/app/dep_arm64.sh | bash
 
 # Step 2: Remove the .sh extension
