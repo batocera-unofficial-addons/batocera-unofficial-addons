@@ -39,27 +39,6 @@ mkdir -p /userdata/roms/ports
 cat << 'EOF' > /userdata/roms/ports/Vesktop.sh
 #!/bin/bash
 
-# Function to download libcups.so.2 if not present
-download_libcups() {
-    libcups_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vesktop/lib/libcups.so.2"
-    libcups_dest="/userdata/system/add-ons/vesktop/lib/libcups.so.2"
-
-    # Check if the file already exists
-    if [ ! -f "$libcups_dest" ]; then
-        echo "$(date): libcups.so.2 not found, downloading..."
-        wget -q --show-progress -O "$libcups_dest" "$libcups_url"
-
-        if [ $? -eq 0 ]; then
-            echo "$(date): libcups.so.2 downloaded successfully."
-        else
-            echo "$(date): Failed to download libcups.so.2."
-            exit 1
-        fi
-    else
-        echo "$(date): libcups.so.2 already exists, skipping download."
-    fi
-}
-
 # Function to ensure the quickCss.css file exists
 ensure_quick_css() {
     config_settings_dir="${HOME}/.config/vesktop/settings"
@@ -76,7 +55,6 @@ ensure_quick_css() {
 }
 
 # Call functions
-download_libcups
 ensure_quick_css
 
 # Environment setup
@@ -127,6 +105,10 @@ chmod +x /userdata/roms/ports/Vesktop.sh
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
+KEYS_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/netflix/extra/Netflix.sh.keys"
+# Step 5: Download the key mapping file
+echo "Downloading key mapping file..."
+curl -L -o "/userdata/roms/ports/Vesktop.sh.keys" "$KEYS_URL"
 # Download the image
 echo "Downloading Vesktop logo..."
 curl -L -o /userdata/roms/ports/images/vesktoplogo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/vesktop/extra/vesktoplogo.png
