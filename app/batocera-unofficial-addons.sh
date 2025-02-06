@@ -228,6 +228,7 @@ while true; do
     # Show category menu
     category_choice=$(dialog --menu "Choose a category" 15 70 4 \
         "Games" "Install Linux native games" \
+        "Windows Freeware" "Install Windows freeware games" \
         "Game Utilities" "Install game related add-ons" \
         "System Utilities" "Install utility apps" \
         "Developer Tools" "Install developer and patching tools" \
@@ -247,6 +248,9 @@ fi
         case "$category_choice" in
             "Games")
                 selected_apps=$(echo "${categories["Games"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+                ;;
+            "Windows Freeware")
+                curl -Ls github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/menu.sh | bash
                 ;;
             "Game Utilities")
                 selected_apps=$(echo "${categories["Game Utilities"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
