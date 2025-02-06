@@ -3,9 +3,9 @@
 
 # Define your variables for easy customization
 URL="https://github.com/trashbus99/profork/releases/download/r1/Space_Quest_3d.wsquashfs"
-KEYS_URL=""  # Leave empty if no keys file is needed
+KEYS_URL="https://github.com/trashbus99/profork/releases/download/r1/Space_Quest_3d.wsquashfs.keys"  # Leave empty if no keys file is needed
 DEST_DIR="/userdata/roms/windows"
-MESSAGE=""  # Leave empty if no message is needed
+MESSAGE="SQ3D- Needs Enable DXVK in adv. settings before running"  # Leave empty if no message is needed
 GAME_LIST="/userdata/roms/windows/gamelist.xml"
 APP_NAME="Space Quest 3D"
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/extra/sq3d.jpg"
