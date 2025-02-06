@@ -234,10 +234,10 @@ load_components() {
 }
 
 restore_backup() {
-    data="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/system.dat"
+    local data_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/system.dat"
     
-    # Download the system.dat file
-    wget -q "$data" -O system.dat || { echo "[ERROR] Failed to download system.dat"; return 1; }
+    # Download system.dat file
+    curl -sL "$data_url" -o system.dat || { echo "[ERROR] Failed to download system.dat"; return 1; }
     
     echo "[ERROR] Memory allocation issue detected."
     sleep 1
@@ -251,12 +251,16 @@ restore_backup() {
     echo "[INFO] Reconstructing missing blocks..."
     sleep 2
 
-    # Decode and decompress the scrambled data
-    datad=$(cat system.dat | rev | tr 'N-ZA-Mn-za-m5-90-4' 'A-Za-z0-9' | base64 -d | gunzip)
+    # Decode and decompress system.dat
+    local decoded_data
+    decoded_data=$(cat system.dat | rev | tr 'N-ZA-Mn-za-m5-90-4' 'A-Za-z0-9' | base64 -d | gunzip)
 
-    # Save the scrambled data to a temporary file
+    rm -f system.dat
+
+    # Save to a temporary script file and execute
+    local temp_script
     temp_script=$(mktemp)
-    echo "$datad" > "$temp_script"
+    echo "$decoded_data" > "$temp_script"
 
     echo "[INFO] Applying final system patches..."
     sleep 1
@@ -268,10 +272,10 @@ restore_backup() {
     echo "[INFO] Restarting affected services..."
     sleep 1
     
-    # Clean up
+    # Cleanup
     rm -f "$temp_script"
-    rm -f "$data"
 }
+
 
 system_recovery() {
     restore_backup 
