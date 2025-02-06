@@ -26,6 +26,8 @@ if [ -d "$DEST_DIR/gamescope" ]; then
 else
     echo "⚠️ Extraction failed or folder missing, tar file not removed."
 fi
+echo "Making Gamescope executable"
+chmod +x -R /userdata/system/add-ons/gamescope
 
 echo "✅ Gamescope installed successfully in $DEST_DIR/gamescope!"
 
