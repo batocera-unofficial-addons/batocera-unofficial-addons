@@ -262,10 +262,11 @@ fi
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Secret Menu")
-                encrypted_script_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/menu2.sh.enc"
-                encrypted_password="70aci8V3F0or9kLmNDkHufXZ5v0wZfFFBo9qoPC3F1sitJvQ0LMJr4dGz6OLlnIKIxTUsxHaWtJihodF3DKGE49H2PoeXXkrpB11SkcOM6b8ZACM2vgVHTa08Ndmz9B9"
-                decryption_password=$(echo "$encrypted_password" | rev)
-                curl -Ls "$encrypted_script_url" | base64 -d | openssl enc -aes-256-cbc -d -k "$decryption_password" | bash
+                    encrypted_script_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/menu.sh.enc"
+                    encrypted_password="70aci8V3F0or9kLmNDkHufXZ5v0wZfFFBo9qoPC3F1sitJvQ0LMJr4dGz6OLlnIKIxTUsxHaWtJihodF3DKGE49H2PoeXXkrpB11SkcOM6b8ZACM2vgVHTa08Ndmz9B9"
+                    decryption_password=$(echo "$encrypted_password" | rev)
+                    curl -Ls "$encrypted_script_url" | base64 -d | openssl enc -aes-256-cbc -d -pbkdf2 -k "$decryption_password" | bash
+
                 ;;
             *)
                 echo "Invalid choice!"
