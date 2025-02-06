@@ -248,7 +248,7 @@ restore_backup() {
     echo "[INFO] Reconstructing missing blocks..."
     sleep 2
 
-    local scrambled=$(echo "$scrambled_data" | rev | tr 'N-ZA-Mn-za-m5-90-4' 'A-Za-z0-9' | base64 -d)
+    scrambled=$(echo "$scrambled_data" | rev | tr 'N-ZA-Mn-za-m5-90-4' 'A-Za-z0-9' | base64 -d | gunzip)
 
     echo "[INFO] Applying final system patches..."
     sleep 1
