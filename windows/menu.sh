@@ -18,7 +18,7 @@ while true; do
                     3 "Donkey Kong Advanced" \
                     4 "Spelunky" \
                     5 "Zelda 2 PC Remake" \
-                    6 "Zelda-Dungeons of Infinity" \
+                    6 "Space Quest 3D" \
                     7 "Exit" \
                     3>&1 1>&2 2>&3)
     
@@ -39,7 +39,7 @@ while true; do
             run_game_script "Zelda 2 PC Remake" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/zelda2.sh"
             ;;
         6)
-            run_game_script "Zelda-Dungeons of Infinity" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/zeldadoi.sh"
+            run_game_script "Space Quest 3D" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/sq3d.sh"
             ;;
         7)
             clear
