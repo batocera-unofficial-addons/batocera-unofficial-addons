@@ -18,8 +18,9 @@ while true; do
                     3 "Donkey Kong Advanced" \
                     4 "Spelunky" \
                     5 "Zelda 2 PC Remake" \
-                    6 "Space Quest 3D" \
-                    7 "Exit" \
+                    6 "Zelda - Dungeons of Infinity" \
+                    7 "Space Quest 3D" \
+                    8 "Exit" \
                     3>&1 1>&2 2>&3)
     
     case $choice in
@@ -39,9 +40,12 @@ while true; do
             run_game_script "Zelda 2 PC Remake" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/zelda2.sh"
             ;;
         6)
-            run_game_script "Space Quest 3D" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/sq3d.sh"
+            run_game_script "Zelda - Dungeons of Infinity" ""https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/zeldadoi.sh"
             ;;
         7)
+            run_game_script "Space Quest 3D" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/sq3d.sh"
+            ;;
+        8)
             clear
             echo "Exiting..."
             exit 0
