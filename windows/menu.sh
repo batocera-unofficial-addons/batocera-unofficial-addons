@@ -40,7 +40,7 @@ while true; do
             run_game_script "Zelda 2 PC Remake" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/zelda2.sh"
             ;;
         6)
-            run_game_script "Zelda - Dungeons of Infinity" ""https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/zeldadoi.sh"
+            run_game_script "Zelda - Dungeons of Infinity" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/zeldadoi.sh"
             ;;
         7)
             run_game_script "Space Quest 3D" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/sq3d.sh"
