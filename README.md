@@ -23,20 +23,25 @@ You will find no support in the official Discord—better to ask for support in 
 - Assault Cube  
 - Brave  
 - Chiaki-NG  
-- Chrome  
+- Chrome
+- CLI Tools  
 - Clone Hero  
-- Conty  
-- CS Portable  
-- Docker  
+- Conty
+- Chrunchy Roll
+- CS Portable    
 - Disney+  
 - Endless Sky  
 - Firefox  
 - Fightcade  
-- FreedroidRPG  
+- FreedroidRPG
+- FreeJ2ME  
 - GParted  
-- Greenlight  
+- Greenlight
+- HBO Max
 - Heroic Launcher  
-- Iptvnator  
+- Iptvnator
+- Java Runtime
+- Luanti
 - Minecraft  
 - Moonlight  
 - Netflix  
@@ -45,8 +50,11 @@ You will find no support in the official Discord—better to ask for support in 
 - OBS  
 - OpenRA  
 - OpenRGB
+- OpenTTD
+- Parsec
 - Plex
-- Port Master  
+- Port Master
+- Prime Video
 - qBittorrent  
 - ShadPS4  
 - Spotify  
@@ -55,21 +63,26 @@ You will find no support in the official Discord—better to ask for support in 
 - SuperTux  
 - SuperTuxKart  
 - Switch  
-- Tailscale  
+- Tailscale
+- Tidal HiFi
 - Twitch  
 - Vesktop  
-- Warzone 2100  
-- Wine Manager  
-- CustomWine  
+- Warzone 2100
+- Wine from V40
+- Wine Manager 
+- Custom Wine Installer 
 - Xonotic  
 - YouTube  
 - YARG  
 
 ### 🛠️ Testing
-- BlissOS  
+- Gamescope
+- Arch
+- Hydra
+  
 
 ### 📋 Todo
-- Hydra  
+
 
 To install:
 
