@@ -32,6 +32,10 @@ echo "Vesktop AppImage downloaded and marked as executable."
 mkdir -p /userdata/system/add-ons/vesktop/vesktop-config
 mkdir -p /userdata/system/logs
 mkdir -p /userdata/system/add-ons/vesktop/lib
+DESKTOP_FILE="/usr/share/applications/Vesktop.desktop"
+PERSISTENT_DESKTOP="/userdata/system/configs/vesktop/Vesktop.desktop"
+ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/vesktop/extra/icon.png"
+INSTALL_DIR="/userdata/system/add-ons/vesktop"
 
 # Step 3: Create the Vesktop Launcher Script
 echo "Creating Vesktop launcher script in Ports..."
@@ -101,6 +105,47 @@ fi
 EOF
 
 chmod +x /userdata/roms/ports/Vesktop.sh
+# Create persistent desktop entry
+echo "Creating persistent desktop entry for Vesktop..."
+cat <<EOF > "$PERSISTENT_DESKTOP"
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Chiaki-NG
+Exec=/userdata/roms/ports/Vesktop.sh
+Icon=/userdata/system/add-ons/vesktop/extra/icon.png
+Terminal=false
+Categories=Game;batocera.linux;
+EOF
+
+chmod +x "$PERSISTENT_DESKTOP"
+
+cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+chmod +x "$DESKTOP_FILE"
+
+# Ensure the desktop entry is always restored to /usr/share/applications
+echo "Ensuring Vesktop desktop entry is restored at startup..."
+cat <<EOF > "/userdata/system/configs/vesktop/restore_desktop_entry.sh"
+#!/bin/bash
+# Restore Vesktop desktop entry
+if [ ! -f "$DESKTOP_FILE" ]; then
+    echo "Restoring Vesktop desktop entry..."
+    cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+    chmod +x "$DESKTOP_FILE"
+    echo "Vesktop desktop entry restored."
+else
+    echo "Vesktop desktop entry already exists."
+fi
+EOF
+chmod +x "/userdata/system/configs/vesktop/restore_desktop_entry.sh"
+
+# Add to startup
+cat <<EOF > "/userdata/system/custom.sh"
+#!/bin/bash
+# Restore Chiaki desktop entry at startup
+bash /userdata/system/configs/vesktop/restore_desktop_entry.sh &
+EOF
+chmod +x "/userdata/system/custom.sh"
 
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
