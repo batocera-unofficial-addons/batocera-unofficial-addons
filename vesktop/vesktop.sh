@@ -107,13 +107,17 @@ fi
 EOF
 
 chmod +x /userdata/roms/ports/Vesktop.sh
+
+echo "Downloading icon..."
+wget --show-progress -qO "${INSTALL_DIR}/extra/icon.png" "$ICON_URL"
+
 # Create persistent desktop entry
 echo "Creating persistent desktop entry for Vesktop..."
 cat <<EOF > "$PERSISTENT_DESKTOP"
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Chiaki-NG
+Name=Vesktop
 Exec=/userdata/roms/ports/Vesktop.sh
 Icon=/userdata/system/add-ons/vesktop/extra/icon.png
 Terminal=false
