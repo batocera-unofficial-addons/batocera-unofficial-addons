@@ -32,6 +32,8 @@ echo "Vesktop AppImage downloaded and marked as executable."
 mkdir -p /userdata/system/add-ons/vesktop/vesktop-config
 mkdir -p /userdata/system/logs
 mkdir -p /userdata/system/add-ons/vesktop/lib
+mkdir -p /userdata/system/configs/vesktop
+mkdir -p /userdata/system/add-ons/vesktop/extra
 DESKTOP_FILE="/usr/share/applications/Vesktop.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/vesktop/Vesktop.desktop"
 ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/vesktop/extra/icon.png"
