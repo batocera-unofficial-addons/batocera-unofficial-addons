@@ -108,12 +108,8 @@ EOF
 chmod +x "/userdata/system/configs/chiaki/restore_desktop_entry.sh"
 
 # Add to startup
-cat <<EOF > "/userdata/system/custom.sh"
-#!/bin/bash
-# Restore Chiaki desktop entry at startup
-bash /userdata/system/configs/chiaki/restore_desktop_entry.sh &
-EOF
-chmod +x "/userdata/system/custom.sh"
+echo "bash /userdata/system/configs/chiaki/restore_desktop_entry.sh &" >> /userdata/system/custom.sh
+chmod +x /userdata/system/custom.sh
 
 # Step 5: Add Chiaki to Ports menu
 if ! command -v xmlstarlet &> /dev/null; then
