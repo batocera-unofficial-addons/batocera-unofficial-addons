@@ -110,7 +110,7 @@ chmod +x "/userdata/system/configs/chiaki/restore_desktop_entry.sh"
 # Add to startup script
 custom_startup="/userdata/system/custom.sh"
 if ! grep -q "/userdata/system/configs/chiaki/restore_desktop_entry.sh" "$custom_startup"; then
-    echo "Adding Heroic restore script to startup..."
+    echo "Adding Chiaki restore script to startup..."
     echo "bash "/userdata/system/configs/chiaki/restore_desktop_entry.sh" &" >> "$custom_startup"
 fi
 chmod +x "$custom_startup"
