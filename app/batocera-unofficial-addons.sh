@@ -147,7 +147,7 @@ apps=(
     ["CRUNCHYROLL"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/crunchyroll/crunchyroll.sh | bash"
     ["MUBI"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/mubi/mubi.sh | bash"
     ["TIDAL"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/tidal/tidal.sh | bash"
-    ["FREETUBE"]"curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/freetube/freetube.sh | bash"
+    ["FREETUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/freetube/freetube.sh | bash"
 )
 
 
