@@ -145,9 +145,13 @@ fi
 EOF
 chmod +x "/userdata/system/configs/vesktop/restore_desktop_entry.sh"
 
-# Add to startup
-echo "bash /userdata/system/configs/vesktop/restore_desktop_entry.sh &" >> /userdata/system/custom.sh
-chmod +x /userdata/system/custom.sh
+# Add to startup script
+custom_startup="/userdata/system/custom.sh"
+if ! grep -q "/userdata/system/configs/vesktop/restore_desktop_entry.sh" "$custom_startup"; then
+    echo "Adding Vesktop restore script to startup..."
+    echo "bash "/userdata/system/configs/vesktop/restore_desktop_entry.sh" &" >> "$custom_startup"
+fi
+chmod +x "$custom_startup"
 
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
