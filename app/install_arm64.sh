@@ -113,12 +113,8 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
 
 curl http://127.0.0.1:1234/reloadgames
 
-custom_startup="/userdata/system/custom.sh"
-if ! grep -q "modprobe fuse" "$custom_startup"; then
-    echo "Adding FUSE restore script to startup..."
-    echo "modprobe fuse" >> "$custom_startup"
-fi
-chmod +x "$custom_startup"
+echo "modprobe fuse" >> /userdata/system/custom.sh
+chmod +x /userdata/system/custom.sh
 
 echo
 echo "Installation complete! You can now launch Batocera Unofficial Add-Ons from the Ports menu."
