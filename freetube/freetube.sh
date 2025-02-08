@@ -22,11 +22,13 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url=$(curl -s https://api.github.com/repos/$REPO/releases/latest | jq -r ".assets[] | select(.name | endswith(\"$AMD_SUFFIX\")) | .browser_download_url")
+   appimage_url=$(curl -s https://api.github.com/repos/$REPO/releases | jq -r "[.[]] | sort_by(.created_at) | reverse | .[0].assets[] | select(.name | endswith(\"$AMD_SUFFIX\")) | .browser_download_url")
+
 elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: arm64 detected."
     if [ -n "$ARM_SUFFIX" ]; then
-        appimage_url=$(curl -s https://api.github.com/repos/$REPO/releases/latest | jq -r ".assets[] | select(.name | endswith(\"$ARM_SUFFIX\")) | .browser_download_url")
+appimage_url=$(curl -s https://api.github.com/repos/$REPO/releases | jq -r "[.[]] | sort_by(.created_at) | reverse | .[0].assets[] | select(.name | endswith(\"$ARM_SUFFIX\")) | .browser_download_url")
+
     else
         echo "No ARM64 AppImage suffix provided. Skipping download. Exiting."
         exit 1
