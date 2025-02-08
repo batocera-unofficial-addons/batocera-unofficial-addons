@@ -94,6 +94,7 @@ apps=(
     ["TAILSCALE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/tailscale/tailscale.sh | bash"
     ["VESKTOP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vesktop/vesktop.sh | bash"
     ["MINECRAFT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/minecraft/bedrock.sh | bash"
+    ["FREETUBE"]"curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/freetube/freetube.sh | bash"
 )
 
 
@@ -106,6 +107,7 @@ descriptions=(
     ["IPTVNATOR"]="IPTV client for watching live TV."
     ["DOCKER"]="Manage and run containerized apps."
     ["MINECRAFT"]="Minecraft Bedrock Edition."
+    ["FREETUBE"]="An Open Source Desktop YouTube Player For Privacy-minded People"
 )
 
 
@@ -114,7 +116,7 @@ declare -A categories
 categories=(
     ["Games"]="MINECRAFT"
     ["Game Utilities"]="PORTMASTER CHIAKI"
-    ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR"
+    ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE"
     ["Developer Tools"]="CONTY DOCKER"
 )
 
