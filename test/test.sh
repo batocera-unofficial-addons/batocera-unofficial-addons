@@ -17,7 +17,7 @@ mkdir -p "$APPPATH/extra"
 mkdir -p /userdata/system/configs/gamelist-manager
 
 # Download and extract application directly to $APPPATH
-curl --progress-bar --remote-name --location "$APPLINK" -o "$APPPATH/$APPNAME.zip"
+wget --show-progress -qO "$APPPATH/$APPNAME.zip" "$APPLINK"
 unzip -oq "$APPPATH/$APPNAME.zip" -d "$APPPATH"
 rm -f "$APPPATH/$APPNAME.zip"
 
