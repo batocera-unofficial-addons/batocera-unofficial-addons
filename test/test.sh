@@ -18,7 +18,7 @@ cp -r "$TEMP_DIR/Release/"* "$APPPATH"
 rm -rf "$TEMP_DIR"
 
 # Download icon
-ICON_URL="https://github.com/RobG66/Gamelist-Manager/blob/master/resources/icon.png"
+ICON_URL="https://raw.githubusercontent.com/RobG66/Gamelist-Manager/master/resources/icon.png"
 curl --progress-bar --location "$ICON_URL" -o "$APPPATH/extra/icon.png"
 
 # Create launcher script
