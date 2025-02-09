@@ -7,6 +7,7 @@ ORIGIN="github.com/RobG66/Gamelist-Manager"
 
 # Prepare installation directories
 mkdir -p "$APPPATH/extra"
+mkdir -p /userdata/system/configs/gamelist-manager
 
 # Download and extract application
 TEMP_DIR=$(mktemp -d)
