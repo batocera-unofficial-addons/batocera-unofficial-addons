@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 APPNAME="Gamelist-Manager"
 APPPATH="/userdata/system/add-ons/${APPNAME,,}"
