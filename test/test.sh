@@ -14,7 +14,7 @@ TEMP_DIR=$(mktemp -d)
 cd "$TEMP_DIR"
 curl --progress-bar --remote-name --location "$APPLINK"
 yes "y" | unzip -oq "*.zip"
-mv Release "$APPPATH"
+cp -r "$TEMP_DIR/Release/"* "$APPPATH"
 rm -rf "$TEMP_DIR"
 
 # Download icon
