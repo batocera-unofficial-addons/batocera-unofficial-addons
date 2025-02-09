@@ -71,7 +71,7 @@ curl http://127.0.0.1:1234/reloadgames
 # Download the logo
 echo "Downloading SuperMarioX logo..."
 LOGO_PATH="/userdata/roms/ports/images/supermariox-logo.png"
-LOGO_URL="https://example.com/supermariox-logo.png"
+LOGO_URL="https://cdn2.steamgriddb.com/logo_thumb/754b8fde508be74748bb02907c2409d9.png"
 GAME_LIST="/userdata/roms/ports/gamelist.xml"
 curl -L -o "$LOGO_PATH" "$LOGO_URL"
 echo "Adding logo to SuperMarioX entry in gamelist.xml..."
