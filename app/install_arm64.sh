@@ -121,5 +121,7 @@ if ! grep -q "modprobe fuse" "$custom_startup"; then
 fi
 chmod +x "$custom_startup"
 
+modprobe fuse
+
 echo
 echo "Installation complete! You can now launch Batocera Unofficial Add-Ons from the Ports menu."
