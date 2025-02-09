@@ -7,17 +7,19 @@ ORIGIN="github.com/RobG66/Gamelist-Manager"
 DESKTOP_FILE="/usr/share/applications/gamelist-manager.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/gamelist-manager/gamelist-manager.desktop"
 
+# Remove $APPPATH if it already exists
+if [ -d "$APPPATH" ]; then
+    rm -rf "$APPPATH"
+fi
+
 # Prepare installation directories
 mkdir -p "$APPPATH/extra"
 mkdir -p /userdata/system/configs/gamelist-manager
 
-# Download and extract application
-TEMP_DIR=$(mktemp -d)
-cd "$TEMP_DIR"
-curl --progress-bar --remote-name --location "$APPLINK"
-yes "y" | unzip -oq "*.zip"
-cp -r "$TEMP_DIR/Release/"* "$APPPATH"
-rm -rf "$TEMP_DIR"
+# Download and extract application directly to $APPPATH
+curl --progress-bar --remote-name --location --output "$APPPATH/$APPNAME.zip" "$APPLINK"
+unzip -oq "$APPPATH/$APPNAME.zip" -d "$APPPATH"
+rm -f "$APPPATH/$APPNAME.zip"
 
 # Download icon
 ICON_URL="https://raw.githubusercontent.com/RobG66/Gamelist-Manager/master/resources/icon.png"
