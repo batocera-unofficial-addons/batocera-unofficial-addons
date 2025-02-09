@@ -2,7 +2,7 @@
 
 APPNAME="Gamelist-Manager"
 APPPATH="/userdata/system/add-ons/${APPNAME,,}"
-APPLINK=$(curl -s https://api.github.com/repos/RobG66/Gamelist-Manager/releases | grep "browser_download_url" | sed 's,^.*https://,https://,g' | cut -d \" -f1 | grep ".zip" | head -n1)
+APPLINK="http://jujuvincebros.fr/phocadownload/outils/executable_only/arrm_executable_without_installer.zip"
 ORIGIN="github.com/RobG66/Gamelist-Manager"
 DESKTOP_FILE="/usr/share/applications/gamelist-manager.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/gamelist-manager/gamelist-manager.desktop"
