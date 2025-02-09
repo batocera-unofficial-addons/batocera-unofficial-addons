@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+APPNAME="Gamelist-Manager"
+APPPATH="/userdata/system/add-ons/${APPNAME,,}"
+APPLINK=$(curl -s https://api.github.com/repos/RobG66/Gamelist-Manager/releases | grep "browser_download_url" | sed 's,^.*https://,https://,g' | cut -d \" -f1 | grep ".zip" | head -n1)
+ORIGIN="github.com/RobG66/Gamelist-Manager"
+
+# Prepare installation directories
+mkdir -p "$APPPATH/extra"
+
+# Download and extract application
+TEMP_DIR=$(mktemp -d)
+cd "$TEMP_DIR"
+curl --progress-bar --remote-name --location "$APPLINK"
+yes "y" | unzip -oq "*.zip"
+mv Release "$APPPATH"
+rm -rf "$TEMP_DIR"
+
+# Download icon
+ICON_URL="https://github.com/RobG66/Gamelist-Manager/blob/master/resources/icon.png"
+curl --progress-bar --location "$ICON_URL" -o "$APPPATH/extra/icon.png"
+
+# Create launcher script
+LAUNCHER="$APPPATH/Launcher"
+echo "#!/bin/bash" > "$LAUNCHER"
+echo 'export DISPLAY=:0.0' >> "$LAUNCHER"
+echo 'unclutter-remote -s' >> "$LAUNCHER"
+echo "DISPLAY=:0.0 QT_SCALE_FACTOR='1.25' GDK_SCALE='1.25' batocera-wine windows play $APPPATH/GamelistManager.exe" >> "$LAUNCHER"
+chmod +x "$LAUNCHER"
+
+# Create persistent desktop entry
+echo "Creating persistent desktop entry for Gamelist-Manager..."
+cat <<EOF > "$PERSISTENT_DESKTOP"
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Gamelist Manager
+Exec=/userdata/system/add-ons/gamelist-manager/Launcher
+Icon=/userdata/system/add-ons/Gamelist-Manager/extra/icon.png
+Terminal=false
+Categories=Game;batocera.linux;
+EOF
+
+chmod +x "$PERSISTENT_DESKTOP"
+
+cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+chmod +x "$DESKTOP_FILE"
+
+# Ensure the desktop entry is always restored to /usr/share/applications
+echo "Ensuring Gamelist-Manager desktop entry is restored at startup..."
+cat <<EOF > "/userdata/system/configs/gamelist-manager/restore_desktop_entry.sh"
+#!/bin/bash
+# Restore Gamelist-Manager desktop entry
+if [ ! -f "$DESKTOP_FILE" ]; then
+    echo "Restoring Gamelist-Manager desktop entry..."
+    cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+    chmod +x "$DESKTOP_FILE"
+    echo "Gamelist-Manager desktop entry restored."
+else
+    echo "Gamelist-Manager desktop entry already exists."
+fi
+EOF
+chmod +x "/userdata/system/configs/gamelist-manager/restore_desktop_entry.sh"
+
+# Add to startup script
+custom_startup="/userdata/system/custom.sh"
+if ! grep -q "/userdata/system/configs/gamelist-manager/restore_desktop_entry.sh" "$custom_startup"; then
+    echo "Adding Gamelist-Manager restore script to startup..."
+    echo "bash "/userdata/system/configs/gamelist-manager/restore_desktop_entry.sh" &" >> "$custom_startup"
+fi
+chmod +x "$custom_startup"
+
+# Finish installation
+echo "$APPNAME installed successfully!"
