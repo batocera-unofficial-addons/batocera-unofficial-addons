@@ -77,7 +77,7 @@ curl -L -o "$LOGO_PATH" "$LOGO_URL"
 echo "Adding logo to SuperMarioX entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./SuperMarioX.sh" \
-  -s "/gameList/game[last()]" -t elem -n "name" -v "SuperMarioX" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "Super Mario Bros X" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/supermariox-logo.png" \
   "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
 curl http://127.0.0.1:1234/reloadgames
