@@ -94,7 +94,8 @@ apps=(
     ["TAILSCALE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/tailscale/tailscale.sh | bash"
     ["VESKTOP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vesktop/vesktop.sh | bash"
     ["MINECRAFT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/minecraft/bedrock.sh | bash"
-    ["FREETUBE"]"curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/freetube/freetube.sh | bash"
+    ["FREETUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/freetube/freetube.sh | bash"
+    ["SUPERMARIOX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supermariox/supermariox.sh | bash"
 )
 
 
@@ -108,13 +109,14 @@ descriptions=(
     ["DOCKER"]="Manage and run containerized apps."
     ["MINECRAFT"]="Minecraft Bedrock Edition."
     ["FREETUBE"]="An Open Source Desktop YouTube Player For Privacy-minded People"
+    ["SUPERMARIOX"]="The greatest fan-made tribute to Super Mario of all time!"
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT"
+    ["Games"]="MINECRAFT SUPERMARIOX"
     ["Game Utilities"]="PORTMASTER CHIAKI"
     ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE"
     ["Developer Tools"]="CONTY DOCKER"
