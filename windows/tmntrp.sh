@@ -61,6 +61,3 @@ curl http://127.0.0.1:1234/reloadgames
 else
   echo "Game list file not found: $GAME_LIST"
 fi
-
-# Clear dialog box after execution
-clear
