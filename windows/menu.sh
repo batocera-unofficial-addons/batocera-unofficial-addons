@@ -47,7 +47,7 @@ while true; do
             run_game_script "Space Quest 3D" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/sq3d.sh"
             ;;
         8)
-            run_game_scripts "Super Smash Flash 2" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/ssf2.sh"
+            run_game_script "Super Smash Flash 2" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/ssf2.sh"
             ;;
         9)
             clear
