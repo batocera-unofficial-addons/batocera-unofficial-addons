@@ -5,6 +5,7 @@ SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/sy
 BATOCERA_ADDONS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/BatoceraUnofficialAddOns.sh"  # URL for batocera-unofficial-addons.sh
 KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/keys.txt"  # URL for keys.txt
 XMLSTARLET_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/xmlstarlet"  # URL for xmlstarlet
+DIO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/.dialogrc"
 
 # Destination path to download the script
 DOWNLOAD_DIR="/userdata/system/services/"
@@ -15,8 +16,10 @@ SCRIPT_PATH="$DOWNLOAD_DIR/$SCRIPT_NAME"
 ROM_PORTS_DIR="/userdata/roms/ports"
 BATOCERA_ADDONS_PATH="$ROM_PORTS_DIR/BatoceraUnofficialAddOns.sh"
 KEYS_FILE="$ROM_PORTS_DIR/keys.txt"
+DIO_FILE="/userdata/system/add-ons/.dialogrc"
 
 mkdir -p "$DOWNLOAD_DIR"
+mkdir -p "/userdata/system/add-ons"
 
 # Step 1: Download the symlink manager script
 echo "Downloading the symlink manager script from $SCRIPT_URL..."
@@ -61,6 +64,7 @@ chmod +x "$BATOCERA_ADDONS_PATH"
 # Step 8: Download keys.txt
 echo "Downloading keys.txt..."
 curl -L -o "$KEYS_FILE" "$KEYS_URL"
+curl -L -o "$DIO_FILE" "$DIO_URL"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download keys.txt. Exiting."
