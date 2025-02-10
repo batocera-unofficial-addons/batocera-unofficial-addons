@@ -21,7 +21,8 @@ while true; do
                     6 "Zelda - Dungeons of Infinity" \
                     7 "Space Quest 3D" \
                     8 "Super Smash Flash 2" \
-                    9 "Exit" \
+                    9 "TMNT Rescue Palooza" \
+                    10 "Exit" \
                     3>&1 1>&2 2>&3)
     
     case $choice in
@@ -50,6 +51,9 @@ while true; do
             run_game_script "Super Smash Flash 2" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/ssf2.sh"
             ;;
         9)
+            run_game_script "TMNT Rescue Palooza" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/tmntrp.sh"
+            ;;
+        10)
             clear
             echo "Exiting..."
             exit 0
