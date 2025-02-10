@@ -3,9 +3,9 @@
 
 # Define your variables for easy customization
 URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/SSF2.wsquashfs"
-KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/SSF2.wsquashfs.keys"  # Leave empty if no keys file is needed
+KEYS_URL=""  # Leave empty if no keys file is needed
 DEST_DIR="/userdata/roms/windows"
-MESSAGE=""  # Leave empty if no message is needed
+MESSAGE="Keyboard & Mouse required to set up initial controller config via in game menu."  # Leave empty if no message is needed
 GAME_LIST="/userdata/roms/windows/gamelist.xml"
 APP_NAME="Super Smash Flash 2"
 LOGO_URL="https://cdn2.steamgriddb.com/thumb/79a3308b13cd31f096d8a4a34f96b66b.jpg"
