@@ -24,7 +24,7 @@ mkdir -p "/userdata/system/add-ons"
 
 # Step 1: Download the symlink manager script
 echo "Downloading the symlink manager script from $SCRIPT_URL..."
-curl -L -o "$SCRIPT_PATH" "$SCRIPT_URL"
+curl -Ls -o "$SCRIPT_PATH" "$SCRIPT_URL"
 
 # Check if the download was successful
 if [ $? -ne 0 ]; then
@@ -33,7 +33,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Download base dependencies
-curl -L https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/app/dep_arm64.sh | bash
+curl -Ls https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/app/dep_arm64.sh | bash
 
 # Step 2: Remove the .sh extension
 SCRIPT_WITHOUT_EXTENSION="${SCRIPT_PATH%.sh}"
@@ -52,7 +52,7 @@ batocera-services start symlink_manager &>/dev/null &
 
 # Step 6: Download batocera-unofficial-addons.sh
 echo "Downloading Batocera Unofficial Add-Ons Launcher..."
-curl -L -o "$BATOCERA_ADDONS_PATH" "$BATOCERA_ADDONS_URL"
+curl -Ls -o "$BATOCERA_ADDONS_PATH" "$BATOCERA_ADDONS_URL"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download batocera-unofficial-addons.sh. Exiting."
@@ -64,8 +64,8 @@ chmod +x "$BATOCERA_ADDONS_PATH"
 
 # Step 8: Download keys.txt
 echo "Downloading keys.txt..."
-curl -L -o "$KEYS_FILE" "$KEYS_URL"
-curl -L -o "$DIO_FILE" "$DIO_URL"
+curl -Ls -o "$KEYS_FILE" "$KEYS_URL"
+curl -Ls -o "$DIO_FILE" "$DIO_URL"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download keys.txt. Exiting."
@@ -79,7 +79,7 @@ mv "$KEYS_FILE" "$RENAME_KEY_FILE"
 
 # Step: Download xmlstarlet
 echo "Downloading xmlstarlet..."
-curl -L -o "/userdata/system/add-ons/.dep/xmlstarlet" "$XMLSTARLET_URL"
+curl -Ls -o "/userdata/system/add-ons/.dep/xmlstarlet" "$XMLSTARLET_URL"
 
 # Check if download was successful
 if [ $? -ne 0 ]; then
@@ -107,7 +107,7 @@ fi
 
 # Download the image
 echo "Downloading Batocera Unofficial Add-ons logo..."
-curl -L -o /userdata/roms/ports/images/BatoceraUnofficialAddons.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png
+curl -Ls -o /userdata/roms/ports/images/BatoceraUnofficialAddons.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png
 echo "Adding logo to Batocera Unofficial Add-ons entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./BatoceraUnofficialAddOns.sh" \
