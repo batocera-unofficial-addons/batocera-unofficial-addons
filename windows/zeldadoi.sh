@@ -6,7 +6,7 @@ KEYS_URL=""  # Leave empty if no keys file is needed
 DEST_DIR="/userdata/roms/windows"
 MESSAGE=""  # Leave empty if no message is needed
 GAME_LIST="/userdata/roms/windows/gamelist.xml"
-APP_NAME="Zelda-Dungeons of Infinity"
+APP_NAME="Zelda - Dungeons of Infinity"
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/extra/zeldadoi.png"
 LOGO_PATH="/userdata/roms/windows/images/zeldadoi-logo.png"
 
