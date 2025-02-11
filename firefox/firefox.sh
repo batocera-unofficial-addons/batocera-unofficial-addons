@@ -14,7 +14,7 @@ fi
 
 # Step 2: Download the AppImage
 echo "Downloading Firefox AppImage from $appimage_url..."
-mkdir -p /userdata/system/add-ons/firefox
+mkdir -p /userdata/system/add-ons/firefox/extra
 wget -q --show-progress -O /userdata/system/add-ons/firefox/Firefox.AppImage "$appimage_url"
 
 if [ $? -ne 0 ]; then
@@ -65,14 +65,15 @@ EOF
 
 chmod +x /userdata/roms/ports/Firefox.sh
 
-#!/bin/bash
-
 APPNAME="Firefox"
 DESKTOP_FILE="/usr/share/applications/${APPNAME}.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/${APPNAME,,}/${APPNAME}.desktop"
 ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
 
 mkdir -p "/userdata/system/configs/${APPNAME,,}"
+
+echo "Downloading icon..."
+wget --show-progress -qO "/userdata/system/add-ons/{$APPNAME,,}/extra/icon.png" "$ICON_URL"
 
 # Create persistent desktop entry
 echo "Creating persistent desktop entry for ${APPNAME}..."
