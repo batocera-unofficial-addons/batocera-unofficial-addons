@@ -1,7 +1,7 @@
 DESKTOP_FILE="/usr/share/applications/{$APPNAME}.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/{$APPNAME,,}/{APPNAME}.desktop"
 ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/{APPNAME,,}/extra/icon.png"
-mkdir -p /userdata/system/configs/$APPNAME
+mkdir -p /userdata/system/configs/{$APPNAME}
 # Create persistent desktop entry
 echo "Creating persistent desktop entry for {APPNAME}..."
 cat <<EOF > "$PERSISTENT_DESKTOP"
