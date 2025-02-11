@@ -82,9 +82,9 @@ cat <<EOF > "$PERSISTENT_DESKTOP"
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=${APPNAME}
-Exec=/userdata/roms/ports/${APPNAME}.sh
-Icon=/userdata/system/add-ons/${APPNAME,,}/extra/icon.png
+Name=Google Chrome
+Exec=/userdata/roms/ports/GoogleChrome.sh
+Icon=/userdata/system/add-ons/google-chrome/extra/icon.png
 Terminal=false
 Categories=Game;batocera.linux;
 EOF
