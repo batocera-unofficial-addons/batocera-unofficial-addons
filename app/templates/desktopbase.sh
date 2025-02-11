@@ -6,6 +6,10 @@ PERSISTENT_DESKTOP="/userdata/system/configs/${APPNAME,,}/${APPNAME}.desktop"
 ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
 
 mkdir -p "/userdata/system/configs/${APPNAME,,}"
+mkdir -p "/userdata/system/add-ons/${APPNAME,,}/extra"
+
+echo "Downloading icon..."
+wget --show-progress -qO "/userdata/system/add-ons/${APPNAME,,}/extra/icon.png" "$ICON_URL"
 
 # Create persistent desktop entry
 echo "Creating persistent desktop entry for ${APPNAME}..."
