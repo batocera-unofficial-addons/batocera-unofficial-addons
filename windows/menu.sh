@@ -23,7 +23,8 @@ while true; do
                     8 "Super Smash Flash 2" \
                     9 "TMNT Rescue Palooza" \
                     10 "Crash Bandicoot - Back In Time" \
-                    11 "Exit" \
+                    11 "Sonic Triple Trouble 16bit" \
+                    12 "Exit" \
                     3>&1 1>&2 2>&3)
     
     case $choice in
@@ -58,6 +59,9 @@ while true; do
             run_game_script "Crash Bandicoot - Back In Time" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/cbbit.sh"
             ;;
         11)
+            run_game_script "Sonic Triple Trouble 16bit" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/stt.sh"
+            ;;
+        12)
             clear
             echo "Exiting..."
             exit 0
