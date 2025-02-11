@@ -66,11 +66,10 @@ ensure_quick_css
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0
+export HOME=/userdata/system/add-ons/vesktop
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/vesktop"
-quickCss_symlink="${HOME}/.config/vesktop"
-quickCss="${HOME}/.config/vesktop/settings/quickCss.css"
 app_image="${app_dir}/Vesktop.AppImage"
 log_dir="/userdata/system/logs"
 log_file="${log_dir}/vesktop.log"
@@ -81,17 +80,6 @@ mkdir -p "${log_dir}"
 # Append all output to the log file
 exec &> >(tee -a "$log_file")
 echo "$(date): Launching Vesktop"
-
-# Move existing config if present
-if [ -d "$quickCss_symlink" ] && [ ! -L "$quickCss_symlink" ]; then
-    mv "$quickCss_symlink" "${app_dir}/vesktop-config"
-fi
-
-# Ensure quickCss file is symlinked as config
-if [ ! -L "$quickCss_symlink" ]; then
-    ln -sf "$quickCss" "$quickCss_symlink"
-    echo "$(date): Symlink created for quickCss.css as config."
-fi
 
 # Launch Vesktop AppImage
 if [ -x "$app_image" ]; then
