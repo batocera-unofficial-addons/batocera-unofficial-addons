@@ -9,7 +9,7 @@ DEST_DIR="/userdata/roms/windows"
 MESSAGE=""  # Leave empty if no message is needed
 GAME_LIST="/userdata/roms/windows/gamelist.xml"
 APP_NAME="Sonic Triple Trouble"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/extra/stt.jpg"
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/extra/sonic.jpg"
 LOGO_PATH="/userdata/roms/windows/images/stt-logo.jpg"
 
 # Ensure destination directory exists
