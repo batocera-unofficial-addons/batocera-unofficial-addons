@@ -67,20 +67,21 @@ EOF
 chmod +x /userdata/roms/ports/GoogleChrome.sh
 
 APPNAME="Chrome"
-DESKTOP_FILE="/usr/share/applications/Chrome.desktop"
-PERSISTENT_DESKTOP="/userdata/system/configs/chrome/Chrome.desktop"
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/chrome/extra/icon.png"
-mkdir -p /userdata/system/configs/chrome
+DESKTOP_FILE="/usr/share/applications/${APPNAME}.desktop"
+PERSISTENT_DESKTOP="/userdata/system/configs/${APPNAME,,}/${APPNAME}.desktop"
+ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
+
+mkdir -p "/userdata/system/configs/${APPNAME,,}"
 
 # Create persistent desktop entry
-echo "Creating persistent desktop entry for Chrome..."
+echo "Creating persistent desktop entry for ${APPNAME}..."
 cat <<EOF > "$PERSISTENT_DESKTOP"
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Google Chrome
-Exec=/userdata/roms/ports/GoogleChrome.sh
-Icon=/userdata/system/add-ons/chrome/extra/icon.png
+Name=${APPNAME}
+Exec=/userdata/roms/ports/${APPNAME}.sh
+Icon=/userdata/system/add-ons/${APPNAME,,}/extra/icon.png
 Terminal=false
 Categories=Game;batocera.linux;
 EOF
@@ -91,28 +92,34 @@ cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
 chmod +x "$DESKTOP_FILE"
 
 # Ensure the desktop entry is always restored to /usr/share/applications
-echo "Ensuring Chrome desktop entry is restored at startup..."
-cat <<EOF > "/userdata/system/configs/chrome/restore_desktop_entry.sh"
+echo "Ensuring ${APPNAME} desktop entry is restored at startup..."
+RESTORE_SCRIPT="/userdata/system/configs/${APPNAME,,}/restore_desktop_entry.sh"
+
+cat <<EOF > "$RESTORE_SCRIPT"
 #!/bin/bash
-# Restore Chrome desktop entry
+# Restore ${APPNAME} desktop entry
 if [ ! -f "$DESKTOP_FILE" ]; then
-    echo "Restoring Chrome desktop entry..."
+    echo "Restoring ${APPNAME} desktop entry..."
     cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
     chmod +x "$DESKTOP_FILE"
-    echo "Chrome desktop entry restored."
+    echo "${APPNAME} desktop entry restored."
 else
-    echo "Chrome desktop entry already exists."
+    echo "${APPNAME} desktop entry already exists."
 fi
 EOF
-chmod +x "/userdata/system/configs/chrome/restore_desktop_entry.sh"
+
+chmod +x "$RESTORE_SCRIPT"
 
 # Add to startup script
-custom_startup="/userdata/system/custom.sh"
-if ! grep -q "/userdata/system/configs/chrome/restore_desktop_entry.sh" "$custom_startup"; then
-    echo "Adding Chrome restore script to startup..."
-    echo "bash "/userdata/system/configs/chrome/restore_desktop_entry.sh" &" >> "$custom_startup"
+CUSTOM_STARTUP="/userdata/system/custom.sh"
+
+if ! grep -q "$RESTORE_SCRIPT" "$CUSTOM_STARTUP"; then
+    echo "Adding ${APPNAME} restore script to startup..."
+    echo "bash \"$RESTORE_SCRIPT\" &" >> "$CUSTOM_STARTUP"
 fi
-chmod +x "$custom_startup"
+
+chmod +x "$CUSTOM_STARTUP"
+
 
 # Step 4: Refresh the Ports menu
 echo "Refreshing Ports menu..."
