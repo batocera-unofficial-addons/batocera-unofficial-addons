@@ -7,8 +7,8 @@ DEST_DIR="/userdata/roms/windows"
 MESSAGE=""  # Leave empty if no message is needed
 GAME_LIST="/userdata/roms/windows/gamelist.xml"
 APP_NAME="Modern Modern Chef"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/extra/mmc.jpg"
-LOGO_PATH="/userdata/roms/windows/images/mmc-logo.jpg"
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/extra/mmc.png"
+LOGO_PATH="/userdata/roms/windows/images/mmc-logo.png"
 
 # Ensure destination directory exists
 mkdir -p "$DEST_DIR"
@@ -51,7 +51,7 @@ echo "Adding logo to $APP_NAME entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./mmc.wsquashfs" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/mmc-logo.jpg" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/mmc-logo.png" \
   "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
 curl http://127.0.0.1:1234/reloadgames
   
