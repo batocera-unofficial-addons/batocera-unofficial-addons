@@ -96,6 +96,7 @@ apps=(
     ["MINECRAFT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/minecraft/bedrock.sh | bash"
     ["FREETUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/freetube/freetube.sh | bash"
     ["SUPERMARIOX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supermariox/supermariox.sh | bash"
+    ["SUPERTUXKART"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertuxkart/supertuxkart.sh | bash"
 )
 
 
@@ -110,13 +111,14 @@ descriptions=(
     ["MINECRAFT"]="Minecraft Bedrock Edition."
     ["FREETUBE"]="An Open Source Desktop YouTube Player For Privacy-minded People"
     ["SUPERMARIOX"]="The greatest fan-made tribute to Super Mario of all time!"
+    ["SUPERTUXKART"]="Free and open-source kart racer."
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT SUPERMARIOX"
+    ["Games"]="MINECRAFT SUPERMARIOX SUPERTUXKART"
     ["Game Utilities"]="PORTMASTER CHIAKI"
     ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE"
     ["Developer Tools"]="CONTY DOCKER"
