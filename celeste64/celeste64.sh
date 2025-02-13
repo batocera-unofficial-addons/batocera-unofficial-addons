@@ -84,7 +84,7 @@ echo "\$(date): Launching $APP_NAME"
 # Launch binary
 if [ -x "\${app_binary}" ]; then
     cd "\${app_dir}"
-    ./\${APP_NAME} "\$@" > "\${log_file}" 2>&1
+    ./${APP_NAME} "\$@" > "\${log_file}" 2>&1
     echo "$APP_NAME exited."
 else
     echo "$APP_NAME not found or not executable."
