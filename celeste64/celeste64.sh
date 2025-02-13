@@ -53,6 +53,7 @@ fi
 
 unzip -o "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.zip" -d "$ADDONS_DIR/${APP_NAME,,}/"
 chmod a+x "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME}"
+rm "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.zip"
 echo "$APP_NAME downloaded, extracted, and marked as executable."
 
 # Create persistent log directory
