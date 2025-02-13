@@ -97,6 +97,7 @@ apps=(
     ["FREETUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/freetube/freetube.sh | bash"
     ["SUPERMARIOX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supermariox/supermariox.sh | bash"
     ["SUPERTUXKART"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertuxkart/supertuxkart.sh | bash"
+    ["CELESTE64"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/celeste64/celeste64.sh | bash"
 )
 
 
@@ -112,13 +113,14 @@ descriptions=(
     ["FREETUBE"]="An Open Source Desktop YouTube Player For Privacy-minded People"
     ["SUPERMARIOX"]="The greatest fan-made tribute to Super Mario of all time!"
     ["SUPERTUXKART"]="Free and open-source kart racer."
+    ["CELESTE64"]="Free 3D platformer, based around Celeste Mountain"
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT SUPERMARIOX SUPERTUXKART"
+    ["Games"]="MINECRAFT SUPERMARIOX SUPERTUXKART CELESTE64"
     ["Game Utilities"]="PORTMASTER CHIAKI"
     ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE"
     ["Developer Tools"]="CONTY DOCKER"
