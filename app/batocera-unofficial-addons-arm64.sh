@@ -120,7 +120,7 @@ descriptions=(
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT SUPERMARIOX SUPERTUXKART"
+    ["Games"]="MINECRAFT SUPERMARIOX SUPERTUXKART CELESTE64"
     ["Game Utilities"]="PORTMASTER CHIAKI"
     ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE"
     ["Developer Tools"]="CONTY DOCKER"
