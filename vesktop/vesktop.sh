@@ -29,9 +29,7 @@ chmod a+x /userdata/system/add-ons/vesktop/Vesktop.AppImage
 echo "Vesktop AppImage downloaded and marked as executable."
 
 # Create persistent configuration and log directories
-mkdir -p /userdata/system/add-ons/vesktop/vesktop-config
 mkdir -p /userdata/system/logs
-mkdir -p /userdata/system/add-ons/vesktop/lib
 mkdir -p /userdata/system/configs/vesktop
 mkdir -p /userdata/system/add-ons/vesktop/extra
 DESKTOP_FILE="/usr/share/applications/Vesktop.desktop"
@@ -44,6 +42,7 @@ echo "Creating Vesktop launcher script in Ports..."
 mkdir -p /userdata/roms/ports
 cat << 'EOF' > /userdata/roms/ports/Vesktop.sh
 #!/bin/bash
+export HOME=/userdata/system/add-ons/vesktop
 
 # Function to ensure the quickCss.css file exists
 ensure_quick_css() {
@@ -66,7 +65,6 @@ ensure_quick_css
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0
-export HOME=/userdata/system/add-ons/vesktop
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/vesktop"
