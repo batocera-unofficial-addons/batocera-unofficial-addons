@@ -113,7 +113,7 @@ descriptions=(
     ["FREETUBE"]="An Open Source Desktop YouTube Player For Privacy-minded People"
     ["SUPERMARIOX"]="The greatest fan-made tribute to Super Mario of all time!"
     ["SUPERTUXKART"]="Free and open-source kart racer."
-    ["CELESTE64"]="Free 3D platformer, based around Celeste Mountain"
+    ["CELESTE64"]="Requires OpenGL 3.2. Free 3D platformer, based around Celeste Mountain"
 )
 
 
