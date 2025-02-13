@@ -44,7 +44,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Extracting $APP_NAME..."
-tar -xf "${TUX_DIR}/SuperTuxKart.tar.xz" -C "$TUX_DIR"
+tar --strip-components=1 -xf "${TUX_DIR}/SuperTuxKart.tar.xz" -C "$TUX_DIR"
 rm "${TUX_DIR}/SuperTuxKart.tar.xz"
 chmod -R a+x "$TUX_DIR"
 echo "$APP_NAME extracted to $TUX_DIR."
@@ -59,7 +59,7 @@ export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
 
 # Directories and file paths
-app_dir="${TUX_DIR}/SuperTuxKart-1.4-linux-x86_64"
+app_dir="$TUX_DIR"
 log_dir="$LOGS_DIR"
 log_file="\${log_dir}/${APP_NAME,,}.log"
 
