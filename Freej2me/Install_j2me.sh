@@ -80,7 +80,7 @@ fi
 
 # Execute the java.sh script if the /userdata/system/pro/java directory does not exist
 echo "Executing the java.sh script..."
-curl -L "https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/java/java.sh" | bash
+curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/java/java-jdk19.sh | bash
 
 # Save changes
 echo "Saving changes..."
