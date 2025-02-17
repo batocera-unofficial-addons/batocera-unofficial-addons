@@ -70,7 +70,7 @@ R=$X
 # --------------------------------------------------------------------
 # -- prepare paths and files for installation: 
 cd ~/
-pro=/userdata/system/pro
+pro=/userdata/system/drl
 mkdir $pro 2>/dev/null
 mkdir $pro/extra 2>/dev/null
 rm -rf $pro/$appname 2>/dev/null
@@ -82,14 +82,14 @@ command=$pro/$appname/extra/command; rm $command 2>/dev/null;
 echo "$COMMAND" >> $command 2>/dev/null 
 # --------------------------------------------------------------------
 # -- prepare dependencies for this app and the installer: 
-url=https://github.com/DRLEdition19/batocera-unofficial-addons.add/raw/main/.dep
+url=https://github.com/DTJW92/batocera-unofficial-addons/raw/main/.dep
 depfile=dependencies.txt; dep=$pro/.dep; mkdir $pro/.dep 2>/dev/null; cd $dep
 wget -q -O $dep/$depfile $url/$depfile 2>/dev/null; dos2unix $dep/$depfile 1>/dev/null 2>/dev/null;
 rm /userdata/system/drl/.dep/libtinfo.so.6 2>/dev/null
 nl=$(cat $dep/$depfile | wc -l); l=1; while [[ "$l" -le "$((nl+2))" ]]; do
 d=$(cat $dep/$depfile | sed ""$l"q;d"); wget -q -O $dep/$d $url/$d 2>/dev/null; 
 if [[ "$(echo $d | grep "lib")" != "" ]]; then ln -s $dep/$d /lib/$d 2>/dev/null; fi; ((l++)); done
-wget -q -O $pro/$appname/extra/icon.png https://github.com/DRLEdition19/batocera-unofficial-addons.add/raw/main/$appname/extra/icon.png; chmod a+x $dep/tput; cd ~/
+wget -q -O $pro/$appname/extra/icon.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/$appname/extra/icon.png; chmod a+x $dep/tput; cd ~/
 # --------------------------------------------------------------------
 # // end of dependencies 
 #
@@ -276,14 +276,14 @@ exit 0
 fi
 # --------------------------------------------------------------------
 # -- temp for curl download
-pro=/userdata/system/pro
+pro=/userdata/system/drl
 temp=$pro/$appname/extra/downloads
 rm -rf $temp 2>/dev/null 
 mkdir -p $temp 2>/dev/null
 # --------------------------------------------------------------------
 echo
 echo -e "${G}DOWNLOADING${W} JAVA-RUNTIME 19.0.1 PACKAGE [ 1+1 / 2 ] . . ."
-url=https://github.com/DRLEdition19/batocera-unofficial-addons.add/raw/main/
+url=https://github.com/DTJW92/batocera-unofficial-addons/raw/main/
 p1=java.tar.bz2.partaa
 p2=java.tar.bz2.partab
 cd $temp
