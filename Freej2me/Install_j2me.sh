@@ -83,7 +83,7 @@ echo "Executing the java.sh script..."
 curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/java/java.sh | bash
 
 echo "Setting permissions for specific files..."
-create_symlink "/userdata/system/add-ons/java/bin/java" "/usr/bin/java"
+create_symlink "/userdata/system/add-ons/java/java/bin/java" "/usr/bin/java"
 
 # Save changes
 echo "Saving changes..."
