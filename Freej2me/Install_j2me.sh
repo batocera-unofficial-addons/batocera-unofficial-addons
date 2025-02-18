@@ -72,7 +72,7 @@ mv /userdata/system/configs/emulationstation/es_system_j2me.cfg /userdata/system
 echo "Cleaning up temporary directory..."
 rm -rf $TEMP_DIR
 
-# Check if the /userdata/system/pro/java directory exists
+# Check if the /userdata/system/add-ons/java directory exists
 if [ -d "/userdata/system/add-ons/java" ]; then
     echo "The directory /userdata/system/add-ons/java already exists. Exiting script."
     exit 0
@@ -80,7 +80,10 @@ fi
 
 # Execute the java.sh script if the /userdata/system/pro/java directory does not exist
 echo "Executing the java.sh script..."
-curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/java/java-jdk19.sh | bash
+curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/java/java.sh | bash
+
+echo "Setting permissions for specific files..."
+create_symlink "/userdata/system/add-ons/java/bin/java" "/usr/bin/java"
 
 # Save changes
 echo "Saving changes..."
