@@ -32,7 +32,7 @@ fi
 echo "Downloading Steam parts..."
 mkdir -p /userdata/system/add-ons/steam
 wget -q --show-progress -O /userdata/system/add-ons/steam/steam_part_aa "$appimage_url/steam_part_aa"
-wget -q --show-progress -O /userdata/system/add-ons/steam/steam_part_bb "$appimage_url/steam_part_bb"
+wget -q --show-progress -O /userdata/system/add-ons/steam/steam_part_bb "$appimage_url/steam_part_ab"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download Steam parts."
