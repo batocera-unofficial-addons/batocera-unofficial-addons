@@ -12,6 +12,22 @@ else
     exit 1
 fi
 
+# Check if fusermount3 exists
+if ! command -v fusermount3 &> /dev/null; then
+    echo "fusermount3 not found!"
+    
+    # Display a YES/NO dialog
+    dialog --yesno "BUA needs to be updated to the latest version for this app to run. Do you want to continue?" 10 60
+    response=$?
+    if [ $response -eq 0 ]; then
+        echo "Updating BUA..."
+        curl -L bit.ly/BUAinstaller | bash
+    else
+        echo "Update declined. Exiting."
+        exit 1
+    fi
+fi
+
 # Step 2: Download the AppImage
 echo "Downloading Steam from $appimage_url..."
 mkdir -p /userdata/system/add-ons/steam
