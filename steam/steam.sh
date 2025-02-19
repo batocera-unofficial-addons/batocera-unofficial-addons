@@ -50,6 +50,9 @@ tar -xf /userdata/system/add-ons/steam/steam.tar.xz -C /userdata/system/add-ons/
 chmod a+x /userdata/system/add-ons/steam/steam
 echo "Steam reassembled, extracted, and marked as executable."
 
+# Remove the tar.xz file after extraction
+rm /userdata/system/add-ons/steam/steam.tar.xz
+
 # Create persistent configuration and log directories
 mkdir -p /userdata/system/logs
 mkdir -p /userdata/system/configs/steam
