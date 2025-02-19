@@ -14,7 +14,6 @@ fi
 
 # Check if fusermount3 exists
 if ! command -v fusermount3 &> /dev/null; then
-    echo "fusermount3 not found!"
     
     # Display a YES/NO dialog
     dialog --yesno "BUA needs to be updated to the latest version for this app to run. Do you want to continue?" 10 60
