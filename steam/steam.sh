@@ -19,6 +19,7 @@ if ! command -v fusermount3 &> /dev/null; then
     dialog --yesno "BUA needs to be updated to the latest version for this app to run. Do you want to continue?" 10 60
     response=$?
     if [ $response -eq 0 ]; then
+    clear
         echo "Updating BUA..."
         curl -L bit.ly/BUAinstaller | bash
     else
