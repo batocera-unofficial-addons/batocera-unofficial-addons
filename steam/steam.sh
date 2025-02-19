@@ -6,7 +6,7 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url="https://github.com/DTJW92/batocera-unofficial-addons/releases/AppImages/"
+    appimage_url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
