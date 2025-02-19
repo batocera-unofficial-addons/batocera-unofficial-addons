@@ -129,13 +129,13 @@ echo "Downloading key mapping file..."
 curl -L -o "/userdata/roms/ports/Steam.sh.keys" "$KEYS_URL"
 # Download the image
 echo "Downloading Steam logo..."
-curl -L -o /userdata/roms/ports/images/steamlogo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/steam/extra/steamlogo.png
+curl -L -o /userdata/roms/ports/images/steamlogo.jpg https://github.com/DTJW92/batocera-unofficial-addons/raw/main/steam/extra/logo.jpg
 
 echo "Adding logo to Steam entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./Steam.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "Steam" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/steamlogo.png" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/steamlogo.jpg" \
   /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
 
 curl http://127.0.0.1:1234/reloadgames
