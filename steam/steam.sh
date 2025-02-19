@@ -6,7 +6,7 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url="https://github.com/DTJW92/batocera-unofficial-addons/releases/AppImages/steam"
+    appimage_url="https://github.com/DTJW92/batocera-unofficial-addons/releases/AppImages/"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
@@ -28,18 +28,27 @@ if ! command -v fusermount3 &> /dev/null; then
     fi
 fi
 
-# Step 2: Download the AppImage
-echo "Downloading Steam from $appimage_url..."
+# Step 2: Download Steam Parts
+echo "Downloading Steam parts..."
 mkdir -p /userdata/system/add-ons/steam
-wget -q --show-progress -O /userdata/system/add-ons/steam/steam "$appimage_url"
+wget -q --show-progress -O /userdata/system/add-ons/steam/steam_part_aa "$appimage_url/steam_part_aa"
+wget -q --show-progress -O /userdata/system/add-ons/steam/steam_part_bb "$appimage_url/steam_part_bb"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download the Steam."
+    echo "Failed to download Steam parts."
     exit 1
 fi
 
+# Reassemble the Steam package
+echo "Reassembling Steam package..."
+cat /userdata/system/add-ons/steam/steam_part_* > /userdata/system/add-ons/steam/steam.tar.xz
+
+# Extract Steam package
+echo "Extracting Steam..."
+tar -xf /userdata/system/add-ons/steam/steam.tar.xz -C /userdata/system/add-ons/steam/
+
 chmod a+x /userdata/system/add-ons/steam/steam
-echo "Steam downloaded and marked as executable."
+echo "Steam reassembled, extracted, and marked as executable."
 
 # Create persistent configuration and log directories
 mkdir -p /userdata/system/logs
@@ -59,7 +68,6 @@ export DISPLAY=:0.0
 
 cd /userdata/system/add-ons/steam
 ulimit -H -n 819200 && ulimit -S -n 819200 && sysctl -w fs.inotify.max_user_watches=8192000 vm.max_map_count=2147483642 fs.file-max=8192000 >/dev/null 2>&1 && ./steam -gamepadui
-
 EOF
 
 chmod +x /userdata/roms/ports/Steam.sh
@@ -74,7 +82,7 @@ cat <<EOF > "$PERSISTENT_DESKTOP"
 Version=1.0
 Type=Application
 Name=Steam
-Exec="ulimit -H -n 819200 && ulimit -S -n 819200 && sysctl -w fs.inotify.max_user_watches=8192000 vm.max_map_count=2147483642 fs.file-max=8192000 >/dev/null 2>&1 && ./userdata/system/add-ons/steam/steam"
+Exec="ulimit -H -n 819200 && ulimit -S -n 819200 && sysctl -w fs.inotify.max_user_watches=8192000 vm.max_map_count=2147483642 fs.file-max=8192000 >/dev/null 2>&1 && /userdata/system/add-ons/steam/steam"
 Icon=/userdata/system/add-ons/steam/extra/icon.png
 Terminal=false
 Categories=Game;batocera.linux;
@@ -85,7 +93,7 @@ chmod +x "$PERSISTENT_DESKTOP"
 cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
 chmod +x "$DESKTOP_FILE"
 
-# Ensure the desktop entry is always restored to /usr/share/applications
+# Ensure the desktop entry is always restored at startup
 echo "Ensuring Steam desktop entry is restored at startup..."
 cat <<EOF > "/userdata/system/configs/steam/restore_desktop_entry.sh"
 #!/bin/bash
@@ -105,7 +113,7 @@ chmod +x "/userdata/system/configs/steam/restore_desktop_entry.sh"
 custom_startup="/userdata/system/custom.sh"
 if ! grep -q "/userdata/system/configs/steam/restore_desktop_entry.sh" "$custom_startup"; then
     echo "Adding Steam restore script to startup..."
-    echo "bash "/userdata/system/configs/steam/restore_desktop_entry.sh" &" >> "$custom_startup"
+    echo "bash \"/userdata/system/configs/steam/restore_desktop_entry.sh\" &" >> "$custom_startup"
 fi
 chmod +x "$custom_startup"
 
@@ -127,8 +135,7 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/steamlogo.png" \
   /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
 
-
 curl http://127.0.0.1:1234/reloadgames
 
 echo
-echo "Installation complete! You can now launch Steam from the F1 Applictions menu and Steam Big Picture Mode from the Ports menu."
+echo "Installation complete! You can now launch Steam from the F1 Applications menu and Steam Big Picture Mode from the Ports menu."
