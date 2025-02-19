@@ -52,6 +52,7 @@ echo "Steam reassembled, extracted, and marked as executable."
 
 # Remove the tar.xz file after extraction
 rm /userdata/system/add-ons/steam/steam.tar.xz
+rm /userdata/system/add-ons/steam/steam_part_*
 
 # Create persistent configuration and log directories
 mkdir -p /userdata/system/logs
@@ -73,7 +74,15 @@ cd /userdata/system/add-ons/steam
 ulimit -H -n 819200 && ulimit -S -n 819200 && sysctl -w fs.inotify.max_user_watches=8192000 vm.max_map_count=2147483642 fs.file-max=8192000 >/dev/null 2>&1 && ./steam -gamepadui
 EOF
 
+cat << 'EOF' > /userdata/system/add-ons/steam/Launcher
+#!/bin/bash
+export DISPLAY=:0.0
+
+sysctl -w fs.inotify.max_user_watches=8192000 vm.max_map_count=2147483642 fs.file-max=8192000 >/dev/null 2>&1 && /userdata/system/add-ons/steam/steam
+EOF
+
 chmod +x /userdata/roms/ports/Steam.sh
+chmod +x /userdata/system/add-ons/steam/Launcher
 
 echo "Downloading icon..."
 wget --show-progress -qO "${INSTALL_DIR}/extra/icon.png" "$ICON_URL"
@@ -85,7 +94,7 @@ cat <<EOF > "$PERSISTENT_DESKTOP"
 Version=1.0
 Type=Application
 Name=Steam
-Exec="ulimit -H -n 819200 && ulimit -S -n 819200 && sysctl -w fs.inotify.max_user_watches=8192000 vm.max_map_count=2147483642 fs.file-max=8192000 >/dev/null 2>&1 && /userdata/system/add-ons/steam/steam"
+Exec=/userdata/system/add-ons/steam/Launcher
 Icon=/userdata/system/add-ons/steam/extra/icon.png
 Terminal=false
 Categories=Game;batocera.linux;
