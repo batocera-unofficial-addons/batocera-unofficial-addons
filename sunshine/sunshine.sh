@@ -102,9 +102,5 @@ batocera-services enable sunshine
 batocera-services start sunshine
 
 
-echo 
 echo
-echo "Installation complete! Please head to https://YOUR-MACHINE-IP:47990 to pair
-Sunshine with Moonlight if this is your first time running Sunshine :)"
-echo
-echo
+dialog --msgbox "Installation complete!\n\nPlease head to https://YOUR-MACHINE-IP:47990 to pair Sunshine with Moonlight if this is your first time running Sunshine :)" 10 60
