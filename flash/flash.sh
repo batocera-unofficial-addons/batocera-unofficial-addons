@@ -5,7 +5,7 @@ APPURL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/A
 DEST="/userdata/system/add-ons/${APPNAME,,}"
 DESKTOP_FILE="/usr/share/applications/${APPNAME}.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/${APPNAME,,}/${APPNAME}.desktop"
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
+ICON_URL="https://static.wikia.nocookie.net/logopedia/images/0/0a/Flashpoint_2020_%28Icon%29_%28Alt%29_%281%29.png"
 TAR_FILE="$DEST/flash.tar.xz"
 
 # Create necessary directories
