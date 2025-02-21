@@ -19,7 +19,7 @@ wget -q --show-progress -O "$TAR_FILE" "$APPURL"
 
 # Extract Flashpoint (keeping the Flashpoint3 directory)
 echo "Extracting ${APPNAME}..."
-tar -xvf "$TAR_FILE" -C "$DEST"
+tar -xvf "$TAR_FILE" -C "$DEST" --strip-components=1
 rm "$TAR_FILE"
 
 # Ensure proper permissions
