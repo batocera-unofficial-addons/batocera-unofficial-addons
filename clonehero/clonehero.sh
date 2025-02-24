@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # BATOCERA ADD-ONS INSTALLER
 
 # Define app information
