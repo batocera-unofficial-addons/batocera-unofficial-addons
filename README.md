@@ -12,77 +12,6 @@ You will find no support in the official Discord—better to ask for support in 
 
 **Contributions welcome, please provide evidence of your addition working to speed up the process.**
 
-# Add-Ons Status
-
-### ✅ Passed
-- 7zip  
-- Amazon-Luna  
-- Ambermoon  
-- Armagetron  
-- Arcade Manager  
-- Assault Cube  
-- Brave  
-- Chiaki-NG  
-- Chrome
-- CLI Tools  
-- Clone Hero  
-- Conty
-- Chrunchy Roll
-- CS Portable    
-- Disney+  
-- Endless Sky  
-- Firefox  
-- Fightcade  
-- FreedroidRPG
-- FreeJ2ME  
-- GParted  
-- Greenlight
-- HBO Max
-- Heroic Launcher  
-- Iptvnator
-- Java Runtime
-- Luanti
-- Minecraft  
-- Moonlight  
-- Netflix  
-- Nvidiaclocker  
-- Nvidiapatcher  
-- OBS  
-- OpenRA  
-- OpenRGB
-- OpenTTD
-- Parsec
-- Plex
-- Port Master
-- Prime Video
-- qBittorrent  
-- ShadPS4  
-- Spotify  
-- Stepmania  
-- Sunshine  
-- SuperTux  
-- SuperTuxKart  
-- Switch  
-- Tailscale
-- Tidal HiFi
-- Twitch  
-- Vesktop  
-- Warzone 2100
-- Wine from V40
-- Wine Manager 
-- Custom Wine Installer 
-- Xonotic  
-- YouTube  
-- YARG  
-
-### 🛠️ Testing
-- Gamescope
-- Arch
-- Hydra
-  
-
-### 📋 Todo
-
 
 To install:
 
@@ -97,3 +26,6 @@ Individual install links won't be provided, the app is needed to handle dependen
 
 Request and support via the **[Batocera Unofficial Add-Ons Discord](https://discord.gg/Uc9BVbDH9e)**!
 
+---
+
+Check out the **[Batocera Unofficial Add-Ons Wiki](https://github.com/DTJW92/batocera-unofficial-addons/wiki)** for help and guides.
