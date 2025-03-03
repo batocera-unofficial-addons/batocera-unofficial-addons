@@ -4,7 +4,6 @@
 APP_NAME="PeaZip"
 AMD_SUFFIX="peazip.AppImage"
 ARM_SUFFIX=""
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/peazip/extra/peazip-icon.png"
 REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/"
 
 # -----------------------------------------------------------------------------------------------------------------
@@ -14,9 +13,10 @@ CONFIGS_DIR="/userdata/system/configs"
 DESKTOP_DIR="/usr/share/applications"
 CUSTOM_SCRIPT="/userdata/system/custom.sh"
 APP_CONFIG_DIR="${CONFIGS_DIR}/${APP_NAME,,}"
-PERSISTENT_DESKTOP="${APP_CONFIG_DIR}/${APP_NAME,,}.desktop"
-DESKTOP_FILE="${DESKTOP_DIR}/${APP_NAME,,}.desktop"
-
+APPNAME="PeaZip"
+DESKTOP_FILE="/usr/share/applications/${APPNAME}.desktop"
+PERSISTENT_DESKTOP="/userdata/system/configs/${APPNAME,,}/${APPNAME}.desktop"
+ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/peazip-icon.png"
 # Ensure directories exist
 echo "Creating necessary directories..."
 mkdir -p "$APP_CONFIG_DIR" "$ADDONS_DIR/${APP_NAME,,}"
