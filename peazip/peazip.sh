@@ -4,7 +4,7 @@
 APP_NAME="PeaZip"
 AMD_SUFFIX="peazip.AppImage"
 ARM_SUFFIX=""
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/peazip/extra/peazip-icon.png"
+ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/peazip/extra/peazip-icon.png"
 REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/"
 
 # -----------------------------------------------------------------------------------------------------------------
