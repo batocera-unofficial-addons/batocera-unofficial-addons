@@ -12,6 +12,11 @@ if [ ! -e "$SYMLINK_MANAGER_PATH" ]; then
     dialog --title "Reinstallation Required" --msgbox "Previous application installs will need to be installed again." 10 60
 fi
 
+[ -f "/userdata/system/add-ons/.dep/libcrypt.so.1" ] || { \
+    wget -O "/userdata/system/add-ons/.dep/libcrypt.so.1" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/.dep/libcrypt.so.1" && \
+    chmod 755 "/userdata/system/add-ons/.dep/libcrypt.so.1"; 
+}
+https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/.dep/libcrypt.so.1
 # Function to display animated title with colors
 animate_title() {
     local text="BATOCERA UNOFFICIAL ADD-ONS INSTALLER"
