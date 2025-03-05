@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Define the path
+SYMLINK_MANAGER_PATH="/userdata/system/services/symlink_manager"
+
+# Check if symlink_manager exists
+if [ ! -e "$SYMLINK_MANAGER_PATH" ]; then
+    # Run the installer script
+    curl -L bit.ly/BUAinstaller | bash
+
+    # Display a dialog box notifying the user
+    dialog --title "Reinstallation Required" --msgbox "Previous application installs will need to be installed again." 10 60
+fi
+
 # Function to display animated title with colors
 animate_title() {
     local text="BATOCERA UNOFFICIAL ADD-ONS INSTALLER"
