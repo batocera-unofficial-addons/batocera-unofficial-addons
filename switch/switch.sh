@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Check if rgs.version exists
+if [ -f "/userdata/system/rgs.version" ]; then
+    dialog --msgbox "Team Pixel Nostalgia's build supports Switch emulation natively. No need to install it via BUA." 8 60
+    clear
+    exit 0
+fi
+
 # Get Batocera version
 version=$(batocera-es-swissknife --version | awk '{print $1}' | sed 's/[^0-9]*//g')  # Extracts the numeric part
 
@@ -14,4 +21,6 @@ elif (( version == 41 )); then
     curl -L bit.ly/foclabroc-switchoff | bash
 else
     echo "Unknown or unsupported Batocera version: $version"
+    dialog --msgbox "Unsupported Batocera version detected: $version. Installation aborted." 8 60
+    clear
 fi
