@@ -22,7 +22,7 @@ chmod +x "$APPDIR/extra/command"
 TEMP_DIR="/tmp/${APPNAME,,}_download"
 mkdir -p "$TEMP_DIR"
 cd "$TEMP_DIR"
-curl -L -o "clonehero.tar.xz" "$APPLINK"
+wget -q --show-progress -O "clonehero.tar.xz" "$APPLINK"
 tar -xf "clonehero.tar.xz" -C "$APPDIR" --strip-components=1
 chmod +x "$APPDIR/${APPNAME,,}"
 rm -rf "$TEMP_DIR"
