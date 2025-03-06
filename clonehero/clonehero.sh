@@ -11,7 +11,7 @@ APPDIR="/userdata/system/add-ons/${APPNAME,,}"
 COMMAND='sysctl -w vm.max_map_count=2097152; ulimit -H -n 819200; ulimit -S -n 819200; ulimit -S -n 819200 clonehero; ulimit -H -l 61634; ulimit -S -l 61634; ulimit -H -s 61634; ulimit -S -s 61634; mkdir '$APPDIR'/home 2>/dev/null; mkdir '$APPDIR'/config 2>/dev/null; mkdir '$APPDIR'/roms 2>/dev/null; HOME='$APPDIR'/home XDG_CONFIG_HOME='$APPDIR'/config XDG_DATA_HOME='$APPDIR'/home XDG_CURRENT_DESKTOP=XFCE DESKTOP_SESSION=XFCE DISPLAY=:0.0 '$APPDIR'/'${APPNAME,,}' ${@}'
 
 # Prepare installation directories
-mkdir -p "$APPDIR/extra"
+mkdir -p "$APPDIR/extra"https://github.com/DTJW92/batocera-unofficial-addons/blob/main/clonehero/extra/icon.png
 rm -rf "$APPDIR/*"
 
 # Download and extract Clone Hero
@@ -67,7 +67,7 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Download Clone Hero logo
 LOGO_PATH="/userdata/roms/ports/images/CloneHero_Logo.png"
-ICON_PATH="/$APPDIR/extra/icon.png
+ICON_PATH="/$APPDIR/extra/icon.png"
 curl -Ls -o "$ICON_PATH" "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/clonehero/extra/icon.png"
 curl -Ls -o "$LOGO_PATH" "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/clonehero/extra/cloneherologo.png"
 
