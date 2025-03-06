@@ -8,7 +8,7 @@ APPDIR="/userdata/system/add-ons/${APPNAME,,}"
 
 # Define launcher command
 
-COMMAND='sysctl -w vm.max_map_count=2097152; ulimit -H -n 819200; ulimit -S -n 819200; ulimit -S -n 819200 clonehero; ulimit -H -l 61634; ulimit -S -l 61634; ulimit -H -s 61634; ulimit -S -s 61634; mkdir '$APPDIR'/home 2>/dev/null; mkdir '$APPDIR'/config 2>/dev/null; mkdir '$APPDIR'/roms 2>/dev/null; HOME='$APPDIR'/home XDG_CONFIG_HOME='$APPDIR'/config XDG_DATA_HOME='$APPDIR'/home XDG_CURRENT_DESKTOP=XFCE DESKTOP_SESSION=XFCE DISPLAY=:0.0 '$APPDIR'/'$APPNAME' ${@}'
+COMMAND='sysctl -w vm.max_map_count=2097152; ulimit -H -n 819200; ulimit -S -n 819200; ulimit -S -n 819200 clonehero; ulimit -H -l 61634; ulimit -S -l 61634; ulimit -H -s 61634; ulimit -S -s 61634; mkdir '$APPDIR'/home 2>/dev/null; mkdir '$APPDIR'/config 2>/dev/null; mkdir '$APPDIR'/roms 2>/dev/null; HOME='$APPDIR'/home XDG_CONFIG_HOME='$APPDIR'/config XDG_DATA_HOME='$APPDIR'/home XDG_CURRENT_DESKTOP=XFCE DESKTOP_SESSION=XFCE DISPLAY=:0.0 '$APPDIR'/'${APPNAME,,}' ${@}'
 
 # Prepare installation directories
 mkdir -p "$APPDIR/extra"
@@ -23,7 +23,7 @@ TEMP_DIR="/tmp/${APPNAME,,}_download"
 mkdir -p "$TEMP_DIR"
 cd "$TEMP_DIR"
 curl -L -o "clonehero.tar.xz" "$APPLINK"
-tar -xf "clonehero.tar.xz" -C "$APPDIR"
+tar -xf "clonehero.tar.xz" -C "$APPDIR" --strip-components=1
 chmod +x "$APPDIR/${APPNAME,,}"
 rm -rf "$TEMP_DIR"
 
