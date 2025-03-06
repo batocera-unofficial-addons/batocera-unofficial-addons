@@ -89,7 +89,7 @@ loading_animation() {
     spinner_pid=$!
     sleep 3  # Adjust for how long the spinner runs
     kill $spinner_pid
-    echo "Done!"d
+    echo "Done!"
 }
 
 # Main script execution
@@ -170,7 +170,7 @@ apps=(
     ["STEAM"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/steam/steam.sh | bash"
     ["LUTRIS"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/lutris/lutris.sh | bash"
     ["FILEZILLA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/filezilla/filezilla.sh | bash"
-    ["PEAZIP"]="curl -Ls ttps://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/peazip/peazip.sh | bash"
+    ["PEAZIP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/peazip/peazip.sh | bash"
 )
 
 
