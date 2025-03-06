@@ -14,10 +14,6 @@ COMMAND='sysctl -w vm.max_map_count=2097152; ulimit -H -n 819200; ulimit -S -n 8
 mkdir -p "$APPDIR/extra"
 rm -rf "$APPDIR/*"
 
-# Store launcher command
-echo "$COMMAND" > "$APPDIR/extra/command"
-chmod +x "$APPDIR/extra/command"
-
 # Download and extract Clone Hero
 TEMP_DIR="/tmp/${APPNAME,,}_download"
 mkdir -p "$TEMP_DIR"
@@ -31,7 +27,7 @@ rm -rf "$TEMP_DIR"
 LAUNCHER="$APPDIR/Launcher"
 echo "#!/bin/bash" > "$LAUNCHER"
 echo "~/add-ons/.dep/mousemove.sh 2>/dev/null" >> "$LAUNCHER"
-echo "\$(cat $APPDIR/extra/command)" >> "$LAUNCHER"
+echo "$COMMAND" >> "$LAUNCHER"
 chmod +x "$LAUNCHER"
 
 # Create application shortcut
