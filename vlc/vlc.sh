@@ -4,7 +4,7 @@
 APP_NAME="VLC"
 AMD_SUFFIX="vlc.AppImage"
 ARM_SUFFIX=""
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/vlc/extra/VLC-Logo.jpg"
+LOGO_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/vlc/extra/VLC-Logo.jpg"
 REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages"
 
 # -----------------------------------------------------------------------------------------------------------------
