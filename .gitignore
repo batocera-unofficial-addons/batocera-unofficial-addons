@@ -1,3 +1,4 @@
 # Ignore the Konami Code logic file
 konami_code.sh
 .gitattributes
+*.zip
