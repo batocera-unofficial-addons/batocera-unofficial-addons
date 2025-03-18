@@ -19,7 +19,7 @@ elif (( version == 41 )); then
     echo "Batocera version is 41. Triggering download for version 41+l..."
     sleep 5
  curl -L bit.ly/foclabroc-switchoff | bash
-elif (( version == 42 )); then
+elif (( version >= 42 )); then
     echo "Batocera version is 42. Triggering download for version 42..."
     sleep 5
 curl -L bit.ly/foclabroc-batswitch | bash
