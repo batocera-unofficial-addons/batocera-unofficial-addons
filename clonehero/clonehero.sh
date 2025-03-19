@@ -7,29 +7,19 @@ APPLINK="https://github.com/clonehero-game/releases/releases/download/v1.1.0.426
 APPDIR="/userdata/system/add-ons/${APPNAME,,}"
 
 # Define launcher command
-COMMAND="sysctl -w vm.max_map_count=2097152; \
-    ulimit -H -n 819200; ulimit -S -n 819200; \
-    ulimit -H -l 61634; ulimit -S -l 61634; \
-    ulimit -H -s 61634; ulimit -S -s 61634; \
-    mkdir -p '$APPDIR/home' '$APPDIR/config' '$APPDIR/roms'; \
-    HOME='$APPDIR/home' XDG_CONFIG_HOME='$APPDIR/config' \
-    XDG_DATA_HOME='$APPDIR/home' XDG_CURRENT_DESKTOP=XFCE \
-    DESKTOP_SESSION=XFCE DISPLAY=:0.0 '$APPDIR/${APPNAME,,}' "$@""
+
+COMMAND='sysctl -w vm.max_map_count=2097152; ulimit -H -n 819200; ulimit -S -n 819200; ulimit -S -n 819200 clonehero; ulimit -H -l 61634; ulimit -S -l 61634; ulimit -H -s 61634; ulimit -S -s 61634; mkdir '$APPDIR'/home 2>/dev/null; mkdir '$APPDIR'/config 2>/dev/null; mkdir '$APPDIR'/roms 2>/dev/null; HOME='$APPDIR'/home XDG_CONFIG_HOME='$APPDIR'/config XDG_DATA_HOME='$APPDIR'/home XDG_CURRENT_DESKTOP=XFCE DESKTOP_SESSION=XFCE DISPLAY=:0.0 '$APPDIR'/'${APPNAME,,}' ${@}'
 
 # Prepare installation directories
 mkdir -p "$APPDIR/extra"
 rm -rf "$APPDIR/*"
 
-# Store launcher command
-echo "$COMMAND" > "$APPDIR/extra/command"
-chmod +x "$APPDIR/extra/command"
-
 # Download and extract Clone Hero
 TEMP_DIR="/tmp/${APPNAME,,}_download"
 mkdir -p "$TEMP_DIR"
 cd "$TEMP_DIR"
-curl -L -o "clonehero.tar.xz" "$APPLINK"
-tar -xf "clonehero.tar.xz" -C "$APPDIR"
+wget -q --show-progress -O "clonehero.tar.xz" "$APPLINK"
+tar -xf "clonehero.tar.xz" -C "$APPDIR" --strip-components=1
 chmod +x "$APPDIR/${APPNAME,,}"
 rm -rf "$TEMP_DIR"
 
@@ -37,7 +27,7 @@ rm -rf "$TEMP_DIR"
 LAUNCHER="$APPDIR/Launcher"
 echo "#!/bin/bash" > "$LAUNCHER"
 echo "~/add-ons/.dep/mousemove.sh 2>/dev/null" >> "$LAUNCHER"
-echo "\$(cat $APPDIR/extra/command)" >> "$LAUNCHER"
+echo "$COMMAND" >> "$LAUNCHER"
 chmod +x "$LAUNCHER"
 
 # Create application shortcut
@@ -77,7 +67,9 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Download Clone Hero logo
 LOGO_PATH="/userdata/roms/ports/images/CloneHero_Logo.png"
-curl -L -o "$LOGO_PATH" "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/clonehero/extra/cloneherologo.png"
+ICON_PATH="/$APPDIR/extra/icon.png"
+curl -Ls -o "$ICON_PATH" "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/clonehero/extra/icon.png"
+curl -Ls -o "$LOGO_PATH" "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/clonehero/extra/cloneherologo.png"
 
 # Add logo to gamelist.xml
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \

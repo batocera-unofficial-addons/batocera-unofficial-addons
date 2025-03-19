@@ -1,5 +1,22 @@
 #!/bin/bash
 
+# Define the path
+SYMLINK_MANAGER_PATH="/userdata/system/services/symlink_manager"
+
+# Check if symlink_manager exists
+if [ ! -e "$SYMLINK_MANAGER_PATH" ]; then
+    # Run the installer script
+    curl -L bit.ly/BUAinstaller | bash
+
+    # Display a dialog box notifying the user
+    dialog --title "Reinstallation Required" --msgbox "Previous application installs will need to be installed again." 10 60
+fi
+
+[ -f "/userdata/system/add-ons/.dep/libcrypt.so.1" ] || { \
+    wget -O "/userdata/system/add-ons/.dep/libcrypt.so.1" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/.dep/libcrypt.so.1" && \
+    chmod 755 "/userdata/system/add-ons/.dep/libcrypt.so.1"; 
+}
+
 # Function to display animated title with colors
 animate_title() {
     local text="BATOCERA UNOFFICIAL ADD-ONS INSTALLER"
@@ -72,7 +89,7 @@ loading_animation() {
     spinner_pid=$!
     sleep 3  # Adjust for how long the spinner runs
     kill $spinner_pid
-    echo "Done!"d
+    echo "Done!"
 }
 
 # Main script execution
@@ -153,6 +170,8 @@ apps=(
     ["STEAM"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/steam/steam.sh | bash"
     ["LUTRIS"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/lutris/lutris.sh | bash"
     ["FILEZILLA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/filezilla/filezilla.sh | bash"
+    ["PEAZIP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/peazip/peazip.sh | bash"
+    ["VLC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vlc/vlc.sh | bash"
 )
 
 
@@ -224,6 +243,8 @@ descriptions=(
     ["STEAM"]="Steam big picture mode in Ports and desktop mode in F1 Applications"
     ["LUTRIS"]="Lutris is a free and open source game manager for Linux"
     ["FILEZILLA"]="A free and open-source cross-platform FTP application"
+    ["PEAZIP"]="A free and open-source file archiver"
+    ["VLC"]="VLC media player"
 )
 
 
@@ -232,7 +253,7 @@ declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64"
     ["Game Utilities"]="AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS"
-    ["System Utilities"]="TAILSCALE WINEMANAGER VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA"
+    ["System Utilities"]="TAILSCALE WINEMANAGER VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP"
     ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER"
 )
 initialize_system() {
