@@ -172,7 +172,7 @@ apps=(
     ["FILEZILLA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/filezilla/filezilla.sh | bash"
     ["PEAZIP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/peazip/peazip.sh | bash"
     ["VLC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vlc/vlc.sh | bash"
-    ["ZENITY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/zenity/zenity.sh | bash"
+   # ["ZENITY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/zenity/zenity.sh | bash"
 )
 
 
@@ -246,7 +246,7 @@ descriptions=(
     ["FILEZILLA"]="A free and open-source cross-platform FTP application"
     ["PEAZIP"]="A free and open-source file archiver"
     ["VLC"]="VLC media player"
-    ["ZENITY"]="Zenity GUI, used by Winetricks amongst others."
+  #  ["ZENITY"]="Zenity GUI, used by Winetricks amongst others."
 )
 
 
@@ -255,7 +255,7 @@ declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64"
     ["Game Utilities"]="AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS"
-    ["System Utilities"]="TAILSCALE WINEMANAGER VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP ZENITY"
+    ["System Utilities"]="TAILSCALE WINEMANAGER VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP"
     ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER"
 )
 initialize_system() {
