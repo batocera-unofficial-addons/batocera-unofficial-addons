@@ -203,7 +203,7 @@ descriptions=(
     ["FIREFOX"]="Mozilla Firefox browser."
     ["JAVA-RUNTIME"]="Install the Java Runtime on your batocera."
     ["SPOTIFY"]="Spotify music streaming client."
-    ["CLITOOLS"]="Various CLI tools including Docker, ZSH, Git etc."
+    ["CLITOOLS"]=">=V40! Various CLI tools including Docker, ZSH, Git etc."
     ["ARCADEMANAGER"]="Manage arcade ROMs and games."
     ["CSPORTABLE"]="Fan-made portable Counter-Strike."
     ["BRAVE"]="Privacy-focused Brave browser."
