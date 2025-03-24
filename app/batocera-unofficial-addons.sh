@@ -261,6 +261,7 @@ categories=(
     ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER"
 )
 initialize_system() {
+    clear
     echo "Loading system modules..."
     sleep 1 
 }
@@ -268,6 +269,12 @@ initialize_system() {
 load_components() {
     echo "Verifying dependencies..."
     sleep 1
+}
+question_salt() {
+    echo "What's that? You want extra salt with your secret menu? Well, may I recommend Profork?"
+    sleep 2
+    echo "Alternatively, stay here and actually get something out of it, rather than some questionable ramblings..."
+    sleep 5
 }
 
 restore_backup() {
@@ -315,6 +322,7 @@ restore_backup() {
 
 
 system_recovery() {
+    question_salt
     restore_backup 
 }
 
@@ -333,7 +341,7 @@ while true; do
 # Exit if the user selects "Exit" or cancels
 if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
     dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
-    sleep 5  # Pause for 3 seconds to let the user read the message
+    sleep 5  
     clear
     exit 0
 fi
