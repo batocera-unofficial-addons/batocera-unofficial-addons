@@ -157,3 +157,5 @@ echo "Downloading key mapping file..."
 curl -L -o "$KEYS_PATH" "$KEYS_URL"
 
 echo "Stremio setup completed successfully."
+echo
+dialog --msgbox "Installation complete!\n\nPlease head to stremio settings and enable the close stremio when window is closed option "
