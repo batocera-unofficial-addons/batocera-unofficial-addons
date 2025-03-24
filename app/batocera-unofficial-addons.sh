@@ -172,6 +172,7 @@ apps=(
     ["FILEZILLA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/filezilla/filezilla.sh | bash"
     ["PEAZIP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/peazip/peazip.sh | bash"
     ["VLC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vlc/vlc.sh | bash"
+   # ["ZENITY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/zenity/zenity.sh | bash"
 )
 
 
@@ -203,7 +204,7 @@ descriptions=(
     ["FIREFOX"]="Mozilla Firefox browser."
     ["JAVA-RUNTIME"]="Install the Java Runtime on your batocera."
     ["SPOTIFY"]="Spotify music streaming client."
-    ["CLITOOLS"]="Various CLI tools including Docker, ZSH, Git etc."
+    ["CLITOOLS"]=">=V40! Various CLI tools including Docker, ZSH, Git etc."
     ["ARCADEMANAGER"]="Manage arcade ROMs and games."
     ["CSPORTABLE"]="Fan-made portable Counter-Strike."
     ["BRAVE"]="Privacy-focused Brave browser."
@@ -245,6 +246,7 @@ descriptions=(
     ["FILEZILLA"]="A free and open-source cross-platform FTP application"
     ["PEAZIP"]="A free and open-source file archiver"
     ["VLC"]="VLC media player"
+  #  ["ZENITY"]="Zenity GUI, used by Winetricks amongst others."
 )
 
 
@@ -257,6 +259,7 @@ categories=(
     ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER"
 )
 initialize_system() {
+    clear
     echo "Loading system modules..."
     sleep 1 
 }
@@ -264,6 +267,12 @@ initialize_system() {
 load_components() {
     echo "Verifying dependencies..."
     sleep 1
+}
+question_salt() {
+    echo "What's that? You want extra salt with your secret menu? Well, may I recommend Profork?"
+    sleep 2
+    echo "Alternatively, stay here and actually get something out of it, rather than some questionable ramblings..."
+    sleep 5
 }
 
 restore_backup() {
@@ -311,6 +320,7 @@ restore_backup() {
 
 
 system_recovery() {
+    question_salt
     restore_backup 
 }
 
@@ -329,7 +339,7 @@ while true; do
 # Exit if the user selects "Exit" or cancels
 if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
     dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
-    sleep 5  # Pause for 3 seconds to let the user read the message
+    sleep 5  
     clear
     exit 0
 fi

@@ -49,6 +49,7 @@ cat << 'EOF' > /userdata/roms/ports/Chiaki.sh
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
+export QTWEBENGINE_DISABLE_SANDBOX=1
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/chiaki"
