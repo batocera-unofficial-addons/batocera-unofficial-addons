@@ -49,6 +49,7 @@ cat << 'EOF' > /userdata/roms/ports/Chiaki.sh
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
+export QTWEBENGINE_DISABLE_SANDBOX=1
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/chiaki"
@@ -107,13 +108,13 @@ fi
 EOF
 chmod +x "/userdata/system/configs/chiaki/restore_desktop_entry.sh"
 
-# Add to startup
-cat <<EOF > "/userdata/system/custom.sh"
-#!/bin/bash
-# Restore Chiaki desktop entry at startup
-bash /userdata/system/configs/chiaki/restore_desktop_entry.sh &
-EOF
-chmod +x "/userdata/system/custom.sh"
+# Add to startup script
+custom_startup="/userdata/system/custom.sh"
+if ! grep -q "/userdata/system/configs/chiaki/restore_desktop_entry.sh" "$custom_startup"; then
+    echo "Adding Chiaki restore script to startup..."
+    echo "bash "/userdata/system/configs/chiaki/restore_desktop_entry.sh" &" >> "$custom_startup"
+fi
+chmod +x "$custom_startup"
 
 # Step 5: Add Chiaki to Ports menu
 if ! command -v xmlstarlet &> /dev/null; then

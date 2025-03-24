@@ -103,11 +103,13 @@ fi
 EOF
 chmod +x "/userdata/system/configs/heroic/restore_desktop_entry.sh"
 
-# Add to startup
-cat <<EOF >> "/userdata/system/custom.sh"
-bash /userdata/system/configs/heroic/restore_desktop_entry.sh &
-EOF
-chmod +x "/userdata/system/custom.sh"
+# Add to startup script
+custom_startup="/userdata/system/custom.sh"
+if ! grep -q "/userdata/system/configs/heroic/restore_desktop_entry.sh" "$custom_startup"; then
+    echo "Adding Heroic restore script to startup..."
+    echo "bash "/userdata/system/configs/heroic/restore_desktop_entry.sh" &" >> "$custom_startup"
+fi
+chmod +x "$custom_startup"
 
 # Create es_systems_heroic.cfg
 echo "Creating Heroic Category for EmulationStation..."

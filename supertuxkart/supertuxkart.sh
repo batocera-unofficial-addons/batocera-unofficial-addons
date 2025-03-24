@@ -2,8 +2,23 @@
 
 # Variables for SuperTuxKart
 APP_NAME="SuperTuxKart"
-ARCHIVE_URL="https://github.com/supertuxkart/stk-code/releases/download/1.4/SuperTuxKart-1.4-linux-x86_64.tar.xz"
+
+# URLs for different architectures
+ARCH_X86_64="https://github.com/supertuxkart/stk-code/releases/download/1.4/SuperTuxKart-1.4-linux-x86_64.tar.xz"
+ARCH_ARM64="https://github.com/supertuxkart/stk-code/releases/download/1.4/SuperTuxKart-1.4-linux-arm64.tar.xz"
+
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/supertuxkart/extra/supertuxkart-logo.png"
+
+# Determine system architecture
+ARCH=$(uname -m)
+if [[ "$ARCH" == "x86_64" ]]; then
+    ARCHIVE_URL="$ARCH_X86_64"
+elif [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
+    ARCHIVE_URL="$ARCH_ARM64"
+else
+    echo "Unsupported architecture: $ARCH"
+    exit 1
+fi
 
 # Directories
 ADDONS_DIR="/userdata/system/add-ons"
@@ -21,7 +36,7 @@ mkdir -p "$PORTS_DIR/images"
 mkdir -p "$LOGS_DIR"
 
 # Step 2: Download and extract SuperTuxKart
-echo "Downloading $APP_NAME..."
+echo "Downloading $APP_NAME for architecture $ARCH..."
 wget -q --show-progress -O "${TUX_DIR}/SuperTuxKart.tar.xz" "$ARCHIVE_URL"
 if [ $? -ne 0 ]; then
     echo "Failed to download $APP_NAME. Exiting."
@@ -29,7 +44,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Extracting $APP_NAME..."
-tar -xf "${TUX_DIR}/SuperTuxKart.tar.xz" -C "$TUX_DIR"
+tar --strip-components=1 -xf "${TUX_DIR}/SuperTuxKart.tar.xz" -C "$TUX_DIR"
 rm "${TUX_DIR}/SuperTuxKart.tar.xz"
 chmod -R a+x "$TUX_DIR"
 echo "$APP_NAME extracted to $TUX_DIR."
@@ -44,7 +59,7 @@ export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
 
 # Directories and file paths
-app_dir="${TUX_DIR}/SuperTuxKart-1.4-linux-x86_64"
+app_dir="$TUX_DIR"
 log_dir="$LOGS_DIR"
 log_file="\${log_dir}/${APP_NAME,,}.log"
 

@@ -29,36 +29,20 @@ chmod a+x /userdata/system/add-ons/vesktop/Vesktop.AppImage
 echo "Vesktop AppImage downloaded and marked as executable."
 
 # Create persistent configuration and log directories
-mkdir -p /userdata/system/add-ons/vesktop/vesktop-config
 mkdir -p /userdata/system/logs
-mkdir -p /userdata/system/add-ons/vesktop/lib
+mkdir -p /userdata/system/configs/vesktop
+mkdir -p /userdata/system/add-ons/vesktop/extra
+DESKTOP_FILE="/usr/share/applications/Vesktop.desktop"
+PERSISTENT_DESKTOP="/userdata/system/configs/vesktop/Vesktop.desktop"
+ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/vesktop/extra/icon.png"
+INSTALL_DIR="/userdata/system/add-ons/vesktop"
 
 # Step 3: Create the Vesktop Launcher Script
 echo "Creating Vesktop launcher script in Ports..."
 mkdir -p /userdata/roms/ports
 cat << 'EOF' > /userdata/roms/ports/Vesktop.sh
 #!/bin/bash
-
-# Function to download libcups.so.2 if not present
-download_libcups() {
-    libcups_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vesktop/lib/libcups.so.2"
-    libcups_dest="/userdata/system/add-ons/vesktop/lib/libcups.so.2"
-
-    # Check if the file already exists
-    if [ ! -f "$libcups_dest" ]; then
-        echo "$(date): libcups.so.2 not found, downloading..."
-        wget -q --show-progress -O "$libcups_dest" "$libcups_url"
-
-        if [ $? -eq 0 ]; then
-            echo "$(date): libcups.so.2 downloaded successfully."
-        else
-            echo "$(date): Failed to download libcups.so.2."
-            exit 1
-        fi
-    else
-        echo "$(date): libcups.so.2 already exists, skipping download."
-    fi
-}
+export HOME=/userdata/system/add-ons/vesktop
 
 # Function to ensure the quickCss.css file exists
 ensure_quick_css() {
@@ -76,7 +60,6 @@ ensure_quick_css() {
 }
 
 # Call functions
-download_libcups
 ensure_quick_css
 
 # Environment setup
@@ -85,8 +68,6 @@ export DISPLAY=:0
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/vesktop"
-quickCss_symlink="${HOME}/.config/vesktop"
-quickCss="${HOME}/.config/vesktop/settings/quickCss.css"
 app_image="${app_dir}/Vesktop.AppImage"
 log_dir="/userdata/system/logs"
 log_file="${log_dir}/vesktop.log"
@@ -97,17 +78,6 @@ mkdir -p "${log_dir}"
 # Append all output to the log file
 exec &> >(tee -a "$log_file")
 echo "$(date): Launching Vesktop"
-
-# Move existing config if present
-if [ -d "$quickCss_symlink" ] && [ ! -L "$quickCss_symlink" ]; then
-    mv "$quickCss_symlink" "${app_dir}/vesktop-config"
-fi
-
-# Ensure quickCss file is symlinked as config
-if [ ! -L "$quickCss_symlink" ]; then
-    ln -sf "$quickCss" "$quickCss_symlink"
-    echo "$(date): Symlink created for quickCss.css as config."
-fi
 
 # Launch Vesktop AppImage
 if [ -x "$app_image" ]; then
@@ -124,9 +94,58 @@ EOF
 
 chmod +x /userdata/roms/ports/Vesktop.sh
 
+echo "Downloading icon..."
+wget --show-progress -qO "${INSTALL_DIR}/extra/icon.png" "$ICON_URL"
+
+# Create persistent desktop entry
+echo "Creating persistent desktop entry for Vesktop..."
+cat <<EOF > "$PERSISTENT_DESKTOP"
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Vesktop
+Exec=/userdata/roms/ports/Vesktop.sh
+Icon=/userdata/system/add-ons/vesktop/extra/icon.png
+Terminal=false
+Categories=Game;batocera.linux;
+EOF
+
+chmod +x "$PERSISTENT_DESKTOP"
+
+cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+chmod +x "$DESKTOP_FILE"
+
+# Ensure the desktop entry is always restored to /usr/share/applications
+echo "Ensuring Vesktop desktop entry is restored at startup..."
+cat <<EOF > "/userdata/system/configs/vesktop/restore_desktop_entry.sh"
+#!/bin/bash
+# Restore Vesktop desktop entry
+if [ ! -f "$DESKTOP_FILE" ]; then
+    echo "Restoring Vesktop desktop entry..."
+    cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+    chmod +x "$DESKTOP_FILE"
+    echo "Vesktop desktop entry restored."
+else
+    echo "Vesktop desktop entry already exists."
+fi
+EOF
+chmod +x "/userdata/system/configs/vesktop/restore_desktop_entry.sh"
+
+# Add to startup script
+custom_startup="/userdata/system/custom.sh"
+if ! grep -q "/userdata/system/configs/vesktop/restore_desktop_entry.sh" "$custom_startup"; then
+    echo "Adding Vesktop restore script to startup..."
+    echo "bash "/userdata/system/configs/vesktop/restore_desktop_entry.sh" &" >> "$custom_startup"
+fi
+chmod +x "$custom_startup"
+
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
+KEYS_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/netflix/extra/Netflix.sh.keys"
+# Step 5: Download the key mapping file
+echo "Downloading key mapping file..."
+curl -L -o "/userdata/roms/ports/Vesktop.sh.keys" "$KEYS_URL"
 # Download the image
 echo "Downloading Vesktop logo..."
 curl -L -o /userdata/roms/ports/images/vesktoplogo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/vesktop/extra/vesktoplogo.png
