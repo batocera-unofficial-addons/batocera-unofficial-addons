@@ -270,7 +270,9 @@ load_components() {
 }
 question_salt() {
     echo "What's that? You want extra salt with your secret menu? Well, may I recommend Profork?"
+    sleep 2
     echo "Alternatively, stay here and actually get something out of it, rather than some questionable ramblings..."
+    sleep 5
 }
 
 restore_backup() {
