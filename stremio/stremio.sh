@@ -8,7 +8,7 @@ ADDONS_DIR="/userdata/system/add-ons"
 PORTS_DIR="/userdata/roms/ports"
 FLATPAK_GAMELIST="/userdata/roms/flatpak/gamelist.xml"
 PORTS_GAMELIST="/userdata/roms/ports/gamelist.xml"
-LOGO_URL="https://dl.flathub.org/media/com/stremio/Stremio/2970db66c5fb7d117634a23bd2946f26/icons/128x128@2/com.stremio.Stremio.png"
+LOGO_URL="https://blog.stremio.com/wp-content/uploads/2023/08/Stremio-logo-dark-background-1024x570.png"
 LAUNCHER="${PORTS_DIR}/${APPNAME,,}.sh"
 PORTS_IMAGE_PATH="/userdata/roms/ports/images/${APPNAME,,}.png"
 KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/netflix/extra/Netflix.sh.keys"
@@ -41,7 +41,7 @@ show_progress_bar_from_log() {
 }
 
 # Add Flathub repository and install Stremio
-install_plex() {
+install_stremio() {
     echo "Adding Flathub repository..."
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
@@ -59,7 +59,7 @@ install_plex() {
 }
 
 # Ensure Stremio is listed in flatpak gamelist.xml and set it as hidden
-hide_plex_in_flatpak() {
+hide_stremio_in_flatpak() {
     echo "Ensuring Stremio entry in flatpak gamelist.xml and setting it as hidden..."
 
     if [ ! -f "${FLATPAK_GAMELIST}" ]; then
@@ -100,7 +100,7 @@ hide_plex_in_flatpak() {
         # Update other details
         xmlstarlet ed --inplace \
             -u "//game[path='./Stremio.flatpak']/name" -v "Stremio" \
-            -u "//game[path='./Stremio.flatpak']/image" -v "./images/Plex.png" \
+            -u "//game[path='./Stremio.flatpak']/image" -v "./images/Stremio.png" \
             -u "//game[path='./Stremio.flatpak']/rating" -v "0" \
             -u "//game[path='./Stremio.flatpak']/releasedate" -v "19700101T010000" \
             -u "//game[path='./Stremio.flatpak']/lang" -v "en" \
@@ -122,8 +122,8 @@ EOF
     echo "Launcher created at ${LAUNCHER}."
 }
 
-# Add Plex entry to Ports gamelist.xml
-add_plex_to_ports_gamelist() {
+# Add Stremio entry to Ports gamelist.xml
+add_stremio_to_ports_gamelist() {
     echo "Adding Stremio entry to ports gamelist.xml..."
     mkdir -p "$(dirname "${PORTS_IMAGE_PATH}")"
     curl -fsSL "${LOGO_URL}" -o "${PORTS_IMAGE_PATH}"
@@ -143,7 +143,7 @@ add_plex_to_ports_gamelist() {
         -s "/gameList/game[last()]" -t elem -n releasedate -v "19700101T010000" \
         -s "/gameList/game[last()]" -t elem -n hidden -v "false" \
         "${PORTS_GAMELIST}"
-    echo "Plex entry added to ports gamelist.xml."
+    echo "Stremio entry added to ports gamelist.xml."
 }
 
 # Run all steps
