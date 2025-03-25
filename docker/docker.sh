@@ -22,7 +22,7 @@ mkdir -p "$directory"
 cd "$directory"
 
 # Download the file with the specified filename
-wget "$url" -O "$filename"
+wget -q --show-progress "$url" -O "$filename"
 
 # Make the file executable
 chmod +x "$filename"
@@ -78,6 +78,11 @@ echo "Installing portainer.."
 echo ""
 docker volume create portainer_data
 docker run --device /dev/dri:/dev/dri --privileged --net host --ipc host -d --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v /media:/media -v portainer_data:/data portainer/portainer-ce:latest
+
+curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker -o /userdata/system/services/docker && chmod +x /userdata/system/services/docker
+batocera-services enable docker
+batocera-services start docker
+
 
 echo "Done." 
 echo "Access portainer gui via https://<batoceraipaddress>:9443"
