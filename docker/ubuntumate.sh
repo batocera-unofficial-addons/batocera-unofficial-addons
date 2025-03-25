@@ -13,11 +13,19 @@ is_port_in_use() {
 
 # Function to find the next available port starting from 3000
 find_available_port() {
-    local port=3000
-    while lsof -i:"$port" &> /dev/null; do
+    local start_port=3000
+    local port=$start_port
+
+    # Get a list of all host ports used by Docker (running or not)
+    local used_ports=$(docker ps -a --format '{{.Ports}}' | grep -oP '\d+(?=->)' | sort -u)
+
+    while :; do
+        if ! echo "$used_ports" | grep -q "^$port$" && ! lsof -i:"$port" &> /dev/null; then
+            echo "$port"
+            return
+        fi
         port=$((port + 1))
     done
-    echo "$port"
 }
 
 # Dynamically get the next free port
