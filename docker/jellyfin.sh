@@ -65,11 +65,11 @@ docker run -d \
 if docker ps -q -f name=jellyfin &> /dev/null; then
     MSG="${APPNAME} container has been started successfully!
 
-Access it at: http://<your-ip>:8096
+\n\nAccess it at: http://<your-ip>:8096
 
-Config: $data_dir/config
-TV Shows: $data_dir/data/tvshows
-Movies: $data_dir/data/movies"
+\n\nConfig: $data_dir/config
+\nTV Shows: $data_dir/data/tvshows
+\nMovies: $data_dir/data/movies"
     
     [ -n "$gpu_flag" ] && MSG+="\n\nHardware acceleration: ENABLED"
 else
