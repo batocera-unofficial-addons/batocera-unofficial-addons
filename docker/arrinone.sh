@@ -78,7 +78,6 @@ docker run -d \
   -v "$data_dir/downloads:/downloads" \
   -v /userdata/system/add-ons:/add-ons \
   --restart unless-stopped \
-  --sysctl net.ipv6.conf.all.disable_ipv6=1 \
   ghcr.io/thespad/arr-in-one
 
 # Final dialog message
