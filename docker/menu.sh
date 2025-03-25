@@ -14,7 +14,7 @@ while true; do
                     --title "Docker App Installer" \
                     --menu "Choose a Docker app to install:" 18 65 6 \
                     1 "CasaOS" \
-                    2 "Umbrel" \
+                    2 "UmbrelOS" \
                     3 "Arch KDE (Webtop)" \
                     4 "Ubuntu MATE (Webtop)" \
                     5 "Alpine XFCE (Webtop)" \
