@@ -84,22 +84,22 @@ docker run -d \
 if docker ps -q -f name=arr-in-one &> /dev/null; then
     MSG="${APPNAME} container started successfully.
 
-/n/nEnabled services: ${enabled_apps//\"/ }
+\n\nEnabled services: ${enabled_apps//\"/ }
 
-/n/nWeb UI Ports:
-  /nSonarr:    http://<your-ip>:8989
-  /nRadarr:    http://<your-ip>:7878
-  /nLidarr:    http://<your-ip>:8686
-  /nReadarr:   http://<your-ip>:8787
-  /nProwlarr:  http://<your-ip>:9696
-  /nWhisparr:  http://<your-ip>:6969
+\n\nWeb UI Ports:
+  \nSonarr:    http://<your-ip>:8989
+  \nRadarr:    http://<your-ip>:7878
+  \nLidarr:    http://<your-ip>:8686
+  \nReadarr:   http://<your-ip>:8787
+  \nProwlarr:  http://<your-ip>:9696
+  \nWhisparr:  http://<your-ip>:6969
 
-/n/nConfig: $data_dir/config
-/nTV: $data_dir/tv
-/nMovies: $data_dir/movies
-/nMusic: $data_dir/music
-/nDownloads: $data_dir/downloads
-/nAdd-Ons Shared: /userdata/system/add-ons → /add-ons"
+\n\nConfig: $data_dir/config
+\nTV: $data_dir/tv
+\nMovies: $data_dir/movies
+\nMusic: $data_dir/music
+\nDownloads: $data_dir/downloads
+\nAdd-Ons Shared: /userdata/system/add-ons → /add-ons"
 else
     MSG="Failed to start ${APPNAME}. Please check Docker logs."
 fi
