@@ -45,7 +45,7 @@ docker run -d \
   -p 3000:3000 \
   -v "$data_dir:/config" \
   -v "$data_dir/home:/home/kde" \
-  --shm-size="100gb" \
+  --shm-size="2gb" \
   --restart unless-stopped \
   lscr.io/linuxserver/webtop:arch-kde
 
