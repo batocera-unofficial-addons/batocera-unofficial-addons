@@ -40,7 +40,7 @@ mkdir -p "$data_dir"
 mkdir -p "$data_dir/home"
 
 # Start Alpine XFCE Docker container
-dialog --title "Starting ${APPNAME}" --infobox "Launching ${APPNAME} (Webtop - MATE) using Docker..." 10 50
+dialog --title "Starting ${APPNAME}" --infobox "Launching ${APPNAME} (Webtop - XFCE) using Docker..." 10 50
 docker run -d \
   --name=alpine-xfce \
   -e PUID=1000 \
