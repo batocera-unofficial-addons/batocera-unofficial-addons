@@ -12,8 +12,8 @@ is_port_in_use() {
 }
 
 # Check if port 3000 is in use
-if is_port_in_use 3000; then
-    dialog --title "Port Conflict" --msgbox "Port 3000 is already in use. Please ensure it is available before installing ${APPNAME}." 10 50
+if is_port_in_use 3002; then
+    dialog --title "Port Conflict" --msgbox "Port 3002 is already in use. Please ensure it is available before installing ${APPNAME}." 10 50
     clear
     exit 1
 fi
@@ -49,7 +49,7 @@ docker run -d \
 
 
 # Final message
-if docker ps -q -f name=ubuntu-xfce &> /dev/null; then
+if docker ps -q -f name=alpine-xfce &> /dev/null; then
     MSG="${APPNAME} container has been started successfully.\n\nAccess it via: http://<your-ip>:3002\n\nPersistent data is stored in:\n$data_dir"
     MSG="Failed to start ${APPNAME}. Please check Docker logs for troubleshooting."
 fi
