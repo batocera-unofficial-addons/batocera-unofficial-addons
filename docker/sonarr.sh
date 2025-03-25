@@ -61,6 +61,7 @@ docker run -d \
   -p 8989:8989 \
   -v "$data_dir/config:/config" \
   -v "$data_dir/tv:/tv" \
+  -v /userdata/system/add-ons:/add-ons \
   $gpu_flag \
   --restart unless-stopped \
   lscr.io/linuxserver/sonarr:latest
