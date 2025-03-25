@@ -37,7 +37,7 @@ mkdir -p "$data_dir/home"
 # Start Ubuntu XFCE Docker container
 dialog --title "Starting ${APPNAME}" --infobox "Launching ${APPNAME} (Webtop - XFCE) using Docker..." 10 50
 docker run -d \
-  --name=ubuntu-xfce \
+  --name=ubuntu-mate \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=Europe/London \
