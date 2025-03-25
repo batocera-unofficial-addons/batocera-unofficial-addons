@@ -51,7 +51,7 @@ docker run -d \
 
 # Final message
 if docker ps -q -f name=arch-kde &> /dev/null; then
-    MSG="${APPNAME} container has been started successfully.\n\nAccess it via: http://<your-ip>:3000\n\nPersistent data is stored in:\n$config_dir\nand\n$config_dir/home"
+    MSG="${APPNAME} container has been started successfully.\n\nAccess it via: http://<your-ip>:3000\n\nPersistent data is stored in:\n$data_dir"
 else
     MSG="Failed to start ${APPNAME}. Please check Docker logs for troubleshooting."
 fi
