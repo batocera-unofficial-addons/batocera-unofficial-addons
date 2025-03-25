@@ -35,13 +35,13 @@ for port in 8989 7878 8686 8787 9696 6969; do
 done
 
 # Ask which services to enable
-enabled_apps=$(dialog --stdout --checklist "Select which apps to enable:" 20 60 6 \
-    "SONARR"   "" off \
-    "RADARR"   "" off \
-    "LIDARR"   "" off \
-    "READARR"  "" off \
-    "PROWLARR" "" off \
-    "WHISPARR" "" off)
+enabled_apps=$(dialog --stdout --checklist "Select which apps to enable:" 20 70 8 \
+    "SONARR"   "TV series downloader"      off  \
+    "RADARR"   "Movie downloader"          off  \
+    "LIDARR"   "Music album downloader"    off \
+    "READARR"  "Audiobook/eBook downloader" off \
+    "PROWLARR" "Indexer manager"           off  \
+    "WHISPARR" "Adult content manager"     off)
 
 # Convert selection to env vars
 env_flags=""
