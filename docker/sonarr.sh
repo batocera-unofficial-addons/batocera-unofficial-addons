@@ -70,10 +70,11 @@ docker run -d \
 if docker ps -q -f name=sonarr &> /dev/null; then
     MSG="${APPNAME} has been installed and started successfully.
 
-Access Web UI: http://<your-ip>:8989
+/n/nAccess Web UI: http://<your-ip>:8989
 
-Config: $data_dir/config
-TV Folder: $data_dir/tv"
+/n/nConfig: $data_dir/config
+/nTV Folder: $data_dir/tv
+/nAdd-Ons Shared: /userdata/system/add-ons → /add-ons"
 else
     MSG="Failed to start ${APPNAME}. Please check Docker logs for troubleshooting."
 fi
