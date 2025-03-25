@@ -19,7 +19,8 @@ while true; do
                     4 "Ubuntu MATE (Webtop)" \
                     5 "Alpine XFCE (Webtop)" \
                     6 "Jellyfin" \
-                    7 "Exit" \
+                    7 "Emby" \
+                    8 "Exit" \
                     3>&1 1>&2 2>&3)
 
     case $choice in
@@ -42,6 +43,9 @@ while true; do
             run_container_script "Jellyfin" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/jellyfin.sh"
             ;;
         7)
+            run_container_script "Emby" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/emby.sh"
+            ;;
+        8)
             clear
             echo "Exiting..."
             exit 0
