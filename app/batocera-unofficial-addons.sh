@@ -9,7 +9,7 @@ if [ ! -e "$SYMLINK_MANAGER_PATH" ]; then
     curl -L bit.ly/BUAinstaller | bash
 
     # Display a dialog box notifying the user
-    dialog --title "Reinstallation Required" --msgbox "Previous application installs will need to be installed again." 10 60
+    dialog --title "Reinstallation Required" --msgbox "You've ran RGS install script since installing BUA! BUA has reinstalled, but previous application installs will need to be installed again." 10 60
 fi
 
 [ -f "/userdata/system/add-ons/.dep/libcrypt.so.1" ] || { \
