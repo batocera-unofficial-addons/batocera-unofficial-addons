@@ -18,7 +18,8 @@ while true; do
                     3 "Arch KDE (Webtop)" \
                     4 "Ubuntu MATE (Webtop)" \
                     5 "Alpine XFCE (Webtop)" \
-                    6 "Exit" \
+                    6 "Jellyfin" \
+                    7 "Exit" \
                     3>&1 1>&2 2>&3)
 
     case $choice in
@@ -38,6 +39,9 @@ while true; do
             run_container_script "Alpine XFCE" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/alpinexfce.sh"
             ;;
         6)
+            run_container_script "Jellyfin" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/jellyfin.sh"
+            ;;
+        7)
             clear
             echo "Exiting..."
             exit 0
