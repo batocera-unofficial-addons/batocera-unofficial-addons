@@ -26,7 +26,7 @@ while true; do
             run_container_script "CasaOS" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/casaos.sh"
             ;;
         2)
-            run_container_script "UmbrelOS" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/umbrel.sh"
+            run_container_script "UmbrelOS" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/umbrelos.sh"
             ;;
         3)
             run_container_script "Arch KDE" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/archkde.sh"
