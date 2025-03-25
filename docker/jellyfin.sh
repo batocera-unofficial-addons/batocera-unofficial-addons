@@ -11,14 +11,22 @@ is_port_in_use() {
     lsof -i:$1 &> /dev/null
 }
 
-# Check if required ports are free
-for port in 8096 8920 7359 1900; do
-    if is_port_in_use $port; then
-        dialog --title "Port Conflict" --msgbox "Port $port is already in use. Please close the conflicting service before installing ${APPNAME}." 10 50
-        clear
-        exit 1
-    fi
-done
+# Function to find an available port starting from 8096
+find_available_port() {
+    local port=8096
+    local used_ports=$(docker ps -a --format '{{.Ports}}' | grep -oP '\d+(?=->)' | sort -u)
+
+    while :; do
+        if ! echo "$used_ports" | grep -q "^$port$" && ! lsof -i:"$port" &> /dev/null; then
+            echo "$port"
+            return
+        fi
+        port=$((port + 1))
+    done
+}
+
+# Dynamically get the next available port for Jellyfin (main web UI)
+HOST_PORT=$(find_available_port)
 
 # Check for Docker and install if missing
 if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
@@ -43,14 +51,14 @@ if [ -e /dev/dri ]; then
     gpu_flag="--device=/dev/dri"
 fi
 
-# Run Jellyfin container
+# Run Jellyfin container with dynamic port
 dialog --title "Starting ${APPNAME}" --infobox "Launching ${APPNAME} using Docker..." 10 50
 docker run -d \
   --name=jellyfin \
   -e PUID=$(id -u) \
   -e PGID=$(id -g) \
   -e TZ=$(cat /etc/timezone) \
-  -p 8096:8096 \
+  -p ${HOST_PORT}:8096 \
   -p 8920:8920 \
   -p 7359:7359/udp \
   -p 1900:1900/udp \
@@ -65,7 +73,7 @@ docker run -d \
 if docker ps -q -f name=jellyfin &> /dev/null; then
     MSG="${APPNAME} container has been started successfully!
 
-\n\nAccess it at: http://<your-ip>:8096
+\n\nAccess it at: http://<your-ip>:${HOST_PORT}
 
 \n\nConfig: $data_dir/config
 \nTV Shows: $data_dir/data/tvshows
