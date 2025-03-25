@@ -11,13 +11,12 @@ is_port_in_use() {
     lsof -i:$1 &> /dev/null
 }
 
-# Function to find an available port starting from 8096
+# Function to find the next available TCP or UDP port
 find_available_port() {
-    local port=8096
-    local used_ports=$(docker ps -a --format '{{.Ports}}' | grep -oP '\d+(?=->)' | sort -u)
-
+    local port=$1
+    local proto=$2
     while :; do
-        if ! echo "$used_ports" | grep -q "^$port$" && ! lsof -i:"$port" &> /dev/null; then
+        if ! lsof -i${proto}:$port &> /dev/null; then
             echo "$port"
             return
         fi
@@ -25,8 +24,9 @@ find_available_port() {
     done
 }
 
-# Dynamically get the next available port for Emby (web UI)
-HOST_PORT=$(find_available_port)
+# Dynamically get available ports for Emby
+PORT_HTTP=$(find_available_port 8096 "TCP")
+PORT_HTTPS=$(find_available_port 8920 "TCP")
 
 # Check for Docker and install if missing
 if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
@@ -51,15 +51,15 @@ if [ -e /dev/dri ]; then
     gpu_flag="--device=/dev/dri"
 fi
 
-# Run Emby container with dynamic port
+# Run Emby container with dynamic ports
 dialog --title "Starting ${APPNAME}" --infobox "Launching ${APPNAME} using Docker..." 10 50
 docker run -d \
   --name=emby \
   -e PUID=$(id -u) \
   -e PGID=$(id -g) \
   -e TZ=$(cat /etc/timezone) \
-  -p ${HOST_PORT}:8096 \
-  -p 8920:8920 \
+  -p ${PORT_HTTP}:8096 \
+  -p ${PORT_HTTPS}:8920 \
   -v "$data_dir/config:/config" \
   -v "$data_dir/data/tvshows:/data/tvshows" \
   -v "$data_dir/data/movies:/data/movies" \
@@ -71,9 +71,10 @@ docker run -d \
 if docker ps -q -f name=emby &> /dev/null; then
     MSG="${APPNAME} container has been started successfully!
 
-\n\nAccess it at: http://<your-ip>:${HOST_PORT}
+\n\nAccess Emby at: http://<your-ip>:${PORT_HTTP}
+\nHTTPS access (if enabled): https://<your-ip>:${PORT_HTTPS}
 
-\n\nConfig: $data_dir/config
+\n\nConfig Directory: $data_dir/config
 \nTV Shows: $data_dir/data/tvshows
 \nMovies: $data_dir/data/movies"
     
