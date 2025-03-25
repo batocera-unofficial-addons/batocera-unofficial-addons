@@ -11,12 +11,17 @@ is_port_in_use() {
     lsof -i:$1 &> /dev/null
 }
 
-# Check if port 3000 is in use
-if is_port_in_use 3000; then
-    dialog --title "Port Conflict" --msgbox "Port 3000 is already in use. Please ensure it is available before installing ${APPNAME}." 10 50
-    clear
-    exit 1
-fi
+# Function to find the next available port starting from 3000
+find_available_port() {
+    local port=3000
+    while lsof -i:"$port" &> /dev/null; do
+        port=$((port + 1))
+    done
+    echo "$port"
+}
+
+# Dynamically get the next free port
+HOST_PORT=$(find_available_port)
 
 # Check for Docker and install if missing
 if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
@@ -41,8 +46,8 @@ docker run -d \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=Europe/London \
-  -e SUBFOLDER=/ \
-  -p 3001:3000 \
+  -e SUBFOLDER=/ \   
+  -p ${HOST_PORT}:3000 \
   -v "$data_dir:/config" \
   -v "$data_dir/home:/home/ubuntu" \
   --shm-size="2gb" \
@@ -50,8 +55,8 @@ docker run -d \
   lscr.io/linuxserver/webtop:ubuntu-mate
 
 # Final message
-if docker ps -q -f name=ubuntu-MATE &> /dev/null; then
-    MSG="${APPNAME} container has been started successfully.\n\nAccess it via: http://<your-ip>:3001\n\nPersistent data is stored in:\n$data_dir"
+if docker ps -q -f name=ubuntu-mate &> /dev/null; then
+    MSG="${APPNAME} container has been started successfully.\n\nAccess it via: http://<your-ip>:${HOST_PORT}"
 else
     MSG="Failed to start ${APPNAME}. Please check Docker logs for troubleshooting."
 fi
