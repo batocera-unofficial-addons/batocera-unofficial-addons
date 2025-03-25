@@ -45,7 +45,7 @@ docker run -d \
   -v /path/to/config:/config \
   --shm-size="2gb" \
   --restart unless-stopped \
-  lscr.io/linuxserver/webtop:alpine
+  lscr.io/linuxserver/webtop:latest
 
 
 # Final message
