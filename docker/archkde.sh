@@ -30,11 +30,12 @@ if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
     fi
 fi
 
-# Create Arch KDE data directory
+# Create Arch KDE data and home directories
 mkdir -p "$data_dir"
+mkdir -p "$data_dir/home"
 
 # Start Arch KDE Docker container
-dialog --title "Starting ${APPNAME}" --infobox "Launching ${APPNAME} (Webtop) using Docker..." 10 50
+dialog --title "Starting ${APPNAME}" --infobox "Launching ${APPNAME} (Webtop - KDE) using Docker..." 10 50
 docker run -d \
   --name=arch-kde \
   -e PUID=1000 \
@@ -43,13 +44,14 @@ docker run -d \
   -e SUBFOLDER=/ \
   -p 3000:3000 \
   -v "$data_dir:/config" \
-  --shm-size="2gb" \
+  -v "$data_dir/home:/home/kde" \
+  --shm-size="100gb" \
   --restart unless-stopped \
   lscr.io/linuxserver/webtop:arch-kde
 
 # Final message
 if docker ps -q -f name=arch-kde &> /dev/null; then
-    MSG="${APPNAME} container has been started successfully.\n\nAccess it via: http://<your-ip>:3000\n\nData stored in: $data_dir"
+    MSG="${APPNAME} container has been started successfully.\n\nAccess it via: http://<your-ip>:3000\n\nPersistent data is stored in:\n$config_dir\nand\n$config_dir/home"
 else
     MSG="Failed to start ${APPNAME}. Please check Docker logs for troubleshooting."
 fi
