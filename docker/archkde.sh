@@ -52,9 +52,9 @@ mkdir -p "$data_dir/home"
 dialog --title "Starting ${APPNAME}" --infobox "Launching ${APPNAME} (Webtop - KDE) using Docker..." 10 50
 docker run -d \
   --name=arch-kde \
-  -e PUID=1000 \
-  -e PGID=1000 \
-  -e TZ=Europe/London \
+  -e PUID=$(id -u) \
+  -e PGID=$(id -g) \
+  -e TZ=$(cat /etc/timezone) \
   -e SUBFOLDER=/ \   
   -p ${HOST_PORT}:3000 \
   -v "$data_dir:/config" \
