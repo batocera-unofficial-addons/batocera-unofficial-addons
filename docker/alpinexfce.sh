@@ -50,8 +50,7 @@ docker run -d \
 
 # Final message
 if docker ps -q -f name=ubuntu-xfce &> /dev/null; then
-    MSG="${APPNAME} container has been started successfully.\n\nAccess it via: http://<your-ip>:3002\n\nPersistent data is stored in:\n$data_dir\nand\n$data_dir/home"
-else
+    MSG="${APPNAME} container has been started successfully.\n\nAccess it via: http://<your-ip>:3002\n\nPersistent data is stored in:\n$data_dir"
     MSG="Failed to start ${APPNAME}. Please check Docker logs for troubleshooting."
 fi
 
