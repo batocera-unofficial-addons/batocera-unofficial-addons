@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Set the application name
-APPNAME="Ubuntu XFCE"
+APPNAME="Ubuntu MATE"
 
-# Base directory for Ubuntu XFCE data
+# Base directory for Ubuntu MATE data
 data_dir="/userdata/system/add-ons/${APPNAME,,}"
 
 # Function to check if a port is in use
@@ -30,12 +30,12 @@ if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
     fi
 fi
 
-# Create Ubuntu XFCE data and home directories
+# Create Ubuntu MATE data and home directories
 mkdir -p "$data_dir"
 mkdir -p "$data_dir/home"
 
-# Start Ubuntu XFCE Docker container
-dialog --title "Starting ${APPNAME}" --infobox "Launching ${APPNAME} (Webtop - XFCE) using Docker..." 10 50
+# Start Ubuntu MATE Docker container
+dialog --title "Starting ${APPNAME}" --infobox "Launching ${APPNAME} (Webtop - MATE) using Docker..." 10 50
 docker run -d \
   --name=ubuntu-mate \
   -e PUID=1000 \
@@ -50,7 +50,7 @@ docker run -d \
   lscr.io/linuxserver/webtop:ubuntu-mate
 
 # Final message
-if docker ps -q -f name=ubuntu-xfce &> /dev/null; then
+if docker ps -q -f name=ubuntu-MATE &> /dev/null; then
     MSG="${APPNAME} container has been started successfully.\n\nAccess it via: http://<your-ip>:3001\n\nPersistent data is stored in:\n$data_dir\nand\n$data_dir/home"
 else
     MSG="Failed to start ${APPNAME}. Please check Docker logs for troubleshooting."
