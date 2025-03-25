@@ -3,7 +3,7 @@
 # Set the application name
 APPNAME="Alpine XFCE"
 
-# Base directory for Ubuntu XFCE data
+# Base directory for Alpine XFCE data
 data_dir="/userdata/system/add-ons/${APPNAME,,}"
 
 # Function to check if a port is in use
@@ -11,12 +11,17 @@ is_port_in_use() {
     lsof -i:$1 &> /dev/null
 }
 
-# Check if port 3000 is in use
-if is_port_in_use 3002; then
-    dialog --title "Port Conflict" --msgbox "Port 3002 is already in use. Please ensure it is available before installing ${APPNAME}." 10 50
-    clear
-    exit 1
-fi
+# Function to find the next available port starting from 3000
+find_available_port() {
+    local port=3000
+    while lsof -i:"$port" &> /dev/null; do
+        port=$((port + 1))
+    done
+    echo "$port"
+}
+
+# Dynamically get the next free port
+HOST_PORT=$(find_available_port)
 
 # Check for Docker and install if missing
 if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
@@ -30,27 +35,29 @@ if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
     fi
 fi
 
-# Create Ubuntu XFCE data and home directories
+# Create Alpine XFCE data and home directories
 mkdir -p "$data_dir"
 mkdir -p "$data_dir/home"
 
-# Start Ubuntu XFCE Docker container
-dialog --title "Starting ${APPNAME}" --infobox "Launching ${APPNAME} (Webtop - XFCE) using Docker..." 10 50
+# Start Alpine XFCE Docker container
+dialog --title "Starting ${APPNAME}" --infobox "Launching ${APPNAME} (Webtop - MATE) using Docker..." 10 50
 docker run -d \
   --name=alpine-xfce \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=Europe/London \
-  -p 3002:3000 \
-  -v /path/to/config:/config \
+  -e SUBFOLDER=/ \   
+  -p ${HOST_PORT}:3000 \
+  -v "$data_dir:/config" \
+  -v "$data_dir/home:/home/ubuntu" \
   --shm-size="2gb" \
   --restart unless-stopped \
   lscr.io/linuxserver/webtop:latest
 
-
 # Final message
 if docker ps -q -f name=alpine-xfce &> /dev/null; then
-    MSG="${APPNAME} container has been started successfully.\n\nAccess it via: http://<your-ip>:3002\n\nPersistent data is stored in:\n$data_dir"
+    MSG="${APPNAME} container has been started successfully.\n\nAccess it via: http://<your-ip>:${HOST_PORT}"
+else
     MSG="Failed to start ${APPNAME}. Please check Docker logs for troubleshooting."
 fi
 
