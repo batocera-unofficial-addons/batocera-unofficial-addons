@@ -337,6 +337,7 @@ while true; do
         "Game Utilities" "Install game related add-ons" \
         "System Utilities" "Install utility apps" \
         "Developer Tools" "Install developer and patching tools" \
+        "Docker Menu" "Install Docker containers (requires Dev Tool Docker" \
         "Secret Menu" "Enter the password to access the secret menu" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
@@ -365,6 +366,9 @@ fi
                 ;;
             "Developer Tools")
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+                ;;
+            "Docker Menu")
+                curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/docker/menu.sh | bash
                 ;;
             "Secret Menu")
                 initialize_system
