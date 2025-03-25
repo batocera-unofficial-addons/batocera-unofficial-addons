@@ -67,6 +67,7 @@ docker run -d \
   -v "$data_dir/config:/config" \
   -v "$data_dir/data/tvshows:/data/tvshows" \
   -v "$data_dir/data/movies:/data/movies" \
+  -v /userdata/system/add-ons:/add-ons \
   $gpu_flag \
   --restart unless-stopped \
   lscr.io/linuxserver/jellyfin
