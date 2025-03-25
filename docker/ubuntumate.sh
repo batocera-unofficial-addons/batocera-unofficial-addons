@@ -47,7 +47,7 @@ docker run -d \
   -v "$data_dir/home:/home/ubuntu" \
   --shm-size="2gb" \
   --restart unless-stopped \
-  lscr.io/linuxserver/webtop:ubuntu-xfce
+  lscr.io/linuxserver/webtop:ubuntu-mate
 
 # Final message
 if docker ps -q -f name=ubuntu-xfce &> /dev/null; then
