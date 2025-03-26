@@ -2,12 +2,11 @@
 
 # Step 1: Install Sunshine
 echo "Installing Sunshine..."
-mkdir -p /userdata/system/add-ons/sunshine && curl -L https://github.com/LizardByte/Sunshine/releases/download/v2025.122.141614/sunshine.AppImage -o /userdata/system/add-ons/sunshine/sunshine.AppImage && chmod +x /userdata/system/add-ons/sunshine/sunshine.AppImage
-
-chmod a+x /userdata/system/add-ons/sunshine/sunshine.AppImage
+mkdir -p /userdata/system/add-ons/sunshine
+curl -s https://api.github.com/repos/LizardByte/Sunshine/releases/latest | grep browser_download_url | grep AppImage | cut -d '"' -f 4 | xargs -n 1 curl -L -o /userdata/system/add-ons/sunshine/sunshine.AppImage
+chmod +x /userdata/system/add-ons/sunshine/sunshine.AppImage
 
 # Create a persistent configuration directory
-mkdir -p /userdata/system/add-ons/sunshine
 mkdir -p /userdata/system/logs
 
 # Configure Sunshine as a service
