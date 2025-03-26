@@ -1,8 +1,8 @@
 #!/bin/bash
 
 APPNAME="Downloaders"
-base_dir="/userdata/system/add-ons/arrinone"
-downloads_dir="${base_dir}/downloads"
+data_dir="/userdata/system/add-ons/arrinone"
+downloads_dir="${data_dir}/downloads"
 
 # Create downloads directory if needed
 mkdir -p "$downloads_dir"
