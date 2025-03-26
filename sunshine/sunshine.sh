@@ -2,8 +2,7 @@
 
 # Step 1: Install Sunshine
 echo "Installing Sunshine..."
-mkdir -p /userdata/system/add-ons/sunshine
-wget -q -O /userdata/system/add-ons/sunshine/sunshine.AppImage  https://github.com/DTJW92/batocera-unofficial-addons/raw/main/sunshine/sunshine.AppImage
+mkdir -p /userdata/system/add-ons/sunshine && curl -L https://github.com/LizardByte/Sunshine/releases/download/v2025.122.141614/sunshine.AppImage -o /userdata/system/add-ons/sunshine/sunshine.AppImage && chmod +x /userdata/system/add-ons/sunshine/sunshine.AppImage
 
 chmod a+x /userdata/system/add-ons/sunshine/sunshine.AppImage
 
