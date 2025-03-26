@@ -33,11 +33,11 @@ install_downloader() {
       -e PGID=$(id -g) \
       -e TZ=$(cat /etc/timezone) \
       -p "$port:$port" \
-      -v "$data_dir/config:/config" \
-      -v "$data_dir/tv:/tv" \
-      -v "$data_dir/movies:/movies" \
-      -v "$data_dir/music:/music" \
-      -v "$data_dir/downloads:/downloads" \
+      -v "$data_dir/config:/data/config" \
+      -v "$data_dir/tv:/data/tv" \
+      -v "$data_dir/movies:/data/movies" \
+      -v "$data_dir/music:/data/music" \
+      -v "$data_dir/downloads:/data/downloads" \
       -v /userdata/system/add-ons:/add-ons \
       $extra_flags \
       --restart unless-stopped \
