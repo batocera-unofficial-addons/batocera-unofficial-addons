@@ -2,9 +2,20 @@
 
 # Step 1: Install Sunshine
 echo "Installing Sunshine..."
+
+# Create target directory
 mkdir -p /userdata/system/add-ons/sunshine
-curl -s https://api.github.com/repos/LizardByte/Sunshine/releases/latest | grep browser_download_url | grep AppImage | cut -d '"' -f 4 | xargs -n 1 curl -L -o /userdata/system/add-ons/sunshine/sunshine.AppImage
-chmod +x /userdata/system/add-ons/sunshine/sunshine.AppImage
+
+# Fetch latest AppImage URL and download it
+APPIMAGE_URL=$(curl -s https://api.github.com/repos/LizardByte/Sunshine/releases/latest | grep browser_download_url | grep AppImage | cut -d '"' -f 4)
+
+if [ -n "$APPIMAGE_URL" ]; then
+    curl -L "$APPIMAGE_URL" -o /userdata/system/add-ons/sunshine/sunshine.AppImage
+    chmod +x /userdata/system/add-ons/sunshine/sunshine.AppImage
+    echo "Sunshine installed successfully."
+else
+    echo "Failed to fetch the latest Sunshine AppImage URL."
+fi
 
 # Create a persistent configuration directory
 mkdir -p /userdata/system/logs
