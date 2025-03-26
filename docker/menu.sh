@@ -20,7 +20,9 @@ while true; do
                     5 "Alpine XFCE (Webtop)" \
                     6 "Jellyfin" \
                     7 "Emby" \
-                    8 "Exit" \
+                    8 "Arr-In-One" \
+                    9 "Arr-In-One Downloaders" \
+                    10 "Exit" \
                     3>&1 1>&2 2>&3)
 
     case $choice in
@@ -46,6 +48,12 @@ while true; do
             run_container_script "Emby" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/emby.sh"
             ;;
         8)
+            run_container_script "Arr-In-One" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/arrinone.sh"
+            ;;
+        9)
+            run_container_script "Arr-In-One Downloaders" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/arrdownloaders.sh"
+            ;;
+        10)
             clear
             echo "Exiting..."
             exit 0
