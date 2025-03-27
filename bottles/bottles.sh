@@ -5,7 +5,7 @@ APPNAME="Bottles"
 
 # Define paths
 FLATPAK_GAMELIST="/userdata/roms/flatpak/gamelist.xml"
-ICON_URL="https://raw.githubusercontent.com/ivan-hc/Bottles-appimage/main/bottles.png"
+ICON_URL="https://cdn2.steamgriddb.com/logo/b6971181414fe808396c6883eb262e8d.png"
 ICON_PATH="/userdata/system/add-ons/${APPNAME,,}/extra/${APPNAME,,}-icon.png"
 DESKTOP_ENTRY="/userdata/system/configs/${APPNAME,,}/${APPNAME,,}.desktop"
 DESKTOP_DIR="/usr/share/applications"
