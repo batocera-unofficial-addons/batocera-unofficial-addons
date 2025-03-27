@@ -1,56 +1,84 @@
 #!/bin/bash
-# Get the machine hardware name
-architecture=$(uname -m)
 
-# Check if the architecture is x86_64 (AMD/Intel)
+# Architecture check
+architecture=$(uname -m)
 if [ "$architecture" != "x86_64" ]; then
     echo "This script only runs on AMD or Intel (x86_64) CPUs, not on $architecture."
     exit 1
 fi
 
+cli_apps="• Zsh (with Oh My Zsh, plugins, Powerlevel10k, .zshrc, and p10k.zsh)
+• Fish (with Oh My Fish)
+• Git
+• Docker
+• Podman
+• Distrobox
+• Exa
+• Bat / Batcat
+• Glances
+• Aria2c
+• Bandwhich
+• Btop
+• Dua
+• Duf
+• Fzf
+• Hyperfine
+• Icdiff
+• Micro
+• Neofetch
+• Procs
+• Ranger
+• Rgrep
+• Rip
+• Scc
+• Screenfetch
+• Sd
+• Speedtest-cli
+• Strings
+• Tldr
+• Transfersh
+• Tre
+• Xmlstarlet
+• Zoxide"
 
 
-# Define variables
-DESTINATION_DIR="$HOME"
-FILENAME="cli.tar.gz"
-DOWNLOAD_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/cli.tar.gz"
+# Show available apps
+dialog --title "Batocera-CLI Available Tools" --msgbox "The following CLI apps are included:\n$cli_apps" 30 70
 
-# Create the destination directory if it doesn't exist
+# Confirm installation
+dialog --title "Continue Installation?" --yesno "Would you like to proceed with installing the Batocera-CLI package?" 8 60
+if [[ $? -ne 0 ]]; then
+    dialog --title "Installation Canceled" --msgbox "The installation has been canceled." 8 60
+    exit 1
+fi
+
+# Check for running Docker
+if pgrep -x "dockerd" >/dev/null; then
+    dialog --title "Error" --msgbox "Docker is currently running. Please stop or remove it first — CLI Tools includes its own Docker setup." 8 60
+    exit 1
+fi
+
+# Start download
+dialog --title "Downloading" --msgbox "Downloading and extracting Batocera-CLI..." 8 60
+
+DESTINATION_DIR="/userdata/system"
+FILENAME="cli.tar.xz"
+DOWNLOAD_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/cli.tar.xz"
+
 mkdir -p "$DESTINATION_DIR"
+cd "$DESTINATION_DIR"
 
-# Download the file using curl
-curl -L "${DOWNLOAD_URL}" -o "${FILENAME}"
+curl -L "$DOWNLOAD_URL" -o "$FILENAME"
+if [[ $? -ne 0 ]]; then
+    dialog --title "Error" --msgbox "Download failed. Please check your connection and try again." 8 60
+    exit 1
+fi
 
-# Extract the contents to the destination directory
-tar -xzvf "${FILENAME}" -C "${DESTINATION_DIR}"
+tar -xJf "$FILENAME" -C "$DESTINATION_DIR"
+rm -f "$FILENAME"
+chmod +x "$DESTINATION_DIR/cli/run"
 
+# Inform the user
+dialog --title "Installation Complete" --msgbox "Batocera-CLI has been installed.\n\nYou can run it manually with:\n\n  bash /userdata/system/cli/run" 10 70
 
-# Modify the run script: change enter_zsh=1 to enter_zsh=0
-sed -i 's/enter_zsh=1/enter_zsh=0/' "${DESTINATION_DIR}/cli/run"
-
-wget https://github.com/DTJW92/batocera-unofficial-addons/raw/main/docker/docker -O /userdata/system/services/docker
-chmod +x /userdata/system/services/docker
-
-# Add the command to ~/custom.sh before starting Docker and Portainer
-echo "bash /userdata/system/cli/run &" >> ~/custom.sh
-
-cd userdata/system/cli
-chmod +x run
-
-clear
-echo "Starting Docker.."
-./run
-
-clear
-
-
-
-# Step 5: Install Portainer
-echo "Installing portainer"
-docker volume create portainer_data
-docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
-
-echo "Done." 
-echo "Access portainer gui via https://<batoceraipaddress>:9443"
-sleep 10
-exit
+exit 0

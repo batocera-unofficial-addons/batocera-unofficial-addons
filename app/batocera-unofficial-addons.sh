@@ -9,7 +9,7 @@ if [ ! -e "$SYMLINK_MANAGER_PATH" ]; then
     curl -L bit.ly/BUAinstaller | bash
 
     # Display a dialog box notifying the user
-    dialog --title "Reinstallation Required" --msgbox "Previous application installs will need to be installed again." 10 60
+    dialog --title "Reinstallation Required" --msgbox "You've ran RGS install script since installing BUA! BUA has reinstalled, but previous application installs will need to be installed again." 10 60
 fi
 
 [ -f "/userdata/system/add-ons/.dep/libcrypt.so.1" ] || { \
@@ -138,6 +138,7 @@ apps=(
     ["SHADPS4"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/shadps4/shadps4.sh | bash"
     ["SPOTIFY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/spotify/spotify.sh | bash"
     ["STEPMANIA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/stepmania/stepmania.sh | bash"
+    ["STREMIO"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/stremio/stremio.sh | bash"
     ["SUNSHINE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/sunshine/sunshine.sh | bash"
     ["SUPERTUX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertux/supertux.sh | bash"
     ["SUPERTUXKART"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertuxkart/supertuxkart.sh | bash"
@@ -148,7 +149,7 @@ apps=(
     ["WARZONE2100"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/warzone2100/warzone2100.sh | bash"
     ["WINE-DEPENDENCIES-x86"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/winemanager/install_redist_dependencies32.sh | bash"
     ["WINE-DEPENDENCIES-x64"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/winemanager/install_redist_dependencies64.sh | bash"
-    ["WINE-MANAGER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/winemanager/winemanager.sh | bash"
+    ["WINE-MANAGER"]="curl -L links.gregoryc.dev/wine-manager | bash"
     ["XONOTIC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/xonotic/xonotic.sh | bash"
     ["YOUTUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/youtubetv.sh | bash"
     ["NVIDIACLOCKER"]="curl -Ls https://raw.githubusercontent.com/nicolai-6/batocera-nvidia-clocker/refs/heads/main/install.sh | bash"
@@ -173,6 +174,7 @@ apps=(
     ["PEAZIP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/peazip/peazip.sh | bash"
     ["VLC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vlc/vlc.sh | bash"
    # ["ZENITY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/zenity/zenity.sh | bash"
+   ["DOCKER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash"
 )
 
 
@@ -190,6 +192,7 @@ descriptions=(
     ["MINECRAFT"]="Minecraft: Java or Bedrock Edition."
     ["ARMAGETRON"]="Tron-style light cycle game."
     ["CLONEHERO"]="Guitar Hero clone for Batocera."
+    ["STREMIO"]="Stremio video streaming app for Batocera."
     ["VESKTOP"]="Discord client for Batocera."
     ["ENDLESS-SKY"]="Space exploration game."
     ["CHIAKI"]="PS4/PS5 Remote Play client."
@@ -247,6 +250,7 @@ descriptions=(
     ["PEAZIP"]="A free and open-source file archiver"
     ["VLC"]="VLC media player"
   #  ["ZENITY"]="Zenity GUI, used by Winetricks amongst others."
+  ["DOCKER"]="Docker/Podman/Portainer AIO."
 )
 
 
@@ -255,8 +259,8 @@ declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64"
     ["Game Utilities"]="AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS"
-    ["System Utilities"]="TAILSCALE WINEMANAGER VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP"
-    ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER"
+    ["System Utilities"]="TAILSCALE WINEMANAGER VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP"
+    ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER DOCKER"
 )
 initialize_system() {
     clear
@@ -333,6 +337,7 @@ while true; do
         "Game Utilities" "Install game related add-ons" \
         "System Utilities" "Install utility apps" \
         "Developer Tools" "Install developer and patching tools" \
+        "Docker Menu" "Install Docker containers (requires Dev Tool Docker" \
         "Secret Menu" "Enter the password to access the secret menu" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
@@ -361,6 +366,9 @@ fi
                 ;;
             "Developer Tools")
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
+                ;;
+            "Docker Menu")
+                curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/docker/menu.sh | bash
                 ;;
             "Secret Menu")
                 initialize_system
