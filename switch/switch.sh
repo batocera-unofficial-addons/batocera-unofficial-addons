@@ -16,7 +16,7 @@ if (( version == 39 || version == 40 )); then
     sleep 5
     curl -L bit.ly/foclabroc-switchoff-40 | bash
 elif (( version == 41 )); then
-    echo "Batocera version is 41. Triggering download for version 41+l..."
+    echo "Batocera version is 41. Triggering download for version 41..."
     sleep 5
  curl -L bit.ly/foclabroc-switchoff | bash
 elif (( version >= 42 )); then
