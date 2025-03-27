@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Set application name
+# Set the application name
 APPNAME="Bottles"
 
-# Paths
+# Define paths
 FLATPAK_GAMELIST="/userdata/roms/flatpak/gamelist.xml"
 ICON_URL="https://raw.githubusercontent.com/ivan-hc/Bottles-appimage/main/bottles.png"
 ICON_PATH="/userdata/system/add-ons/${APPNAME,,}/extra/${APPNAME,,}-icon.png"
@@ -11,62 +11,103 @@ DESKTOP_ENTRY="/userdata/system/configs/${APPNAME,,}/${APPNAME,,}.desktop"
 DESKTOP_DIR="/usr/share/applications"
 CUSTOM_SCRIPT="/userdata/system/custom.sh"
 
-# Ensure required directories
-mkdir -p "$(dirname "$ICON_PATH")"
-mkdir -p "$(dirname "$DESKTOP_ENTRY")"
-
 # Ensure xmlstarlet is installed
 if ! command -v xmlstarlet &> /dev/null; then
-    echo "❌ xmlstarlet is not installed. Please install it to continue."
+    echo "xmlstarlet is not installed. Please install xmlstarlet before running this script."
     exit 1
 fi
 
-# Progress bar for flatpak install
+# Progress bar function using percentage from log
 show_progress_bar_from_log() {
-    local LOGFILE=$1
-    local PROGRESS=0
+    local LOGFILE=$1  # Log file to monitor
+    local PROGRESS=0  # Initial progress
 
     while kill -0 "$2" 2>/dev/null; do
         if [ -f "$LOGFILE" ]; then
+            # Extract the latest percentage from the log file
             PROGRESS=$(grep -oE '[0-9]+%' "$LOGFILE" | tail -n 1 | tr -d '%')
-            [[ -z "$PROGRESS" ]] && PROGRESS=0
+            if [ -z "$PROGRESS" ]; then
+                PROGRESS=0
+            fi
             printf "\r[%-50s] %d%%" "$(printf '#%.0s' $(seq 1 $((PROGRESS / 2))))" "$PROGRESS"
         fi
         sleep 0.5
     done
+
     printf "\r[%-50s] 100%%\n" "$(printf '#%.0s' $(seq 1 50))"
 }
 
-# Install Bottles
-echo "📦 Installing Bottles..."
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+# Add Flathub repository and install Bottles
+install_bottles() {
+    echo "Adding Flathub repository..."
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
-LOGFILE="/tmp/bottles_install.log"
-flatpak install --system -y flathub com.usebottles.bottles &> "$LOGFILE" &
-show_progress_bar_from_log "$LOGFILE" $!
+    echo "Installing Bottles..."
+    local LOGFILE=/tmp/bottles_install.log
 
-batocera-flatpak-update &>/dev/null
-echo "✅ Bottles installed."
+    # Run flatpak install in the background and monitor with progress bar
+    flatpak install --system -y flathub com.bottles.Bottles &> "$LOGFILE" &
+    show_progress_bar_from_log "$LOGFILE" $!
 
-# Hide Bottles from flatpak gamelist
-if [ ! -f "${FLATPAK_GAMELIST}" ]; then
-    echo "<gameList />" > "${FLATPAK_GAMELIST}"
-fi
+    echo "Updating Batocera Flatpaks..."
+    batocera-flatpak-update &> /dev/null
 
-if ! xmlstarlet sel -t -c "//game[path='./Bottles.flatpak']" "${FLATPAK_GAMELIST}" &>/dev/null; then
-    xmlstarlet ed --inplace \
-        -s "/gameList" -t elem -n game \
-        -s "/gameList/game[last()]" -t elem -n path -v "./Bottles.flatpak" \
-        -s "/gameList/game[last()]" -t elem -n name -v "${APPNAME}" \
-        -s "/gameList/game[last()]" -t elem -n image -v "./images/${APPNAME,,}.png" \
-        -s "/gameList/game[last()]" -t elem -n rating -v "0" \
-        -s "/gameList/game[last()]" -t elem -n releasedate -v "19700101T010000" \
-        -s "/gameList/game[last()]" -t elem -n hidden -v "true" \
-        -s "/gameList/game[last()]" -t elem -n lang -v "en" \
-        "${FLATPAK_GAMELIST}"
-    echo "🔒 Bottles hidden from flatpak menu."
-fi
+    echo "Bottles installation completed successfully."
+}
 
+# Ensure Bottles is listed in flatpak gamelist.xml and set it as hidden
+hide_bottles_in_flatpak() {
+    echo "Ensuring Bottles entry in flatpak gamelist.xml and setting it as hidden..."
+
+    if [ ! -f "${FLATPAK_GAMELIST}" ]; then
+        echo "Flatpak gamelist.xml not found. Creating a new one."
+        echo "<gameList />" > "${FLATPAK_GAMELIST}"
+    fi
+
+    if ! xmlstarlet sel -t -c "//game[path='./Bottles.flatpak']" "${FLATPAK_GAMELIST}" &>/dev/null; then
+        echo "Bottles entry not found. Creating a new entry."
+        xmlstarlet ed --inplace \
+            -s "/gameList" -t elem -n game \
+            -s "/gameList/game[last()]" -t elem -n path -v "./Bottles.flatpak" \
+            -s "/gameList/game[last()]" -t elem -n name -v "Bottles" \
+            -s "/gameList/game[last()]" -t elem -n image -v "./images/Bottles.png" \
+            -s "/gameList/game[last()]" -t elem -n rating -v "0" \
+            -s "/gameList/game[last()]" -t elem -n releasedate -v "19700101T010000" \
+            -s "/gameList/game[last()]" -t elem -n hidden -v "true" \
+            -s "/gameList/game[last()]" -t elem -n lang -v "en" \
+            "${FLATPAK_GAMELIST}"
+        echo "Bottles entry created and set as hidden."
+    else
+        echo "Bottles entry found. Ensuring hidden tag and updating all details."
+
+        # Add <hidden> if it doesn't exist
+        if ! xmlstarlet sel -t -c "//game[path='./Bottles.flatpak']/hidden" "${FLATPAK_GAMELIST}" &>/dev/null; then
+            xmlstarlet ed --inplace \
+                -s "//game[path='./Bottles.flatpak']" -t elem -n hidden -v "true" \
+                "${FLATPAK_GAMELIST}"
+            echo "Added missing hidden tag to Bottles entry."
+        else
+            # Update <hidden> value
+            xmlstarlet ed --inplace \
+                -u "//game[path='./Bottles.flatpak']/hidden" -v "true" \
+                "${FLATPAK_GAMELIST}"
+            echo "Updated hidden tag for Bottles entry."
+        fi
+
+        # Update other details
+        xmlstarlet ed --inplace \
+            -u "//game[path='./Bottles.flatpak']/name" -v "Bottles" \
+            -u "//game[path='./Bottles.flatpak']/image" -v "./images/Bottles.png" \
+            -u "//game[path='./Bottles.flatpak']/rating" -v "0" \
+            -u "//game[path='./Bottles.flatpak']/releasedate" -v "19700101T010000" \
+            -u "//game[path='./Bottles.flatpak']/lang" -v "en" \
+            "${FLATPAK_GAMELIST}"
+        echo "Updated details for Bottles entry."
+    fi
+}
+
+# Create launcher for Bottles
+create_launcher() {
 # Download icon
 curl -L -o "$ICON_PATH" "$ICON_URL"
 
@@ -99,5 +140,9 @@ chmod +x "/userdata/system/configs/${APPNAME,,}/restore_desktop_entry.sh"
 if ! grep -q "restore_desktop_entry.sh" "${CUSTOM_SCRIPT}" 2>/dev/null; then
     echo "\"/userdata/system/configs/${APPNAME,,}/restore_desktop_entry.sh\" &" >> "${CUSTOM_SCRIPT}"
 fi
+
+# Run all steps
+install_bottles
+hide_bottles_in_flatpak
 
 echo "✅ ${APPNAME} setup complete with desktop entry."
