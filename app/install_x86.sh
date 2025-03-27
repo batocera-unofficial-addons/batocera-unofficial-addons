@@ -14,7 +14,7 @@ SCRIPT_PATH="$DOWNLOAD_DIR/$SCRIPT_NAME"
 
 # Destination path for batocera-unofficial-addons.sh and keys.txt
 ROM_PORTS_DIR="/userdata/roms/ports"
-BATOCERA_ADDONS_PATH="$ROM_PORTS_DIR/BatoceraUnofficialAddOns.sh"
+BATOCERA_ADDONS_PATH="$ROM_PORTS_DIR/bua.sh"
 KEYS_FILE="$ROM_PORTS_DIR/keys.txt"
 DIO_FILE="/userdata/system/add-ons/.dialogrc"
 
@@ -116,7 +116,7 @@ cat <<EOF > "$PERSISTENT_DESKTOP"
 Version=1.0
 Type=Application
 Name=Batocera Unofficial Add Ons
-Exec=/userdata/roms/ports/BatoceraUnofficialAddOns.sh
+Exec=/userdata/roms/ports/bua.sh
 Icon=/userdata/system/add-ons/${APPNAME,,}/extra/icon.png
 Terminal=false
 Categories=Game;batocera.linux;
@@ -170,7 +170,7 @@ echo "Downloading Batocera Unofficial Add-ons logo..."
 curl -Ls -o /userdata/roms/ports/images/BatoceraUnofficialAddons.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png
 echo "Adding logo to Batocera Unofficial Add-ons entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-  -s "/gameList/game[last()]" -t elem -n "path" -v "./BatoceraUnofficialAddOns.sh" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./bua.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "Batocera Unofficial Add-Ons Installer" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/BatoceraUnofficialAddons.png" \
   /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
