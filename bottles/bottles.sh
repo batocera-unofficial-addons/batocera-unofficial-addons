@@ -51,6 +51,9 @@ install_bottles() {
 
     echo "Updating Batocera Flatpaks..."
     batocera-flatpak-update &> /dev/null
+    
+    # Add /userdata to be accessible
+    flatpak override com.usebottles.bottles --filesystem=/userdata:rw
 
     echo "Bottles installation completed successfully."
 }
