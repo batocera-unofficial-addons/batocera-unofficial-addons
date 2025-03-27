@@ -19,6 +19,7 @@ if [ -d "$install_dir" ]; then
 fi
 
 mkdir -p "$install_dir"
+mkdir -p /userdata/system/.local/share/shadPS4
 
 # Step 3: Download the zip file
 echo "Downloading ShadPS4 zip from $latest_release_url..."
