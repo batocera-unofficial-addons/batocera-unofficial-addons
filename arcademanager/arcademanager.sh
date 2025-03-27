@@ -3,9 +3,9 @@
 
 # Define variables
 APPNAME="ArcadeManager"
-REPO_BASE_URL="https://github.com/cosmo0/arcade-manager/releases/download/v7.1/"
-AMD_SUFFIX="ArcadeManager-7.1-linux-x64.AppImage"
-ARM_SUFFIX="ArcadeManager-7.1-linux-arm64.AppImage"
+REPO_BASE_URL="https://github.com/cosmo0/arcade-manager/releases/download"
+AMD_SUFFIX="/v25.1/ArcadeManager-linux-25.1.0.AppImage"
+ARM_SUFFIX="/v7.1/ArcadeManager-7.1-linux-arm64.AppImage"
 ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/arcademanager/extra/icon.png"
 
 # Directories
