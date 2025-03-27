@@ -4,7 +4,7 @@
 SYMLINK_MANAGER_PATH="/userdata/system/services/symlink_manager"
 PORTS_FILE="/userdata/roms/ports/bua.sh"
 
-if [ ! -e "$PORTS_FILE"]; then
+if [ ! -e "$PORTS_FILE" ]; then
 curl -L bit.ly/BUAinstaller | bash
 rm -f /userdata/roms/ports/BatoceraUnofficialAddOns.sh
 
