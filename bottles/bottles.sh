@@ -140,11 +140,12 @@ chmod +x "/userdata/system/configs/${APPNAME,,}/restore_desktop_entry.sh"
 if ! grep -q "restore_desktop_entry.sh" "${CUSTOM_SCRIPT}" 2>/dev/null; then
     echo "\"/userdata/system/configs/${APPNAME,,}/restore_desktop_entry.sh\" &" >> "${CUSTOM_SCRIPT}"
 fi
+}
 
 # Run all steps
-create_launcher
 install_bottles
 hide_bottles_in_flatpak
+create_launcher
 
 echo "✅ ${APPNAME} setup complete with desktop entry."
 sleep 5
