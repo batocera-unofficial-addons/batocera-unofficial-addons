@@ -142,7 +142,9 @@ if ! grep -q "restore_desktop_entry.sh" "${CUSTOM_SCRIPT}" 2>/dev/null; then
 fi
 
 # Run all steps
+create_launcher
 install_bottles
 hide_bottles_in_flatpak
 
 echo "✅ ${APPNAME} setup complete with desktop entry."
+sleep 5
