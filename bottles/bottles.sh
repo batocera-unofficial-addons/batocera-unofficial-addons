@@ -46,7 +46,7 @@ install_bottles() {
     local LOGFILE=/tmp/bottles_install.log
 
     # Run flatpak install in the background and monitor with progress bar
-    flatpak install --system -y flathub com.bottles.Bottles &> "$LOGFILE" &
+    flatpak install --system -y flathub com.usebottles.bottles &> "$LOGFILE" &
     show_progress_bar_from_log "$LOGFILE" $!
 
     echo "Updating Batocera Flatpaks..."
