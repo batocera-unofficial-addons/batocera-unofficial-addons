@@ -1,6 +1,16 @@
 #!/bin/bash
 
+mount_cgroup() {
+  if ! mount | grep -q "cgroup"; then
+    echo "Mounting cgroup filesystem..."
+    mkdir -p /sys/fs/cgroup
+    mount -t cgroup2 none /sys/fs/cgroup
+  fi
+}
+
 start() {
+  mount_cgroup
+
   if [[ -z "$(pidof dockerd)" ]]; then
     if command -v dockerd &>/dev/null; then
       nohup dockerd >/dev/null 2>&1 &
