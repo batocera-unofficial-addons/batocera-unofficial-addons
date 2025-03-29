@@ -1,78 +1,80 @@
-# 🎮 Emulador de Jogos Java ME para Batocera
+# 🎮 Java ME Game Emulator for Batocera
 
-Olá! 👋
-Seja bem-vindo ao projeto para instalar em seu Batocera o emulador de jogos Java Me, o Freej2me.
+Hello! 👋
+Welcome to the project to install the Java ME game emulator, Freej2me, on your Batocera.
 
-Este projeto conta com todos os recursos necessários para que tudo seja funcional em seu Batocera.
+This project includes all the necessary resources to ensure full functionality on your Batocera.
 
-## 🚀 Instruções de Instalação
+## 🚀 Installation Instructions
 
-Para iniciar a instalação, copie o comando abaixo, cole em seu terminal, e dê Enter para iniciar a instalação:
+To start the installation, copy the command below, paste it into your terminal, and press Enter to begin the installation:
 
 ```sh
 curl -L bit.ly/drl-j2me | bash
 ```
 
-Lembrando que este instalador, após a instalação concluída, contará com duas versões do Freej2me:
-1. **Freej2me**: O emulador padrão.
-2. **Freej2me com emulação pelo Retroarch**: Através do core libretro do Retroarch.
+Remember that after installation is complete, this installer will include two versions of Freej2me:
+1. **Freej2me**: The standard emulator.
+2. **Freej2me with Retroarch emulation**: Through the libretro core of Retroarch.
 
-## 🔄 Alternando Entre Emulações
+## 🔄 Switching Between Emulations
 
-Ao navegar no seu front-end, você encontrará dentro da coleção Ports um arquivo chamado `-Update_j2me`. Basta iniciar este script para alternar entre a emulação padrão do Freej2me e a do Retroarch com o libretro.
+When browsing your front-end, you will find a file called `-Update_j2me` inside the Ports collection. Simply launch this script to switch between the standard Freej2me emulation and the Retroarch libretro emulation.
 
-Este recurso foi implementado para garantir a sua boa usabilidade durante as emulações J2me.
+This feature was implemented to ensure a smooth user experience while running J2ME emulations.
 
-## 🎮 Suporte ao Gamepad
+## 🎮 Gamepad Support
 
-A emulação padrão do Freej2me já conta com um recurso de reconhecimento do Gamepad. No entanto, a emulação pelo Retroarch ainda continua em fase de testes, mas você poderá realizar testes e personalizá-lo.
+The standard Freej2me emulation already includes a gamepad recognition feature. However, Retroarch emulation is still in the testing phase, but you can experiment and customize it.
 
 ---
-# Teclas e atalhos de controle de entrada para o emulador Freej2me instalado no Batocera.
-## A emulação padrão do Freej2me já conta com um recurso de reconhecimento do Gamepad. No entanto, a emulação pelo Retroarch ainda continua em fase de testes, mas você poderá realizar testes e personalizá-lo.
+# Key Mapping and Input Shortcuts for the Freej2me Emulator Installed on Batocera
 
-![image](https://github.com/DRLEdition19/batocera-unofficial-addons.add/blob/main/Freej2me/extra/joytick.jpg?raw=true)
+## The standard Freej2me emulation already includes a gamepad recognition feature. However, Retroarch emulation is still in the testing phase, but you can experiment and customize it.
 
-# Estas configurações de controle abaixo, são correspondentes com os botões do teclado ilustrado acima
+![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/joytick.jpg?raw=true)
+
+# The following control settings correspond to the keyboard buttons illustrated above.
 ---
-## Atalhos de Teclado Comuns
+## Common Keyboard Shortcuts
 
-|**🎮Gamepad / Joystick🕹️**|    **Teclas**     | **Funções como** |
+|**🎮Gamepad / Joystick🕹️**|    **Keys**     | **Functions as** |
 | :--------------: | :------------: | :--------------: |
-| **Start**        |      Esc       | Menu de Opções do freej2me |
-| **🔺 / X** ou **L1**  |       Q        |   Tecla de Opções / Selecionar    |
-| **⭕ / A** ou **R1**  |       W        |     Tecla de voltar     |
+| **Start**        |      Esc       | Freej2me Options Menu |
+| **🔺 / X** or **L1**  |       Q        |   Options Key / Select    |
+| **⭕ / A** or **R1**  |       W        |     Back Key     |
 | **L2**           |       E        |        *         |
 | **R2**           |       R        |        #         |
-| **D-PAD** ou **🕹L-ANALOG**      |   Linha de números   |  Teclado numérico  |
-| **D-PAD** ou **🕹L-ANALOG**      | Teclado numérico 7,8,9 |      1,2,3       |
-| **D-PAD** ou **🕹L-ANALOG**      | Teclado numérico 4,5,6 |      4,5,6       |
-| **D-PAD** ou **🕹L-ANALOG**      | Teclado numérico 1,2,3 |      7,8,9       |
+| **D-PAD** or **🕹L-ANALOG**      |   Number line   |  Numeric keyboard  |
+| **D-PAD** or **🕹L-ANALOG**      | Numeric keyboard 7,8,9 |      1,2,3       |
+| **D-PAD** or **🕹L-ANALOG**      | Numeric keyboard 4,5,6 |      4,5,6       |
+| **D-PAD** or **🕹L-ANALOG**      | Numeric keyboard 1,2,3 |      7,8,9       |
 
-## Atalhos de Teclado Padrão
+## Standard Keyboard Shortcuts
 
-Todas as **combinações de teclas comuns** a seguir:
+All **common key combinations** below:
 
-|**🎮Gamepad / Joystick🕹️**|    **Teclas**     | **Funções como** |
+|**🎮Gamepad / Joystick🕹️**|    **Keys**     | **Functions as** |
 | :--------------: | :---------: | :--------------: |
-| **![image](https://github.com/DRLEdition19/batocera-unofficial-addons.add/blob/main/Freej2me/extra/Acima.png?raw=true)D-PAD UP** ou **🕹L-ANALOG UP**       |  Seta para cima      | 2 |
-| **![image](https://github.com/DRLEdition19/batocera-unofficial-addons.add/blob/main/Freej2me/extra/Abaixo.png?raw=true)D-PAD DOWN** ou **🕹L-ANALOG DOWN**   |  Seta para baixo     | 8 |
-| **![image](https://github.com/DRLEdition19/batocera-unofficial-addons.add/blob/main/Freej2me/extra/Esquerda.png?raw=true)D-PAD LEFT** ou **🕹L-ANALOG LEFT**   |  Seta para esquerda  | 4 |
-| **![image](https://github.com/DRLEdition19/batocera-unofficial-addons.add/blob/main/Freej2me/extra/Direita.png?raw=true)D-PAD RIGHT** ou **🕹L-ANALOG RIGHT** |  Seta para direita   | 6 |
+| **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Acima.png?raw=true)D-PAD UP** or **🕹L-ANALOG UP**       |  Up Arrow      | 2 |
+| **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Abaixo.png?raw=true)D-PAD DOWN** or **🕹L-ANALOG DOWN**   |  Down Arrow     | 8 |
+| **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Esquerda.png?raw=true)D-PAD LEFT** or **🕹L-ANALOG LEFT**   |  Left Arrow  | 4 |
+| **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Direita.png?raw=true)D-PAD RIGHT** or **🕹L-ANALOG RIGHT** |  Right Arrow   | 6 |
 | **✖️ / B**                                 |       Enter          | 5 |
 
-## Atalhos de Teclado Nokia
+## Nokia Keyboard Shortcuts
 
-Todas as **teclas de atalhos comuns** a seguir:
+All **common shortcut keys** below:
 
-|**🎮Gamepad / Joystick🕹️**|    **Teclas**     | **Funções como** |
+|**🎮Gamepad / Joystick🕹️**|    **Keys**     | **Functions as** |
 | :--------------: | :------------: | :--------------------: |
-| **![image](https://github.com/DRLEdition19/batocera-unofficial-addons.add/blob/main/Freej2me/extra/Acima.png?raw=true)D-PAD UP** ou **🕹L-ANALOG UP**       | Seta para cima     |            Para Cima            |
-| **![image](https://github.com/DRLEdition19/batocera-unofficial-addons.add/blob/main/Freej2me/extra/Abaixo.png?raw=true)D-PAD DOWN** ou **🕹L-ANALOG DOWN**   | Seta para baixo    |           Para Baixo            |
-| **![image](https://github.com/DRLEdition19/batocera-unofficial-addons.add/blob/main/Freej2me/extra/Esquerda.png?raw=true)D-PAD LEFT** ou **🕹L-ANALOG LEFT**   | Seta para esquerda |          Para Esquerda          |
-| **![image](https://github.com/DRLEdition19/batocera-unofficial-addons.add/blob/main/Freej2me/extra/Direita.png?raw=true)D-PAD RIGHT** ou **🕹L-ANALOG RIGHT** | Seta para direita  |          Para Direita           |
-| **✖️ / B**                                 |      Enter         | Tecla de ação (botão de **OK**) | 
+| **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Acima.png?raw=true)D-PAD UP** or **🕹L-ANALOG UP**       | Up Arrow     |            Up            |
+| **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Abaixo.png?raw=true)D-PAD DOWN** or **🕹L-ANALOG DOWN**   | Down Arrow    |           Down            |
+| **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Esquerda.png?raw=true)D-PAD LEFT** or **🕹L-ANALOG LEFT**   | Left Arrow |          Left          |
+| **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Direita.png?raw=true)D-PAD RIGHT** or **🕹L-ANALOG RIGHT** | Right Arrow  |          Right           |
+| **✖️ / B**                                 |      Enter         | Action Key (**OK** button) |
 
 ---
 
-Aproveite o emulador e divirta-se com seus jogos Java ME favoritos no Batocera! 😃
+Enjoy the emulator and have fun with your favorite Java ME games on Batocera! 😃
+
