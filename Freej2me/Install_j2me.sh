@@ -107,7 +107,7 @@ mkdir -p $PORTS_DIR
 
 # Download the DRL file
 echo "Downloading the Freej2me.DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/J2me-Batocera/releases/download/files/Freej2me.DRL"
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/batocera-unofficial-addons.add/releases/download/files/Freej2me.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
