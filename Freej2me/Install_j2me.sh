@@ -97,13 +97,13 @@ echo "Welcome to the automatic installer for the Freej2me by DRL Edition."
 # Temporary directory for download
 TEMP_DIR="/userdata/tmp/Freej2me"
 DRL_FILE="$TEMP_DIR/Freej2me.DRL"
+EXTRACT_DIR="$TEMP_DIR/extracted"
 DEST_DIR="/"
 
 # Create the temporary directories
 echo "Creating temporary directories..."
 mkdir -p $TEMP_DIR
 mkdir -p $EXTRACT_DIR
-mkdir -p $PORTS_DIR
 
 # Download the DRL file
 echo "Downloading the Freej2me.DRL file..."
