@@ -10,7 +10,7 @@ This project includes all the necessary resources to ensure full functionality o
 To start the installation, copy the command below, paste it into your terminal, and press Enter to begin the installation:
 
 ```sh
-curl -L bit.ly/drl-j2me | bash
+curl -L github.com/DRLEdition19/batocera-unofficial-addons.add/raw/refs/heads/main/Freej2me/Install_j2me.sh | bash
 ```
 
 Remember that after installation is complete, this installer will include two versions of Freej2me:
