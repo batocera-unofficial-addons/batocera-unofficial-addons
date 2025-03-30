@@ -62,7 +62,7 @@ All **common key combinations** below:
 | **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Direita.png?raw=true)D-PAD RIGHT** or **🕹L-ANALOG RIGHT** |  Right Arrow   | 6 |
 | **🕹R-ANALOG LEFT**    | *TOP LEFT DIAGONAL* | 1 |
 | **🕹R-ANALOG RIGHT**   | *TOP RIGHT DIAGONAL* | 9 |
-| **🕹R-ANALOG up**      | *LOWER LEFT DIAGONAL* | 3 |
+| **🕹R-ANALOG UP**      | *LOWER LEFT DIAGONAL* | 3 |
 | **🕹R-ANALOG DOWN**    | *LOWER RIGHT DIAGONAL* | 7 |
 | **□ / Y**             |       A         | ??? |
 | **✖️ / B**             |       Enter         | 5 |
