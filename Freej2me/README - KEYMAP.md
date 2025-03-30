@@ -64,6 +64,7 @@ All **common key combinations** below:
 | **🕹R-ANALOG RIGHT**   | *TOP RIGHT DIAGONAL* | 3 |
 | **🕹R-ANALOG up**      | *LOWER LEFT DIAGONAL* | 7 |
 | **🕹R-ANALOG DOWN**    | *LOWER LEFT DIAGONAL* | 9 |
+| **□ / Y**             |       A         | ??? |
 | **✖️ / B**             |       Enter         | 5 |
 
 ## Nokia Keyboard Shortcuts
@@ -76,6 +77,7 @@ All **common shortcut keys** below:
 | **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Abaixo.png?raw=true)D-PAD DOWN** or **🕹L-ANALOG DOWN**   | Down Arrow    |           Down            |
 | **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Esquerda.png?raw=true)D-PAD LEFT** or **🕹L-ANALOG LEFT**   | Left Arrow |          Left          |
 | **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Direita.png?raw=true)D-PAD RIGHT** or **🕹L-ANALOG RIGHT** | Right Arrow  |          Right           |
+| **□ / Y**             |       A         | ??? |
 | **✖️ / B**                                 |      Enter         | Action Key (**OK** button) |
 
 ---
