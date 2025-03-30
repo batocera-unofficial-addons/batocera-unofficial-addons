@@ -142,6 +142,15 @@ else
     echo "The information already exists in the file. No changes were made."
 fi
 
+# Check if the information is already in the file batocera.conf
+if ! grep -q "j2me" "$FILE2"; then
+    # Add the desired content to the file
+    echo -e "\nj2me.core=freej2me\nj2me.emulator=libretro" >> "$FILE2"
+    echo "Information added to the file."
+else
+    echo "The information already exists in the file. No changes were made."
+fi
+
 # Clean up
 echo "Cleaning up..."
 rm -rf $TEMP_DIR
