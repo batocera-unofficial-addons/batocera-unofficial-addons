@@ -63,7 +63,7 @@ All **common key combinations** below:
 | **🕹R-ANALOG LEFT**    | *TOP LEFT DIAGONAL* | 1 |
 | **🕹R-ANALOG RIGHT**   | *TOP RIGHT DIAGONAL* | 3 |
 | **🕹R-ANALOG up**      | *LOWER LEFT DIAGONAL* | 7 |
-| **🕹R-ANALOG DOWN**    | *LOWER LEFT DIAGONAL* | 9 |
+| **🕹R-ANALOG DOWN**    | *LOWER RIGHT DIAGONAL* | 9 |
 | **□ / Y**             |       A         | ??? |
 | **✖️ / B**             |       Enter         | 5 |
 
