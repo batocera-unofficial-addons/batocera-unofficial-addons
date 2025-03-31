@@ -31,6 +31,7 @@ This project includes a hidden "secret menu" that is self-hosted and password-pr
 
 ⚠️ This menu is not open source, is provided for personal use only, and is protected under a custom license.
 The source code is not publicly distributed due to the sensitive nature of what it provides.
+Full details of it's custom license is included when trying to access the menu.
 
 
 ---
