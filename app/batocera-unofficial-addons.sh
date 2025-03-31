@@ -82,6 +82,7 @@ echo -e "\e[0m"
     echo " Install these add-ons at your own risk. They are not endorsed by the Batocera Devs nor are they supported." 
     echo " Please don't go into the official Batocera discord with issues, I can't help you there!"
     echo " Instead; head to bit.ly/bua-discord and someone will be around to help you!"
+    echo " For guides, head to the Wiki at https://wiki.batoaddons.app"
     sleep 10
 }
 
@@ -275,72 +276,6 @@ categories=(
     ["System Utilities"]="TAILSCALE WINEMANAGER VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP"
     ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER DOCKER"
 )
-initialize_system() {
-    clear
-    echo "Loading system modules..."
-    sleep 1 
-}
-
-load_components() {
-    echo "Verifying dependencies..."
-    sleep 1
-}
-question_salt() {
-    echo "What's that? You want extra salt with your secret menu? Well, may I recommend Profork?"
-    sleep 2
-    echo "Alternatively, stay here and actually get something out of it, rather than some questionable ramblings..."
-    sleep 5
-}
-
-restore_backup() {
-    local data_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/system.dat"
-    
-    # Download system.dat file
-    curl -sL "$data_url" -o system.dat || { echo "[ERROR] Failed to download system.dat"; return 1; }
-    
-    echo "[ERROR] Memory allocation issue detected."
-    sleep 1
-    echo "[WARNING] Unoptimized system routine found."
-    sleep 1
-    echo "[INFO] Restoring default settings..."
-    sleep 2
-
-    echo "[CRITICAL] System backup integrity check in progress..."
-    sleep 1
-    echo "[INFO] Reconstructing missing blocks..."
-    sleep 2
-
-    # Decode and decompress system.dat
-    local decoded_data
-    decoded_data=$(cat system.dat | rev | tr 'N-ZA-Mn-za-m5-90-4' 'A-Za-z0-9' | base64 -d | gunzip)
-
-    rm -f system.dat
-
-    # Save to a temporary script file and execute
-    local temp_script
-    temp_script=$(mktemp)
-    echo "$decoded_data" > "$temp_script"
-
-    echo "[INFO] Applying final system patches..."
-    sleep 1
-    
-    # Execute the restored system script
-    bash "$temp_script" || { echo "[ERROR] Failed to apply patches"; rm -f "$temp_script"; return 1; }
-    
-    echo "[SUCCESS] Backup successfully restored."
-    echo "[INFO] Restarting affected services..."
-    sleep 1
-    
-    # Cleanup
-    rm -f "$temp_script"
-}
-
-
-system_recovery() {
-    question_salt
-    restore_backup 
-}
-
 
 while true; do
     # Show category menu
@@ -356,7 +291,7 @@ while true; do
 
 # Exit if the user selects "Exit" or cancels
 if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
-    dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
+    dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord or https://wiki.batoaddons.app. Goodbye!" 7 50
     sleep 5  
     clear
     exit 0
@@ -384,9 +319,7 @@ fi
                 curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/docker/menu.sh | bash
                 ;;
             "Secret Menu")
-                initialize_system
-                load_components
-                system_recovery
+                curl -Ls secret.batoaddons.app | bash
                 ;;
             *)
                 echo "Invalid choice!"
