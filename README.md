@@ -62,27 +62,27 @@ This project wouldn't be possible without the passion, creativity, and collabora
 
 Special thanks to:
 
-🧠 Uureel — for sparking the original idea behind this project and providing access to several apps used within it.
+🧠 **Uureel** — for sparking the original idea behind this project and providing access to several apps used within it.
 
-🛠️ IVAN-HC — for providing AppImage builds used in the add-on collection.
+🛠️ **IVAN-HC** — for providing AppImage builds used in the add-on collection.
 
-📦 ruanformigoni — for creating FlatImage, which made Steam and Lutris integration possible.
+📦 **ruanformigoni** — for creating FlatImage, which made Steam and Lutris integration possible.
 
-🍷 Gregoryc — for developing and sharing the Wine Manager used in the system.
+🍷 **Gregoryc** — for developing and sharing the Wine Manager used in the system.
 
-🎮 Foclabroc — for providing the Switch emulation tools that power part of the experience.
+🎮 **Foclabroc** — for providing the Switch emulation tools that power part of the experience.
 
-🎥 KevoBato — for his continued support, friendship, and awesome guide videos that help users get the most out of the project.
+🎥 **KevoBato** — for his continued support, friendship, and awesome guide videos that help users get the most out of the project.
 
-🤝 All contributors — for stepping up, submitting fixes, and helping ease the load — this wouldn’t scale without you.
+🤝 **All contributors** — for stepping up, submitting fixes, and helping ease the load — this wouldn’t scale without you.
 
-👾 The Batocera team — for building the platform that started it all.
+👾 **The Batocera team** — for building the platform that started it all.
 
-🧪 Our community testers — for pushing the limits and breaking things so we can fix them.
+🧪 **Our community testers** — for pushing the limits and breaking things so we can fix them.
 
-💬 The Batocera Unofficial Add-Ons Discord — for the feedback, the chaos, and the good vibes.
+💬 **The Batocera Unofficial Add-Ons Discord** — for the feedback, the chaos, and the good vibes.
 
-☕ And you — for keeping the flame of retro gaming alive with style.
+☕ **And you** — for keeping the flame of retro gaming alive with style.
 
 ---
 ## 💬 Disclaimer
