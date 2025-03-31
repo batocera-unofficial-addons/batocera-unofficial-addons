@@ -1,28 +1,26 @@
 #!/bin/bash
 
-# Define the path
 SYMLINK_MANAGER_PATH="/userdata/system/services/symlink_manager"
 PORTS_FILE="/userdata/roms/ports/bua.sh"
 LIBCURSOR="/userdata/system/add-ons/.dep/libwayland-cursor.so.0"
 
+install_bua() {
+    curl -L bit.ly/BUAinstaller | bash
+}
+
 if [ ! -e "$PORTS_FILE" ]; then
-curl -L bit.ly/BUAinstaller | bash
-rm -f /userdata/roms/ports/BatoceraUnofficialAddOns.sh
+    install_bua
+    rm -f /userdata/roms/ports/BatoceraUnofficialAddOns.sh
 fi
 
-# Check if symlink_manager exists
 if [ ! -e "$SYMLINK_MANAGER_PATH" ]; then
-    # Run the installer script
-    curl -L bit.ly/BUAinstaller | bash
-
-    # Display a dialog box notifying the user
-    dialog --title "Reinstallation Required" --msgbox "You've ran RGS install script since installing BUA! BUA has reinstalled, but previous application installs will need to be installed again." 10 60
+    install_bua
+    dialog --title "Reinstallation Required" --msgbox \
+        "You've ran RGS install script since installing BUA! BUA has reinstalled, but previous application installs will need to be installed again." 10 60
 fi
 
-# Check for latest dependencies 
 if [ ! -e "$LIBCURSOR" ]; then
-    # Run the installer script
-    curl -L bit.ly/BUAinstaller | bash
+    install_bua
 fi
 
 # Function to display animated title with colors
