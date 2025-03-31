@@ -3,6 +3,7 @@
 # Define the path
 SYMLINK_MANAGER_PATH="/userdata/system/services/symlink_manager"
 PORTS_FILE="/userdata/roms/ports/bua.sh"
+LIBCURSOR="/userdata/system/add-ons/.dep/libwayland-cursor.so.0"
 
 if [ ! -e "$PORTS_FILE" ]; then
 curl -L bit.ly/BUAinstaller | bash
@@ -18,15 +19,10 @@ if [ ! -e "$SYMLINK_MANAGER_PATH" ]; then
     dialog --title "Reinstallation Required" --msgbox "You've ran RGS install script since installing BUA! BUA has reinstalled, but previous application installs will need to be installed again." 10 60
 fi
 
-[ -f "/userdata/system/add-ons/.dep/libwayland-client.so.0" ] || { \
-    wget -O "/userdata/system/add-ons/.dep/libwayland-client.so.0" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/.dep/libwayland-client.so.0" && \
-    wget -O "/userdata/system/add-ons/.dep/libwayland-egl.so.1" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/.dep/libwayland-egl.so.1" && \
-    wget -O "/userdata/system/add-ons/.dep/libwayland-server.so.0" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/.dep/libwayland-server.so.0" && \
-    
-    chmod 755 "/userdata/system/add-ons/.dep/libwayland-client.so.0"; 
-    chmod 755 "/userdata/system/add-ons/.dep/libwayland-egl.so.1"; 
-    chmod 755 "/userdata/system/add-ons/.dep/libwayland-server.so.0"; 
-}
+# Check for latest dependencies 
+if [ ! -e "$LIBCURSOR" ]; then
+    # Run the installer script
+    curl -L bit.ly/BUAinstaller | bash
 
 # Function to display animated title with colors
 animate_title() {
