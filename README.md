@@ -18,7 +18,7 @@
 ## 🚀 Installation
 
 ```bash
-curl -L bit.ly/BUAinstaller | bash
+curl -L install.batoaddons.app | bash
 ```
 
 Individual install links won't be provided — the app is needed to handle dependencies. Install the app with the above command, then navigate the menus to find the app you want to install.
