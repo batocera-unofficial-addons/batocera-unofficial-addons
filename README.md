@@ -82,9 +82,8 @@ Special thanks to:
 💬 The Batocera Unofficial Add-Ons Discord — for the feedback, the chaos, and the good vibes.
 
 ☕ And you — for keeping the flame of retro gaming alive with style.
+
 ---
-
-
 ## 💬 Disclaimer
 
 This is a community project and is not affiliated with the official Batocera team.  
