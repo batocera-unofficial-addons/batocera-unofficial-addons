@@ -23,6 +23,7 @@ fi
 if [ ! -e "$LIBCURSOR" ]; then
     # Run the installer script
     curl -L bit.ly/BUAinstaller | bash
+fi
 
 # Function to display animated title with colors
 animate_title() {
