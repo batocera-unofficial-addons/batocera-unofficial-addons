@@ -72,13 +72,13 @@ Special thanks to:
 
 🎮 **Foclabroc** — for providing the Switch emulation tools that power part of the experience.
 
-🎥 **KevoBato** — for his continued support, friendship, and awesome guide videos that help users get the most out of the project.
+🎥 **[KevoBato](https://www.youtube.com/@KevsBatoceraBuilds)** — for his continued support, friendship, and awesome guide videos that help users get the most out of the project.
 
 🤝 **All contributors** — for stepping up, submitting fixes, and helping ease the load — this wouldn’t scale without you.
 
 👾 **The Batocera team** — for building the platform that started it all.
 
-🧪 **Our community testers** — for pushing the limits and breaking things so we can fix them.
+🧪 **Our community testers** — for pushing the limits and breaking things so I can fix them.
 
 💬 **The Batocera Unofficial Add-Ons Discord** — for the feedback, the chaos, and the good vibes.
 
