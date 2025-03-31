@@ -6,10 +6,33 @@ echo "Installing Tailscale..."
 mkdir -p /userdata/temp
 cd /userdata/temp || exit 1
 
-wget -q https://pkgs.tailscale.com/stable/tailscale_1.76.1_amd64.tgz
+ARCH=$(uname -m)
 
-tar -xf tailscale_1.76.1_amd64.tgz
-cd tailscale_1.76.1_amd64 || exit 1
+case "$ARCH" in
+  x86_64)
+    FILE="tailscale_1.76.1_amd64.tgz"
+    ;;
+  armv7l)
+    FILE="tailscale_1.76.1_arm.tgz"
+    ;;
+  aarch64)
+    FILE="tailscale_1.76.1_arm64.tgz"
+    ;;
+  *)
+    echo "Unsupported architecture: $ARCH"
+    exit 1
+    ;;
+esac
+
+echo "Detected architecture: $ARCH"
+echo "Downloading $FILE..."
+wget -q "https://pkgs.tailscale.com/stable/${FILE}"
+
+echo "Extracting..."
+tar -xf "$FILE"
+DIR="${FILE%.tgz}"
+cd "$DIR" || exit 1
+
 
 mkdir -p /userdata/add-ons/tailscale
 
