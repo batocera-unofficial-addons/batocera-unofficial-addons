@@ -56,7 +56,7 @@ In accordance with the GPL:
 - **[Batocera Unofficial Add-Ons Discord](https://discord.gg/Uc9BVbDH9e)** – Community support
 
 ---
-🙏 Special Thanks
+## 🙏 Special Thanks
 
 This project wouldn't be possible without the passion, creativity, and collaboration of the retro and open-source communities.
 
