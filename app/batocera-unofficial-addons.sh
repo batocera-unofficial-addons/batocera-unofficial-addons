@@ -5,7 +5,7 @@ PORTS_FILE="/userdata/roms/ports/bua.sh"
 LIBCURSOR="/userdata/system/add-ons/.dep/libwayland-cursor.so.0"
 
 install_bua() {
-    curl -L bit.ly/BUAinstaller | bash
+    curl -L install.batoaddons.app | bash
 }
 
 if [ ! -e "$PORTS_FILE" ]; then
