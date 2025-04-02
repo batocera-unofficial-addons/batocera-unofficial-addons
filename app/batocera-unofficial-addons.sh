@@ -8,6 +8,9 @@ install_bua() {
     curl -L install.batoaddons.app | bash
 }
 
+rm -f /usr/share/applications/BUA.desktop
+/userdata/system/configs/bua/restore_desktop_entry.sh &
+
 if [ ! -e "$PORTS_FILE" ]; then
     install_bua
     rm -f /userdata/roms/ports/BatoceraUnofficialAddOns.sh
