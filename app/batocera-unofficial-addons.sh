@@ -8,8 +8,9 @@ install_bua() {
     curl -L install.batoaddons.app | bash
 }
 
-rm -f /usr/share/applications/BUA.desktop
-/userdata/system/configs/bua/restore_desktop_entry.sh &
+rm -f /usr/share/applications/BUA.desktop >/dev/null 2>&1
+/userdata/system/configs/bua/restore_desktop_entry.sh >/dev/null 2>&1
+
 
 if [ ! -e "$PORTS_FILE" ]; then
     install_bua
