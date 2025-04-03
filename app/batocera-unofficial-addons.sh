@@ -25,6 +25,22 @@ if [ ! -e "$LIBCURSOR" ]; then
     install_bua
 fi
 
+RESTORE_SCRIPT="/userdata/system/configs/bua/restore_desktop_entry.sh"
+
+cat <<EOF > "$RESTORE_SCRIPT"
+#!/bin/bash
+# Restore ${APPNAME} desktop entry (always replace)
+
+echo "Restoring ${APPNAME} desktop entry..."
+cp -f "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+chmod +x "$DESKTOP_FILE"
+echo "${APPNAME} desktop entry restored."
+
+EOF
+
+chmod +x "$RESTORE_SCRIPT"
+/userdata/system/configs/bua/restore_desktop_entry.sh
+
 # Function to display animated title with colors
 animate_title() {
     local text="BATOCERA UNOFFICIAL ADD-ONS INSTALLER"
