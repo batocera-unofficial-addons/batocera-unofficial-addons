@@ -8,7 +8,7 @@ install_bua() {
     curl -L install.batoaddons.app | bash
 }
 
-grep -q '^Exec=/usedata/roms/ports/BatoceraUnofficialAddOns.sh' /usr/share/applications/BUA.desktop && curl -sL install.batoaddons.app | bash >/dev/null 2>&1
+grep -q '^Exec=/userdata/roms/ports/BatoceraUnofficialAddOns.sh' /usr/share/applications/BUA.desktop && curl -sL install.batoaddons.app | bash >/dev/null 2>&1
 
 if [ ! -e "$PORTS_FILE" ]; then
     install_bua
@@ -24,19 +24,6 @@ fi
 if [ ! -e "$LIBCURSOR" ]; then
     install_bua
 fi
-
-RESTORE_SCRIPT="/userdata/system/configs/bua/restore_desktop_entry.sh"
-
-cat <<EOF > "$RESTORE_SCRIPT"
-#!/bin/bash
-# Restore ${APPNAME} desktop entry (always replace)
-
-echo "Restoring ${APPNAME} desktop entry..."
-cp -f "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
-chmod +x "$DESKTOP_FILE"
-echo "${APPNAME} desktop entry restored."
-
-EOF
 
 chmod +x "$RESTORE_SCRIPT"
 /userdata/system/configs/bua/restore_desktop_entry.sh
