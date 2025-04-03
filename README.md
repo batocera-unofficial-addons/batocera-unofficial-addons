@@ -29,7 +29,7 @@ Individual install links won't be provided — the app is needed to handle depen
 
 This project includes a hidden "secret menu" that is self-hosted and password-protected.
 
-⚠️ This menu is not open source, is provided for personal use only, and is protected under a custom license.
+⚠️ This menu, and it's contents, are not open source, are provided for personal use only, and are protected under a custom license.
 The source code is not publicly distributed due to the sensitive nature of what it provides.
 Full details of it's custom license is included when trying to access the menu.
 
