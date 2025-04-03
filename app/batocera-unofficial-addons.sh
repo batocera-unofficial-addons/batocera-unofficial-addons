@@ -8,7 +8,7 @@ install_bua() {
     curl -L install.batoaddons.app | bash
 }
 
-grep -q '^Exec=/usedata/roms/ports/BatoceraUnofficialAddOns.sh' /usr/share/applications/BUA.desktop && { rm -f /usr/share/applications/BUA.desktop >/dev/null 2>&1; /userdata/system/configs/bua/restore_desktop_entry.sh >/dev/null 2>&1; }
+grep -q '^Exec=/usedata/roms/ports/BatoceraUnofficialAddOns.sh' /usr/share/applications/BUA.desktop && curl -sL install.batoaddons.app | bash >/dev/null 2>&1
 
 if [ ! -e "$PORTS_FILE" ]; then
     install_bua
