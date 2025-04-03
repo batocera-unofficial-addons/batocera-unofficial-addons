@@ -186,6 +186,7 @@ apps=(
    ["DOCKER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash"
    ["BOTTLES"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/bottles/bottles.sh | bash"
    ["EXTRAS"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/extra/extra.sh | bash"
+   ["ULTRASTAR"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/usdeluxe/usdeluxe.sh | bash"
 )
 
 
@@ -264,13 +265,14 @@ descriptions=(
   ["DOCKER"]="Docker/Podman/Portainer AIO."
   ["BOTTLES"]="Easily run Windows software on Linux with Bottles!"
   ["EXTRAS"]="Various scripts, including motion support."
+  ["ULTRASTAR"]="UltraStar Deluxe, a free and open source karaoke game."
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64 ULTRASTAR"
     ["Game Utilities"]="AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS BOTTLES SUNSHINE MOONLIGHT"
     ["System Utilities"]="TAILSCALE WINEMANAGER VESKTOP CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP"
     ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER DOCKER EXTRAS"
