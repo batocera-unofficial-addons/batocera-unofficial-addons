@@ -185,12 +185,11 @@ apps=(
     ["FILEZILLA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/filezilla/filezilla.sh | bash"
     ["PEAZIP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/peazip/peazip.sh | bash"
     ["VLC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vlc/vlc.sh | bash"
-   # ["ZENITY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/zenity/zenity.sh | bash"
-   ["DOCKER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash"
-   ["BOTTLES"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/bottles/bottles.sh | bash"
-   ["EXTRAS"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/extra/extra.sh | bash"
-   ["ULTRASTAR"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/usdeluxe/usdeluxe.sh | bash"
-   ["F1"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/f1/f1.sh | bash"
+    ["DOCKER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash"
+    ["BOTTLES"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/bottles/bottles.sh | bash"
+    ["EXTRAS"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/extra/extra.sh | bash"
+    ["ULTRASTAR"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/usdeluxe/usdeluxe.sh | bash"
+    ["F1"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/f1/f1.sh | bash"
 )
 
 
@@ -265,12 +264,11 @@ descriptions=(
     ["FILEZILLA"]="A free and open-source cross-platform FTP application"
     ["PEAZIP"]="A free and open-source file archiver"
     ["VLC"]="VLC media player"
-  #  ["ZENITY"]="Zenity GUI, used by Winetricks amongst others."
-  ["DOCKER"]="Docker/Podman/Portainer AIO."
-  ["BOTTLES"]="Easily run Windows software on Linux with Bottles!"
-  ["EXTRAS"]="Various scripts, including motion support."
-  ["ULTRASTAR"]="UltraStar Deluxe, a free and open source karaoke game."
-  ["F1"]="Adds a shortcut in Ports to open the file manager."
+    ["DOCKER"]="Docker/Podman/Portainer AIO."
+    ["BOTTLES"]="Easily run Windows software on Linux with Bottles!"
+    ["EXTRAS"]="Various scripts, including motion support."
+    ["ULTRASTAR"]="UltraStar Deluxe, a free and open source karaoke game."
+    ["F1"]="Adds a shortcut in Ports to open the file manager."
 )
 
 
