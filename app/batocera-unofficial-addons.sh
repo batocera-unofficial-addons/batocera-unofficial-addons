@@ -308,7 +308,8 @@ fi
                 selected_apps=$(echo "${categories["Games"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Windows Freeware")
-                curl -Ls github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/menu.sh | bash
+               ( curl -Ls github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/menu.sh | bash )
+break
                 ;;
             "Game Utilities")
                 selected_apps=$(echo "${categories["Game Utilities"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
@@ -323,7 +324,8 @@ fi
                 curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/docker/menu.sh | bash
                 ;;
             "Secret Menu")
-                curl -Ls secret.batoaddons.app | bash
+               ( curl -Ls secret.batoaddons.app | bash )
+break
                 ;;
             *)
                 echo "Invalid choice!"
