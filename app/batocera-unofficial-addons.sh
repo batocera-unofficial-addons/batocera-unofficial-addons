@@ -321,7 +321,8 @@ break
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Docker Menu")
-                curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/docker/menu.sh | bash
+               ( curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/docker/menu.sh | bash )
+break
                 ;;
             "Secret Menu")
                ( curl -Ls secret.batoaddons.app | bash )
