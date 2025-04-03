@@ -133,15 +133,13 @@ RESTORE_SCRIPT="/userdata/system/configs/${APPNAME,,}/restore_desktop_entry.sh"
 
 cat <<EOF > "$RESTORE_SCRIPT"
 #!/bin/bash
-# Restore ${APPNAME} desktop entry
-if [ ! -f "$DESKTOP_FILE" ]; then
-    echo "Restoring ${APPNAME} desktop entry..."
-    cp "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
-    chmod +x "$DESKTOP_FILE"
-    echo "${APPNAME} desktop entry restored."
-else
-    echo "${APPNAME} desktop entry already exists."
-fi
+# Restore ${APPNAME} desktop entry (always replace)
+
+echo "Restoring ${APPNAME} desktop entry..."
+cp -f "$PERSISTENT_DESKTOP" "$DESKTOP_FILE"
+chmod +x "$DESKTOP_FILE"
+echo "${APPNAME} desktop entry restored."
+
 EOF
 
 chmod +x "$RESTORE_SCRIPT"
