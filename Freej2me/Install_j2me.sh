@@ -132,6 +132,7 @@ cp -r $EXTRACT_DIR/* $DEST_DIR
 
 # Set the file path
 FILE="/usr/share/batocera/configgen/configgen-defaults.yml"
+FILE2="/userdata/system/batocera.conf"
 
 # Check if the information is already in the file
 if ! grep -q "j2me:" "$FILE"; then
