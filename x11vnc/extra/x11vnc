@@ -9,6 +9,7 @@ RUN_CMD="x11vnc -display :0 -rfbport 5900 -reopen -forever -shared"
 case "$1" in
     start)
         echo "Starting x11vnc..."
+        sleep 10
         $RUN_CMD &
         echo $! > "$PID_FILE"
         ;;
