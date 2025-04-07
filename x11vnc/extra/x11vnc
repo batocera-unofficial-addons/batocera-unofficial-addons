@@ -4,7 +4,7 @@
 PID_FILE="/var/run/x11vnc.pid"
 
 # Your actual run command
-RUN_CMD="x11vnc -display :0 -rfbport 5900 -ncache 10"
+RUN_CMD="x11vnc -display :0 -rfbport 5900 -ncache 10 -reopen -forever"
 
 case "$1" in
     start)
