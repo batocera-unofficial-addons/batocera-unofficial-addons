@@ -4,7 +4,7 @@
 URL="https://drive.usercontent.google.com/download?id=1Qizzji8stAHTDQSwHX3QoBq3vf6iXNrN&export=download&authuser=0&confirm=t"
 KEYS_URL=""  # Leave empty if no keys file is needed
 DEST_DIR="/userdata/roms/windows"
-MESSAGE=""  # Leave empty if no message is needed
+MESSAGE="Needs DXVK set to OFF"  # Leave empty if no message is needed
 GAME_LIST="/userdata/roms/windows/gamelist.xml"
 APP_NAME="Super Smash Bros CMC+"
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/extra/cmc.jpg"
