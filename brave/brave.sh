@@ -20,22 +20,24 @@ LOGO_PATH="${PORTS_DIR}/images/${APP_NAME,,}-logo.png"
 echo "Detecting system architecture..."
 arch=$(uname -m)
 
-# Fetch the latest release regardless of pre-release or not
-latest_release_data=$(curl -s https://api.github.com/repos/$REPO/releases | jq '.[0]')
-
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url=$(echo "$latest_release_data" | jq -r ".assets[] | select(.name | endswith(\"$AMD_SUFFIX\")) | .browser_download_url")
+    appimage_url=$(curl -s https://api.github.com/repos/$REPO/releases/latest | jq -r ".assets[] | select(.name | endswith(\"$AMD_SUFFIX\")) | .browser_download_url")
 elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: arm64 detected."
     if [ -n "$ARM_SUFFIX" ]; then
-        appimage_url=$(echo "$latest_release_data" | jq -r ".assets[] | select(.name | endswith(\"$ARM_SUFFIX\")) | .browser_download_url")
+        appimage_url=$(curl -s https://api.github.com/repos/$REPO/releases/latest | jq -r ".assets[] | select(.name | endswith(\"$ARM_SUFFIX\")) | .browser_download_url")
     else
         echo "No ARM64 AppImage suffix provided. Skipping download. Exiting."
         exit 1
     fi
 else
     echo "Unsupported architecture: $arch. Exiting."
+    exit 1
+fi
+
+if [ -z "$appimage_url" ]; then
+    echo "No suitable AppImage found for architecture: $arch. Exiting."
     exit 1
 fi
 
