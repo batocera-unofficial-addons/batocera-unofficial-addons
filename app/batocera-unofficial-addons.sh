@@ -2,7 +2,7 @@
 
 SYMLINK_MANAGER_PATH="/userdata/system/services/symlink_manager"
 PORTS_FILE="/userdata/roms/ports/bua.sh"
-libcypt="/userdata/system/add-ons/.dep/libcrypt.so.2"
+libcrypt="/userdata/system/add-ons/.dep/libcrypt.so.2"
 
 install_bua() {
     curl -L install.batoaddons.app | bash
