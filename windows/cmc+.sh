@@ -7,7 +7,7 @@ DEST_DIR="/userdata/roms/windows"
 MESSAGE=""  # Leave empty if no message is needed
 GAME_LIST="/userdata/roms/windows/gamelist.xml"
 APP_NAME="Super Smash Bros CMC+"
-LOGO_URL="https://images.gamebanana.com/img/ss/mods/64cb123da0d4a.jpg"
+LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/extra/cmc.jpg"
 LOGO_PATH="/userdata/roms/windows/images/cmc+-logo.jpg"
 
 # Ensure destination directory exists
