@@ -34,6 +34,7 @@ cat << 'EOF' > /userdata/roms/ports/Moonlight.sh
 # Environment setup
 export $(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
+export HOME=/userdata/system/add-ons/moonlight
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/moonlight"
