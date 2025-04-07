@@ -2,7 +2,7 @@
 
 SYMLINK_MANAGER_PATH="/userdata/system/services/symlink_manager"
 PORTS_FILE="/userdata/roms/ports/bua.sh"
-LIBCURSOR="/userdata/system/add-ons/.dep/libwayland-cursor.so.0"
+libcypt="/userdata/system/add-ons/.dep/libcrypt.so.2"
 
 install_bua() {
     curl -L install.batoaddons.app | bash
@@ -21,7 +21,7 @@ if [ ! -e "$SYMLINK_MANAGER_PATH" ]; then
         "You've ran RGS install script since installing BUA! BUA has reinstalled, but previous application installs will need to be installed again." 10 60
 fi
 
-if [ ! -e "$LIBCURSOR" ]; then
+if [ ! -e "$libcrypt" ]; then
     install_bua
 fi
 
