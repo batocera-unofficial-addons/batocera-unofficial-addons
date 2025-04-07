@@ -56,7 +56,6 @@ animate_border() {
 
 # Function to display controls
 display_controls() {
-/userdata/system/add-ons/bua/keys-generator.sh &
 # Display the ASCII art
 echo -e "\e[1;90m"
 echo -e "                                                             \e[1;90m ⠈⠻⠷⠄     \e[0m                 "
