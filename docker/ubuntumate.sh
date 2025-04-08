@@ -54,7 +54,7 @@ docker run -d \
   -e PUID=$(id -u) \
   -e PGID=$(id -g) \
   -e TZ=$(cat /etc/timezone) \
-  -e SUBFOLDER=/ \   
+  -e SUBFOLDER=/ \
   -p ${HOST_PORT}:3000 \
   -v "$data_dir:/config" \
   -v "$data_dir/home:/home/ubuntu" \
