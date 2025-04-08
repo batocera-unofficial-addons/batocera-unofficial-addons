@@ -56,8 +56,7 @@ curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/mai
 batocera-services enable docker
 batocera-services start docker
 
-
-echo "Done." 
-echo "Access portainer gui via https://<batoceraipaddress>:9443"
-sleep 10
+dialog --title "Installation Complete" --msgbox "Done!\n\nYou can now access the Portainer GUI at:\n\nhttps://<batoceraipaddress>:9443" 10 50
+clear
 exit
+
