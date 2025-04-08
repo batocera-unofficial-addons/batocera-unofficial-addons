@@ -68,9 +68,9 @@ update_flatpak_gamelist() {
     xmlstarlet ed --inplace \
         -d "/gameList/game[path='./Parsec Cloud, Inc..flatpak']" \
         -s "/gameList" -t elem -n game \
-        -s "/gameList/game[last()]" -t elem -n path -v "./Parsec Cloud, Inc..flatpak" \
+        -s "/gameList/game[last()]" -t elem -n path -v "./Parsec Cloud, Inc.flatpak" \
         -s "/gameList/game[last()]" -t elem -n name -v "Parsec Cloud, Inc." \
-        -s "/gameList/game[last()]" -t elem -n image -v "./images/Parsec Cloud, Inc..png" \
+        -s "/gameList/game[last()]" -t elem -n image -v "./images/Parsec Cloud, Inc.png" \
         -s "/gameList/game[last()]" -t elem -n rating -v "" \
         -s "/gameList/game[last()]" -t elem -n releasedate -v "" \
         -s "/gameList/game[last()]" -t elem -n hidden -v "true" \
