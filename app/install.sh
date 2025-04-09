@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Check if Profork is installed and show warning
+# Check for Profork
 if [[ -e "/userdata/system/pro" ]]; then
     cat <<'EOF' > /dev/tty
 
@@ -30,14 +30,12 @@ EOF
     fi
 fi
 
-# Define URLs for install scripts
+# URLs
 AMD64="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/install_x86.sh"
 ARM64="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/install_arm64.sh"
 
-# Check the filesystem type of /userdata
+# Filesystem check
 fstype=$(stat -f -c %T /userdata)
-
-# List of known filesystems that are incompatible or problematic with symlinks
 incompatible_types=("vfat" "msdos" "exfat" "cifs" "ntfs")
 
 for type in "${incompatible_types[@]}"; do
@@ -49,20 +47,16 @@ done
 
 echo -e "\e[32mFile system '$fstype' supports symlinks. Continuing...\e[0m"
 
-# Detect system architecture
+# Architecture detection
 ARCH=$(uname -m)
 
-case "$ARCH" in
-    x86_64)
-        echo "Detected AMD64 architecture. Executing the install script..."
-        curl -Ls "$AMD64" | bash
-        ;;
-    aarch64)
-        echo "Detected ARM64 architecture. Executing the install script..."
-        curl -Ls "$ARM64" | bash
-        ;;
-    *)
-        echo -e "\e[31mUnsupported architecture:\e[0m $ARCH"
-        exit 1
-        ;;
-esac
+if [[ "$ARCH" == "x86_64" ]]; then
+    echo "Detected AMD64 architecture. Executing the install script..."
+    curl -Ls "$AMD64" | bash
+elif [[ "$ARCH" == "aarch64" ]]; then
+    echo "Detected ARM64 architecture. Executing the install script..."
+    curl -Ls "$ARM64" | bash
+else
+    echo -e "\e[31mUnsupported architecture:\e[0m $ARCH"
+    exit 1
+fi
