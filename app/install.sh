@@ -18,7 +18,7 @@ If this was meant as satire or commentary, it needs to stop. Let your work stand
 Please note: if you continue with this installation, Profork will no longer open, as Cliffy added a detection
 code and a lock file. Don't ask me why — this is literally the only thing in the entire BUA repo that even
 has any reference to Profork. But hey, I'm not here to tell people how to run their own repos...
-just don't fuck with mine, bro.
+just don't fuck with mine.
 
 EOF
 
