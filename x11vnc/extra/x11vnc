@@ -1,28 +1,29 @@
 #!/bin/bash
 
-# PID file location
-PID_FILE="/var/run/x11vnc.pid"
+STOP_FILE="/tmp/x11vnc.stop"
 LOG_FILE="/userdata/system/logs/x11vnc.log"
-export DISPLAY=:0.0
-
-# Your actual run command
 RUN_CMD="x11vnc -display :0 -rfbport 5900 -reopen -forever -shared -logappend $LOG_FILE"
 
 case "$1" in
     start)
-        echo "Starting x11vnc..."
-        sleep 10
-        $RUN_CMD &
-        echo $! > "$PID_FILE"
+	# Remove stop file
+        [ -f $STOP_FILE ] && rm $STOP_FILE
+
+        # Ensure no new instances are spawned if already running
+        [[ $(pgrep -f "$RUN_CMD" > /dev/null) ]] && exit 0
+
+        (
+	    while [ ! -f $STOP_FILE ]; do
+                echo "$(date) Starting x11vnc..." | tee -a "$LOG_FILE"
+                $RUN_CMD
+            done
+            echo "$(date) Stop file found" | tee -a "$LOG_FILE"
+        )&
         ;;
     stop)
-        echo "Stopping x11vnc..."
-        if [ -f "$PID_FILE" ]; then
-            kill $(cat "$PID_FILE") && rm "$PID_FILE"
-        else
-            echo "PID file not found. Trying to kill all x11vnc processes."
-            pkill -f "$RUN_CMD"
-        fi
+        echo "$(date) Stopping x11vnc..." | tee -a "$LOG_FILE"
+        touch $STOP_FILE # Create stop file, so process won't restart anymore
+        pkill -f "$RUN_CMD"
         ;;
     status)
         if pgrep -f "$RUN_CMD" > /dev/null; then
@@ -38,3 +39,4 @@ case "$1" in
 esac
 
 exit 0
+
