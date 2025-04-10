@@ -3,6 +3,7 @@
 # PID file location
 PID_FILE="/var/run/x11vnc.pid"
 LOG_FILE="/userdata/system/logs/x11vnc.log"
+export DISPLAY=:0.0
 
 # Your actual run command
 RUN_CMD="x11vnc -display :0 -rfbport 5900 -reopen -forever -shared -logappend $LOG_FILE"
