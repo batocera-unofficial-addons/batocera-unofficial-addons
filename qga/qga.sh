@@ -51,7 +51,7 @@ esac
 EOF
 
 # Make the service script executable
-chmod +x /userdata/system/services/qemu-ga
+chmod +x /userdata/system/services/qemu_ga
 
 # Wait silently for /usr/bin/qemu-ga to become available
 timeout=30
@@ -66,8 +66,8 @@ if [[ ! -x /usr/bin/qemu-ga ]]; then
     exit 1
 fi
 
-batocera-services enable qemu-ga
-batocera-services start qemu-ga &>/dev/null &
+batocera-services enable qemu_ga
+batocera-services start qemu_ga &>/dev/null &
 
 clear_
 dialog --msgbox "QEMU Guest Agent installed and service created!\n\nTo manually control it, use:\n\nbatocera-services {start|stop|restart} qemu_ga" 10 60
