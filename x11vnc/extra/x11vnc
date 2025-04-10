@@ -2,9 +2,10 @@
 
 # PID file location
 PID_FILE="/var/run/x11vnc.pid"
+LOG_FILE="/userdata/system/logs/x11vnc.log"
 
 # Your actual run command
-RUN_CMD="x11vnc -display :0 -rfbport 5900 -reopen -forever -shared"
+RUN_CMD="x11vnc -display :0 -rfbport 5900 -reopen -forever -shared -logappend $LOG_FILE"
 
 case "$1" in
     start)
@@ -19,11 +20,11 @@ case "$1" in
             kill $(cat "$PID_FILE") && rm "$PID_FILE"
         else
             echo "PID file not found. Trying to kill all x11vnc processes."
-            pkill -f "x11vnc"
+            pkill -f "$RUN_CMD"
         fi
         ;;
     status)
-        if pgrep -f "x11vnc" > /dev/null; then
+        if pgrep -f "$RUN_CMD" > /dev/null; then
             echo "x11vnc is running."
         else
             echo "x11vnc is not running."
