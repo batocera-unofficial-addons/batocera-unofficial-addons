@@ -4,7 +4,7 @@
 curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/qga/extra/qga.tar.gz | tar -xz -C /userdata/system/add-ons
 
 # Create the service script
-cat << 'EOF' > /userdata/system/services/qemu-ga
+cat << 'EOF' > /userdata/system/services/qemu_ga
 #!/bin/bash
 
 QGA_PID="/userdata/system/add-ons/qga/qga.pid"
@@ -69,7 +69,7 @@ fi
 batocera-services enable qemu-ga
 batocera-services start qemu-ga &>/dev/null &
 
-clear
-dialog --msgbox "QEMU Guest Agent installed and service created!\n\nTo manually control it, use:\n\nbatocera-services {start|stop|restart} qemu-ga" 10 60
+clear_
+dialog --msgbox "QEMU Guest Agent installed and service created!\n\nTo manually control it, use:\n\nbatocera-services {start|stop|restart} qemu_ga" 10 60
 clear
 exit 0
