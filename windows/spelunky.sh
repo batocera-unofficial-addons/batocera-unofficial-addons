@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define your variables for easy customization
-URL="https://github.com/trashbus99/profork/releases/download/r1/spelunky.wsquashfs"
+URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/spelunky.wsquashfs"
 KEYS_URL=""  # Leave empty if no keys file is needed
 DEST_DIR="/userdata/roms/windows"
 MESSAGE=""  # Leave empty if no message is needed
