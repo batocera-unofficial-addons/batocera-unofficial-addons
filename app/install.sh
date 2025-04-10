@@ -13,6 +13,7 @@ Cliffy throwing toys around for no reason. Don't know what's up with you bro, bu
 Unfortunately he's decided, despite no incompatibility, that BUA cannot be installed alongside Profork.
 Bottom line: Profork should not be rewriting launchers that don’t belong to it, deleting itself in protest,
 or turning user tools into a passive-aggressive circus. This is toxic behavior, and it undermines trust in the project entirely.
+If this was meant as satire or commentary, it needs to stop. Let your work stand on its own without sabotaging others.
 
 Please note: if you continue with this installation, Profork will no longer open, as Cliffy added a detection
 code and a lock file. Don't ask me why — this is literally the only thing in the entire BUA repo that even
