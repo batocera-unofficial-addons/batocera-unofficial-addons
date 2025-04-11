@@ -33,6 +33,14 @@ restart() {
   start
 }
 
+status() {
+  if pidof qemu-ga >/dev/null; then
+    echo "QEMU Guest Agent is running (PID: $(pidof qemu-ga))."
+  else
+    echo "QEMU Guest Agent is not running."
+  fi
+}
+
 case "$1" in
   start)
     start &
@@ -43,8 +51,11 @@ case "$1" in
   restart)
     restart
     ;;
+  status)
+    status
+    ;;
   *)
-    echo "Usage: $0 {start|stop|restart}"
+    echo "Usage: $0 {start|stop|restart|status}"
     exit 1
     ;;
 esac
