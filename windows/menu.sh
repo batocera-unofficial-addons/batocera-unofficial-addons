@@ -26,7 +26,8 @@ while true; do
                     11 "Sonic Triple Trouble 16bit" \
                     12 "Modern Modern Chef" \
                     13 "Sonic Robo Blast 2" \
-                    14 "Exit" \
+                    14 "Super Smash Bros CMC+" \
+                    15 "Exit" \
                     3>&1 1>&2 2>&3)
     
     case $choice in
@@ -70,6 +71,9 @@ while true; do
             run_game_script "Sonic Robo Blast 2" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/srb2.sh"
             ;;
         14)
+            run_game_script "Super Smash Bros CMC+" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/windows/cmc+.sh"
+            ;;
+        15)
             clear
             echo "Exiting..."
             exit 0

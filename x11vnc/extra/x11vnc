@@ -1,0 +1,42 @@
+#!/bin/bash
+
+STOP_FILE="/tmp/x11vnc.stop"
+LOG_FILE="/userdata/system/logs/x11vnc.log"
+RUN_CMD="x11vnc -display :0 -rfbport 5900 -reopen -forever -shared -logappend $LOG_FILE"
+
+case "$1" in
+    start)
+	# Remove stop file
+        [ -f $STOP_FILE ] && rm $STOP_FILE
+
+        # Ensure no new instances are spawned if already running
+        [[ $(pgrep -f "$RUN_CMD" > /dev/null) ]] && exit 0
+
+        (
+	    while [ ! -f $STOP_FILE ]; do
+                echo "$(date) Starting x11vnc..." | tee -a "$LOG_FILE"
+                $RUN_CMD
+            done
+            echo "$(date) Stop file found" | tee -a "$LOG_FILE"
+        )&
+        ;;
+    stop)
+        echo "$(date) Stopping x11vnc..." | tee -a "$LOG_FILE"
+        touch $STOP_FILE # Create stop file, so process won't restart anymore
+        pkill -f "$RUN_CMD"
+        ;;
+    status)
+        if pgrep -f "$RUN_CMD" > /dev/null; then
+            echo "x11vnc is running."
+        else
+            echo "x11vnc is not running."
+        fi
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status}"
+        exit 1
+        ;;
+esac
+
+exit 0
+

@@ -43,7 +43,7 @@ mkdir -p "$(dirname "$ICON_PATH")"   # Ensure the images directory exists
 
 cat << EOF > $PORT_SCRIPT
 #!/bin/bash
-DISPLAY=:0.0 $APPPATH --no-sandbox --test-type --start-fullscreen --force-device-scale-factor=1.6 'crunchyroll.com/'
+DISPLAY=:0.0 $APPPATH --no-sandbox --test-type --start-fullscreen --force-device-scale-factor=1.6 'crunchyroll.com'
 EOF
 
 chmod +x $PORT_SCRIPT
@@ -56,10 +56,10 @@ curl -L -o "$ICON_PATH" "$LOGO_URL"
 echo "Downloading key mapping file..."
 curl -L -o "$KEYS_PATH" "$KEYS_URL"
 
-# Step 6: Add Netflix entry to gamelist.xml
+# Step 6: Add Crunchyroll entry to gamelist.xml
 echo "Updating gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-  -s "/gameList/game[last()]" -t elem -n "path" -v "./Crunchroll.sh" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./Crunchyroll.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "$APPNAME" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/crunchyroll-logo.png" \
   "$GAMELIST" > "${GAMELIST}.tmp" && mv "${GAMELIST}.tmp" "$GAMELIST"

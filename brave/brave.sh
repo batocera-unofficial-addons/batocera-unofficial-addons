@@ -20,13 +20,18 @@ LOGO_PATH="${PORTS_DIR}/images/${APP_NAME,,}-logo.png"
 echo "Detecting system architecture..."
 arch=$(uname -m)
 
+# Fetch all releases and find the first matching asset for the architecture
+releases_json=$(curl -s "https://api.github.com/repos/$REPO/releases")
+
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url=$(curl -s https://api.github.com/repos/$REPO/releases/latest | jq -r ".assets[] | select(.name | endswith(\"$AMD_SUFFIX\")) | .browser_download_url")
+    appimage_url=$(echo "$releases_json" | jq -r --arg suffix "$AMD_SUFFIX" '
+        .[] | .assets[]? | select(.name | endswith($suffix)) | .browser_download_url' | head -n 1)
 elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: arm64 detected."
     if [ -n "$ARM_SUFFIX" ]; then
-        appimage_url=$(curl -s https://api.github.com/repos/$REPO/releases/latest | jq -r ".assets[] | select(.name | endswith(\"$ARM_SUFFIX\")) | .browser_download_url")
+        appimage_url=$(echo "$releases_json" | jq -r --arg suffix "$ARM_SUFFIX" '
+            .[] | .assets[]? | select(.name | endswith($suffix)) | .browser_download_url' | head -n 1)
     else
         echo "No ARM64 AppImage suffix provided. Skipping download. Exiting."
         exit 1
@@ -40,6 +45,8 @@ if [ -z "$appimage_url" ]; then
     echo "No suitable AppImage found for architecture: $arch. Exiting."
     exit 1
 fi
+
+
 
 # Step 2: Download the AppImage
 echo "Downloading $APP_NAME AppImage from $appimage_url..."

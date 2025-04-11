@@ -1,33 +1,54 @@
-#!/bin/sh
+#!/bin/bash
 
+mount_cgroup() {
+  if ! mount | grep -q "cgroup"; then
+    echo "Mounting cgroup filesystem..."
+    mkdir -p /sys/fs/cgroup
+    mount -t cgroup2 none /sys/fs/cgroup
+  fi
+}
 
 start() {
+  mount_cgroup
 
-if [[ "$(pidof dockerd)" = "" ]]; then
-  if [[ -e "$(which dockerd)" ]]; then
-    nohup dockerd 1>/dev/null 2>/dev/null &
+  if [[ -z "$(pidof dockerd)" ]]; then
+    if command -v dockerd &>/dev/null; then
+      nohup dockerd >/dev/null 2>&1 &
+    else
+      ~/batocera-containers/batocera-containers
+    fi
   else
-    ~/cli/run
+    containers=$(docker ps -q)
+    if [[ -n "$containers" ]]; then
+      docker unpause $containers
+    fi
   fi
-else
-  docker unpause $(docker ps -q)
-fi
+}
 
+restart() {
+  pkill -f batocera-containers
+  ~/batocera-containers/batocera-containers
 }
 
 stop() {
-    docker pause $(docker ps -q)
-    
-}  
+  containers=$(docker ps -q)
+  if [[ -n "$containers" ]]; then
+    docker pause $containers
+  fi
+}
 
 case "$1" in
-        start)
-                start &
-                ;;
-        stop)
-                stop
-                ;;
-        *)
-                echo "Usage: $0 {start|stop}"
-                exit 1
+  start)
+    start &
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    restart
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+    ;;
 esac

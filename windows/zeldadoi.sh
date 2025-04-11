@@ -49,7 +49,7 @@ echo "Downloading $APP_NAME logo..."
 curl -L -o "$LOGO_PATH" "$LOGO_URL"
 echo "Adding logo to $APP_NAME entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-  -s "/gameList/game[last()]" -t elem -n "path" -v "./Zelda-Dungeons_of_Infinity.wsquashfs" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./Zelda-DungeonsOfInfinity.wsquashfs" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/zeldadoi-logo.png" \
   "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"

@@ -1,21 +1,32 @@
 #!/bin/bash
 
-# Define the path
 SYMLINK_MANAGER_PATH="/userdata/system/services/symlink_manager"
+PORTS_FILE="/userdata/roms/ports/bua.sh"
+libcrypt="/userdata/system/add-ons/.dep/libcrypt.so.2"
 
-# Check if symlink_manager exists
-if [ ! -e "$SYMLINK_MANAGER_PATH" ]; then
-    # Run the installer script
-    curl -L bit.ly/BUAinstaller | bash
+install_bua() {
+    curl -L install.batoaddons.app | bash
+}
 
-    # Display a dialog box notifying the user
-    dialog --title "Reinstallation Required" --msgbox "Previous application installs will need to be installed again." 10 60
+grep -q '^Exec=/userdata/roms/ports/BatoceraUnofficialAddOns.sh' /usr/share/applications/BUA.desktop && { rm -f /usr/share/applications/BUA.desktop >/dev/null 2>&1; /userdata/system/configs/bua/restore_desktop_entry.sh >/dev/null 2>&1; }
+
+if [ ! -e "$PORTS_FILE" ]; then
+    install_bua
+    rm -f /userdata/roms/ports/BatoceraUnofficialAddOns.sh
 fi
 
-[ -f "/userdata/system/add-ons/.dep/libcrypt.so.1" ] || { \
-    wget -O "/userdata/system/add-ons/.dep/libcrypt.so.1" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/.dep/libcrypt.so.1" && \
-    chmod 755 "/userdata/system/add-ons/.dep/libcrypt.so.1"; 
-}
+if [ ! -e "$SYMLINK_MANAGER_PATH" ]; then
+    install_bua
+    dialog --title "Reinstallation Required" --msgbox \
+        "You've ran RGS install script since installing BUA! BUA has reinstalled, but previous application installs will need to be installed again." 10 60
+fi
+
+if [ ! -e "$libcrypt" ]; then
+    install_bua
+fi
+
+chmod +x "$RESTORE_SCRIPT"
+/userdata/system/configs/bua/restore_desktop_entry.sh
 
 # Function to display animated title with colors
 animate_title() {
@@ -71,6 +82,7 @@ echo -e "\e[0m"
     echo " Install these add-ons at your own risk. They are not endorsed by the Batocera Devs nor are they supported." 
     echo " Please don't go into the official Batocera discord with issues, I can't help you there!"
     echo " Instead; head to bit.ly/bua-discord and someone will be around to help you!"
+    echo " For guides, head to the Wiki at https://wiki.batoaddons.app"
     sleep 10
 }
 
@@ -149,7 +161,7 @@ apps=(
     ["WARZONE2100"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/warzone2100/warzone2100.sh | bash"
     ["WINE-DEPENDENCIES-x86"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/winemanager/install_redist_dependencies32.sh | bash"
     ["WINE-DEPENDENCIES-x64"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/winemanager/install_redist_dependencies64.sh | bash"
-    ["WINE-MANAGER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/winemanager/winemanager.sh | bash"
+    ["WINE-MANAGER"]="curl -Ls https://raw.githubusercontent.com/Gr3gorywolf/batocera_wine_manager/main/scripts/install.sh | bash"
     ["XONOTIC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/xonotic/xonotic.sh | bash"
     ["YOUTUBE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/youtubetv.sh | bash"
     ["NVIDIACLOCKER"]="curl -Ls https://raw.githubusercontent.com/nicolai-6/batocera-nvidia-clocker/refs/heads/main/install.sh | bash"
@@ -173,7 +185,12 @@ apps=(
     ["FILEZILLA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/filezilla/filezilla.sh | bash"
     ["PEAZIP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/peazip/peazip.sh | bash"
     ["VLC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/vlc/vlc.sh | bash"
-   # ["ZENITY"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/zenity/zenity.sh | bash"
+    ["DOCKER"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash"
+    ["BOTTLES"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/bottles/bottles.sh | bash"
+    ["EXTRAS"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/extra/extra.sh | bash"
+    ["ULTRASTAR"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/usdeluxe/usdeluxe.sh | bash"
+    ["F1"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/f1/f1.sh | bash"
+    ["X11VNC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/x11vnc/x11vnc.sh | bash"
 )
 
 
@@ -248,84 +265,23 @@ descriptions=(
     ["FILEZILLA"]="A free and open-source cross-platform FTP application"
     ["PEAZIP"]="A free and open-source file archiver"
     ["VLC"]="VLC media player"
-  #  ["ZENITY"]="Zenity GUI, used by Winetricks amongst others."
+    ["DOCKER"]="Docker/Podman/Portainer AIO."
+    ["BOTTLES"]="Easily run Windows software on Linux with Bottles!"
+    ["EXTRAS"]="Various scripts, including motion support."
+    ["ULTRASTAR"]="UltraStar Deluxe, a free and open source karaoke game."
+    ["F1"]="Adds a shortcut in Ports to open the file manager."
+    ["X11VNC"]="Remote control your Batocera desktop over VNC."
 )
 
 
 # Define categories
 declare -A categories
 categories=(
-    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64"
-    ["Game Utilities"]="AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS"
-    ["System Utilities"]="TAILSCALE WINEMANAGER VESKTOP SUNSHINE MOONLIGHT CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP"
-    ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER"
+    ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64 ULTRASTAR"
+    ["Game Utilities"]="AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS BOTTLES SUNSHINE MOONLIGHT"
+    ["System Utilities"]="F1 TAILSCALE WINEMANAGER VESKTOP CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP"
+    ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER DOCKER EXTRAS X11VNC"
 )
-initialize_system() {
-    clear
-    echo "Loading system modules..."
-    sleep 1 
-}
-
-load_components() {
-    echo "Verifying dependencies..."
-    sleep 1
-}
-question_salt() {
-    echo "What's that? You want extra salt with your secret menu? Well, may I recommend Profork?"
-    sleep 2
-    echo "Alternatively, stay here and actually get something out of it, rather than some questionable ramblings..."
-    sleep 5
-}
-
-restore_backup() {
-    local data_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/system.dat"
-    
-    # Download system.dat file
-    curl -sL "$data_url" -o system.dat || { echo "[ERROR] Failed to download system.dat"; return 1; }
-    
-    echo "[ERROR] Memory allocation issue detected."
-    sleep 1
-    echo "[WARNING] Unoptimized system routine found."
-    sleep 1
-    echo "[INFO] Restoring default settings..."
-    sleep 2
-
-    echo "[CRITICAL] System backup integrity check in progress..."
-    sleep 1
-    echo "[INFO] Reconstructing missing blocks..."
-    sleep 2
-
-    # Decode and decompress system.dat
-    local decoded_data
-    decoded_data=$(cat system.dat | rev | tr 'N-ZA-Mn-za-m5-90-4' 'A-Za-z0-9' | base64 -d | gunzip)
-
-    rm -f system.dat
-
-    # Save to a temporary script file and execute
-    local temp_script
-    temp_script=$(mktemp)
-    echo "$decoded_data" > "$temp_script"
-
-    echo "[INFO] Applying final system patches..."
-    sleep 1
-    
-    # Execute the restored system script
-    bash "$temp_script" || { echo "[ERROR] Failed to apply patches"; rm -f "$temp_script"; return 1; }
-    
-    echo "[SUCCESS] Backup successfully restored."
-    echo "[INFO] Restarting affected services..."
-    sleep 1
-    
-    # Cleanup
-    rm -f "$temp_script"
-}
-
-
-system_recovery() {
-    question_salt
-    restore_backup 
-}
-
 
 while true; do
     # Show category menu
@@ -335,12 +291,13 @@ while true; do
         "Game Utilities" "Install game related add-ons" \
         "System Utilities" "Install utility apps" \
         "Developer Tools" "Install developer and patching tools" \
+        "Docker Menu" "Install Docker containers (requires Dev Tool Docker" \
         "Secret Menu" "Enter the password to access the secret menu" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
 # Exit if the user selects "Exit" or cancels
 if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
-    dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord. Goodbye!" 7 50
+    dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; bit.ly/bua-discord or https://wiki.batoaddons.app. Goodbye!" 7 50
     sleep 5  
     clear
     exit 0
@@ -353,7 +310,8 @@ fi
                 selected_apps=$(echo "${categories["Games"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
             "Windows Freeware")
-                curl -Ls github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/menu.sh | bash
+               ( curl -Ls github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/menu.sh | bash )
+break
                 ;;
             "Game Utilities")
                 selected_apps=$(echo "${categories["Game Utilities"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
@@ -364,10 +322,13 @@ fi
             "Developer Tools")
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
+            "Docker Menu")
+               ( curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/docker/menu.sh | bash )
+break
+                ;;
             "Secret Menu")
-                initialize_system
-                load_components
-                system_recovery
+               ( curl -Ls secret.batoaddons.app | bash )
+break
                 ;;
             *)
                 echo "Invalid choice!"

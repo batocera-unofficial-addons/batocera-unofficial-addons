@@ -86,99 +86,80 @@ echo ""
 echo -ne "${PURPLE}"  # Cor roxa para a mensagem final
 type_text "Thank you for running this script!"  
 type_text "Developed by DRLEdition19"  
-type_text "The installation will start in a few moments. Please wait..."
+type_text "Please wait, the process is in progress..."
 sleep 2
 clear
 
 
 # Welcome message
-echo "Welcome to the automatic installer for the J2ME game emulator by DRL Edition."
+echo "Welcome to the automatic installer for the Freej2me by DRL Edition."
 
 # Temporary directory for download
-TEMP_DIR="/userdata/tmp/freej2me"
-DRL_FILE="$TEMP_DIR/freej2me.zip"
+TEMP_DIR="/userdata/tmp/Freej2me"
+DRL_FILE="$TEMP_DIR/Freej2me.DRL"
+EXTRACT_DIR="$TEMP_DIR/extracted"
 DEST_DIR="/"
 
-# Create the temporary directory
-echo "Creating temporary directory for download..."
+# Create the temporary directories
+echo "Creating temporary directories..."
 mkdir -p $TEMP_DIR
+mkdir -p $EXTRACT_DIR
 
-# Download the drl file
-echo "Downloading the freej2me.drl file..."
-curl -L -o $DRL_FILE "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/Freej2me/extra/freej2me.zip"
+# Download the DRL file
+echo "Downloading the Freej2me.DRL file..."
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/batocera-unofficial-addons.add/releases/download/files/Freej2me.DRL"
 
-# Extract the drl file with a progress bar and change permissions for each extracted file
-echo "Extracting the drl file and setting permissions for each file..."
-unzip -o $DRL_FILE -d $TEMP_DIR | while IFS= read -r file; do
-    if [ -f "$TEMP_DIR/$file" ]; then
-        chmod 777 "$TEMP_DIR/$file"
-    fi
-done
-
-# Copy the extracted files to the root directory, replacing existing ones
-echo "Copying extracted files to the root directory..."
-cp -r $TEMP_DIR/* $DEST_DIR
-
-# Create symbolic links
-echo "Creating symbolic links..."
-
-# Function to create a symbolic link and replace it if it already exists
-# Function to create a symbolic link and remove the target if it already exists
-create_symlink() {
-    local target="$1"
-    local link="$2"
-
-    # Remove existing file or directory
-    if [ -e "$link" ] || [ -L "$link" ]; then
-        echo "Removing existing link or file: $link"
-        rm -rf "$link"
-    fi
-
-    # Create the new symbolic link
-    ln -s "$target" "$link"
-    echo "Created symlink: $link → $target"
-}
-
-create_symlink "/userdata/system/configs/bat-drl/AntiMicroX" "/opt/AntiMicroX"
-create_symlink "/userdata/system/configs/bat-drl/AntiMicroX/antimicrox" "/usr/bin/antimicrox"
-create_symlink "/userdata/system/configs/bat-drl/Freej2me" "/opt/Freej2me"
-create_symlink "/userdata/system/configs/bat-drl/python2.7" "/usr/lib/python2.7"
-
-# Set permissions for specific files
-echo "Setting permissions for specific files..."
-chmod 777 /media/SHARE/system/configs/bat-drl/Freej2me/freej2me.sh
-chmod 777 /media/SHARE/system/configs/bat-drl/python2.7/site-packages/configgen/emulatorlauncher.sh
-chmod 777 /userdata/system/configs/bat-drl/AntiMicroX/antimicrox
-chmod 777 /userdata/system/configs/bat-drl/AntiMicroX/antimicrox.sh
-
-# Delete the freej2me.zip file from the root directory
-echo "Deleting the freej2me.zip file from the root directory..."
-rm -rf $TEMP_DIR/freej2me.zip
-rm -rf /freej2me.zip
-
-# Rename es_system_j2me.cfg to es_systems_j2me.cfg
-mv /userdata/system/configs/emulationstation/es_system_j2me.cfg /userdata/system/configs/emulationstation/es_systems_j2me.cfg
-
-# Clean up the temporary directory
-echo "Cleaning up temporary directory..."
-rm -rf $TEMP_DIR
-
-# Check if the /userdata/system/add-ons/java directory exists
-if [ -d "/userdata/system/add-ons/java" ]; then
-    echo "The directory /userdata/system/add-ons/java already exists. Exiting script."
-    exit 0
+# Check if download was successful
+if [ ! -f "$DRL_FILE" ]; then
+    echo "Error: Failed to download Freej2me.DRL"
+    exit 1
 fi
 
-# Execute the java.sh script if the /userdata/system/add-ons/java directory does not exist
-echo "Executing the java.sh script..."
-curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/java/java.sh | bash
+# Extract the squashfs file
+echo "Extracting the DRL file..."
+unsquashfs -f -d "$EXTRACT_DIR" "$DRL_FILE"
 
-echo "Setting permissions for specific files..."
-create_symlink "/userdata/system/add-ons/java/java/bin/java" "/usr/bin/java"
+# Check if extraction was successful
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to extract the DRL file"
+    rm -rf $TEMP_DIR
+    exit 1
+fi
+
+# Copy the extracted files to the root directory
+echo "Copying files to the system..."
+cp -r $EXTRACT_DIR/* $DEST_DIR
+
+# Set the file path
+FILE="/usr/share/batocera/configgen/configgen-defaults.yml"
+FILE2="/userdata/system/batocera.conf"
+
+# Check if the information is already in the file
+if ! grep -q "j2me:" "$FILE"; then
+    # Add the desired content to the file
+    echo -e "\nj2me:\n  emulator: libretro\n  core:     freej2me" >> "$FILE"
+    echo "Information added to the file."
+else
+    echo "The information already exists in the file. No changes were made."
+fi
+
+# Check if the information is already in the file batocera.conf
+if ! grep -q "j2me" "$FILE2"; then
+    # Add the desired content to the file
+    echo -e "\nj2me.core=freej2me\nj2me.emulator=libretro" >> "$FILE2"
+    echo "Information added to the file."
+else
+    echo "The information already exists in the file. No changes were made."
+fi
+
+# Clean up
+echo "Cleaning up..."
+rm -rf $TEMP_DIR
 
 # Save changes
 echo "Saving changes..."
-batocera-save-overlay 300
+batocera-save-overlay
 
-echo "Installation completed successfully."
+type_text "Installation completed successfully."
+type_text "Developed by DRLEdition19"  
 killall -9 emulationstation
