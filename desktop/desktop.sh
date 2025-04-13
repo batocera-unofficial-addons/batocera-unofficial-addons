@@ -204,9 +204,6 @@ EOF
 echo "Refreshing Ports menu..."
 curl -s http://127.0.0.1:1234/reloadgames
 
-# Step 12: Done!
-echo "BatoDesktop installed successfully. Launch from the Ports menu!"
-
 # Step 13: Add the image and marquee
 echo "Adding image and marquee to the game list..."
 
@@ -248,3 +245,8 @@ awk -v entry="$xml_entry" '
 ' "$gamelist_file" > "$temp_file" && mv "$temp_file" "$gamelist_file"
 
 echo "Game added to gamelist.xml."
+
+
+# Step 12: Done!
+echo "BatoDesktop installed successfully. Launch from the Ports menu!"
+sleep 5
