@@ -6,10 +6,10 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url=$(curl -s https://api.github.com/repos/LibreWolf/LibreWolf/releases/latest | jq -r '.assets[] | select(.name | endswith("x86_64.AppImage")) | .browser_download_url')
+    appimage_url=$(curl -s https://gitlab.com/api/v4/projects/24386000/releases | jq -r '.[0].assets.links[] | select(.name | test("librewolf.*x86_64.AppImage$")) | .url')
 elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: aarch64 detected."
-    appimage_url=$(curl -s https://api.github.com/repos/LibreWolf/LibreWolf/releases/latest | jq -r '.assets[] | select(.name | endswith("aarch64.AppImage")) | .browser_download_url')
+    appimage_url=$(curl -s https://gitlab.com/api/v4/projects/24386000/releases | jq -r '.[0].assets.links[] | select(.name | test("librewolf.*aarch64.AppImage$")) | .url')
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
