@@ -12,6 +12,10 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
+    url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/batocera-containers"
+elif [ "$arch" == "aarch64" ]; then
+    echo "Architecture: aarch64 detected."
+    url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/batocera-containers-aarch64"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
@@ -19,53 +23,55 @@ fi
 
 # Step 2: Check if Docker is installed
 if ! command -v docker >/dev/null 2>&1; then
-echo "Preparing & Downloading Docker & Podman..."
+    echo "Preparing & Downloading Docker & Podman..."
 
-# Define the directory and the URL for the file
-directory="$HOME/batocera-containers"
-url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/batocera-containers"
-filename="batocera-containers" # Explicitly set the filename
+    # Define the directory and target filename
+    directory="$HOME/batocera-containers"
+    filename="batocera-containers"
 
-# Create the directory if it doesn't exist
-mkdir -p "$directory"
+    # Create the directory if it doesn't exist
+    mkdir -p "$directory"
 
-# Change to the directory
-cd "$directory"
+    # Change to the directory
+    cd "$directory"
 
-# Download the file with the specified filename
-wget -q --show-progress "$url" -O "$filename"
+    # Download the correct binary as 'batocera-containers'
+    wget -q --show-progress "$url" -O "$filename"
 
-# Make the file executable
-chmod +x "$filename"
+    # Make it executable
+    chmod +x "$filename"
+    echo "File '$filename' downloaded and made executable in '$directory/$filename'"
 
-echo "File '$filename' downloaded and made executable in '$directory/$filename'"
+    # Add to startup script if not already added
+    custom_startup="/userdata/system/custom.sh"
+    restore_script="/userdata/system/batocera-containers/$filename"
 
-# Add the command to ~/custom.sh before starting Docker and Portainer
-custom_startup="/userdata/system/custom.sh"
-restore_script="/userdata/system/batocera-containers/batocera-containers"
+    if ! grep -q "$restore_script" "$custom_startup" 2>/dev/null; then
+        echo "Adding batocera-containers to startup..."
+        echo "bash $restore_script &" >> "$custom_startup"
+    fi
+    chmod +x "$custom_startup"
 
-if ! grep -q "$restore_script" "$custom_startup" 2>/dev/null; then
-    echo "Adding batocera-containers to startup..."
-    echo "bash $restore_script &" >> "$custom_startup"
-fi
-chmod +x "$custom_startup"
+    cd "$directory"
 
-cd ~/batocera-containers
+    clear
+    echo "Starting Docker..."
+    echo ""
+    ./batocera-containers
 
-clear
-echo "Starting Docker..."
-echo ""
-~/batocera-containers/batocera-containers
+    # Install Portainer
+    echo "Installing Portainer..."
+    echo ""
+    docker volume create portainer_data
+    docker run --device /dev/dri:/dev/dri --privileged --net host --ipc host -d --name portainer --restart=always \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v /media:/media \
+        -v portainer_data:/data \
+        portainer/portainer-ce:latest
 
-# Install Portainer
-echo "Installing portainer.."
-echo ""
-docker volume create portainer_data
-docker run --device /dev/dri:/dev/dri --privileged --net host --ipc host -d --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v /media:/media -v portainer_data:/data portainer/portainer-ce:latest
-
-curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker -o /userdata/system/services/docker && chmod +x /userdata/system/services/docker
-batocera-services enable docker
-batocera-services start docker
+    curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker -o /userdata/system/services/docker && chmod +x /userdata/system/services/docker
+    batocera-services enable docker
+    batocera-services start docker
 else
     echo "Docker is already installed."
 fi
