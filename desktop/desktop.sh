@@ -137,57 +137,22 @@ read -r confirm < /dev/tty
 [[ "${confirm,,}" != "y" ]] && echo "Installation cancelled." && exit 1
 
 # Step 7: Run Docker Webtop container
-podman run -d \
-  --name=desktop \
-  --replace \
-  --privileged \
-  --network host \
-  --security-opt seccomp=unconfined \
-  -v /etc/resolv.conf:/etc/resolv.conf:ro \
-  -e PUID=$(id -u) \
-  -e PGID=$(id -g) \
-  -e TZ=$(cat /etc/timezone) \
-  -e SUBFOLDER=/ \
-  -e TITLE="Webtop ($distro $env)" \
-  -v /userdata:/config/ \
-  --device /dev/dri:/dev/dri \
-  --device /dev/bus/usb:/dev/bus/usb \
-  -p 3000:3000 \
-  --shm-size=$shm_size \
-  lscr.io/linuxserver/webtop:$tag
-
-custom="/userdata/system/custom.sh"
-restore="/userdata/system/add-ons/bua/start-desktop.sh"
-
-cat << 'EOF' > "$restore"
-#!/bin/sh
-
-timeout=60
-elapsed=0
-
-# Wait until 'podman info' succeeds
-while ! podman info >/dev/null 2>&1 && [ "$elapsed" -lt "$timeout" ]; do
-    sleep 1
-    elapsed=$((elapsed + 1))
-done
-
-# Exit if podman still isn't ready
-if ! podman info >/dev/null 2>&1; then
-    echo "Podman did not become available within $timeout seconds"
-    exit 1
-fi
-
-podman start desktop &
-
-EOF
-
-chmod +x "$restore"
-if ! grep -q "$restore" "$custom" 2>/dev/null; then
-    echo "Adding Desktop to startup..."
-    echo "bash $restore &" >> "$custom"
-fi
-chmod +x "$custom"
-
+docker rm -f desktop || true && \
+docker run -d \
+    --name=desktop \
+    --security-opt seccomp=unconfined \
+    -e PUID=$(id -u) \
+    -e PGID=$(id -g) \
+    -e TZ=$(cat /etc/timezone) \
+    -e SUBFOLDER=/ \
+    -e TITLE="Webtop ($distro $env)" \
+    -v /userdata:/config/ \
+    --device /dev/dri:/dev/dri \
+    --device /dev/bus/usb:/dev/bus/usb \
+    -p 3000:3000 \
+    --shm-size=$shm_size \
+    --restart unless-stopped \
+    lscr.io/linuxserver/webtop:$tag
 
 # Step 8: Install Google Chrome AppImage
 echo "Installing Google Chrome AppImage..."
