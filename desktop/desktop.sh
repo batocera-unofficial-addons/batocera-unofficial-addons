@@ -140,7 +140,7 @@ read -r confirm < /dev/tty
 docker pull lscr.io/linuxserver/webtop:$tag
 
 # Optional: Clean up old *other* webtop images (but not the one we just pulled)
-docker rmi $(docker images --filter=reference='*webtop*' -q | grep -v "$(docker images -q lscr.io/linuxserver/webtop:$tag)") || true
+docker rmi $(docker images --filter=reference='lscr.io/linuxserver/webtop:*' -q | grep -v "$(docker images -q lscr.io/linuxserver/webtop:$tag)") || true
 
 # Remove old container and run new one
 docker rm -f desktop || true && \
