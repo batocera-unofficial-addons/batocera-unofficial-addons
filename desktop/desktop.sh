@@ -31,7 +31,7 @@ if ! command -v docker >/dev/null 2>&1; then
     wget -q --show-progress "$url" -O "$filename"
     chmod +x "$filename"
 
-    custom_startup="/userdata/system/custom.sh"
+custom_startup="/userdata/system/custom.sh"
 restore_script="/userdata/system/batocera-containers/batocera-containers"
 
 if ! grep -q "$restore_script" "$custom_startup" 2>/dev/null; then
@@ -154,21 +154,45 @@ podman run -d \
     lscr.io/linuxserver/webtop:$tag
 
 custom="/userdata/system/custom.sh"
-restore="podman start desktop"
+restore="/userdata/system/add-ons/bua/start-desktop.sh"
 
+cat << 'EOF' > start-desktop.sh
+#!/bin/sh
+
+timeout=60
+elapsed=0
+
+# Wait until 'podman info' succeeds
+while ! podman info >/dev/null 2>&1 && [ "$elapsed" -lt "$timeout" ]; do
+    sleep 1
+    elapsed=$((elapsed + 1))
+done
+
+# Exit if podman still isn't ready
+if ! podman info >/dev/null 2>&1; then
+    echo "Podman did not become available within $timeout seconds"
+    exit 1
+fi
+
+# Start the container if it exists
+if podman container exists desktop; then
+    podman start desktop
+    echo "Container 'desktop' started"
+else
+    echo "Container 'desktop' does not exist"
+fi
+EOF
+
+chmod +x start-desktop.sh
 if ! grep -q "$restore" "$custom" 2>/dev/null; then
     echo "Adding Desktop to startup..."
-    echo "$restore &" >> "$custom"
+    echo "bash $restore &" >> "$custom"
 fi
 chmod +x "$custom"
 
 
 # Step 8: Install Google Chrome AppImage
 echo "Installing Google Chrome AppImage..."
-if ! command -v jq >/dev/null 2>&1; then
-    echo "Missing dependency: jq is required. Please install jq and re-run."
-    exit 1
-fi
 appimage_url=$(curl -s https://api.github.com/repos/ivan-hc/Chrome-appimage/releases/latest | jq -r '.assets[] | select(.name | endswith(".AppImage") and contains("Google-Chrome-stable")) | .browser_download_url')
 mkdir -p /userdata/system/add-ons/google-chrome/extra
 wget -q --show-progress -O /userdata/system/add-ons/google-chrome/GoogleChrome.AppImage "$appimage_url"
@@ -228,8 +252,8 @@ logo_path="/userdata/roms/ports/images/desktop-logo.png"
 marquee_path="/userdata/roms/ports/images/desktop-marquee.png"
 
 # Download the logo and marquee
-curl -L -o "$logo_path" "$logo_url"
-curl -L -o "$marquee_path" "$marquee_url"
+curl -Ls -o "$logo_path" "$logo_url"
+curl -Ls -o "$marquee_path" "$marquee_url"
 
 # XML entry for the game
 xml_entry="<game>
