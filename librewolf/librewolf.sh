@@ -71,7 +71,7 @@ chmod +x /userdata/roms/ports/LibreWolf.sh
 APPNAME="LibreWolf"
 DESKTOP_FILE="/usr/share/applications/${APPNAME}.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/${APPNAME,,}/${APPNAME}.desktop"
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
+ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/librewolficon.png"
 mkdir -p "/userdata/system/configs/${APPNAME,,}"
 
 # Download icon
@@ -130,7 +130,7 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Download the image
 echo "Downloading LibreWolf logo..."
-curl -L -o /userdata/roms/ports/images/librewolf-logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/librewolf/extra/icon.png
+curl -L -o /userdata/roms/ports/images/librewolf-logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/librewolf/extra/librewolf.png
 
 # Add to gamelist.xml
 echo "Adding logo to LibreWolf entry in gamelist.xml..."
