@@ -174,13 +174,8 @@ if ! podman info >/dev/null 2>&1; then
     exit 1
 fi
 
-# Start the container if it exists
-if podman container exists desktop; then
-    podman start desktop
-    echo "Container 'desktop' started"
-else
-    echo "Container 'desktop' does not exist"
-fi
+podman start desktop &
+
 EOF
 
 chmod +x start-desktop.sh
