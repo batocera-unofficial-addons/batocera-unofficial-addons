@@ -183,9 +183,9 @@ chmod +x /userdata/system/add-ons/google-chrome/GoogleChrome.AppImage
 # Step 9: Create launcher in Ports
 echo "Creating BatoDesktop launcher in Ports..."
 mkdir -p /userdata/roms/ports
-host_ip=$(ip addr show | awk '/inet / && $2 !~ /^127/ {print $2}' | cut -d/ -f1 | head -n1)
 cat << 'EOF' > /userdata/roms/ports/BatoDesktop.sh
 #!/bin/bash
+host_ip=$(ip addr show | awk '/inet / && $2 !~ /^127/ {print $2}' | cut -d/ -f1 | head -n1)
 DISPLAY=:0.0 /userdata/system/add-ons/google-chrome/GoogleChrome.AppImage --no-sandbox --test-type --start-fullscreen --force-device-scale-factor=1.6 'http://$host_ip:3000'
 EOF
 chmod +x /userdata/roms/ports/BatoDesktop.sh
