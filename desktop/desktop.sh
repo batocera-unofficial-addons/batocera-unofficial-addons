@@ -138,20 +138,23 @@ read -r confirm < /dev/tty
 
 # Step 7: Run Docker Webtop container
 podman run -d \
-    --name=desktop \
-    --replace \
-    --security-opt seccomp=unconfined \
-    -e PUID=$(id -u) \
-    -e PGID=$(id -g) \
-    -e TZ=$(cat /etc/timezone) \
-    -e SUBFOLDER=/ \
-    -e TITLE="Webtop ($distro $env)" \
-    -v /userdata:/config/ \
-    --device /dev/dri:/dev/dri \
-    --device /dev/bus/usb:/dev/bus/usb \
-    -p 3000:3000 \
-    --shm-size=$shm_size \
-    lscr.io/linuxserver/webtop:$tag
+  --name=desktop \
+  --replace \
+  --privileged \
+  --network host \
+  --security-opt seccomp=unconfined \
+  -v /etc/resolv.conf:/etc/resolv.conf:ro \
+  -e PUID=$(id -u) \
+  -e PGID=$(id -g) \
+  -e TZ=$(cat /etc/timezone) \
+  -e SUBFOLDER=/ \
+  -e TITLE="Webtop ($distro $env)" \
+  -v /userdata:/config/ \
+  --device /dev/dri:/dev/dri \
+  --device /dev/bus/usb:/dev/bus/usb \
+  -p 3000:3000 \
+  --shm-size=$shm_size \
+  lscr.io/linuxserver/webtop:$tag
 
 custom="/userdata/system/custom.sh"
 restore="/userdata/system/add-ons/bua/start-desktop.sh"
