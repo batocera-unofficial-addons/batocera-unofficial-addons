@@ -181,7 +181,7 @@ podman start desktop &
 
 EOF
 
-chmod +x start-desktop.sh
+chmod +x "$restore"
 if ! grep -q "$restore" "$custom" 2>/dev/null; then
     echo "Adding Desktop to startup..."
     echo "bash $restore &" >> "$custom"
