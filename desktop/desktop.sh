@@ -137,8 +137,9 @@ read -r confirm < /dev/tty
 [[ "${confirm,,}" != "y" ]] && echo "Installation cancelled." && exit 1
 
 # Step 7: Run Docker Webtop container
-docker run -d \
+podman run -d \
     --name=desktop \
+    --replace \
     --security-opt seccomp=unconfined \
     -e PUID=$(id -u) \
     -e PGID=$(id -g) \
@@ -150,8 +151,9 @@ docker run -d \
     --device /dev/bus/usb:/dev/bus/usb \
     -p 3000:3000 \
     --shm-size=$shm_size \
-    --restart unless-stopped \
+    --restart=unless-stopped \
     lscr.io/linuxserver/webtop:$tag
+
 
 # Step 8: Install Google Chrome AppImage
 echo "Installing Google Chrome AppImage..."
