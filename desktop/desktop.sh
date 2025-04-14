@@ -156,7 +156,7 @@ podman run -d \
 custom="/userdata/system/custom.sh"
 restore="/userdata/system/add-ons/bua/start-desktop.sh"
 
-cat << 'EOF' > start-desktop.sh
+cat << 'EOF' > "$restore"
 #!/bin/sh
 
 timeout=60
