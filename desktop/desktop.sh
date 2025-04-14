@@ -136,13 +136,18 @@ echo -n "Proceed with installation? [y/N]: "
 read -r confirm < /dev/tty
 [[ "${confirm,,}" != "y" ]] && echo "Installation cancelled." && exit 1
 
-# Pull the desired tag (if it's not already present)
+# Pull latest image (in case it's new or missing)
 docker pull lscr.io/linuxserver/webtop:$tag
 
-# Optional: Clean up old *other* webtop images (but not the one we just pulled)
-docker rmi $(docker images --filter=reference='lscr.io/linuxserver/webtop:*' -q | grep -v "$(docker images -q lscr.io/linuxserver/webtop:$tag)") || true
+# Remove old webtop images (except the one we just pulled)
+keep=$(docker images -q lscr.io/linuxserver/webtop:$tag)
+images=$(docker images --filter=reference='lscr.io/linuxserver/webtop:*' -q | grep -v "$keep")
 
-# Remove old container and run new one
+if [ -n "$images" ]; then
+    docker rmi $images
+fi
+
+# Remove container and run fresh
 docker rm -f desktop || true && \
 docker run -d \
     --name=desktop \
