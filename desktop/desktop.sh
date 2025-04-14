@@ -151,7 +151,6 @@ podman run -d \
     --device /dev/bus/usb:/dev/bus/usb \
     -p 3000:3000 \
     --shm-size=$shm_size \
-    --restart=unless-stopped \
     lscr.io/linuxserver/webtop:$tag
 
 custom="/userdata/system/custom.sh"
