@@ -98,6 +98,7 @@ apps=(
     ["SUPERMARIOX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supermariox/supermariox.sh | bash"
     ["SUPERTUXKART"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertuxkart/supertuxkart.sh | bash"
     ["CELESTE64"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/celeste64/celeste64.sh | bash"
+    ["F1"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/f1/f1.sh | bash"
 )
 
 
@@ -114,6 +115,7 @@ descriptions=(
     ["SUPERMARIOX"]="The greatest fan-made tribute to Super Mario of all time!"
     ["SUPERTUXKART"]="Free and open-source kart racer."
     ["CELESTE64"]="Requires OpenGL 3.2. Free 3D platformer, based around Celeste Mountain"
+    ["F1"]="Adds a shortcut in Ports to open the file manager."
 )
 
 
@@ -122,7 +124,7 @@ declare -A categories
 categories=(
     ["Games"]="MINECRAFT SUPERMARIOX SUPERTUXKART CELESTE64"
     ["Game Utilities"]="PORTMASTER CHIAKI"
-    ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE"
+    ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE F1"
     ["Developer Tools"]="CONTY DOCKER"
 )
 
