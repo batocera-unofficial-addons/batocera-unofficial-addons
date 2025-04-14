@@ -154,6 +154,15 @@ podman run -d \
     --restart=unless-stopped \
     lscr.io/linuxserver/webtop:$tag
 
+custom="/userdata/system/custom.sh"
+restore="podman start desktop"
+
+if ! grep -q "$restore" "$custom" 2>/dev/null; then
+    echo "Adding Desktop to startup..."
+    echo "$restore &" >> "$custom"
+fi
+chmod +x "$custom"
+
 
 # Step 8: Install Google Chrome AppImage
 echo "Installing Google Chrome AppImage..."
