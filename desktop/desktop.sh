@@ -31,14 +31,14 @@ if ! command -v docker >/dev/null 2>&1; then
     wget -q --show-progress "$url" -O "$filename"
     chmod +x "$filename"
 
-    # Update ~/custom.sh to autostart batocera-containers
-    startup="/userdata/system/batocera-containers/batocera-containers &"
-    csh=/userdata/system/custom.sh
-    if ! grep -Fq "$startup" "$csh" 2>/dev/null; then
-        echo -e '#!/bin/bash\n\n'"$startup\n" > "$csh"
-        dos2unix "$csh" 2>/dev/null
-        chmod a+x "$csh"
-    fi
+    custom_startup="/userdata/system/custom.sh"
+restore_script="/userdata/system/batocera-containers/batocera-containers"
+
+if ! grep -q "$restore_script" "$custom_startup" 2>/dev/null; then
+    echo "Adding batocera-containers to startup..."
+    echo "bash $restore_script &" >> "$custom_startup"
+fi
+chmod +x "$custom_startup"
 
     clear
     echo "Starting Docker..."
