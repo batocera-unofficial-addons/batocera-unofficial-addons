@@ -136,7 +136,13 @@ echo -n "Proceed with installation? [y/N]: "
 read -r confirm < /dev/tty
 [[ "${confirm,,}" != "y" ]] && echo "Installation cancelled." && exit 1
 
-# Step 7: Run Docker Webtop container
+# Pull the desired tag (if it's not already present)
+docker pull lscr.io/linuxserver/webtop:$tag
+
+# Optional: Clean up old *other* webtop images (but not the one we just pulled)
+docker rmi $(docker images --filter=reference='*webtop*' -q | grep -v "$(docker images -q lscr.io/linuxserver/webtop:$tag)") || true
+
+# Remove old container and run new one
 docker rm -f desktop || true && \
 docker run -d \
     --name=desktop \
@@ -153,6 +159,7 @@ docker run -d \
     --shm-size=$shm_size \
     --restart unless-stopped \
     lscr.io/linuxserver/webtop:$tag
+
 
 # Step 8: Install Google Chrome AppImage
 echo "Installing Google Chrome AppImage..."
