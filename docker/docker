@@ -15,7 +15,7 @@ start() {
     if command -v dockerd &>/dev/null; then
       nohup dockerd >/dev/null 2>&1 &
     else
-      ~/batocera-containers/batocera-containers
+      /userdata/system/batocera-containers/batocera-containers
     fi
   else
     containers=$(docker ps -q)
@@ -27,7 +27,7 @@ start() {
 
 restart() {
   pkill -f batocera-containers
-  ~/batocera-containers/batocera-containers
+  /userdata/system/batocera-containers/batocera-containers
 }
 
 stop() {
