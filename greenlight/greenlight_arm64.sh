@@ -20,8 +20,13 @@ sleep 2
 rm -rf "${APPDIR}"
 mkdir -p "${APPDIR}/greenlight" "${APPDIR}/extra" "${APPDIR}/home" "${APPDIR}/config" "${APPDIR}/roms"
 
-# Download and extract app into greenlight subdir
-curl -L "$APPURL" | tar -xJ -C "${APPDIR}/greenlight"
+# Download .tar.xz using wget
+ARCHIVE="${APPDIR}/greenlight.tar.xz"
+wget -q --show-progress -O "$ARCHIVE" "$APPURL"
+
+# Extract it into greenlight subdir
+tar -xJf "$ARCHIVE" -C "${APPDIR}/greenlight"
+rm -f "$ARCHIVE"
 
 # Make sure main binary is executable (if applicable)
 chmod +x "${APPDIR}/greenlight/greenlight" 2>/dev/null
