@@ -25,7 +25,7 @@ ARCHIVE="${APPDIR}/greenlight.tar.xz"
 wget -q --show-progress -O "$ARCHIVE" "$APPURL"
 
 # Extract it into greenlight subdir
-tar -xJf "$ARCHIVE" -C "${APPDIR}/greenlight"
+tar -xJf "$ARCHIVE" -C "${APPDIR}"
 rm -f "$ARCHIVE"
 
 # Make sure main binary is executable (if applicable)
