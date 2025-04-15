@@ -179,23 +179,46 @@ docker run -d \
     lscr.io/linuxserver/webtop:$tag
 
 
-# Step 8: Install Google Chrome AppImage
-echo "Installing Google Chrome AppImage..."
-appimage_url=$(curl -s https://api.github.com/repos/ivan-hc/Chrome-appimage/releases/latest | jq -r '.assets[] | select(.name | endswith(".AppImage") and contains("Google-Chrome-stable")) | .browser_download_url')
-mkdir -p /userdata/system/add-ons/google-chrome/extra
-wget -q --show-progress -O /userdata/system/add-ons/google-chrome/GoogleChrome.AppImage "$appimage_url"
-chmod +x /userdata/system/add-ons/google-chrome/GoogleChrome.AppImage
+# Step 8: Install browser depending on architecture
+echo "Detecting system architecture..."
+arch=$(uname -m)
+
+mkdir -p /userdata/system/add-ons/batodesktop/extra
+mkdir -p /userdata/roms/ports
+
+if [ "$arch" == "x86_64" ]; then
+    echo "Installing Google Chrome AppImage for x86_64..."
+    appimage_url=$(curl -s https://api.github.com/repos/ivan-hc/Chrome-appimage/releases/latest | jq -r '.assets[] | select(.name | endswith(".AppImage") and contains("Google-Chrome-stable")) | .browser_download_url')
+    wget -q --show-progress -O /userdata/system/add-ons/batodesktop/GoogleChrome.AppImage "$appimage_url"
+    chmod +x /userdata/system/add-ons/batodesktop/GoogleChrome.AppImage
+    BROWSER_LAUNCH_CMD='/userdata/system/add-ons/batodesktop/GoogleChrome.AppImage --no-sandbox --test-type --start-fullscreen --force-device-scale-factor=1.6 "http://$host_ip:3000"'
+
+elif [ "$arch" == "aarch64" ]; then
+    echo "Installing Firefox binary for aarch64..."
+    firefox_url="https://download-installer.cdn.mozilla.net/pub/firefox/releases/137.0.1/linux-aarch64/en-US/firefox-137.0.1.tar.xz"
+    archive_path="/userdata/system/add-ons/batodesktop/firefox-137.0.1.tar.xz"
+    dest_dir="/userdata/system/add-ons/batodesktop"
+    wget -q --show-progress -O "$archive_path" "$firefox_url"
+    tar -xf "$archive_path" -C "$dest_dir" --strip-components=1
+    chmod +x "$dest_dir/firefox"
+    BROWSER_LAUNCH_CMD='/userdata/system/add-ons/batodesktop/firefox --kiosk http://$host_ip:3000'
+
+else
+    echo "Unsupported architecture: $arch. Exiting."
+    exit 1
+fi
 
 # Step 9: Create launcher in Ports
 echo "Creating BatoDesktop launcher in Ports..."
-mkdir -p /userdata/roms/ports
-cat << 'EOF' > /userdata/roms/ports/BatoDesktop.sh
+cat << EOF > /userdata/roms/ports/BatoDesktop.sh
 #!/bin/bash
-host_ip=$(ip addr show | awk '/inet / && $2 !~ /^127/ {print $2}' | cut -d/ -f1 | head -n1)
-[ -z "$host_ip" ] && host_ip="localhost"
-DISPLAY=:0.0 /userdata/system/add-ons/google-chrome/GoogleChrome.AppImage --no-sandbox --test-type --start-fullscreen --force-device-scale-factor=1.6 "http://$host_ip:3000"
+host_ip=\$(ip addr show | awk '/inet / && \$2 !~ /^127/ {print \$2}' | cut -d/ -f1 | head -n1)
+[ -z "\$host_ip" ] && host_ip="localhost"
+DISPLAY=:0.0 $BROWSER_LAUNCH_CMD
 EOF
+
 chmod +x /userdata/roms/ports/BatoDesktop.sh
+
 
 # Step 10: Add controller support
 cat << 'EOF' > /userdata/roms/ports/BatoDesktop.sh.keys
