@@ -64,7 +64,7 @@ chmod +x "$DESKTOP"
 cp "$DESKTOP" "/usr/share/applications/luna.desktop" 2>/dev/null
 
 # Create PORTS launcher
-PORT_LAUNCHER="/userdata/roms/ports/Amazon-Luna.sh"
+PORT_LAUNCHER="/userdata/roms/ports/AmazonLuna.sh"
 cat <<EOF > "$PORT_LAUNCHER"
 #!/bin/bash
 killall -9 amazonluna 2>/dev/null
