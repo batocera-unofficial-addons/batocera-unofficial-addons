@@ -48,7 +48,7 @@ chmod +x "${APPDIR}/Launcher"
 PORT_LAUNCHER="/userdata/roms/ports/Stremio.sh"
 cat <<EOF > "$PORT_LAUNCHER"
 #!/bin/bash
-killall -9 stremio-wrapper 2>/dev/null
+killall -9 stremio 2>/dev/null
 batocera-mouse show
 ${APPDIR}/Launcher
 EOF
@@ -70,8 +70,8 @@ EOF
 
 # Download the image
 echo "Downloading Greenlight logo..."
-curl -L -o /userdata/roms/ports/images/stremio.png $PORTIMG
-echo "Adding logo to Greenlight entry in gamelist.xml..."
+curl -L -o /userdata/roms/ports/images/stremio.png "$PORTIMG"
+echo "Adding logo to Stremio entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./Stremio.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "Stremio" \
