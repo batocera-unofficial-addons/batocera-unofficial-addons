@@ -1,10 +1,17 @@
 #!/bin/bash
-# Get the machine hardware name
-architecture=$(uname -m)
 
-# Check if the architecture is x86_64 (AMD/Intel)
-if [ "$architecture" != "x86_64" ]; then
-    echo "This script only runs on AMD or Intel (x86_64) CPUs, not on $architecture."
+# Step 1: Detect system architecture
+echo "Detecting system architecture..."
+arch=$(uname -m)
+
+if [ "$arch" == "x86_64" ]; then
+    echo "Architecture: x86_64 detected."
+    url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/batocera-containers"
+elif [ "$arch" == "aarch64" ]; then
+    echo "Architecture: aarch64 detected."
+    url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/batocera-containers-aarch64"
+else
+    echo "Unsupported architecture: $arch. Exiting."
     exit 1
 fi
 
@@ -12,7 +19,6 @@ echo "Preparing & Downloading Docker & Podman..."
 
 # Define the directory and the URL for the file
 directory="$HOME/batocera-containers"
-url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/batocera-containers"
 filename="batocera-containers" # Explicitly set the filename
 
 # Create the directory if it doesn't exist
