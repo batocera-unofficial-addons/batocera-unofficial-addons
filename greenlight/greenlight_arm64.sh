@@ -34,7 +34,6 @@ chmod +x "${APPDIR}/greenlight/run.sh" 2>/dev/null
 
 # Download icons
 curl -s -L -o "${APPDIR}/extra/icon.png" "$ICONURL"
-curl -s -L -o "${APPDIR}/extra/greenlight.png" "$PORTIMG"
 
 # Create launcher script
 cat <<EOF > "${APPDIR}/Launcher"
@@ -78,9 +77,6 @@ EOF
 
 chmod +x "$PORT_LAUNCHER"
 
-# Add icon to ports menu
-cp "${APPDIR}/extra/greenlight.png" "/userdata/roms/ports/${APPNAME}.png"
-
 # Create controller keys mapping
 cat <<EOF > "${PORT_LAUNCHER}.keys"
 {
@@ -109,6 +105,22 @@ chmod +x "$STARTUP_SCRIPT"
 CUSTOM_SH="/userdata/system/custom.sh"
 grep -qxF "$STARTUP_SCRIPT" "$CUSTOM_SH" 2>/dev/null || echo "$STARTUP_SCRIPT" >> "$CUSTOM_SH"
 chmod +x "$CUSTOM_SH"
+
+# Step 5: Refresh the Ports menu
+echo "Refreshing Ports menu..."
+curl http://127.0.0.1:1234/reloadgames
+
+# Download the image
+echo "Downloading Greenlight logo..."
+curl -L -o /userdata/roms/ports/images/greenlight.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/greenlight/extra/greenlight.png
+echo "Adding logo to Greenlight entry in gamelist.xml..."
+xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./Greenlight.sh" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "Greenlight" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/greenlight.png" \
+  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+  
+curl http://127.0.0.1:1234/reloadgames
 
 echo "${APPNAME} installed and available under Ports and Applications!"
 sleep 3
