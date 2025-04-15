@@ -1,5 +1,15 @@
 #!/bin/bash
 
+libselinux="/userdata/system/add-ons/.dep/libselinux.so.1"
+
+install_bua() {
+    curl -L install.batoaddons.app | bash
+}
+
+if [ ! -e "$libselinux" ]; then
+    install_bua
+fi
+
 # Function to display animated title with colors
 animate_title() {
     local text="BATOCERA UNOFFICIAL ADD-ONS INSTALLER"
@@ -53,7 +63,7 @@ echo -e "\e[0m"
     echo -e "\e[0m" # Reset color
     echo " Install these add-ons at your own risk. They are not endorsed by the Batocera Devs nor are they supported." 
     echo " Please don't go into the official Batocera discord with issues, I can't help you there!"
-    echo " Instead; head to bit.ly/bua-discord and someone will be around to help you!"
+    echo " Instead; head to discord.batoaddons.app and someone will be around to help you!"
     sleep 10
 }
 
@@ -99,6 +109,8 @@ apps=(
     ["SUPERTUXKART"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/supertuxkart/supertuxkart.sh | bash"
     ["CELESTE64"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/celeste64/celeste64.sh | bash"
     ["F1"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/f1/f1.sh | bash"
+    ["FIREFOX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/firefox/firefox-arm64.sh | bash"
+    ["DESKTOP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/desktop/desktop.sh | bash"
 )
 
 
@@ -116,6 +128,8 @@ descriptions=(
     ["SUPERTUXKART"]="Free and open-source kart racer."
     ["CELESTE64"]="Requires OpenGL 3.2. Free 3D platformer, based around Celeste Mountain"
     ["F1"]="Adds a shortcut in Ports to open the file manager."
+    ["FIREFOX"]="Mozilla Firefox browser."
+    ["DESKTOP"]="Adds desktop mode to Batocera access it via Ports."
 )
 
 
@@ -124,7 +138,7 @@ declare -A categories
 categories=(
     ["Games"]="MINECRAFT SUPERMARIOX SUPERTUXKART CELESTE64"
     ["Game Utilities"]="PORTMASTER CHIAKI"
-    ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE F1"
+    ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE F1 FIREFOX DESKTOP"
     ["Developer Tools"]="CONTY DOCKER"
 )
 
