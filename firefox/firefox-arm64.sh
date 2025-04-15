@@ -19,7 +19,7 @@ archive_name="firefox-137.0.1.tar.xz"
 
 if [ ! -f "$archive_name" ]; then
     echo "Downloading Firefox from $firefox_url..."
-    curl -L "$firefox_url" -o "$archive_name"
+    wget -q --show-progress "$firefox_url" -O "$archive_name"
 fi
 
 echo "Extracting Firefox..."
