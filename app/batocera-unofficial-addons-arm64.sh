@@ -111,6 +111,7 @@ apps=(
     ["F1"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/f1/f1.sh | bash"
     ["FIREFOX"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/firefox/firefox-arm64.sh | bash"
     ["DESKTOP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/desktop/desktop.sh | bash"
+    ["GREENLIGHT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/greenlight/greenlight_arm64.sh | bash"
 )
 
 
@@ -130,6 +131,7 @@ descriptions=(
     ["F1"]="Adds a shortcut in Ports to open the file manager."
     ["FIREFOX"]="Mozilla Firefox browser."
     ["DESKTOP"]="Adds desktop mode to Batocera access it via Ports."
+    ["GREENLIGHT"]="Client for xCloud and Xbox streaming."
 )
 
 
@@ -137,7 +139,7 @@ descriptions=(
 declare -A categories
 categories=(
     ["Games"]="MINECRAFT SUPERMARIOX SUPERTUXKART CELESTE64"
-    ["Game Utilities"]="PORTMASTER CHIAKI"
+    ["Game Utilities"]="PORTMASTER CHIAKI GREENLIGHT"
     ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE F1 FIREFOX DESKTOP"
     ["Developer Tools"]="CONTY DOCKER"
 )
