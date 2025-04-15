@@ -23,7 +23,7 @@ mkdir -p "${APPDIR}/luna" "${APPDIR}/extra" "${APPDIR}/home" "${APPDIR}/config" 
 # Download and extract app
 ARCHIVE="${APPDIR}/luna.tar.xz"
 wget -q --show-progress -O "$ARCHIVE" "$APPURL"
-tar -xJf "$ARCHIVE" -C "${APPDIR}/luna"
+tar -xJf "$ARCHIVE" -C "${APPDIR}"
 rm -f "$ARCHIVE"
 
 # Make binary executable
