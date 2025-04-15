@@ -54,7 +54,6 @@ ${APPDIR}/Launcher
 EOF
 
 chmod +x "$PORT_LAUNCHER"
-cp "${APPDIR}/extra/stremio.png" "/userdata/roms/ports/Stremio.png"
 
 # Create controller keys mapping
 cat <<EOF > "${PORT_LAUNCHER}.keys"
@@ -69,5 +68,16 @@ cat <<EOF > "${PORT_LAUNCHER}.keys"
 }
 EOF
 
+# Download the image
+echo "Downloading Greenlight logo..."
+curl -L -o /userdata/roms/ports/images/stremio.png $PORTIMG
+echo "Adding logo to Greenlight entry in gamelist.xml..."
+xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./Stremio.sh" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "Stremio" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/stremio.png" \
+  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+
 echo "✅ ${APPNAME} installed and available under Ports and Applications!"
+sleep 3
 exit 0
