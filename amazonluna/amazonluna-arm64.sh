@@ -9,11 +9,11 @@ PORTIMG="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/amazonlun
 
 # Check for Xwayland
 if ! pgrep -x "Xwayland" > /dev/null; then
-    echo "❌ Xwayland is not running. Exiting."
+    echo "Xwayland is not running. Exiting."
     exit 1
 fi
 
-echo "✅ Xwayland detected. Installing ${APPNAME}..."
+echo "Xwayland detected. Installing ${APPNAME}..."
 sleep 2
 
 # Prepare install directory
@@ -119,5 +119,6 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   
 curl http://127.0.0.1:1234/reloadgames
 
-echo "✅ Amazon Luna installed and available under Ports and Applications!"
+echo "Amazon Luna installed and available under Ports and Applications!"
+sleep 3
 exit 0
