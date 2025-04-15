@@ -22,7 +22,7 @@ mkdir -p "${APPDIR}/stremio" "${APPDIR}/extra" "${APPDIR}/home" "${APPDIR}/confi
 # Download and extract app
 ARCHIVE="${APPDIR}/stremio.tar.xz"
 wget -q --show-progress -O "$ARCHIVE" "$APPURL"
-tar -xJf "$ARCHIVE" -C "${APPDIR}/stremio"
+tar -xJf "$ARCHIVE" -C "${APPDIR}"
 rm -f "$ARCHIVE"
 
 # Make binary executable
