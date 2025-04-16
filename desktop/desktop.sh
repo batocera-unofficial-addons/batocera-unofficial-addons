@@ -228,10 +228,6 @@ EOF
 
 chmod +x /userdata/roms/ports/BatoDesktop.sh
 
-
-chmod +x /userdata/roms/ports/BatoDesktop.sh
-
-
 # Step 10: Add controller support
 cat << 'EOF' > /userdata/roms/ports/BatoDesktop.sh.keys
 {
