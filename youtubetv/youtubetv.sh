@@ -19,8 +19,10 @@ else
 fi
 
 # Step 2: Download the archive
-echo "⬇Downloading YouTube TV from $app_url..."
+echo "Cleaning previous install at $app_dir..."
+rm -rf "$app_dir"
 mkdir -p "$app_dir"
+echo "⬇Downloading YouTube TV from $app_url..."
 archive_path="$app_dir/yttv.tar.xz"
 wget -q --show-progress -O "$archive_path" "$app_url"
 
