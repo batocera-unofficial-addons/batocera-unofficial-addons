@@ -4,49 +4,40 @@
 echo "Detecting system architecture..."
 arch=$(uname -m)
 
+app_dir="/userdata/system/add-ons/youtube-tv"
+app_bin="${app_dir}/YouTubeonTV"
+
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    app_url=$(curl -s https://api.github.com/repositories/295226865/releases/latest | \
-    jq -r ".assets[] | select(.name | contains(\"linux-x64\")) | .browser_download_url")
+    app_url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/yttv.tar.xz"
 elif [ "$arch" == "aarch64" ]; then
-    echo "Architecture: arm64 detected."
-    app_url=$(curl -s https://api.github.com/repositories/295226865/releases/latest | \
-    jq -r ".assets[] | select(.name | contains(\"linux-arm64\")) | .browser_download_url")
+    echo "Architecture: ARM64 detected."
+    app_url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/yttv-arm64.tar.xz"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
 fi
 
-# Step 2: Validate app_url
-if [ -z "$app_url" ]; then
-    echo "Error: Failed to fetch the download URL for YouTube TV."
-    echo "Debugging information:"
-    curl -s https://api.github.com/repositories/295226865/releases/latest
-    exit 1
-fi
-
-# Step 3: Download the archive
-echo "Downloading YouTube TV archive from $app_url..."
-app_dir="/userdata/system/add-ons/youtube-tv"
-temp_dir="$app_dir/temp"
-mkdir -p "$temp_dir"
-wget -q --show-progress -O "$temp_dir/youtube-tv.zip" "$app_url"
+# Step 2: Download the archive
+echo "⬇Downloading YouTube TV from $app_url..."
+mkdir -p "$app_dir"
+archive_path="$app_dir/yttv.tar.xz"
+wget -q --show-progress -O "$archive_path" "$app_url"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download YouTube TV archive."
     exit 1
 fi
 
-# Step 4: Extract the downloaded archive
-echo "Extracting YouTube TV files..."
-mkdir -p "$app_dir"
-unzip -o "$temp_dir/youtube-tv.zip" -d "$temp_dir/youtube-tv-extracted"
-mv "$temp_dir/youtube-tv-extracted/"*/* "$app_dir"
-chmod a+x "$app_dir/YouTubeonTV"
+# Step 3: Extract the downloaded archive
+echo "Extracting files..."
+tar -xf "$archive_path" -C "$app_dir" --strip-components=1
+rm -f "$archive_path"
 
-# Cleanup temp files
-rm -rf "$temp_dir"
-echo "Extraction complete. Files moved to $app_dir."
+# Step 4: Make executable
+chmod +x "$app_bin"
+
+echo "YouTube TV installed to $app_dir"
 
 # Step 5: Create a launcher script using the original command
 echo "Creating YouTube TV script in Ports..."
@@ -54,11 +45,11 @@ ports_dir="/userdata/roms/ports"
 mkdir -p "$ports_dir"
 cat << EOF > "$ports_dir/YouTubeTV.sh"
 #!/bin/bash
-sed -i "s,!appArgs.disableOldBuildWarning,1 == 0,g" "$app_dir/resources/app/lib/main.js" 2>/dev/null
-QT_SCALE_FACTOR="1" \
-GDK_SCALE="1" \
-DISPLAY=:0.0 \
-"$app_dir/YouTubeonTV" --no-sandbox --test-type "\$@"
+batocera-mouse show
+QT_SCALE_FACTOR="1"
+GDK_SCALE="1"
+DISPLAY=:0.0
+"$app_bin" --no-sandbox "\$@"
 EOF
 
 chmod +x "$ports_dir/YouTubeTV.sh"
