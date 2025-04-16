@@ -186,34 +186,37 @@ docker run -d \
 echo "Detecting system architecture..."
 arch=$(uname -m)
 
-mkdir -p /userdata/system/add-ons/batodesktop/extra
+APPNAME="Desktop"
+install_dir="/userdata/system/add-ons/${APPNAME,,}"
+bin_path="$install_dir/${APPNAME}.AppImage"
+
+mkdir -p "$install_dir"
 mkdir -p /userdata/roms/ports
-arch=$(uname -m)
-install_dir="/userdata/system/add-ons/desktop"
-bin_path="$install_dir/desktop"
+
 host_ip=$(ip addr show | awk '/inet / && $2 !~ /^127/ {print $2}' | cut -d/ -f1 | head -n1)
 [ -z "$host_ip" ] && host_ip="localhost"
 
-mkdir -p "$install_dir"
+# Select download URL based on architecture
+case "$arch" in
+    x86_64)
+        echo "Downloading ${APPNAME} AppImage for x86_64..."
+        url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/${APPNAME}.AppImage"
+        ;;
+    aarch64)
+        echo "Downloading ${APPNAME} AppImage for ARM64..."
+        url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/${APPNAME}-arm64.AppImage"
+        ;;
+    *)
+        echo "Unsupported architecture: $arch. Exiting."
+        exit 1
+        ;;
+esac
 
-if [ "$arch" == "x86_64" ]; then
-    echo "Downloading Desktop wrapper for x86_64..."
-    url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/desktop.tar.xz"
-elif [ "$arch" == "aarch64" ]; then
-    echo "Downloading Desktop wrapper for ARM64..."
-    url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/desktop-arm64.tar.xz"
-else
-    echo "❌ Unsupported architecture: $arch. Exiting."
-    exit 1
-fi
-
-archive_path="$install_dir/desktop.tar.xz"
-
-# Download and extract with folder stripping
-wget -q --show-progress -O "$archive_path" "$url"
-tar -xf "$archive_path" -C "$install_dir" --strip-components=1
-rm "$archive_path"
+# Download AppImage
+wget -q --show-progress -O "$bin_path" "$url"
 chmod +x "$bin_path"
+
+echo "${APPNAME} installed at $bin_path"
 
 # Step: Create launcher in Ports
 echo "Creating Desktop launcher in Ports..."
@@ -223,7 +226,7 @@ batocera-mouse show
 QT_SCALE_FACTOR="1" \
 GDK_SCALE="1" \
 DISPLAY=:0.0 \
-/userdata/system/add-ons/desktop/desktop --no-sandbox
+"$bin_path" --no-sandbox
 EOF
 
 chmod +x /userdata/roms/ports/BatoDesktop.sh
