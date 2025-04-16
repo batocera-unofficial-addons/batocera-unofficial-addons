@@ -163,20 +163,23 @@ fi
 # Remove container and run fresh
 docker rm -f desktop || true && \
 docker run -d \
-    --name=desktop \
-    --security-opt seccomp=unconfined \
-    -e PUID=$(id -u) \
-    -e PGID=$(id -g) \
-    -e TZ=$(cat /etc/timezone) \
-    -e SUBFOLDER=/ \
-    -e TITLE="Webtop ($distro $env)" \
-    -v /userdata:/config/ \
-    --device /dev/dri:/dev/dri \
-    --device /dev/bus/usb:/dev/bus/usb \
-    -p 3000:3000 \
-    --shm-size=$shm_size \
-    --restart unless-stopped \
-    lscr.io/linuxserver/webtop:$tag
+  --name=desktop \
+  --security-opt seccomp=unconfined \
+  --device /dev/dri:/dev/dri \
+  --device /dev/bus/usb:/dev/bus/usb \
+  --device /dev/snd \
+  --group-add audio \
+  -e PUID=$(id -u) \
+  -e PGID=$(id -g) \
+  -e TZ=$(cat /etc/timezone) \
+  -e SUBFOLDER=/ \
+  -e TITLE="Webtop ($distro $env)" \
+  -v /userdata:/config/ \
+  -p 3000:3000 \
+  --shm-size=$shm_size \
+  --restart unless-stopped \
+  lscr.io/linuxserver/webtop:$tag
+
 
 
 # Step 8: Install browser depending on architecture
@@ -185,37 +188,46 @@ arch=$(uname -m)
 
 mkdir -p /userdata/system/add-ons/batodesktop/extra
 mkdir -p /userdata/roms/ports
+arch=$(uname -m)
+install_dir="/userdata/system/add-ons/desktop"
+bin_path="$install_dir/desktop"
+host_ip=$(ip addr show | awk '/inet / && $2 !~ /^127/ {print $2}' | cut -d/ -f1 | head -n1)
+[ -z "$host_ip" ] && host_ip="localhost"
+
+mkdir -p "$install_dir"
 
 if [ "$arch" == "x86_64" ]; then
-    echo "Installing Google Chrome AppImage for x86_64..."
-    appimage_url=$(curl -s https://api.github.com/repos/ivan-hc/Chrome-appimage/releases/latest | jq -r '.assets[] | select(.name | endswith(".AppImage") and contains("Google-Chrome-stable")) | .browser_download_url')
-    wget -q --show-progress -O /userdata/system/add-ons/batodesktop/GoogleChrome.AppImage "$appimage_url"
-    chmod +x /userdata/system/add-ons/batodesktop/GoogleChrome.AppImage
-    BROWSER_LAUNCH_CMD='/userdata/system/add-ons/batodesktop/GoogleChrome.AppImage --no-sandbox --test-type --start-fullscreen --force-device-scale-factor=1.6 "http://$host_ip:3000"'
-
+    echo "Downloading Desktop wrapper for x86_64..."
+    url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/desktop.tar.xz"
 elif [ "$arch" == "aarch64" ]; then
-    echo "Installing Firefox binary for aarch64..."
-    firefox_url="https://download-installer.cdn.mozilla.net/pub/firefox/releases/137.0.1/linux-aarch64/en-US/firefox-137.0.1.tar.xz"
-    archive_path="/userdata/system/add-ons/batodesktop/firefox-137.0.1.tar.xz"
-    dest_dir="/userdata/system/add-ons/batodesktop"
-    wget -q --show-progress -O "$archive_path" "$firefox_url"
-    tar -xf "$archive_path" -C "$dest_dir" --strip-components=1
-    chmod +x "$dest_dir/firefox"
-    BROWSER_LAUNCH_CMD='/userdata/system/add-ons/batodesktop/firefox --kiosk http://$host_ip:3000'
-
+    echo "Downloading Desktop wrapper for ARM64..."
+    url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/desktop-arm64.tar.xz"
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    echo "❌ Unsupported architecture: $arch. Exiting."
     exit 1
 fi
 
-# Step 9: Create launcher in Ports
-echo "Creating BatoDesktop launcher in Ports..."
+archive_path="$install_dir/desktop.tar.xz"
+
+# Download and extract with folder stripping
+wget -q --show-progress -O "$archive_path" "$url"
+tar -xf "$archive_path" -C "$install_dir" --strip-components=1
+rm "$archive_path"
+chmod +x "$bin_path"
+
+# Step: Create launcher in Ports
+echo "Creating Desktop launcher in Ports..."
 cat << EOF > /userdata/roms/ports/BatoDesktop.sh
 #!/bin/bash
-host_ip=\$(ip addr show | awk '/inet / && \$2 !~ /^127/ {print \$2}' | cut -d/ -f1 | head -n1)
-[ -z "\$host_ip" ] && host_ip="localhost"
-DISPLAY=:0.0 $BROWSER_LAUNCH_CMD
+batocera-mouse show
+QT_SCALE_FACTOR="1" \
+GDK_SCALE="1" \
+DISPLAY=:0.0 \
+/userdata/system/add-ons/desktop/desktop --no-sandbox
 EOF
+
+chmod +x /userdata/roms/ports/BatoDesktop.sh
+
 
 chmod +x /userdata/roms/ports/BatoDesktop.sh
 
