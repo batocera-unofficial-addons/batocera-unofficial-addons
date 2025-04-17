@@ -5,7 +5,7 @@ echo "Detecting system architecture..."
 arch=$(uname -m)
 
 app_dir="/userdata/system/add-ons/youtube-tv"
-app_bin="${app_dir}/YouTubeonTV"
+app_bin="${app_dir}/youtube-tv"
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
