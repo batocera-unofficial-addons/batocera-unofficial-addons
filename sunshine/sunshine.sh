@@ -29,8 +29,10 @@ cat << 'EOF' > /userdata/system/services/sunshine
 # sunshine service script for Batocera
 # Functional start/stop/restart/status (update)/uninstall
 
+MIN_SECS_AFTER_BOOT_SEQUENCE=60
+
 # Environment setup
-export $(cat /proc/1/environ | tr '\0' '\n')
+export $(tr '\0' '\n' < /proc/1/environ)
 export DISPLAY=:0.0
 export HOME=/userdata/system/add-ons/sunshine
 
@@ -54,6 +56,9 @@ case "$1" in
 
         # Start Sunshine AppImage
         if [ -x "${app_image}" ]; then
+            # Leave enough time to boot sequence after running this service to avoid messing up with X server's startup
+            # If system has been running past boot time, start right away
+            [ "$(cut -d. -f1 /proc/uptime)" -lt $MIN_SECS_AFTER_BOOT_SEQUENCE ] && sleep $MIN_SECS_AFTER_BOOT_SEQUENCE
             cd "${app_dir}"
             ./sunshine.AppImage > "${log_file}" 2>&1 &
             echo "Sunshine started successfully."

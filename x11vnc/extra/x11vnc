@@ -1,24 +1,28 @@
 #!/bin/bash
 
+MIN_SECS_AFTER_BOOT_SEQUENCE=60
 STOP_FILE="/tmp/x11vnc.stop"
 LOG_FILE="/userdata/system/logs/x11vnc.log"
 RUN_CMD="x11vnc -display :0 -rfbport 5900 -reopen -forever -shared -logappend $LOG_FILE"
 
 case "$1" in
     start)
-	# Remove stop file
+	      # Remove stop file
         [ -f $STOP_FILE ] && rm $STOP_FILE
 
         # Ensure no new instances are spawned if already running
-        [[ $(pgrep -f "$RUN_CMD" > /dev/null) ]] && exit 0
+        pgrep -f "$RUN_CMD" > /dev/null && exit 0
 
         (
-	    while [ ! -f $STOP_FILE ]; do
+          # Leave enough time to boot sequence after running this service to avoid messing up with X server's startup
+          # If system has been running past boot time, start right away
+          [ "$(cut -d. -f1 /proc/uptime)" -lt $MIN_SECS_AFTER_BOOT_SEQUENCE ] && sleep $MIN_SECS_AFTER_BOOT_SEQUENCE
+	        while [ ! -f $STOP_FILE ]; do
                 echo "$(date) Starting x11vnc..." | tee -a "$LOG_FILE"
                 $RUN_CMD
-            done
-            echo "$(date) Stop file found" | tee -a "$LOG_FILE"
-        )&
+          done
+          echo "$(date) Stop file found" | tee -a "$LOG_FILE"
+        ) &
         ;;
     stop)
         echo "$(date) Stopping x11vnc..." | tee -a "$LOG_FILE"
