@@ -155,6 +155,7 @@ while true; do
         stop)
             echo "Stopping symlink creation..."
             remove_symlinks
+            exit 0
             ;;
         status)
             echo "Checking status of symlinks..."
