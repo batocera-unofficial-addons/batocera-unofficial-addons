@@ -26,7 +26,6 @@ if [ ! -e "$libcrypt" ]; then
 fi
 
 if ! grep -q 'shopt -s nullglob' "$SYMLINK_MANAGER_PATH"; then
-    batocera-services stop symlink_manager
     install_bua
 fi
 
