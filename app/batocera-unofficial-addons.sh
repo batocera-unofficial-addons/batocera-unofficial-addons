@@ -25,6 +25,13 @@ if [ ! -e "$libcrypt" ]; then
     install_bua
 fi
 
+if ! grep -q 'shopt -s nullglob' "$SYMLINK_MANAGER_PATH"; then
+    batocera-services stop symlink_manager
+    install_bua
+fi
+
+
+
 chmod +x "$RESTORE_SCRIPT"
 /userdata/system/configs/bua/restore_desktop_entry.sh
 
