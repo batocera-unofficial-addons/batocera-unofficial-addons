@@ -1,0 +1,20 @@
+default_profile = "default"
+
+[[repositories]]
+name = "bincache"
+url = "https://meta.pkgforge.dev/bincache/x86_64-Linux.sdb.zstd"
+desktop_integration = false
+pubkey = "https://meta.pkgforge.dev/bincache/minisign.pub"
+signature_verification = true
+sync_interval = "3h"
+
+[[repositories]]
+name = "pkgcache"
+url = "https://meta.pkgforge.dev/pkgcache/x86_64-Linux.sdb.zstd"
+desktop_integration = true
+pubkey = "https://meta.pkgforge.dev/pkgcache/minisign.pub"
+signature_verification = true
+sync_interval = "3h"
+
+[profile.default]
+root_path = "/userdata/system/add-ons/soar"
