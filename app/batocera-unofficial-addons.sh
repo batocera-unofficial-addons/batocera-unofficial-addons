@@ -1,8 +1,6 @@
 #!/bin/bash
 
 SYMLINK_MANAGER_PATH="/userdata/system/services/symlink_manager"
-PORTS_FILE="/userdata/roms/ports/bua.sh"
-libcrypt="/userdata/system/add-ons/.dep/libcrypt.so.2"
 
 install_bua() {
     curl -L install.batoaddons.app | bash
@@ -10,19 +8,11 @@ install_bua() {
 
 grep -q '^Exec=/userdata/roms/ports/BatoceraUnofficialAddOns.sh' /usr/share/applications/BUA.desktop && { rm -f /usr/share/applications/BUA.desktop >/dev/null 2>&1; /userdata/system/configs/bua/restore_desktop_entry.sh >/dev/null 2>&1; }
 
-if [ ! -e "$PORTS_FILE" ]; then
-    install_bua
-    rm -f /userdata/roms/ports/BatoceraUnofficialAddOns.sh
-fi
 
 if [ ! -e "$SYMLINK_MANAGER_PATH" ]; then
     install_bua
     dialog --title "Reinstallation Required" --msgbox \
         "You've ran RGS install script since installing BUA! BUA has reinstalled, but previous application installs will need to be installed again." 10 60
-fi
-
-if [ ! -e "$libcrypt" ]; then
-    install_bua
 fi
 
 FILE="/userdata/system/add-ons/.dep/libbrotlicommon.so.1"
@@ -33,11 +23,6 @@ fi
 if ! grep -q 'shopt -s nullglob' "$SYMLINK_MANAGER_PATH"; then
     install_bua
 fi
-
-
-
-chmod +x "$RESTORE_SCRIPT"
-/userdata/system/configs/bua/restore_desktop_entry.sh
 
 # Function to display animated title with colors
 animate_title() {
