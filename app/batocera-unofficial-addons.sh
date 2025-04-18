@@ -25,6 +25,11 @@ if [ ! -e "$libcrypt" ]; then
     install_bua
 fi
 
+FILE="/userdata/system/add-ons/.dep/libbrotlicommon.so.1"
+if [ -e "$FILE" ]; then
+    rm -f "$FILE"
+fi
+
 if ! grep -q 'shopt -s nullglob' "$SYMLINK_MANAGER_PATH"; then
     install_bua
 fi
