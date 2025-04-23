@@ -90,8 +90,9 @@ Special thanks to:
 This is a community project and is not affiliated with the official Batocera team.  
 Use at your own discretion. For help, join the community Discord.
 
-                        
-## Stargazers over time
-[![Stargazers over time](https://starchart.cc/DTJW92/batocera-unofficial-addons.svg?variant=adaptive)](https://starchart.cc/DTJW92/batocera-unofficial-addons)
+![Alt](https://repobeats.axiom.co/api/embed/afdaf47a9359eac5aef68253c1410c01e46fad08.svg "Repobeats analytics image")
+[![Stargazers](https://reporoster.com/stars/dark/DTJW92/batocera-unofficial-addons)](https://github.com/DTJW92/batocera-unofficial-addons/stargazers)
+[![Stargazers over time](https://starchart.cc/DTJW92/batocera-unofficial-addons.svg?variant=dark)](https://starchart.cc/DTJW92/batocera-unofficial-addons)
+
 
                     
