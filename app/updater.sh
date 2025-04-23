@@ -12,37 +12,44 @@ mkdir -p "$TEMP_DIR"
 CHECKLIST_FILE="$TEMP_DIR/checklist.txt"
 
 > "$CHECKLIST_FILE"
+UPDATE_COUNT=0
 
 echo "🔍 Scanning installed add-ons..."
 
-# Build the checklist
+# Loop through each add-on
 for ADDON_PATH in "$ADDONS_DIR"/*; do
     [ -d "$ADDON_PATH" ] || continue
     ADDON_NAME=$(basename "$ADDON_PATH")
     LOCAL_MODIFIED=$(stat -c %Y "$ADDON_PATH")
 
-    # Use GitHub API to get last commit time of script
+    # Get latest commit date from GitHub API
     API_URL="$GITHUB_API?path=$ADDON_NAME/$ADDON_NAME.sh&sha=$REPO_BRANCH"
     REMOTE_MODIFIED=$(curl -s "$API_URL" | jq -r '.[0].commit.committer.date' | xargs -I{} date -d {} +%s 2>/dev/null)
 
     if [[ -z "$REMOTE_MODIFIED" || "$REMOTE_MODIFIED" == "null" ]]; then
-        echo "Could not get commit time for $ADDON_NAME" >&2
+        echo "⚠️ Skipping $ADDON_NAME — commit not found"
         continue
     fi
 
     if [ "$REMOTE_MODIFIED" -gt "$LOCAL_MODIFIED" ]; then
-        echo "$ADDON_NAME \"$ADDON_NAME needs update\" off" >> "$CHECKLIST_FILE"
-    else
-        echo "$ADDON_NAME \"$ADDON_NAME is up to date\" off" >> "$CHECKLIST_FILE"
+        echo "$ADDON_NAME \"$ADDON_NAME has an update\" off" >> "$CHECKLIST_FILE"
+        ((UPDATE_COUNT++))
     fi
 done
 
-# Show dialog checklist
+# If everything is up to date
+if [ "$UPDATE_COUNT" -eq 0 ]; then
+    dialog --msgbox "✅ All installed add-ons are already up to date!" 7 50
+    clear
+    exit 0
+fi
+
+# Show checklist dialog with only outdated items
 CHOICES=$(dialog --clear --stdout --no-tags --checklist "Select add-ons to update:" 20 70 15 --file "$CHECKLIST_FILE")
 
 clear
 
-# Perform updates
+# Perform updates if selected
 if [ -n "$CHOICES" ]; then
     for ADDON in $CHOICES; do
         echo "⬇️ Updating $ADDON..."
@@ -52,11 +59,10 @@ if [ -n "$CHOICES" ]; then
         curl -s -L -o "$TEMP_SCRIPT" "$SCRIPT_URL"
         chmod +x "$TEMP_SCRIPT"
         bash "$TEMP_SCRIPT"
-        echo "$ADDON updated."
+        echo "✅ $ADDON updated."
     done
 else
-    echo "No add-ons selected. Nothing was updated."
+    echo "❌ No add-ons selected. Nothing was updated."
 fi
 
-# Cleanup
 rm -rf "$TEMP_DIR"
