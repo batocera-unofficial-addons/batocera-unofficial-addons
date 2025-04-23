@@ -132,24 +132,22 @@ chmod +x "$custom_startup"
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
-  GNU nano 7.2                        steam.sh                        Modified
-
-KEYS_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/r>
+KEYS_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/steam/extra/Steam.sh.keys"
 # Step 5: Download the key mapping file
 echo "Downloading key mapping file..."
 curl -L -o "/userdata/roms/ports/Steam.sh.keys" "$KEYS_URL"
 # Download the image
 echo "Downloading Steam logo..."
-curl -L -o /userdata/roms/ports/images/steamlogo.jpg https://github.com/DTJW92/>
+curl -L -o /userdata/roms/ports/images/steamlogo.jpg https://github.com/DTJW92/batocera-unofficial-addons/raw/main/steam/extra/logo.jpg
 
 echo "Adding logo to Steam entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./Steam.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "Steam" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/steamlogo.jpg" \
-  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && >
+  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
 
 curl http://127.0.0.1:1234/reloadgames
 
 echo
-echo "Installation complete! You can now launch Steam from the F1 Applications >
+echo "Installation complete! You can now launch Steam from the F1 Applications menu and Steam Big Picture Mode from the Ports menu."
