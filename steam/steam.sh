@@ -14,7 +14,7 @@ fi
 
 # Check if fusermount3 exists
 if ! command -v fusermount3 &> /dev/null; then
-    
+
     # Display a YES/NO dialog
     dialog --yesno "BUA needs to be updated to the latest version for this app to run. Do you want to continue?" 10 60
     response=$?
@@ -31,27 +31,27 @@ fi
 # Step 2: Download Steam Parts
 echo "Downloading Steam parts..."
 mkdir -p /userdata/system/add-ons/steam
-wget -q --show-progress -O /userdata/system/add-ons/steam/steam_part_aa "$appimage_url/steam_part_aa"
-wget -q --show-progress -O /userdata/system/add-ons/steam/steam_part_bb "$appimage_url/steam_part_ab"
+wget -q -c --show-progress -O /userdata/system/add-ons/steam/steam_part_aa "$appimage_url/steam_part_aa"
+wget -q -c --show-progress -O /userdata/system/add-ons/steam/steam_part_ab "$appimage_url/steam_part_ab"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download Steam parts."
     exit 1
 fi
 
-# Reassemble the Steam package
-echo "Reassembling Steam package..."
-cat /userdata/system/add-ons/steam/steam_part_* > /userdata/system/add-ons/steam/steam.tar.xz
+# Reassemble and extract Steam package
+echo "Reassemble and extracting Steam..."
+cat /userdata/system/add-ons/steam/steam_part_* | tar -xvJf - -i -C /userdata/system/add-ons/steam
 
-# Extract Steam package
-echo "Extracting Steam..."
-tar -xf /userdata/system/add-ons/steam/steam.tar.xz -C /userdata/system/add-ons/steam/
+if [ ! -f "/userdata/system/add-ons/steam/steam" ]; then
+    echo "Failed to reassemble and extract Steam."
+    exit 1
+fi
 
 chmod a+x /userdata/system/add-ons/steam/steam
 echo "Steam reassembled, extracted, and marked as executable."
 
-# Remove the tar.xz file after extraction
-rm /userdata/system/add-ons/steam/steam.tar.xz
+# Remove the tar part files after extraction
 rm /userdata/system/add-ons/steam/steam_part_*
 
 # Create persistent configuration and log directories
@@ -132,22 +132,24 @@ chmod +x "$custom_startup"
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
-KEYS_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/steam/extra/Steam.sh.keys"
+  GNU nano 7.2                        steam.sh                        Modified
+
+KEYS_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/r>
 # Step 5: Download the key mapping file
 echo "Downloading key mapping file..."
 curl -L -o "/userdata/roms/ports/Steam.sh.keys" "$KEYS_URL"
 # Download the image
 echo "Downloading Steam logo..."
-curl -L -o /userdata/roms/ports/images/steamlogo.jpg https://github.com/DTJW92/batocera-unofficial-addons/raw/main/steam/extra/logo.jpg
+curl -L -o /userdata/roms/ports/images/steamlogo.jpg https://github.com/DTJW92/>
 
 echo "Adding logo to Steam entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./Steam.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "Steam" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/steamlogo.jpg" \
-  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && >
 
 curl http://127.0.0.1:1234/reloadgames
 
 echo
-echo "Installation complete! You can now launch Steam from the F1 Applications menu and Steam Big Picture Mode from the Ports menu."
+echo "Installation complete! You can now launch Steam from the F1 Applications >
