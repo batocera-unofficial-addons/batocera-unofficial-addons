@@ -120,10 +120,19 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Add to startup script
 custom_startup="/userdata/system/custom.sh"
+
+# Create file if it doesn't exist
+if [ ! -f "$custom_startup" ]; then
+    touch "$custom_startup"
+fi
+
+# Append modprobe line if not already present
 if ! grep -q "modprobe fuse" "$custom_startup"; then
     echo "Adding FUSE to startup..."
     echo "modprobe fuse &" >> "$custom_startup"
 fi
+
+# Ensure it's executable
 chmod +x "$custom_startup"
 
 modprobe fuse
