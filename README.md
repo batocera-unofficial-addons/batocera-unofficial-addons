@@ -1,6 +1,6 @@
 # Unofficial Add-ons for Batocera
 
-<img alt="Discord" src="https://img.shields.io/discord/1322750191756906638?style=for-the-badge&label=Discord"> <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/DTJW92/batocera-unofficial-addons?style=for-the-badge"> <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/DTJW92/batocera-unofficial-addons?style=for-the-badge"> <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/DTJW92/batocera-unofficial-addons?style=for-the-badge">  <a href="https://www.buymeacoffee.com/TheNotoriousFOX" target="_blank"> <img src="https://cdn.buymeacoffee.com/buttons/v2/default-orange.png" 
+<object alt="Discord" src="https://img.shields.io/discord/1322750191756906638?style=for-the-badge&label=Discord&link=https%3A%2F%2Fdiscord.batoaddons.app"> <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/DTJW92/batocera-unofficial-addons?style=for-the-badge"> <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/DTJW92/batocera-unofficial-addons?style=for-the-badge"> <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/DTJW92/batocera-unofficial-addons?style=for-the-badge">  <a href="https://www.buymeacoffee.com/TheNotoriousFOX" target="_blank"> <img src="https://cdn.buymeacoffee.com/buttons/v2/default-orange.png" 
        alt="Buy Me A Beer" 
        height="28" 
        width="140">
