@@ -190,6 +190,7 @@ apps=(
     ["X11VNC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/x11vnc/x11vnc.sh | bash"
     ["QEMU-GA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/qga/qga.sh | bash"
     ["BRIDGE"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/bridge/bridge.sh | bash"
+    ["SOAR"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/soar/soar.sh | bash"
 )
 
 
@@ -273,6 +274,7 @@ descriptions=(
     ["X11VNC"]="Remote control your Batocera desktop over VNC."
     ["QEMU-GA"]="For use with VM instances"
     ["BRIDGE"]-"Chart downloader for CloneHero/YARG"
+    ["SOAR"]="Soar package manager integrated with BUA"
 )
 
 
@@ -282,7 +284,7 @@ categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64 ULTRASTAR"
     ["Game Utilities"]="AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS BOTTLES SUNSHINE MOONLIGHT BRIDGE"
     ["System Utilities"]="F1 TAILSCALE WINEMANAGER VESKTOP CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP DESKTOP"
-    ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER DOCKER EXTRAS X11VNC QEMU-GA"
+    ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER DOCKER EXTRAS X11VNC QEMU-GA SOAR"
 )
 
 while true; do
