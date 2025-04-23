@@ -3,8 +3,14 @@
 # Detect architecture
 ARCH=$(uname -m)
 case "$ARCH" in
-    x86_64)    SOAR_BINARY="soar-x86_64-linux" ;;
-    aarch64)   SOAR_BINARY="soar-aarch64-linux" ;;
+    x86_64)
+        SOAR_BINARY="soar-x86_64-linux"
+        CONFIG_FILE_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/soar/extra/config.toml"
+        ;;
+    aarch64)
+        SOAR_BINARY="soar-aarch64-linux"
+        CONFIG_FILE_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/soar/extra/arm64_config.toml"
+        ;;
     *)
         echo "Unsupported architecture: $ARCH"
         exit 1
@@ -34,8 +40,7 @@ SOAR_URL="https://github.com/pkgforge/soar/releases/download/${LATEST_TAG}/${SOA
 curl -Lso "$SOAR_BINARY_PATH" "$SOAR_URL"
 chmod +x "$SOAR_BINARY_PATH"
 
-# Download the config file
-curl -Lso "$SOAR_CONFIG_DIR/config.toml" "https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/soar/extra/config.toml"
+# Download the appropriate config file
+curl -Lso "$SOAR_CONFIG_DIR/config.toml" "$CONFIG_FILE_URL"
 
 echo "Soar setup completed for $ARCH!"
-
