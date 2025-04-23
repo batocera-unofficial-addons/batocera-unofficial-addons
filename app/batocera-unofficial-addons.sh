@@ -315,7 +315,7 @@ fi
                 ;;
             "Windows Freeware")
                ( curl -Ls github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/menu.sh | bash )
-break
+                break
                 ;;
             "Game Utilities")
                 selected_apps=$(echo "${categories["Game Utilities"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
@@ -328,11 +328,15 @@ break
                 ;;
             "Docker Menu")
                ( curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/docker/menu.sh | bash )
-break
+                break
+                ;;
+            "Updater")
+                ( curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/updater.sh | bash )
+                break
                 ;;
             "Secret Menu")
                ( curl -Ls secret.batoaddons.app | bash )
-break
+                break
                 ;;
             *)
                 echo "Invalid choice!"
