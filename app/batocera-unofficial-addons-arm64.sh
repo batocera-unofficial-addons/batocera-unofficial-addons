@@ -113,6 +113,7 @@ apps=(
     ["DESKTOP"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/desktop/desktop.sh | bash"
     ["GREENLIGHT"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/greenlight/greenlight_arm64.sh | bash"
     ["AMAZON-LUNA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/amazonluna/amazonluna-arm64.sh | bash"
+    ["SOAR"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/soar/soar.sh | bash"
 )
 
 
@@ -134,6 +135,7 @@ descriptions=(
     ["DESKTOP"]="Adds desktop mode to Batocera access it via Ports."
     ["GREENLIGHT"]="Client for xCloud and Xbox streaming."
     ["AMAZON-LUNA"]="Amazon Luna game streaming client."
+    ["SOAR"]="Soar package manager integrated with BUA"
 )
 
 
@@ -143,7 +145,7 @@ categories=(
     ["Games"]="MINECRAFT SUPERMARIOX SUPERTUXKART CELESTE64"
     ["Game Utilities"]="PORTMASTER CHIAKI GREENLIGHT AMAZON-LUNA"
     ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE F1 FIREFOX DESKTOP"
-    ["Developer Tools"]="CONTY DOCKER"
+    ["Developer Tools"]="CONTY DOCKER SOAR"
 )
 
 while true; do
