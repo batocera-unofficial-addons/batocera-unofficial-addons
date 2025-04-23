@@ -181,8 +181,17 @@ fi
             "Developer Tools")
                 selected_apps=$(echo "${categories["Developer Tools"]}" | tr ' ' '\n' | sort | tr '\n' ' ')
                 ;;
+            "Docker Menu")
+               ( curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/main/docker/menu.sh | bash )
+                break
+                ;;
+            "Updater")
+                ( curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/updater.sh | bash )
+                break
+                ;;
             "Secret Menu")
-                curl -Ls secret.batoaddons.app | bash
+               ( curl -Ls secret.batoaddons.app | bash )
+                break
                 ;;
             *)
                 echo "Invalid choice!"
