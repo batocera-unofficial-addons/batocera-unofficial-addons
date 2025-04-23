@@ -4,7 +4,7 @@
        alt="Buy Me A Beer" 
        height="28" 
        width="140">
-</a> <img alt="Discord" src="https://img.shields.io/discord/1322750191756906638?link=https%3A%2F%2Fdiscord.batoaddons.app">
+</a> <img alt="Discord" src="https://img.shields.io/discord/1322750191756906638?style=for-the-badge">
 
 ---
 
