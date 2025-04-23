@@ -27,7 +27,7 @@ for ADDON_PATH in "$ADDONS_DIR"/*; do
     REMOTE_MODIFIED=$(curl -s "$API_URL" | jq -r '.[0].commit.committer.date' | xargs -I{} date -d {} +%s 2>/dev/null)
 
     if [[ -z "$REMOTE_MODIFIED" || "$REMOTE_MODIFIED" == "null" ]]; then
-        echo "⚠️ Skipping $ADDON_NAME — commit not found"
+        echo "Skipping $ADDON_NAME — commit not found"
         continue
     fi
 
@@ -39,7 +39,7 @@ done
 
 # If everything is up to date
 if [ "$UPDATE_COUNT" -eq 0 ]; then
-    dialog --msgbox "✅ All installed add-ons are already up to date!" 7 50
+    dialog --msgbox "All installed add-ons are already up to date!" 7 50
     clear
     exit 0
 fi
@@ -52,17 +52,17 @@ clear
 # Perform updates if selected
 if [ -n "$CHOICES" ]; then
     for ADDON in $CHOICES; do
-        echo "⬇️ Updating $ADDON..."
+        echo "Updating $ADDON..."
         SCRIPT_URL="$REPO_BASE_URL/$ADDON/$ADDON.sh"
         TEMP_SCRIPT="$TEMP_DIR/$ADDON.sh"
 
         curl -s -L -o "$TEMP_SCRIPT" "$SCRIPT_URL"
         chmod +x "$TEMP_SCRIPT"
         bash "$TEMP_SCRIPT"
-        echo "✅ $ADDON updated."
+        echo "$ADDON updated."
     done
 else
-    echo "❌ No add-ons selected. Nothing was updated."
+    echo "No add-ons selected. Nothing was updated."
 fi
 
 rm -rf "$TEMP_DIR"
