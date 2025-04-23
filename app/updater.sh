@@ -1,5 +1,7 @@
 #!/bin/bash
 
+clear
+
 ADDONS_DIR="/userdata/system/add-ons"
 REPO_USER="DTJW92"
 REPO_NAME="batocera-unofficial-addons"
@@ -14,7 +16,7 @@ CHECKLIST_FILE="$TEMP_DIR/checklist.txt"
 > "$CHECKLIST_FILE"
 UPDATE_COUNT=0
 
-echo "🔍 Scanning installed add-ons..."
+echo "Scanning installed add-ons..."
 
 # Loop through each add-on
 for ADDON_PATH in "$ADDONS_DIR"/*; do
