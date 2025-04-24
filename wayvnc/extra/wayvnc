@@ -4,9 +4,6 @@ STOP_FILE="/tmp/wayvnc.stop"
 LOG_FILE="/userdata/system/logs/wayvnc.log"
 RUN_CMD="wayvnc 0.0.0.0"
 
-# Required runtime env for wayvnc
-export LD_LIBRARY_PATH="/userdata/system/add-ons/wayvnc/lib:$LD_LIBRARY_PATH"
-
 case "$1" in
     start)
         [ -f "$STOP_FILE" ] && rm "$STOP_FILE"
