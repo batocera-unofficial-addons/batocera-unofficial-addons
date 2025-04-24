@@ -1,0 +1,43 @@
+#!/bin/bash
+
+STOP_FILE="/tmp/wayvnc.stop"
+LOG_FILE="/userdata/system/logs/wayvnc.log"
+RUN_CMD="wayvnc 0.0.0.0"
+
+# Required runtime env for wayvnc
+export LD_LIBRARY_PATH="/userdata/system/add-ons/wayvnc/lib:$LD_LIBRARY_PATH"
+
+case "$1" in
+    start)
+        [ -f "$STOP_FILE" ] && rm "$STOP_FILE"
+
+        # Prevent multiple instances
+        [[ $(pgrep -f "$RUN_CMD" > /dev/null) ]] && exit 0
+
+        (
+            while [ ! -f "$STOP_FILE" ]; do
+                echo "$(date) Starting wayvnc..." | tee -a "$LOG_FILE"
+                $RUN_CMD >> "$LOG_FILE" 2>&1
+            done
+            echo "$(date) Stop file found." | tee -a "$LOG_FILE"
+        ) &
+        ;;
+    stop)
+        echo "$(date) Stopping wayvnc..." | tee -a "$LOG_FILE"
+        touch "$STOP_FILE"
+        pkill -f "$RUN_CMD"
+        ;;
+    status)
+        if pgrep -f "$RUN_CMD" > /dev/null; then
+            echo "wayvnc is running."
+        else
+            echo "wayvnc is not running."
+        fi
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status}"
+        exit 1
+        ;;
+esac
+
+exit 0
