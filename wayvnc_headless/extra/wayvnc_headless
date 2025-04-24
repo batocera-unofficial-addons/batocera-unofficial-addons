@@ -1,0 +1,76 @@
+#!/bin/bash
+
+STOP_FILE="/tmp/wayvnc_headless.stop"
+LOG_FILE="/userdata/system/logs/wayvnc_headless.log"
+RUN_CMD="/userdata/system/add-ons/wayvnc/bin/wayvnc 0.0.0.0"
+export XDG_RUNTIME_DIR=/run/user/0
+mkdir -p "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR"
+
+export WLR_BACKENDS=headless
+export WLR_LIBINPUT_NO_DEVICES=1
+export LD_LIBRARY_PATH="/userdata/system/add-ons/wayvnc/lib:$LD_LIBRARY_PATH"
+
+case "$1" in
+    start)
+        [ -f "$STOP_FILE" ] && rm "$STOP_FILE"
+
+        [[ $(pgrep -f "$RUN_CMD" > /dev/null) ]] && exit 0
+
+        (
+            while [ ! -f "$STOP_FILE" ]; do
+                pkill sway
+		echo "$(date) Starting wayvnc..." | tee -a "$LOG_FILE"
+
+                sway > /tmp/sway_headless.log 2>&1 &
+                for i in {1..10}; do
+                    socket=$(ls $XDG_RUNTIME_DIR/wayland-* 2>/dev/null | head -n1)
+                    if [ -n "$socket" ]; then
+                        export WAYLAND_DISPLAY=$(basename "$socket")
+                        break
+                    fi
+                    sleep 1
+                done
+
+                if [ -z "$WAYLAND_DISPLAY" ]; then
+                    echo "$(date) Sway failed to start, log:" | tee -a "$LOG_FILE"
+                    cat /tmp/sway_headless.log >> "$LOG_FILE"
+                    sleep 5
+                    continue
+                fi
+
+                while [ ! -f "$STOP_FILE" ]; do
+                    socket=$(ls $XDG_RUNTIME_DIR/wayland-* 2>/dev/null | head -n1)
+                    [ -z "$socket" ] && break
+                    export WAYLAND_DISPLAY=$(basename "$socket")
+                    echo "$(date) Starting wayvnc headless with $WAYLAND_DISPLAY..." | tee -a "$LOG_FILE"
+                    $RUN_CMD >> "$LOG_FILE" 2>&1
+                    echo "$(date) wayvnc headless exited. Restarting..." | tee -a "$LOG_FILE"
+                    sleep 2
+                done
+            done
+
+            echo "$(date) Stop file found. Exiting wayvnc headless service." | tee -a "$LOG_FILE"
+        ) &
+        ;;
+    stop)
+        echo "$(date) Stopping wayvnc headless..." | tee -a "$LOG_FILE"
+        touch "$STOP_FILE"
+        pkill sway
+	pkill -f "$RUN_CMD"
+        ;;
+    status)
+        if pgrep -f "$RUN_CMD" > /dev/null; then
+            echo "wayvnc headless is running."
+        else
+            echo "wayvnc headless is not running."
+        fi
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status}"
+        exit 1
+        ;;
+esac
+
+exit 0
+
