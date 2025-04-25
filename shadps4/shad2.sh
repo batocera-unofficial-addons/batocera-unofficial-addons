@@ -5,7 +5,7 @@ shadps4_version="0.7.0"
 install_dir="/userdata/system/add-ons/shadps4"
 
 # URLs
-shadps4_release_url="https://github.com/shadps4-emu/shadPS4/releases/download/v${shadps4_version}/shadps4-linux-qt-${shadps4_version}.zip"
+shadps4_release_url="https://github.com/shadps4-emu/shadPS4/releases/download/v.${shadps4_version}/shadps4-linux-qt-${shadps4_version}.zip"
 sdl_latest_url=$(curl -s https://api.github.com/repos/shadps4-emu/shadPS4/releases/latest | grep "browser_download_url" | grep "shadps4-linux-sdl.*\.zip" | cut -d '"' -f 4)
 
 # Check URLs
