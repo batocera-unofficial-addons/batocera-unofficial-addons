@@ -4,7 +4,7 @@
 output_dir="/userdata/roms/ps4"
 gamelist_path="$output_dir/gamelist.xml"
 processed_list="/userdata/system/.local/share/shadPS4/processed_games.txt"
-app_image="/userdata/system/add-ons/shadps4/Shadps4-qt.AppImage"
+app_image="/userdata/system/add-ons/shadps4/Shadps4-sdl.AppImage"
 image_dir="/userdata/system/add-ons/shadps4/images"
 csv_url="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/shadps4/extra/PS4_Title_ID_List.csv"
 
