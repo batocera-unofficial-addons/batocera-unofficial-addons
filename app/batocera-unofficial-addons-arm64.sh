@@ -1,12 +1,12 @@
 #!/bin/bash
 
-libselinux="/userdata/system/add-ons/.dep/libselinux.so.1"
+lib="/userdata/system/add-ons/.dep/libseccomp.so.2"
 
 install_bua() {
     curl -L install.batoaddons.app | bash
 }
 
-if [ ! -e "$libselinux" ]; then
+if [ ! -e "$lib" ]; then
     install_bua
 fi
 
