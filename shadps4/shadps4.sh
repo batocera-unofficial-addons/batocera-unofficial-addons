@@ -1,5 +1,24 @@
 #!/bin/bash
 
+# Step 1: Check if /userdata/system/add-ons/shadps4 exists
+if [ -d "/userdata/system/add-ons/shadps4" ]; then
+
+    # Step 2: Check if Shadps4-sdl.AppImage exists
+    if [ ! -f "/userdata/system/add-ons/Shadps4-sdl.AppImage" ]; then
+        # Step 3: Show dialog message
+        dialog --title "ShadPS4 Updated" --msgbox "ShadPS4 has been updated.\n\nFor maximum compatibility, please delete your current launchers and reopen ShadPS4." 10 50
+    else
+        # Step 4: Check the first .sh file in /userdata/roms/ps4
+        first_sh_file=$(find /userdata/roms/ps4 -maxdepth 1 -type f -name "*.sh" | head -n 1)
+        if [ -f "$first_sh_file" ]; then
+            if grep -q "Shadps4-qt.AppImage" "$first_sh_file"; then
+                # Step 3: Show dialog again if old launcher is detected
+                dialog --title "ShadPS4 Updated" --msgbox "ShadPS4 has been updated.\n\nFor maximum compatibility, please delete your current launchers and reopen ShadPS4." 10 50
+            fi
+        fi
+    fi
+fi
+
 # Variables
 shadps4_version="0.7.0"
 install_dir="/userdata/system/add-ons/shadps4"
