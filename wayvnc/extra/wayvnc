@@ -4,6 +4,7 @@ STOP_FILE="/tmp/wayvnc.stop"
 LOG_FILE="/userdata/system/logs/wayvnc.log"
 WAYVNC_BIN="/usr/bin/wayvnc"
 RUN_CMD="$WAYVNC_BIN 0.0.0.0"
+export XDG_RUNTIME_DIR=/var/run
 
 case "$1" in
     start)
@@ -21,6 +22,14 @@ case "$1" in
         (
             while [ ! -f "$STOP_FILE" ]; do
                 echo "$(date) Starting wayvnc..." | tee -a "$LOG_FILE"
+                for i in {1..10}; do
+                    socket=$(ls $XDG_RUNTIME_DIR/wayland-* 2>/dev/null | head -n1)
+                    if [ -n "$socket" ]; then
+                        export WAYLAND_DISPLAY=$(basename "$socket")
+                        break
+                    fi
+                    sleep 1
+                done
                 $RUN_CMD >> "$LOG_FILE" 2>&1
                 echo "$(date) wayvnc exited. Restarting in 3s..." | tee -a "$LOG_FILE"
                 sleep 3
