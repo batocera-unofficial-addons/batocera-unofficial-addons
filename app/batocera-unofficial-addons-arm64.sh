@@ -115,6 +115,7 @@ apps=(
     ["AMAZON-LUNA"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/amazonluna/amazonluna-arm64.sh | bash"
     ["SOAR"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/soar/soar.sh | bash"
     ["WAYVNC"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/wayvnc/wayvnc.sh | bash"
+    ["WAYVNC-HEADLESS"]="curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/wayvnc_headless/wayvnc_headless.sh | bash"
 )
 
 
@@ -138,6 +139,7 @@ descriptions=(
     ["AMAZON-LUNA"]="Amazon Luna game streaming client."
     ["SOAR"]="Soar package manager integrated with BUA"
     ["WAYVNC"]="WayVNC for remote access"
+    ["WAYVNC-HEADLESS"]="WayVNC for headless systems"
 )
 
 
@@ -147,7 +149,7 @@ categories=(
     ["Games"]="MINECRAFT SUPERMARIOX SUPERTUXKART CELESTE64"
     ["Game Utilities"]="PORTMASTER CHIAKI GREENLIGHT AMAZON-LUNA"
     ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE F1 FIREFOX DESKTOP"
-    ["Developer Tools"]="CONTY DOCKER SOAR WAYVNC"
+    ["Developer Tools"]="CONTY DOCKER SOAR WAYVNC WAYVNC-HEADLESS"
 )
 
 while true; do
