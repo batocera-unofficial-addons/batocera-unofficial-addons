@@ -93,6 +93,7 @@ clear
 
 # Welcome message
 echo "Welcome to the automatic installer for the Freej2me by DRL Edition."
+type_text "Java j2me game emulator tested and working on Batocera v.42"
 
 # Temporary directory for download
 TEMP_DIR="/userdata/tmp/Freej2me"
