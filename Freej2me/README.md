@@ -32,7 +32,7 @@ The standard Freej2me emulation already includes a gamepad recognition feature. 
 
 ## The standard Freej2me emulation already includes a gamepad recognition feature. However, Retroarch emulation is still in the testing phase, but you can experiment and customize it.
 
-![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/joytick.jpg?raw=true)
+![image]([https://github.com/DRLEdition19/batocera-unofficial-addons.add/raw/refs/heads/main/Freej2me/extra/joytick.jpg])
 
 # The following control settings correspond to the keyboard buttons illustrated above.
 ---
