@@ -5,6 +5,8 @@ Welcome to the project to install the Java ME game emulator, Freej2me, on your B
 
 This project includes all the necessary resources to ensure full functionality on your Batocera.
 
+This project has been successfully tested on Batocera v.38, v.39, v.40, v.41 and v.42
+
 ## 🚀 Installation Instructions
 
 To start the installation, copy the command below, paste it into your terminal, and press Enter to begin the installation:
@@ -32,7 +34,7 @@ The standard Freej2me emulation already includes a gamepad recognition feature. 
 
 ## The standard Freej2me emulation already includes a gamepad recognition feature. However, Retroarch emulation is still in the testing phase, but you can experiment and customize it.
 
-![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/joytick.jpg?raw=true)
+![image](https://github.com/DRLEdition19/batocera-unofficial-addons.add/raw/refs/heads/main/Freej2me/extra/joytick.jpg)
 
 # The following control settings correspond to the keyboard buttons illustrated above.
 ---
@@ -64,7 +66,7 @@ All **common key combinations** below:
 | **🕹R-ANALOG UP**      | *LOWER LEFT DIAGONAL* | 3 |
 | **🕹R-ANALOG DOWN**    | *LOWER RIGHT DIAGONAL* | 7 |
 | **🕹R-ANALOG RIGHT**   | *TOP RIGHT DIAGONAL* | 9 |
-| **□ / Y**             |       A         | ??? |
+| **⏹️ / Y**             |       A         | ??? |
 | **✖️ / B**             |       Enter         | 5 |
 
 ## Nokia Keyboard Shortcuts
@@ -77,7 +79,7 @@ All **common shortcut keys** below:
 | **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Abaixo.png?raw=true)D-PAD DOWN** or **🕹L-ANALOG DOWN**   | Down Arrow    |           Down            |
 | **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Esquerda.png?raw=true)D-PAD LEFT** or **🕹L-ANALOG LEFT**   | Left Arrow |          Left          |
 | **![image](https://github.com/DRLEdition19/J2me-Batocera/blob/main/Freej2me/extra/Direita.png?raw=true)D-PAD RIGHT** or **🕹L-ANALOG RIGHT** | Right Arrow  |          Right           |
-| **□ / Y**             |       A         | ??? |
+| **⏹️ / Y**             |       A         | ??? |
 | **✖️ / B**                                 |      Enter         | Action Key (**OK** button) |
 
 ---
