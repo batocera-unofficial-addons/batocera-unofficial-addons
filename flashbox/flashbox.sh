@@ -2,10 +2,10 @@
 
 # Variables to update for different apps
 APP_NAME="Flashbox"
-AMD_SUFFIX="flashbox/extra/Flashbox.AppImage"
-ARM_SUFFIX="flashbox/extra/Flashbox-aarch64.AppImage"
+AMD_SUFFIX="Flashbox.AppImage"
+ARM_SUFFIX="Flashbox-arm64.AppImage"
 LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/flashbox/extra/flashbox.png"
-REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main"
+REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/"
 
 # -----------------------------------------------------------------------------------------------------------------
 
