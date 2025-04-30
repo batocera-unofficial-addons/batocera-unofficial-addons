@@ -4,7 +4,7 @@ set -euo pipefail
 # URL of the script to download
 SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/symlinks.sh"  # URL for symlink_manager.sh
 BATOCERA_ADDONS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/BatoceraUnofficialAddOns.sh"  # URL for batocera-unofficial-addons.sh
-BATOCERA_ADDONS_LOGO_URL=https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png
+BATOCERA_ADDONS_LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png"
 KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/keys.txt"  # URL for keys.txt
 XMLSTARLET_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/xmlstarlet"  # URL for xmlstarlet
 DIO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/.dialogrc"
