@@ -96,11 +96,11 @@ echo "Welcome to the automatic installer for the Winconfig by DRL Edition."
 
 # Temporary directory for download
 TEMP_DIR="/userdata/tmp/Winconfig"
-DRL_FILE="$TEMP_DIR/Config.DRL"
+DRL_FILE="$TEMP_DIR/Winconfig.DRL"
 EXTRACT_DIR="$TEMP_DIR/extracted"
 DEST_DIR="/"
 PORTS_DIR="/userdata/roms/ports"
-DEPS_INSTALLER="- Config Windows game for Batocera.sh"
+DEPS_INSTALLER="- Windows Game Fix.sh"
 
 # Create the temporary directories
 echo "Creating temporary directories..."
@@ -109,12 +109,12 @@ mkdir -p $EXTRACT_DIR
 mkdir -p $PORTS_DIR
 
 # Download the DRL file
-echo "Downloading the Config.DRL file..."
+echo "Downloading the DRL file..."
 curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Winconfig_Files_full_2.0.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
-    echo "Error: Failed to download Config.DRL"
+    echo "Error: Failed to download DRL file"
     exit 1
 fi
 
@@ -178,7 +178,7 @@ rm -rf $TEMP_DIR
 
 # Save changes
 echo "Saving changes..."
-curl -L "https://github.com/DRLEdition19/batocera-unofficial-addons.add/raw/refs/heads/main/Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config.sh" | bash
+curl -L "https://github.com/DRLEdition19/DRLEdition_Interface/raw/refs/heads/main/extra/Winconfig_gamelist_config.sh" | bash
 batocera-save-overlay
 
 echo "Installation completed successfully."
