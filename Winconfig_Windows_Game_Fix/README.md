@@ -6,7 +6,7 @@ Seja bem vindo ao projeto de instalação do Winconfig - Windows Game Fix - para
 
 Este projeto possui todos os recursos necessários para fornecer uma ferramenta totalmente funcional para seu batocera.
 
-![image](https://github.com/DRLEdition19/DRLEdition_Interface/blob/main/extra/Windows%20Game%20Fix%20on%20Batocera.png?raw=true)
+![image](https://github.com/DRLEdition19/batocera-unofficial-addons.add/blob/main/Winconfig_Windows_Game_Fix/extra/Windows%20Game%20Fix%20on%20Batocera.png?raw=true)
 
 ## 🚀 Instruções de instalação
 
@@ -24,7 +24,7 @@ Você irá encontrar a ferramenta dentro da coleção **Ports**
 
 **O Winconfig - Windows Game Fix - já conta com um recurso de reconhecimento do gamepad, no entanto, a configuração de mapeamento ainda continua em fase de testes, mas você poderá realizar testes e personalizá-lo.**
 
-![image](https://github.com/DRLEdition19/DRLEdition_Interface/blob/main/extra/joytick.jpg?raw=true)
+![image](https://github.com/DRLEdition19/batocera-unofficial-addons.add/blob/main/Winconfig_Windows_Game_Fix/extra/joytick.jpg?raw=true)
 
 ***Estas configurações de mapeamento abaixo, são correspondentes com os botões do gamepad ilustrado acima.***
 
@@ -59,4 +59,4 @@ Confira na tabela abaixo o que cada botão mágico do seu controle faz:
 
 ***Esta ferramenta ainda esta em fase de testes e desenvolvimento para melhoria contínua, e portanto você poderá encontrar bugs.***
 
-![image](https://github.com/DRLEdition19/DRLEdition_Interface/blob/main/extra/Windows%20Game%20Fix%20on%20Batocera%20-%20logo.png?raw=true)
+![image](https://github.com/DRLEdition19/batocera-unofficial-addons.add/blob/main/Winconfig_Windows_Game_Fix/extra/Windows%20Game%20Fix%20on%20Batocera%20-%20logo.png?raw=true)
