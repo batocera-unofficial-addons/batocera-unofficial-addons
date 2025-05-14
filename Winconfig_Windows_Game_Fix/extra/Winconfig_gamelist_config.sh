@@ -18,47 +18,54 @@ read -r -d '' GAME_ENTRY <<'EOF'
 		<game>
 		<path>./- Windows Game Fix.sh</path>
 		<name>- Windows Game Fix on Batocera</name>
-		<sortname>1 =-  Windows Game Fix</sortname>
-		<desc>This script, known as the "Windows Game Manager for Batocera - DRL Edition," is designed to simplify the configuration and management of Windows games within the Batocera operating system.
+		<desc>This script, known as the "Windows Game Manager for Batocera - by DRL Edition", is designed to simplify the configuration and management of Windows games within the Batocera operating system.
+This tool, known as "Winconfig - Windows Game Fix - by DRL Edition", was developed to simplify the configuration and management of Windows games on the Batocera operating system.
 
-Its core functionalities include:
+Its main features include:
 
--> Extracting games from various compressed formats (like .zip, .rar, .wsquashfs, .plus).
+-> Extracting games from various compressed formats (such as .zip, .rar, .wsquashfs, .plus).
 -> Compressing game folders to save space.
--> Automatically creating the necessary launcher files (autorun.cmd, batocera.plus) for EmulationStation.
--> Renaming game folders with appropriate suffixes (.pc, .wine, .plus) for Batocera compatibility.
--> Performing automatic backups of original game folders before modifications.
--> Restoring games from these backups.
--> A "Redist" tool to install crucial Windows dependencies (like DirectX, VC Runtimes) into the game's environment to improve compatibility.
--> An interactive settings panel to customize ROM directories, AntiMicroX profiles, compression settings, logging, and more.
--> Checking for required system dependencies.
+-> Automatic creation of the necessary startup files (autorun.cmd, batocera.plus) for Batocera.
+-> Automatic renaming of game folders with appropriate suffixes (.pc, .wine, .plus) for compatibility with Batocera.
+-> Automatic backups of original game folders before modifications, if the user enables this option in the settings menu.
+-> Restoring games from these backups. 
+-> A "Redist" tool to install crucial Windows dependencies (such as DirectX, VC Runtimes) into the game environment to improve compatibility.
+-> An interactive settings panel to customize ROM directories, AntiMicroX profiles, compression settings, registries, and more.
+-> Checking for required system dependencies if the user enables this option in the settings menu.
 -> Providing a comprehensive interactive help manual.
--> Offering direct access to AntiMicroX for gamepad mapping configuration.
+-> Providing direct access to AntiMicroX for gamepad mapping configuration.
 
 =================================================
 
-The project was based on an initiative started by DRL Edition on 22-01-2023, and this version of the script was last updated on 25-04-2025.
+The project was based on an initiative started by DRL Edition on 2023-01-22, and this version of the script was last updated on 2025-04-25.
 
 =================================================
-    Last update: 25.04.2025
+    Last updated: 04/25/2025
     Developer: DRL Edition19
     Redist, 2025 by DRL Edition
 =================================================</desc>
-		<rating>2.1</rating>
+		<image>./images/WindowsGameFix-thumb.png</image>
+		<marquee>./images/WindowsGameFix-marquee.png</marquee>
+		<thumbnail>./images/WindowsGameFix-thumb.png</thumbnail>
+		<fanart>./images/WindowsGameFix-thumb.png</fanart>
+		<titleshot>./images/WindowsGameFix-thumb.png</titleshot>
+		<cartridge>./images/WindowsGameFix-thumb.png</cartridge>
+		<boxart>./images/WindowsGameFix-marquee.png</boxart>
+		<boxback>./images/WindowsGameFix-thumb.png</boxback>
+		<wheel>./images/WindowsGameFix-thumb.png</wheel>
+		<mix>./images/WindowsGameFix-thumb.png</mix>
+		<rating>1</rating>
+		<releasedate>20230122T220656</releasedate>
 		<developer>DRL Edition</developer>
 		<publisher>DRLEdition19</publisher>
 		<genre>Game Fix</genre>
-		<genreid>0</genreid>
-		<region>usa</region>
+		<players>1</players>
+		<favorite>true</favorite>
 		<lang>en</lang>
-		<image>./images/WindowsGameFix-thumb.png</image>
-		<wheel>./images/WindowsGameFix-thumb.png</wheel>
-		<boxart>./images/WindowsGameFix-marquee.png</boxart>
+		<region>Conceicao de Cima, Alagoinhas, Bahia, Brazil</region>
+		<sortname>1 =-  Windows Game Fix</sortname>
+		<genreid>0</genreid>
 		<screenshot>./images/WindowsGameFix-thumb.png</screenshot>
-		<cartridge>./images/WindowsGameFix-thumb.png</cartridge>
-		<mix>./images/WindowsGameFix-thumb.png</mix>
-		<thumbnail>./images/WindowsGameFix-thumb.png</thumbnail>
-		<marquee>./images/WindowsGameFix-marquee.png</marquee>
 	</game>
 EOF
 
