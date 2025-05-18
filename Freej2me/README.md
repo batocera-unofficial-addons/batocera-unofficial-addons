@@ -86,3 +86,9 @@ All **common shortcut keys** below:
 
 Enjoy the emulator and have fun with your favorite Java ME games on Batocera! 😃
 
+## Acknowledgements
+
+Thanks to the developer **hex007**, for developing and making **Freej2me** available. The development of this project would be nothing without the existence of **Freej2me**.
+
+You can access the official page by clicking on this link:
+https://github.com/hex007/freej2me
