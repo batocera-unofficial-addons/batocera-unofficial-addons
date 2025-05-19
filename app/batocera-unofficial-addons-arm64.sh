@@ -194,10 +194,6 @@ fi
                 ( curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/updater.sh | bash )
                 break
                 ;;
-            "Secret Menu")
-               ( curl -Ls secret.batoaddons.app | bash )
-                break
-                ;;
             *)
                 echo "Invalid choice!"
                 exit 1
