@@ -21,17 +21,6 @@ Individual install links won't be provided — the app is needed to handle depen
 
 ---
 
-🔐 About the Secret Menu
-
-This project includes a hidden "secret menu" that is self-hosted and password-protected.
-
-⚠️ This menu, and it's contents, are not open source, are provided for personal use only, and are protected under a custom license.
-The source code is not publicly distributed due to the sensitive nature of what it provides.
-Full details of it's custom license is included when trying to access the menu.
-
-
----
-
 ## 📜 Licensing & GPL Compliance
 
 This repository is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.  
@@ -43,6 +32,7 @@ In accordance with the GPL:
 - The **full source code** is available in this repository, including any installation scripts and helper files.
 - If you distribute modified versions, you must also make the source available under the same license.
 - Any GPL third-party software used or installed will retain its original license.
+- Attribution is not required, since it is not a term of the GPL-3.0 license.
 
 ---
 
