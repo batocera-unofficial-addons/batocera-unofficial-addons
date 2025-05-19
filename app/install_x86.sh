@@ -190,9 +190,9 @@ if [ ! -s "$BATOCERA_ADDONS_LOGO_DEST" ]; then
 fi
 
 # Download the wheel image
-echo "Downloading Batocera Unofficial Add-ons wheel image from $BATOCERA_ADDONS_BATOCERA_ADDONS_WHEEL_URL..."
+echo "Downloading Batocera Unofficial Add-ons wheel image from $BATOCERA_ADDONS_WHEEL_URL..."
 BATOCERA_ADDONS_WHEEL_DEST="/userdata/roms/ports/images/BatoceraUnofficialAddons_Wheel.png"
-curl -fLs -o "$BATOCERA_ADDONS_WHEEL_DEST" "$BATOCERA_ADDONS_BATOCERA_ADDONS_WHEEL_URL"
+curl -fLs -o "$BATOCERA_ADDONS_WHEEL_DEST" "$BATOCERA_ADDONS_WHEEL_URL"
 
 # Check if download was successful
 if [ ! -s "$BATOCERA_ADDONS_WHEEL_DEST" ]; then
