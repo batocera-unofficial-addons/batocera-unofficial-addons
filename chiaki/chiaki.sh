@@ -25,7 +25,7 @@ mkdir -p /userdata/roms/ports/images
 mkdir -p /userdata/system/configs/chiaki
 DESKTOP_FILE="/usr/share/applications/chiaki.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/chiaki/chiaki.desktop"
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/chiaki/extra/icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/chiaki/extra/icon.png"
 INSTALL_DIR="/userdata/system/add-ons/chiaki"
 # Step 3: Download the AppImage
 echo "Downloading Chiaki AppImage..."
@@ -123,7 +123,7 @@ if ! command -v xmlstarlet &> /dev/null; then
 fi
 
 echo "Adding Chiaki to Ports menu..."
-curl -L -o /userdata/roms/ports/images/chiakilogo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/chiaki/extra/chiakilogo.png
+curl -L -o /userdata/roms/ports/images/chiakilogo.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/chiaki/extra/chiakilogo.png
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./Chiaki.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "Chiaki" \
