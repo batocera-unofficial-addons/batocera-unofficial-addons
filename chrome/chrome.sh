@@ -70,7 +70,7 @@ chmod +x /userdata/roms/ports/GoogleChrome.sh
 APPNAME="Chrome"
 DESKTOP_FILE="/usr/share/applications/${APPNAME}.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/${APPNAME,,}/${APPNAME}.desktop"
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
 mkdir -p "/userdata/system/configs/${APPNAME,,}"
 
 echo "Downloading icon..."
@@ -131,7 +131,7 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Download the image
 echo "Downloading Google Chrome logo..."
-curl -L -o /userdata/roms/ports/images/chrome-logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/chrome/extra/chrome-logo.png
+curl -L -o /userdata/roms/ports/images/chrome-logo.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/chrome/extra/chrome-logo.png
 echo "Adding logo to Google Chrome entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./GoogleChrome.sh" \
