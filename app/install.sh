@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # URLs
-AMD64="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/install_x86.sh"
-ARM64="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/install_arm64.sh"
+AMD64="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/app/install_x86.sh"
+ARM64="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/app/install_arm64.sh"
 
 # Filesystem check
 fstype=$(stat -f -c %T /userdata)
