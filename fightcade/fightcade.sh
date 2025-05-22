@@ -5,8 +5,8 @@ APP_NAME="Fightcade"
 REPO_BASE_URL="https://web.fightcade.com/download/"
 AMD_SUFFIX="Fightcade-linux-latest.tar.gz"
 ARM_SUFFIX=""
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/fightcade/extra/fightcade-logo.png"
-SYM_WINE_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/fightcade/sym_wine.sh"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/fightcade/extra/fightcade-logo.png"
+SYM_WINE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/fightcade/sym_wine.sh"
 # Directories
 ADDONS_DIR="/userdata/system/add-ons"
 PORTS_DIR="/userdata/roms/ports"
@@ -90,7 +90,7 @@ mkdir -p "$BIN_DIR"
 
 # Download the wine AppImage and save it as "wine"
 echo "Downloading wine AppImage into $BIN_DIR as 'wine'..."
-wget -c -q --show-progress -O "$BIN_DIR/wine" "https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/wine-staging_ge-proton_8-26-x86_64.AppImage"
+wget -c -q --show-progress -O "$BIN_DIR/wine" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/wine-staging_ge-proton_8-26-x86_64.AppImage"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download the wine AppImage."
