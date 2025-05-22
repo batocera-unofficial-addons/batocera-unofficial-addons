@@ -88,7 +88,7 @@ if ! command -v xmlstarlet &> /dev/null; then
 fi
 
 echo "Adding Minecraft Bedrock Edition to Ports menu..."
-logo_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-bedrock-logo.png"
+logo_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-bedrock-logo.png"
 entry_name="Minecraft Bedrock Edition"
 script_name="MinecraftBedrock.sh"
 
