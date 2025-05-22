@@ -6,7 +6,7 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/"
+    appimage_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
@@ -60,7 +60,7 @@ mkdir -p /userdata/system/configs/lutris
 mkdir -p /userdata/system/add-ons/lutris/extra
 DESKTOP_FILE="/usr/share/applications/Lutris.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/lutris/Lutris.desktop"
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/lutris/extra/icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/lutris/extra/icon.png"
 INSTALL_DIR="/userdata/system/add-ons/lutris"
 
 # Step 3: Create the Lutris Launcher Script
@@ -132,13 +132,13 @@ chmod +x "$custom_startup"
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
-KEYS_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/lutris/extra/Lutris.sh.keys"
+KEYS_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/lutris/extra/Lutris.sh.keys"
 # Step 5: Download the key mapping file
 echo "Downloading key mapping file..."
 curl -L -o "/userdata/roms/ports/Lutris.sh.keys" "$KEYS_URL"
 # Download the image
 echo "Downloading Lutris logo..."
-curl -L -o /userdata/roms/ports/images/lutrislogo.jpg https://github.com/DTJW92/batocera-unofficial-addons/raw/main/lutris/extra/logo.jpg
+curl -L -o /userdata/roms/ports/images/lutrislogo.jpg https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/lutris/extra/logo.jpg
 
 echo "Adding logo to Lutris entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
