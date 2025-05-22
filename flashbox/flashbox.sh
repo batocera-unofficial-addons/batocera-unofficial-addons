@@ -4,8 +4,8 @@
 APP_NAME="Flashbox"
 AMD_SUFFIX="Flashbox.AppImage"
 ARM_SUFFIX="Flashbox-arm64.AppImage"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/flashbox/extra/flashbox.png"
-REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/flashbox/extra/flashbox.png"
+REPO_BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages"
 
 # -----------------------------------------------------------------------------------------------------------------
 
