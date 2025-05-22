@@ -2,10 +2,10 @@
 
 # Define variables
 APPNAME="GParted"
-REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/gparted/extra/"
+REPO_BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/gparted/extra/"
 AMD_SUFFIX="gparted.AppImage"
 ARM_SUFFIX=""
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/gparted/extra/icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/gparted/extra/icon.png"
 
 # Directories
 ADDONS_DIR="/userdata/system/add-ons"
