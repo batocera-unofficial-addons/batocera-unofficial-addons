@@ -31,7 +31,7 @@ PORT_HTTPS=$(find_available_port 8920 "TCP")
 # Check for Docker and install if missing
 if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
     dialog --title "Docker Required" --infobox "Docker is not installed or not running. Installing Docker..." 10 50
-    curl -fsSL https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash
+    curl -fsSL https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash
 
     if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
         dialog --title "Docker Error" --msgbox "Docker installation failed or service didn't start. Install manually." 10 50
