@@ -4,7 +4,7 @@
 APPNAME="OpenRGB"
 AMD_SUFFIX="OpenRGB_0.9_x86_64_b5f46e3.AppImage"
 ARM_SUFFIX=""
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/openrgb/extra/openrgb-logo.png"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/openrgb/extra/openrgb-logo.png"
 REPO_BASE_URL="https://openrgb.org/releases/release_0.9/"
 
 # Directories
@@ -61,7 +61,7 @@ echo "$APPNAME AppImage downloaded and marked as executable."
 
 DESKTOP_FILE="/usr/share/applications/${APPNAME}.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/${APPNAME,,}/${APPNAME}.desktop"
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
 
 mkdir -p "/userdata/system/configs/${APPNAME,,}"
 mkdir -p "/userdata/system/add-ons/${APPNAME,,}/extra"
