@@ -116,6 +116,7 @@ apps=(
     ["SOAR"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/soar/soar.sh | bash"
     ["WAYVNC"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/wayvnc/wayvnc.sh | bash"
     ["WAYVNC-HEADLESS"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/wayvnc_headless/wayvnc_headless.sh | bash"
+    ["DARK-MODE"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/dark/dark.sh | bash"
 )
 
 
@@ -140,6 +141,7 @@ descriptions=(
     ["SOAR"]="Soar package manager integrated with BUA"
     ["WAYVNC"]="WayVNC for remote access"
     ["WAYVNC-HEADLESS"]="WayVNC for headless systems"
+    ["DARK-MODE"]="Custom service to enable/disable F1 dark mode"
 )
 
 
@@ -149,7 +151,7 @@ categories=(
     ["Games"]="MINECRAFT SUPERMARIOX SUPERTUXKART CELESTE64"
     ["Game Utilities"]="PORTMASTER CHIAKI GREENLIGHT AMAZON-LUNA"
     ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE F1 FIREFOX DESKTOP"
-    ["Developer Tools"]="CONTY DOCKER SOAR WAYVNC WAYVNC-HEADLESS"
+    ["Developer Tools"]="CONTY DOCKER SOAR WAYVNC WAYVNC-HEADLESS DARK-MODE"
 )
 
 while true; do
