@@ -9,10 +9,10 @@ app_bin="${app_dir}/YouTubeonTV"
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    app_url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/yttv.tar.xz"
+    app_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/yttv.tar.xz"
 elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: ARM64 detected."
-    app_url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/yttv-arm64.tar.xz"
+    app_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/yttv-arm64.tar.xz"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
@@ -58,7 +58,7 @@ chmod +x "$ports_dir/YouTubeTV.sh"
 
 # Step 6: Download keys file
 echo "Downloading keys file..."
-keys_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/extra/YoutubeTV.sh.keys"
+keys_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/extra/YoutubeTV.sh.keys"
 keys_file="$ports_dir/YoutubeTV.sh.keys"
 curl -L -o "$keys_file" "$keys_url"
 
@@ -76,7 +76,7 @@ curl http://127.0.0.1:1234/reloadgames
 # Step 8: Add an entry to gamelist.xml
 echo "Adding YouTube TV entry to gamelist.xml..."
 gamelist_file="$ports_dir/gamelist.xml"
-logo_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/youtubetv/extra/youtubetv-logo.jpg"
+logo_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/youtubetv/extra/youtubetv-logo.jpg"
 logo_path="$ports_dir/images/youtubetv-logo.jpg"
 
 # Ensure the logo directory exists and download the logo
