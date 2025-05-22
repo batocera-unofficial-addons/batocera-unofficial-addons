@@ -2,8 +2,8 @@
 
 # Step 1: Define the static download URL for Armagetron Advanced
 echo "Downloading Armagetron Advanced AppImage..."
-appimage_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/armagetron/ArmagetronAdvanced.AppImage"
-keys_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/armagetron/Armagetron.sh.keys"
+appimage_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/armagetron/ArmagetronAdvanced.AppImage"
+keys_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/armagetron/Armagetron.sh.keys"
 
 # Step 2: Download the AppImage
 mkdir -p /userdata/system/add-ons/armagetron
@@ -79,7 +79,7 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Download the image
 echo "Downloading Armagetron logo..."
-curl -L -o /userdata/roms/ports/images/armagetron-logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/armagetron/extra/armagetronlogo.png
+curl -L -o /userdata/roms/ports/images/armagetron-logo.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/armagetron/extra/armagetronlogo.png
 
 echo "Adding logo to Batocera Unofficial Add-ons entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
