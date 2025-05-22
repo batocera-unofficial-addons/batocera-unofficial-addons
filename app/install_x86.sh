@@ -2,13 +2,13 @@
 set -euo pipefail
 
 # URL of the script to download
-SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/symlinks.sh"  # URL for symlink_manager.sh
-BATOCERA_ADDONS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/BatoceraUnofficialAddOns.sh"  # URL for batocera-unofficial-addons.sh
-BATOCERA_ADDONS_LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png"
-BATOCERA_ADDONS_WHEEL_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons-wheel.png"
-KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/keys.txt"  # URL for keys.txt
-XMLSTARLET_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/xmlstarlet"  # URL for xmlstarlet
-DIO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/.dialogrc"
+SCRIPT_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/symlinks.sh"  # URL for symlink_manager.sh
+BATOCERA_ADDONS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/BatoceraUnofficialAddOns.sh"  # URL for batocera-unofficial-addons.sh
+BATOCERA_ADDONS_LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png"
+BATOCERA_ADDONS_WHEEL_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons-wheel.png"
+KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/keys.txt"  # URL for keys.txt
+XMLSTARLET_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/app/xmlstarlet"  # URL for xmlstarlet
+DIO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/app/.dialogrc"
 
 # Destination path to download the script
 DOWNLOAD_DIR="/userdata/system/services/"
@@ -35,7 +35,7 @@ if [ ! -s "$SCRIPT_PATH" ]; then
 fi
 
 # Download base dependencies
-curl -fLs https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/app/dep.sh | bash
+curl -fLs https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/app/dep.sh | bash
 
 # Step 2: Remove the .sh extension
 SCRIPT_WITHOUT_EXTENSION="${SCRIPT_PATH%.sh}"
@@ -113,7 +113,7 @@ mkdir -p "/userdata/roms/ports/images"
 APPNAME="BUA"
 DESKTOP_FILE="/usr/share/applications/${APPNAME}.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/${APPNAME,,}/${APPNAME}.desktop"
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/extra/icon.png"
 
 mkdir -p "/userdata/system/configs/${APPNAME,,}"
 mkdir -p "/userdata/system/add-ons/${APPNAME,,}/extra"
