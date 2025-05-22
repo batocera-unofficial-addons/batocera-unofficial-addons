@@ -4,10 +4,10 @@
 APPNAME="Eaglercraft"
 APPDIR="/userdata/system/add-ons/google-chrome"
 APPPATH="$APPDIR/GoogleChrome.AppImage"
-CHROME_INSTALLER_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh"
+CHROME_INSTALLER_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh"
 PORT_SCRIPT="/userdata/roms/ports/Eaglercraft.sh"
 ICON_PATH="/userdata/roms/ports/images/eaglercraft-logo.jpg"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/eaglercraft-logo.jpg"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/minecraft/extra/eaglercraft-logo.jpg"
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 1: Show dialog to confirm
