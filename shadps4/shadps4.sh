@@ -61,8 +61,8 @@ chmod a+x "$install_dir/Shadps4-qt.AppImage"
 chmod a+x "$install_dir/Shadps4-sdl.AppImage"
 
 # Download supporting scripts
-monitor_script_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/shadps4/monitor_shadps4.sh"
-launchers_script_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/shadps4/create_game_launchers.sh"
+monitor_script_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/shadps4/monitor_shadps4.sh"
+launchers_script_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/shadps4/create_game_launchers.sh"
 
 wget -q --show-progress -O "$install_dir/monitor_shadps4.sh" "$monitor_script_url"
 wget -q --show-progress -O "$install_dir/create_game_launchers.sh" "$launchers_script_url"
@@ -79,7 +79,7 @@ EOF
 chmod +x "$install_dir/launch_shadps4.sh"
 
 # Setup desktop entry
-icon_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/shadps4/extra/shadps4-icon.png"
+icon_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/shadps4/extra/shadps4-icon.png"
 mkdir -p "$install_dir/extra"
 wget -q --show-progress -O "$install_dir/extra/shadps4-icon.png" "$icon_url"
 
@@ -116,7 +116,7 @@ fi
 chmod +x "$custom_startup"
 
 # Run ES System Script
-curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/shadps4/es_ps4/es_ps4_install.sh | bash
+curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/shadps4/es_ps4/es_ps4_install.sh | bash
 
 # Finish
 echo "Installation complete! ShadPS4 v${shadps4_version} (QT) and latest SDL build installed successfully."
