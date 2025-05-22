@@ -95,7 +95,7 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Download the image
 echo "Downloading Amazon Luna logo..."
-curl -L -o /userdata/roms/ports/images/amazonluna.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/amazonluna/extra/amazonluna.png
+curl -L -o /userdata/roms/ports/images/amazonluna.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/amazonluna/extra/amazonluna.png
 echo "Adding logo to Amazon Luna entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./AmazonLuna.sh" \
