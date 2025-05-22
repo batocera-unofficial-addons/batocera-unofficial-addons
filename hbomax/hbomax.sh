@@ -4,12 +4,12 @@
 APPNAME="HBO Max"
 APPDIR="/userdata/system/add-ons/google-chrome"
 APPPATH="$APPDIR/GoogleChrome.AppImage"
-CHROME_INSTALLER_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh"
+CHROME_INSTALLER_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh"
 PORT_SCRIPT="/userdata/roms/ports/HBOMax.sh"
 ICON_PATH="/userdata/roms/ports/images/hbo-logo.jpg"
 KEYS_PATH="/userdata/roms/ports/HBOMax.sh.keys"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hbomax/extra/hbo-logo.jpg"
-KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/netflix/extra/Netflix.sh.keys"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/hbomax/extra/hbo-logo.jpg"
+KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/netflix/extra/Netflix.sh.keys"
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 1: Show dialog to confirm
