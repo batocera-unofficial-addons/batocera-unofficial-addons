@@ -5,7 +5,7 @@ APP_NAME="Brave"
 REPO="srevinsaju/Brave-AppImage"
 AMD_SUFFIX="x86_64.AppImage"
 ARM_SUFFIX=""
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/brave/extra/brave-logo.png"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/brave/extra/brave-logo.png"
 
 # -----------------------------------------------------------------------------------------------------------------
 
@@ -73,6 +73,7 @@ cat << EOF > "$PORT_SCRIPT"
 # Environment setup
 export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
+export HOME=/userdata/system/add-ons/brave
 
 # Directories and file paths
 app_dir="$ADDONS_DIR/${APP_NAME,,}"
