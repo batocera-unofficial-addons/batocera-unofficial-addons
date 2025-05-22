@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define variables
-URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/gamescope/extra/gamescope.tar"
+URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/gamescope/extra/gamescope.tar"
 DEST_DIR="/userdata/system/add-ons"
 ARCHIVE_NAME="gamescope.tar"
 
