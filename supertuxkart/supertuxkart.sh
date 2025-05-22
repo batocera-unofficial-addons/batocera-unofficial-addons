@@ -7,7 +7,7 @@ APP_NAME="SuperTuxKart"
 ARCH_X86_64="https://github.com/supertuxkart/stk-code/releases/download/1.4/SuperTuxKart-1.4-linux-x86_64.tar.xz"
 ARCH_ARM64="https://github.com/supertuxkart/stk-code/releases/download/1.4/SuperTuxKart-1.4-linux-arm64.tar.xz"
 
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/supertuxkart/extra/supertuxkart-logo.png"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/supertuxkart/extra/supertuxkart-logo.png"
 
 # Determine system architecture
 ARCH=$(uname -m)
