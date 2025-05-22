@@ -69,7 +69,7 @@ fi
 EOF
 
 chmod +x /userdata/roms/ports/IPTVNator.sh
-KEYS_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/netflix/extra/Netflix.sh.keys"
+KEYS_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/netflix/extra/Netflix.sh.keys"
 # Step 5: Download the key mapping file
 echo "Downloading key mapping file..."
 curl -L -o "/userdata/roms/ports/IPTVNator.sh.keys" "$KEYS_URL"
@@ -80,7 +80,7 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Step 6: Download the image
 echo "Downloading IPTVNator logo..."
-curl -L -o /userdata/roms/ports/images/iptvnator-logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/iptvnator/extra/iptvnator-logo.png
+curl -L -o /userdata/roms/ports/images/iptvnator-logo.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/iptvnator/extra/iptvnator-logo.png
 
 echo "Adding logo to IPTVNator entry in gamelist.xml..."
 xmlstarlet ed \
