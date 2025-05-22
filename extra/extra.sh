@@ -19,3 +19,4 @@ case "$version" in
 esac
 
  mkdir -p /userdata/extra && wget -O - https://github.com/git-developer/batocera-extra/tarball/main | gunzip | tar x --strip-components 1 -C /userdata/extra
+ /userdata/extra/bin/extra-services register
