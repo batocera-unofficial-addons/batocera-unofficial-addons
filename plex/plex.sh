@@ -11,7 +11,7 @@ PORTS_GAMELIST="/userdata/roms/ports/gamelist.xml"
 LOGO_URL="https://static1.howtogeekimages.com/wordpress/wp-content/uploads/2023/03/Plex-logo.jpg"
 LAUNCHER="${PORTS_DIR}/${APPNAME,,}.sh"
 PORTS_IMAGE_PATH="/userdata/roms/ports/images/${APPNAME,,}.png"
-KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/netflix/extra/Netflix.sh.keys"
+KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/netflix/extra/Netflix.sh.keys"
 KEYS_PATH="/userdata/roms/ports/plex.sh.keys"
 
 # Ensure xmlstarlet is installed
