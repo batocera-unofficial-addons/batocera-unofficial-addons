@@ -5,12 +5,12 @@
 APPNAME="Prime Video"
 APPDIR="/userdata/system/add-ons/google-chrome"
 APPPATH="$APPDIR/GoogleChrome.AppImage"
-CHROME_INSTALLER_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh"
+CHROME_INSTALLER_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh"
 PORT_SCRIPT="/userdata/roms/ports/PrimeVideo.sh"
 ICON_PATH="/userdata/roms/ports/images/prime-logo.png"
 KEYS_PATH="/userdata/roms/ports/PrimeVideo.sh.keys"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/prime/extra/prime-logo.png"
-KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/netflix/extra/Netflix.sh.keys"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/prime/extra/prime-logo.png"
+KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/netflix/extra/Netflix.sh.keys"
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 1: Show dialog to confirm
