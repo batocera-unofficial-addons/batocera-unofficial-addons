@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # === CONFIG ===
-TAR_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/x11vnc/extra/x11vnc.tar.gz"
-SERVICE_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/x11vnc/extra/x11vnc"
+TAR_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/x11vnc/extra/x11vnc.tar.gz"
+SERVICE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/x11vnc/extra/x11vnc"
 ADDONS_DIR="/userdata/system/add-ons"
 SERVICES_DIR="/userdata/system/services"
 TAR_NAME="x11vnc.tar.gz"
