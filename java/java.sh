@@ -15,7 +15,7 @@ echo "$COMMAND" > /userdata/system/add-ons/$APPNAME/extra/command
 
 # Download Necessary Files
 curl -s -Lo /userdata/system/add-ons/$APPNAME/extra/icon.png \
-    https://github.com/DTJW92/batocera-unofficial-addons/raw/main/$APPNAME/extra/icon.png || { echo "Download failed! Exiting..."; exit 1; }
+    https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/$APPNAME/extra/icon.png || { echo "Download failed! Exiting..."; exit 1; }
 
 # Check System Compatibility
 if ! uname -a | grep -q 'x86_64'; then 
@@ -29,7 +29,7 @@ cd /userdata/system/add-ons/$APPNAME/extra/downloads
 
 for part in java.tar.bz2.partaa java.tar.bz2.partab; do
     curl -s --progress-bar --remote-name --location \
-        https://github.com/DTJW92/batocera-unofficial-addons/raw/main/$APPNAME/extra/$part || { echo "Download failed! Exiting..."; exit 1; }
+        https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/$APPNAME/extra/$part || { echo "Download failed! Exiting..."; exit 1; }
 done
 
 # Merge and Extract Java Files
