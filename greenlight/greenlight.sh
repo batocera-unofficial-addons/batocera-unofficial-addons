@@ -81,7 +81,7 @@ chmod +x "${ports_dir}/Greenlight.sh"
 APPNAME="Greenlight"
 DESKTOP_FILE="/usr/share/applications/${APPNAME}.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/${APPNAME,,}/${APPNAME}.desktop"
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
 
 mkdir -p "/userdata/system/configs/${APPNAME,,}"
 mkdir -p "/userdata/system/add-ons/${APPNAME,,}/extra"
@@ -142,7 +142,7 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Download the image
 echo "Downloading Greenlight logo..."
-curl -L -o /userdata/roms/ports/images/greenlight.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/greenlight/extra/greenlight.png
+curl -L -o /userdata/roms/ports/images/greenlight.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/greenlight/extra/greenlight.png
 echo "Adding logo to Greenlight entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./Greenlight.sh" \
