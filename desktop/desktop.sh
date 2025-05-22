@@ -13,11 +13,11 @@ arch=$(uname -m)
 case "$arch" in
     x86_64)
         echo "Architecture: x86_64 detected."
-        url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/batocera-containers"
+        url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/batocera-containers"
         ;;
     aarch64)
         echo "Architecture: aarch64 detected."
-        url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/batocera-containers-aarch64"
+        url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/batocera-containers-aarch64"
         ;;
     *)
         echo "Unsupported architecture: $arch. Exiting."
@@ -59,7 +59,7 @@ if ! command -v docker >/dev/null 2>&1; then
         -v portainer_data:/data \
         portainer/portainer-ce:latest
 
-    curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker -o /userdata/system/services/docker && chmod +x /userdata/system/services/docker
+    curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/docker -o /userdata/system/services/docker && chmod +x /userdata/system/services/docker
     batocera-services enable docker
     batocera-services start docker
 else
@@ -159,10 +159,10 @@ mkdir -p "$install_dir" /userdata/roms/ports
 
 case "$arch" in
     x86_64)
-        url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/${APPNAME}.AppImage"
+        url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/${APPNAME}.AppImage"
         ;;
     aarch64)
-        url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/${APPNAME}-arm64.AppImage"
+        url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/${APPNAME}-arm64.AppImage"
         ;;
     *) echo "Unsupported architecture: $arch. Exiting." && exit 1 ;;
 esac
@@ -211,8 +211,8 @@ curl -s http://127.0.0.1:1234/reloadgames
 
 echo "Adding image and marquee..."
 mkdir -p /userdata/roms/ports/images
-curl -Ls -o /userdata/roms/ports/images/desktop-logo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/desktop/extra/desktop-logo.png
-curl -Ls -o /userdata/roms/ports/images/desktop-marquee.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/desktop/extra/desktop-marquee.png
+curl -Ls -o /userdata/roms/ports/images/desktop-logo.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/desktop/extra/desktop-logo.png
+curl -Ls -o /userdata/roms/ports/images/desktop-marquee.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/desktop/extra/desktop-marquee.png
 
 gamelist_file="/userdata/roms/ports/gamelist.xml"
 if [ ! -f "$gamelist_file" ]; then
