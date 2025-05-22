@@ -4,7 +4,7 @@
 APP_NAME="Stepmania"
 AMD_SUFFIX=""
 ARM_SUFFIX=""
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/stepmania/extra/stepmania-logo.png"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/stepmania/extra/stepmania-logo.png"
 REPO_BASE_URL="https://drive.usercontent.google.com/download?id=1-0-D9sXzD0lcG_P_hDcjunvxjjKYnasC&export=download&authuser=0"
 
 # -----------------------------------------------------------------------------------------------------------------
