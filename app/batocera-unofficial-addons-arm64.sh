@@ -1,12 +1,12 @@
 #!/bin/bash
 
-lib="/userdata/system/add-ons/.dep/libseccomp.so.2"
+LAUNCH_PATH="/userdata/roms/ports/bua.sh"
 
 install_bua() {
     curl -L install.batoaddons.app | bash
 }
 
-if [ ! -e "$lib" ]; then
+if grep -q 'DTJW92' "$LAUNCH_PATH"; then
     install_bua
 fi
 
@@ -63,7 +63,8 @@ echo -e "\e[0m"
     echo -e "\e[0m" # Reset color
     echo " Install these add-ons at your own risk. They are not endorsed by the Batocera Devs nor are they supported." 
     echo " Please don't go into the official Batocera discord with issues, I can't help you there!"
-    echo " Instead; head to discord.batoaddons.app and someone will be around to help you!"
+    echo " Instead; head to https://discord.batoaddons.app and someone will be around to help you!"
+    echo " For guides, head to the Wiki at https://wiki.batoaddons.app"
     sleep 10
 }
 
