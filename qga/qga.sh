@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Download and extract the addon
-curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/qga/extra/qga.tar.gz | tar -xz -C /userdata/system/add-ons
+curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/qga/extra/qga.tar.gz | tar -xz -C /userdata/system/add-ons
 
 # Create the service script
 cat << 'EOF' > /userdata/system/services/qemu_ga
