@@ -5,11 +5,11 @@ ARCH=$(uname -m)
 case "$ARCH" in
     x86_64)
         SOAR_BINARY="soar-x86_64-linux"
-        CONFIG_FILE_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/soar/extra/config.toml"
+        CONFIG_FILE_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/soar/extra/config.toml"
         ;;
     aarch64)
         SOAR_BINARY="soar-aarch64-linux"
-        CONFIG_FILE_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/main/soar/extra/arm64_config.toml"
+        CONFIG_FILE_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/soar/extra/arm64_config.toml"
         ;;
     *)
         echo "Unsupported architecture: $ARCH"
