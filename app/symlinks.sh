@@ -105,11 +105,11 @@ remove_symlinks() {
                 symlink_target="/usr/bin/$(basename "$file")"
             fi
 
-            if [ -L "$symlink_target" ]; then
-                echo "Removing symlink: $symlink_target"
-                rm "$symlink_target"
-            else
-                echo "Not a symlink or does not exist: $symlink_target. Skipping."
+           if [ -L "$symlink_target" ] && [[ "$(readlink "$symlink_target")" == "$file" ]]; then
+    echo "Removing symlink: $symlink_target"
+    rm "$symlink_target"
+else
+    echo "Symlink does not point to expected file or not a symlink: $symlink_target. Skipping."
             fi
         fi
     done
