@@ -160,7 +160,6 @@ while true; do
         "System Utilities" "Install utility apps" \
         "Developer Tools" "Install developer and patching tools" \
         "Updater" "Install the latest updates to your add-ons" \
-        "Secret Menu" "Enter the password to access the secret menu" \
         "Exit" "Exit the installer" 2>&1 >/dev/tty)
 
 # Exit if the user selects "Exit" or cancels
