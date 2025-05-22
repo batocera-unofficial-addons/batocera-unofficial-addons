@@ -17,7 +17,7 @@ fi
 # Check for Docker and install if needed
 if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
     dialog --title "Docker" --infobox "Installing Docker..." 10 50
-    curl -fsSL https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash
+    curl -fsSL https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash
     if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
         dialog --title "Docker Error" --msgbox "Docker installation failed. Install manually." 10 50
         clear
