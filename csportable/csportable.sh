@@ -3,11 +3,11 @@
 # Variables
 APPNAME="CS Portable"
 APPDIR="/userdata/system/add-ons/csportable"
-ZIP_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/csportable/extra/CS-Portable-2023.zip"
+ZIP_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/csportable/extra/CS-Portable-2023.zip"
 ZIP_PATH="$APPDIR/CS-Portable-2023.zip"
 PORT_SCRIPT="/userdata/roms/ports/CSPortable.sh"
 ICON_PATH="/userdata/roms/ports/images/cs-portable-logo.jpg"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/csportable/extra/cs-portable-logo.jpg"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/csportable/extra/cs-portable-logo.jpg"
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 2: Check if CS Portable is installed
