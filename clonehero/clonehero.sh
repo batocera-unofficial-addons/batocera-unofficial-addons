@@ -68,8 +68,8 @@ curl http://127.0.0.1:1234/reloadgames
 # Download Clone Hero logo
 LOGO_PATH="/userdata/roms/ports/images/CloneHero_Logo.png"
 ICON_PATH="/$APPDIR/extra/icon.png"
-curl -Ls -o "$ICON_PATH" "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/clonehero/extra/icon.png"
-curl -Ls -o "$LOGO_PATH" "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/clonehero/extra/cloneherologo.png"
+curl -Ls -o "$ICON_PATH" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/clonehero/extra/icon.png"
+curl -Ls -o "$LOGO_PATH" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/clonehero/extra/cloneherologo.png"
 
 # Add logo to gamelist.xml
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
