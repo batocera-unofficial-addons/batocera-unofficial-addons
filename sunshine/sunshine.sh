@@ -102,7 +102,7 @@ chmod +x /userdata/system/services/sunshine
 
 echo "Applying Nvidia patches for a smoother experience..."
 # Apply Nvidia patches if necessary
-curl -L https://github.com/DTJW92/batocera-unofficial-addons/raw/main/nvidiapatch/nvidiapatch.sh | bash
+curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/nvidiapatch/nvidiapatch.sh | bash
 
 batocera-save-overlay
 
