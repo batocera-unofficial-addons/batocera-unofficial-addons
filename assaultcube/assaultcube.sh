@@ -2,7 +2,7 @@
 
 # Variables specific to AssaultCube
 APP_NAME="AssaultCube"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/assaultcube/extra/assaultcube-logo.png"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/assaultcube/extra/assaultcube-logo.png"
 FILE_URL="https://github.com/assaultcube/AC/releases/download/v1.3.0.2/AssaultCube_v1.3.0.2_LockdownEdition_RC1.tar.bz2"
 
 ADDONS_DIR="/userdata/system/add-ons"
