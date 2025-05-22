@@ -2,7 +2,7 @@
 
 LAUNCHER="/usr/bin/filemanagerlauncher"
 THEME_LINE='export GTK_THEME=Adwaita-dark'
-THEME_PATH="/usr/share/themes/"
+THEME_PATH="/usr/share/themes/Adwaita-dark"
 SOURCE_THEME="/userdata/system/add-ons/darkmode/Adwaita-dark"
 
 start() {
