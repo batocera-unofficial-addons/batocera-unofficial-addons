@@ -1,1 +1,47 @@
+#!/bin/sh
 
+LAUNCHER="/usr/bin/filemanagerlauncher"
+THEME_LINE='export GTK_THEME=Adwaita-dark'
+THEME_PATH="/usr/share/themes/"
+SOURCE_THEME="/userdata/system/add-ons/darkmode/Adwaita-dark"
+
+start() {
+    # Ensure the dark theme is available
+    if [ ! -d "$THEME_PATH" ] && [ -d "$SOURCE_THEME" ]; then
+        echo "Copying Adwaita-dark theme to system themes..."
+        cp -r "$SOURCE_THEME" "$THEME_PATH"
+    fi
+
+    # Inject theme export if not already present
+    if ! grep -q "^${THEME_LINE}" "$LAUNCHER"; then
+        echo "Enabling dark GTK theme in file manager launcher..."
+        sed -i "/^export XDG_CONFIG_DIRS=\/etc\/xdg/a ${THEME_LINE}" "$LAUNCHER"
+    fi
+}
+
+stop() {
+    # Remove the theme export line if present
+    if grep -q "^${THEME_LINE}" "$LAUNCHER"; then
+        echo "Disabling dark GTK theme in file manager launcher..."
+        sed -i "/^${THEME_LINE}$/d" "$LAUNCHER"
+    fi
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+        ;;
+esac
+
+exit 0
