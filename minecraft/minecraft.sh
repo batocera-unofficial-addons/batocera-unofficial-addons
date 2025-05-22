@@ -46,10 +46,10 @@ if [ "$edition_choice" == "1" ]; then
     fi
 elif [ "$edition_choice" == "2" ]; then
     echo "Eaglercraft selected."
-    appimage_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/minecraft/minecraft_3.sh"
+    appimage_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/minecraft/minecraft_3.sh"
     app_dir="/userdata/system/add-ons/minecraft/minecraft-eaglercraft"
 elif [ "$edition_choice" == "3" ]; then
-    appimage_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/minecraft/minecraft_2.sh"
+    appimage_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/minecraft/minecraft_2.sh"
     app_dir="/userdata/system/add-ons/minecraft/"
 elif [ "$edition_choice" == "4" ]; then
     if [ "$arch" == "x86_64" ]; then
@@ -211,17 +211,17 @@ curl http://127.0.0.1:1234/reloadgames
 
 if [ "$edition_choice" == "1" ]; then
     echo "Adding Minecraft Java Edition to Ports menu..."
-    logo_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-java-logo.png"
+    logo_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-java-logo.png"
     entry_name="Minecraft Java Edition"
     script_name="MinecraftJava.sh"
 elif [ "$edition_choice" == "3" ]; then
     echo "Adding Minecraft to Ports menu..."
-    logo_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-logo.png"
+    logo_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-logo.png"
     entry_name="Minecraft"
     script_name="Minecraft.sh"
 elif [ "$edition_choice" == "4" ]; then
     echo "Adding Minecraft Bedrock Edition to Ports menu..."
-    logo_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-bedrock-logo.png"
+    logo_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/minecraft/extra/minecraft-bedrock-logo.png"
     entry_name="Minecraft Bedrock Edition"
     script_name="MinecraftBedrock.sh"
 fi
