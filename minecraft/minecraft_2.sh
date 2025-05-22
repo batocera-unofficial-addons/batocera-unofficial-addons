@@ -6,7 +6,7 @@ APPNAME=MINECRAFT
 appname=minecraft
 AppName=Minecraft
 APPPATH=/userdata/system/add-ons/$appname/$AppName
-APPLINK=https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/Minecraft
+APPLINK=https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/minecraft/extra/Minecraft
 LIBPATH=/userdata/system/add-ons/$appname/lib
 IMAGEPATH=/userdata/system/add-ons/$appname
 PORTSPATH=/userdata/roms/ports
@@ -33,7 +33,7 @@ libs=("liblauncher.tar.bz2.partaa" "liblauncher.tar.bz2.partab" "liblauncher.tar
 
 for lib in "${libs[@]}"; do
     echo -e "${GREEN}Downloading $lib...${X}"
-    wget --progress=bar --no-check-certificate -q -O "$LIBPATH/$lib" "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/lib/$lib"
+    wget --progress=bar --no-check-certificate -q -O "$LIBPATH/$lib" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/minecraft/extra/lib/$lib"
     if [[ ! -f "$LIBPATH/$lib" ]]; then
         echo -e "${RED}Failed to download $lib. Aborting.${X}"
         exit 1
@@ -70,7 +70,7 @@ chmod a+x "$IMAGEPATH/$AppName"
 # Download and place Minecraft.sh.keys
 cd $PORTSPATH
 echo -e "${GREEN}Downloading Minecraft.sh.keys...${X}"
-wget --progress=bar --no-check-certificate -q -O "$PORTSPATH/Minecraft.sh.keys" "https://github.com/DTJW92/batocera-unofficial-addons/raw/main/minecraft/extra/Minecraft.sh.keys"
+wget --progress=bar --no-check-certificate -q -O "$PORTSPATH/Minecraft.sh.keys" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/minecraft/extra/Minecraft.sh.keys"
 if [[ ! -f "$PORTSPATH/Minecraft.sh.keys" ]]; then
     echo -e "${RED}Failed to download Minecraft.sh.keys. Aborting.${X}"
     exit 1
