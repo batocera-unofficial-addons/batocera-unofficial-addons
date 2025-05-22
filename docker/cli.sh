@@ -63,7 +63,7 @@ dialog --title "Downloading" --msgbox "Downloading and extracting Batocera-CLI..
 
 DESTINATION_DIR="/userdata/system"
 FILENAME="cli.tar.xz"
-DOWNLOAD_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/cli.tar.xz"
+DOWNLOAD_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/cli.tar.xz"
 
 mkdir -p "$DESTINATION_DIR"
 cd "$DESTINATION_DIR"
