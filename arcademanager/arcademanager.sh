@@ -6,7 +6,7 @@ APPNAME="ArcadeManager"
 REPO_BASE_URL="https://github.com/cosmo0/arcade-manager/releases/download"
 AMD_SUFFIX="/v25.1/ArcadeManager-linux-25.1.0.AppImage"
 ARM_SUFFIX="/v7.1/ArcadeManager-7.1-linux-arm64.AppImage"
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/arcademanager/extra/icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/arcademanager/extra/icon.png"
 
 # Directories
 ADDONS_DIR="/userdata/system/add-ons"
