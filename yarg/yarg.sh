@@ -3,7 +3,7 @@
 # Variables to update for different apps
 APP_NAME="YARG"
 LOGO_URL="https://yarg.in/twitter-image.png"
-APP_DOWNLOAD_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/batocera-yarg.AppImage"
+APP_DOWNLOAD_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/batocera-yarg.AppImage"
 
 # -----------------------------------------------------------------------------------------------------------------
 
