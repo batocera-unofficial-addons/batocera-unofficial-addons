@@ -8,7 +8,7 @@ GAME_LIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 1: Create the launcher script
 echo "Creating ${APP_NAME}.sh..."
-cat << 'EOF' > "${APP_NAME}.sh"
+cat << 'EOF' > "/userdata/roms/ports/${APP_NAME}.sh"
 #!/bin/bash
 filemanagerlauncher
 EOF
