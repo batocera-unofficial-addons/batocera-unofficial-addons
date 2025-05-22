@@ -3,9 +3,9 @@
 APPNAME="Amazon-Luna"
 APPDIR="/userdata/system/add-ons/${APPNAME,,}"
 APPBIN="${APPDIR}/luna/amazonluna"
-APPURL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/luna.tar.xz"
-ICONURL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/amazonluna/extra/lunaicon.png"
-PORTIMG="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/amazonluna/extra/amazonluna.png"
+APPURL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/luna.tar.xz"
+ICONURL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/amazonluna/extra/lunaicon.png"
+PORTIMG="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/amazonluna/extra/amazonluna.png"
 
 # Check for Xwayland
 if ! pgrep -x "Xwayland" > /dev/null; then
@@ -109,7 +109,7 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Download the image
 echo "Downloading Amazon Luna logo..."
-curl -L -o /userdata/roms/ports/images/amazonluna.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/amazonluna/extra/amazonluna.png
+curl -L -o /userdata/roms/ports/images/amazonluna.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/amazonluna/extra/amazonluna.png
 echo "Adding logo to Amazon Luna entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./AmazonLuna.sh" \
