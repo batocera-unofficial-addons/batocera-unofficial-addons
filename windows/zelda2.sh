@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Define your variables for easy customization
-URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/Zelda2_Remake.wsquashfs"
+URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/Zelda2_Remake.wsquashfs"
 KEYS_URL=""  # Leave empty if no keys file is needed
 DEST_DIR="/userdata/roms/windows"
 MESSAGE="Zelda 2 PC Remake - Needs Enable DXVK in Adv settings for game and change video mode resolution to 1280x720x60 for best results"  # Leave empty if no message is needed
 GAME_LIST="/userdata/roms/windows/gamelist.xml"
 APP_NAME="Zelda 2 PC Remake"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/extra/zelda2logo.jpg"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/windows/extra/zelda2logo.jpg"
 LOGO_PATH="/userdata/roms/windows/images/zelda2-logo.jpg"
 
 # Ensure destination directory exists
