@@ -4,7 +4,7 @@
 mkdir -p ~/add-ons/.dep 2>/dev/null && cd ~/add-ons/.dep
 
 # Define the GitHub API URL
-API_URL="https://api.github.com/repos/DTJW92/batocera-unofficial-addons/contents/.dep"
+API_URL="https://api.github.com/repos/batocera-unofficial-addons/batocera-unofficial-addons/contents/.dep"
 
 # Fetch the file list from the GitHub API
 curl -s "$API_URL" | grep '"download_url":' | cut -d '"' -f 4 > file_list.txt
