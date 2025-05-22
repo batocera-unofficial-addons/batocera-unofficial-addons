@@ -2,13 +2,13 @@
 #!/bin/bash
 
 # Define your variables for easy customization
-URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/TMNT_Rescue-Palooza.wsquashfs"
-KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/TMNT_Rescue-Palooza.wsquashfs.keys"  # Leave empty if no keys file is needed
+URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/TMNT_Rescue-Palooza.wsquashfs"
+KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/TMNT_Rescue-Palooza.wsquashfs.keys"  # Leave empty if no keys file is needed
 DEST_DIR="/userdata/roms/windows"
 MESSAGE=""  # Leave empty if no message is needed
 GAME_LIST="/userdata/roms/windows/gamelist.xml"
 APP_NAME="TMNT Rescue Palooza"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/extra/tmnt.jpg"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/windows/extra/tmnt.jpg"
 LOGO_PATH="/userdata/roms/windows/images/tmnt-logo.jpg"
 
 # Ensure destination directory exists
