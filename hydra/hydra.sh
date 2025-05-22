@@ -5,9 +5,9 @@ APP_NAME="Hydra"
 REPO="hydralauncher/hydra"
 AMD_SUFFIX=".AppImage"
 ARM_SUFFIX=""
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hydra/extra/hydra-logo.png"
-SYNC_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hydra/extra/hydra"
-BIN_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/hydra/extra/aria2c"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/hydra/extra/hydra-logo.png"
+SYNC_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/hydra/extra/hydra"
+BIN_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/hydra/extra/aria2c"
 
 # -----------------------------------------------------------------------------------------------------------------
 
