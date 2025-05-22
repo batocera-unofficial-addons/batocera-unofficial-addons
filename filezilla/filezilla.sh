@@ -1,11 +1,11 @@
 #!/bin/bash
 
 APPNAME="FileZilla"
-APPURL="https://github.com//userdata/extra/bin/extra-services register/batocera-unofficial-addons/raw/refs/heads/main/filezilla/extra/FileZilla_3.68.1_x86_64-linux-gnu.tar.xz"
+APPURL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/filezilla/extra/FileZilla_3.68.1_x86_64-linux-gnu.tar.xz"
 DEST="/userdata/system/add-ons/${APPNAME,,}"
 DESKTOP_FILE="/usr/share/applications/${APPNAME}.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/${APPNAME,,}/${APPNAME}.desktop"
-ICON_URL="https://github.com//userdata/extra/bin/extra-services register/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
 TAR_FILE="$DEST/FileZilla_3.68.1_x86_64-linux-gnu.tar.xz"
 
 # Create necessary directories
