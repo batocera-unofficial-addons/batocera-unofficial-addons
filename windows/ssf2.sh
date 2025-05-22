@@ -2,13 +2,13 @@
 #!/bin/bash
 
 # Define your variables for easy customization
-URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/SSF2.wsquashfs"
+URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/SSF2.wsquashfs"
 KEYS_URL=""  # Leave empty if no keys file is needed
 DEST_DIR="/userdata/roms/windows"
 MESSAGE="Keyboard & Mouse required to set up initial controller config via in game menu."  # Leave empty if no message is needed
 GAME_LIST="/userdata/roms/windows/gamelist.xml"
 APP_NAME="Super Smash Flash 2"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/extra/ssf2-logo.jpg"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/windows/extra/ssf2-logo.jpg"
 LOGO_PATH="/userdata/roms/windows/images/ssf2-logo.jpg"
 
 # Ensure destination directory exists
