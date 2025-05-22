@@ -2,7 +2,7 @@
 
 # Variables specific to Ambermoon
 APP_NAME="Ambermoon"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/ambermoon/extra/ambermoon-logo.png"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/ambermoon/extra/ambermoon-logo.png"
 FILE_URL="https://github.com/Pyrdacor/Ambermoon.net/releases/download/v1.10.4/Ambermoon.net-Linux.tar.gz"
 
 ADDONS_DIR="/userdata/system/add-ons"
