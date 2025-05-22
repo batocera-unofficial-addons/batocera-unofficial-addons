@@ -4,8 +4,8 @@
 APP_NAME="Warzone 2100"
 AMD_SUFFIX="warzone2100-x86_64.AppImage"
 ARM_SUFFIX=""
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/warzone2100/extra/warzone-logo.png"
-REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/warzone2100/extra/warzone-logo.png"
+REPO_BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages"
 
 # -----------------------------------------------------------------------------------------------------------------
 
