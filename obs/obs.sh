@@ -2,10 +2,10 @@
 
 # Define variables
 APPNAME="OBS"
-REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/"
+REPO_BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/"
 AMD_SUFFIX="obs.AppImage"
 ARM_SUFFIX=""
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/obs/extra/icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/obs/extra/icon.png"
 
 # Directories
 ADDONS_DIR="/userdata/system/add-ons"
