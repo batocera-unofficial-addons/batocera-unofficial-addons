@@ -3,7 +3,7 @@
 clear
 
 ADDONS_DIR="/userdata/system/add-ons"
-REPO_USER="DTJW92"
+REPO_USER="batocera-unofficial-addons"
 REPO_NAME="batocera-unofficial-addons"
 REPO_BRANCH="main"
 REPO_BASE_URL="https://raw.githubusercontent.com/$REPO_USER/$REPO_NAME/$REPO_BRANCH"
