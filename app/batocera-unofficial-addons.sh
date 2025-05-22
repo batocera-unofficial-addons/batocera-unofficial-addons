@@ -73,7 +73,7 @@ echo -e "\e[0m"
     echo -e "\e[0m" # Reset color
     echo " Install these add-ons at your own risk. They are not endorsed by the Batocera Devs nor are they supported." 
     echo " Please don't go into the official Batocera discord with issues, I can't help you there!"
-    echo " Instead; head to bit.ly/bua-discord and someone will be around to help you!"
+    echo " Instead; head to https://discord.batoaddons.app and someone will be around to help you!"
     echo " For guides, head to the Wiki at https://wiki.batoaddons.app"
     sleep 10
 }
