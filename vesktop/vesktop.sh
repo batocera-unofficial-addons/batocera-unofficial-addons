@@ -34,7 +34,7 @@ mkdir -p /userdata/system/configs/vesktop
 mkdir -p /userdata/system/add-ons/vesktop/extra
 DESKTOP_FILE="/usr/share/applications/Vesktop.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/vesktop/Vesktop.desktop"
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/vesktop/extra/icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/vesktop/extra/icon.png"
 INSTALL_DIR="/userdata/system/add-ons/vesktop"
 
 # Step 3: Create the Vesktop Launcher Script
@@ -142,13 +142,13 @@ chmod +x "$custom_startup"
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
-KEYS_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/netflix/extra/Netflix.sh.keys"
+KEYS_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/netflix/extra/Netflix.sh.keys"
 # Step 5: Download the key mapping file
 echo "Downloading key mapping file..."
 curl -L -o "/userdata/roms/ports/Vesktop.sh.keys" "$KEYS_URL"
 # Download the image
 echo "Downloading Vesktop logo..."
-curl -L -o /userdata/roms/ports/images/vesktoplogo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/vesktop/extra/vesktoplogo.png
+curl -L -o /userdata/roms/ports/images/vesktoplogo.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/vesktop/extra/vesktoplogo.png
 
 echo "Adding logo to Vesktop entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
