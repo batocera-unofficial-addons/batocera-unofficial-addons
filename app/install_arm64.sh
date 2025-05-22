@@ -2,13 +2,13 @@
 set -euo pipefail
 
 # URL of the script to download
-SCRIPT_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/symlinks.sh"  # URL for symlink_manager.sh
-BATOCERA_ADDONS_URL="https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/app/BatoceraUnofficialAddons_ARM64.sh"  # URL for batocera-unofficial-addons.sh
-BATOCERA_ADDONS_LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png"
-BATOCERA_ADDONS_WHEEL_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons-wheel.png"
-KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/app/keys.txt"  # URL for keys.txt
-XMLSTARLET_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/xmlstarlet-arm64"  # URL for xmlstarlet
-DIO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/app/.dialogrc"
+SCRIPT_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/symlinks.sh"  # URL for symlink_manager.sh
+BATOCERA_ADDONS_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/app/BatoceraUnofficialAddons_ARM64.sh"  # URL for batocera-unofficial-addons.sh
+BATOCERA_ADDONS_LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png"
+BATOCERA_ADDONS_WHEEL_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons-wheel.png"
+KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/keys.txt"  # URL for keys.txt
+XMLSTARLET_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/app/xmlstarlet-arm64"  # URL for xmlstarlet
+DIO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/app/.dialogrc"
 
 
 # Destination path to download the script
@@ -36,7 +36,7 @@ if [ ! -s "$SCRIPT_PATH" ]; then
 fi
 
 # Download base dependencies
-curl -fLs https://raw.githubusercontent.com/DTJW92/batocera-unofficial-addons/refs/heads/main/app/dep_arm64.sh | bash
+curl -fLs https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/app/dep_arm64.sh | bash
 
 # Step 2: Remove the .sh extension
 SCRIPT_WITHOUT_EXTENSION="${SCRIPT_PATH%.sh}"
