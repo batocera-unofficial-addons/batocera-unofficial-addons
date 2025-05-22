@@ -11,7 +11,7 @@ PORTS_GAMELIST="/userdata/roms/ports/gamelist.xml"
 LOGO_URL="https://blog.stremio.com/wp-content/uploads/2023/08/Stremio-logo-dark-background-1024x570.png"
 LAUNCHER="${PORTS_DIR}/${APPNAME,,}.sh"
 PORTS_IMAGE_PATH="/userdata/roms/ports/images/${APPNAME,,}.png"
-KEYS_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/netflix/extra/Netflix.sh.keys"
+KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/netflix/extra/Netflix.sh.keys"
 KEYS_PATH="/userdata/roms/ports/stremio.sh.keys"
 
 # Ensure xmlstarlet is installed
