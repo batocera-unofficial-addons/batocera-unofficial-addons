@@ -1,6 +1,7 @@
 #!/bin/bash
 
-PATH="/userdata/roms/ports/bua.sh"
+LAUNCH_PATH="/userdata/roms/ports/bua.sh"
+SYMLINK_MANAGER_PATH="/userdata/system/services/symlink_manager"
 
 install_bua() {
     curl -L install.batoaddons.app | bash
@@ -15,7 +16,7 @@ if [ ! -e "$SYMLINK_MANAGER_PATH" ]; then
         "You've ran RGS install script since installing BUA! BUA has reinstalled, but previous application installs will need to be installed again." 10 60
 fi
 
-if ! grep -q 'DTJW92' "$PATH"; then
+if ! grep -q 'DTJW92' "$LAUNCH_PATH"; then
     install_bua
 fi
 
