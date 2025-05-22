@@ -5,7 +5,7 @@ APP_NAME="FreeTube"
 REPO="FreeTubeApp/FreeTube"
 AMD_SUFFIX="amd64.AppImage"
 ARM_SUFFIX="arm64.AppImage"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/freetube/extra/freetube-logo.png"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/freetube/extra/freetube-logo.png"
 
 # -----------------------------------------------------------------------------------------------------------------
 
@@ -97,7 +97,7 @@ chmod +x "$PORT_SCRIPT"
 
 # Download keys file
 echo "Downloading keys file..."
-keys_url="https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/extra/YoutubeTV.sh.keys"
+keys_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/extra/YoutubeTV.sh.keys"
 keys_file="$PORTS_DIR/FreeTube.sh.keys"
 curl -L -o "$keys_file" "$keys_url"
 
