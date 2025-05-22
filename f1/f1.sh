@@ -3,7 +3,7 @@
 # Set variables
 APP_NAME="F1"
 LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/f1/extra/f1key.jpg"   # Replace with actual logo URL
-LOGO_PATH="./images/${APP_NAME,,}-logo.jpg"
+LOGO_PATH="/userdata/roms/ports/images/${APP_NAME,,}-logo.jpg"
 GAME_LIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 1: Create the launcher script
@@ -21,7 +21,6 @@ curl -s http://127.0.0.1:1234/reloadgames
 
 # Step 3: Download the logo
 echo "Downloading logo..."
-mkdir -p ./images
 curl -s -L -o "$LOGO_PATH" "$LOGO_URL"
 
 # Step 4: Add entry to gamelist.xml
