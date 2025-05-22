@@ -4,8 +4,8 @@
 APP_NAME="OpenTTD"
 AMD_SUFFIX="openttd/extra/openttd.AppImage"
 ARM_SUFFIX=""
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/openttd/extra/openttd-logo.png"
-REPO_BASE_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/openttd/extra/openttd-logo.png"
+REPO_BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main"
 
 # -----------------------------------------------------------------------------------------------------------------
 
