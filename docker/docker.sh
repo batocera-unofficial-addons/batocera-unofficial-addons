@@ -6,10 +6,10 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/batocera-containers"
+    url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/batocera-containers"
 elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: aarch64 detected."
-    url="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/batocera-containers-aarch64"
+    url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/batocera-containers-aarch64"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
@@ -58,7 +58,7 @@ echo ""
 docker volume create portainer_data
 docker run --device /dev/dri:/dev/dri --privileged --net host --ipc host -d --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v /media:/media -v portainer_data:/data portainer/portainer-ce:latest
 
-curl -Ls https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/docker -o /userdata/system/services/docker && chmod +x /userdata/system/services/docker
+curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/docker -o /userdata/system/services/docker && chmod +x /userdata/system/services/docker
 batocera-services enable docker
 batocera-services start docker
 
