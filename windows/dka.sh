@@ -3,13 +3,13 @@
 #!/bin/bash
 
 # Define your variables for easy customization
-URL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/DK_Advanced.wtgz"
-KEYS_URL="https://github.com/trashbus99/profork/releases/download/r1/DK_Advanced.wtgz.keys"  # Leave empty if no keys file is needed
+URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/DK_Advanced.wtgz"
+KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/DK_Advanced.wtgz.keys" 
 DEST_DIR="/userdata/roms/windows"
-MESSAGE=""  # Leave empty if no message is needed
+MESSAGE=""  
 GAME_LIST="/userdata/roms/windows/gamelist.xml"
 APP_NAME="Donkey Kong Advanced"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/windows/extra/dka.png"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/windows/extra/dka.png"
 LOGO_PATH="/userdata/roms/windows/images/dka-logo.png"
 
 # Ensure destination directory exists
