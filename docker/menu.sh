@@ -27,31 +27,31 @@ while true; do
 
     case $choice in
         1)
-            run_container_script "CasaOS" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/casaos.sh"
+            run_container_script "CasaOS" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/casaos.sh"
             ;;
         2)
-            run_container_script "UmbrelOS" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/umbrelos.sh"
+            run_container_script "UmbrelOS" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/umbrelos.sh"
             ;;
         3)
-            run_container_script "Arch KDE" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/archkde.sh"
+            run_container_script "Arch KDE" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/archkde.sh"
             ;;
         4)
-            run_container_script "Ubuntu MATE" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/ubuntumate.sh"
+            run_container_script "Ubuntu MATE" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/ubuntumate.sh"
             ;;
         5)
-            run_container_script "Alpine XFCE" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/alpinexfce.sh"
+            run_container_script "Alpine XFCE" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/alpinexfce.sh"
             ;;
         6)
-            run_container_script "Jellyfin" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/jellyfin.sh"
+            run_container_script "Jellyfin" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/jellyfin.sh"
             ;;
         7)
-            run_container_script "Emby" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/emby.sh"
+            run_container_script "Emby" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/emby.sh"
             ;;
         8)
-            run_container_script "Arr-In-One" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/arrinone.sh"
+            run_container_script "Arr-In-One" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/arrinone.sh"
             ;;
         9)
-            run_container_script "Arr-In-One Downloaders" "https://github.com/DTJW92/batocera-unofficial-addons/raw/refs/heads/main/docker/arrdownloaders.sh"
+            run_container_script "Arr-In-One Downloaders" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/arrdownloaders.sh"
             ;;
         10)
             clear
