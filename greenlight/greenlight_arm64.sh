@@ -3,9 +3,9 @@
 # Set up basic app info
 APPNAME="Greenlight"
 APPDIR="/userdata/system/add-ons/${APPNAME,,}"
-APPURL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/greenlight.tar.xz"
-ICONURL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/greenlight/extra/icon.png"
-PORTIMG="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/greenlight/extra/greenlight.png"
+APPURL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/greenlight.tar.xz"
+ICONURL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/greenlight/extra/icon.png"
+PORTIMG="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/greenlight/extra/greenlight.png"
 
 # Check for Xwayland
 if ! pgrep -x "Xwayland" > /dev/null; then
@@ -112,7 +112,7 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Download the image
 echo "Downloading Greenlight logo..."
-curl -L -o /userdata/roms/ports/images/greenlight.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/greenlight/extra/greenlight.png
+curl -L -o /userdata/roms/ports/images/greenlight.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/greenlight/extra/greenlight.png
 echo "Adding logo to Greenlight entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./Greenlight.sh" \
