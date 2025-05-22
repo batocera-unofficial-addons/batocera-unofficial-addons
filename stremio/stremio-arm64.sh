@@ -3,7 +3,7 @@
 APPNAME="Stremio"
 APPDIR="/userdata/system/add-ons/${APPNAME,,}"
 APPBIN="${APPDIR}/stremio/stremio"
-APPURL="https://github.com/DTJW92/batocera-unofficial-addons/releases/download/AppImages/stremio.tar.xz" 
+APPURL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/stremio.tar.xz" 
 PORTIMG="https://blog.stremio.com/wp-content/uploads/2023/08/Stremio-logo-dark-background-1024x570.png"
 
 # Check for Xwayland
