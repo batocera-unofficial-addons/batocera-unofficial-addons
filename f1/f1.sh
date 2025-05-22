@@ -2,7 +2,7 @@
 
 # Set variables
 APP_NAME="F1"
-LOGO_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/f1/extra/f1key.jpg"   # Replace with actual logo URL
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/f1/extra/f1key.jpg"   # Replace with actual logo URL
 LOGO_PATH="./images/${APP_NAME,,}-logo.jpg"
 GAME_LIST="/userdata/roms/ports/gamelist.xml"
 
