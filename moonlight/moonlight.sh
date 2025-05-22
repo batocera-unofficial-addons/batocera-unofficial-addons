@@ -82,7 +82,7 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Download the image
 echo "Downloading Moonlight logo..."
-curl -L -o /userdata/roms/ports/images/moonlightlogo.png https://github.com/DTJW92/batocera-unofficial-addons/raw/main/moonlight/extra/moonlightlogo.png
+curl -L -o /userdata/roms/ports/images/moonlightlogo.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/moonlight/extra/moonlightlogo.png
 
 echo "Adding logo to Moonlight entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
