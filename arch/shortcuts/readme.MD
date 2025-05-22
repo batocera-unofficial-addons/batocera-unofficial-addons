@@ -1,1 +1,0 @@
-Shortcuts for Arch container
