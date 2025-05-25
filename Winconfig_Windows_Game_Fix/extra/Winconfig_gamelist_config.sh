@@ -8,9 +8,6 @@ readonly GAMELIST_FILE_PATH="${TARGET_DIR}/${TARGET_FILE}"
 readonly WGM_FILE="/userdata/roms/ports/- Windows Game Fix.sh"
 readonly TEMP_FILE=$(mktemp) || { echo "Erro ao criar arquivo temporário."; }
 
-# Cria diretórios essenciais se não existirem
-mkdir -p "$CONFIG_DIR" "$LOG_DIR" "$BACKUP_BASE_DIR"
-
 ####################################################################################################
 # Função para alterar idioma - Início
 ####################################################################################################
