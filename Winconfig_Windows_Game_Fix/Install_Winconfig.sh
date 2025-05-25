@@ -110,7 +110,7 @@ mkdir -p $PORTS_DIR
 
 # Download the DRL file
 echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Winconfig_Files_full_2.0.DRL"
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Winconfig_Files_full_3.0.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
@@ -178,8 +178,8 @@ rm -rf $TEMP_DIR
 
 # Save changes
 echo "Saving changes..."
-curl -L "https://github.com/DRLEdition19/batocera-unofficial-addons.add/raw/refs/heads/main/Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config.sh" | bash
 batocera-save-overlay
+curl -L "https://github.com/DRLEdition19/DRLEdition_Interface/raw/refs/heads/main/extra/Winconfig_gamelist_config.sh" | bash
 
 echo "Installation completed successfully."
 exit
