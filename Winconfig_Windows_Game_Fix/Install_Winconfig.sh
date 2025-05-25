@@ -1,6 +1,4 @@
 #!/bin/bash
-clear
-
 # Exibe mensagem inicial 
 echo "Presenting..."
 sleep 2
@@ -179,7 +177,26 @@ rm -rf $TEMP_DIR
 # Save changes
 echo "Saving changes..."
 batocera-save-overlay
-curl -L "https://github.com/DRLEdition19/DRLEdition_Interface/raw/refs/heads/main/extra/Winconfig_gamelist_config.sh" | bash
-
 echo "Installation completed successfully."
-exit
+
+# Gamelist config
+# Script para baixar, renomear, configurar permissões e mover um arquivo
+# para o diretório do sistema
+
+echo "Iniciando o processo de download e instalação..."
+
+# Download do arquivo
+echo "Baixando o arquivo..."
+wget -O /tmp/gamelistconfig.sh https://github.com/DRLEdition19/DRLEdition_Interface/raw/refs/heads/main/extra/Winconfig_gamelist_config.sh
+echo "Download concluído com sucesso."
+
+# Configura as permissões
+echo "Configurando permissões (chmod 777)..."
+chmod 777 /tmp/gamelistconfig.sh
+
+# Inicia a ferramenta para configurar o Idioma
+xterm -fs 14 -fg white -bg black -fa "Monospace" -en UTF-8 -sb -rightbar -e bash -c "PS1='[\u@\h \$PWD]# ' /bin/bash /tmp/gamelistconfig.sh"
+
+rm -r -f /tmp/gamelistconfig.sh
+
+exit 0
