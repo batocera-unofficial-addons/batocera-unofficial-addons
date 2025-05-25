@@ -18,6 +18,22 @@ curl -L bit.ly/winconfig-drl | bash
 
 Você irá encontrar a ferramenta dentro da coleção **Ports**
 
+## 🧩 Implementações e Atualizações
+
+***Atualização - 22.05.2025***
+
+**Durante a instalação, será perguntado qual idioma você deseja para a ferramenta.**
+**Esta ferramenta agora conta com os idiomas:**
+
+***-Portugês Brasil***
+
+***-Inglês***
+
+***-Espanhol***
+
+***-Italiano***
+
+***-Francês***
 # 🎮 Suporte ao Gamepad
 ---
 ## Teclas e atalhos de controle de entrada para o Winconfig - Windows Game Fix - instalado no Batocera.
