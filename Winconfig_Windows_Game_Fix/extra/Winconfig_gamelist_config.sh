@@ -1,166 +1,326 @@
 #!/bin/bash
 
-# Definição das variáveis
-TARGET_DIR="/userdata/roms/ports"
-TARGET_FILE="gamelist.xml"
-FILE_PATH="$TARGET_DIR/$TARGET_FILE"
-TEMP_FILE=$(mktemp) || { echo "Erro ao criar arquivo temporário."; exit 1; }
+# --- Diretórios e Configurações Globais ---
+readonly ATALHO="/userdata/system/.local/share/applications/WinConfig.desktop"
+readonly TARGET_DIR="/userdata/roms/ports"
+readonly TARGET_FILE="gamelist.xml"
+readonly GAMELIST_FILE_PATH="${TARGET_DIR}/${TARGET_FILE}"
+readonly WGM_FILE="/userdata/roms/ports/- Windows Game Fix.sh"
+readonly TEMP_FILE=$(mktemp) || { echo "Erro ao criar arquivo temporário."; }
 
-# Função para limpar o arquivo temporário na saída
-cleanup() {
-  rm -f "$TEMP_FILE"
-}
-trap cleanup EXIT # Registra a função cleanup para ser executada ao sair do script
+# Cria diretórios essenciais se não existirem
+mkdir -p "$CONFIG_DIR" "$LOG_DIR" "$BACKUP_BASE_DIR"
 
-# Conteúdo a ser adicionado/inserido
-# Usando 'EOF' entre aspas simples para prevenir expansão de variáveis e substituição de comandos dentro do heredoc
-read -r -d '' GAME_ENTRY <<'EOF'
-		<game>
-		<path>./- Windows Game Fix.sh</path>
-		<name>- Windows Game Fix on Batocera</name>
-		<desc>This script, known as the "Windows Game Manager for Batocera - by DRL Edition", is designed to simplify the configuration and management of Windows games within the Batocera operating system.
-This tool, known as "Winconfig - Windows Game Fix - by DRL Edition", was developed to simplify the configuration and management of Windows games on the Batocera operating system.
+####################################################################################################
+# Função para alterar idioma - Início
+####################################################################################################
+####################################################################################################
 
-Its main features include:
-
--> Extracting games from various compressed formats (such as .zip, .rar, .wsquashfs, .plus).
--> Compressing game folders to save space.
--> Automatic creation of the necessary startup files (autorun.cmd, batocera.plus) for Batocera.
--> Automatic renaming of game folders with appropriate suffixes (.pc, .wine, .plus) for compatibility with Batocera.
--> Automatic backups of original game folders before modifications, if the user enables this option in the settings menu.
--> Restoring games from these backups. 
--> A "Redist" tool to install crucial Windows dependencies (such as DirectX, VC Runtimes) into the game environment to improve compatibility.
--> An interactive settings panel to customize ROM directories, AntiMicroX profiles, compression settings, registries, and more.
--> Checking for required system dependencies if the user enables this option in the settings menu.
--> Providing a comprehensive interactive help manual.
--> Providing direct access to AntiMicroX for gamepad mapping configuration.
-
-=================================================
-
-The project was based on an initiative started by DRL Edition on 2023-01-22, and this version of the script was last updated on 2025-04-25.
-
-=================================================
-    Last updated: 04/25/2025
-    Developer: DRL Edition19
-    Redist, 2025 by DRL Edition
-=================================================</desc>
-		<image>./images/WindowsGameFix-thumb.png</image>
-		<marquee>./images/WindowsGameFix-marquee.png</marquee>
-		<thumbnail>./images/WindowsGameFix-thumb.png</thumbnail>
-		<fanart>./images/WindowsGameFix-thumb.png</fanart>
-		<titleshot>./images/WindowsGameFix-thumb.png</titleshot>
-		<cartridge>./images/WindowsGameFix-thumb.png</cartridge>
-		<boxart>./images/WindowsGameFix-marquee.png</boxart>
-		<boxback>./images/WindowsGameFix-thumb.png</boxback>
-		<wheel>./images/WindowsGameFix-thumb.png</wheel>
-		<mix>./images/WindowsGameFix-thumb.png</mix>
-		<rating>1</rating>
-		<releasedate>20230122T220656</releasedate>
-		<developer>DRL Edition</developer>
-		<publisher>DRLEdition19</publisher>
-		<genre>Game Fix</genre>
-		<players>1</players>
-		<favorite>true</favorite>
-		<lang>en</lang>
-		<region>Conceicao de Cima, Alagoinhas, Bahia, Brazil</region>
-		<sortname>1 =-  Windows Game Fix</sortname>
-		<genreid>0</genreid>
-		<screenshot>./images/WindowsGameFix-thumb.png</screenshot>
-	</game>
-EOF
-
-# Conteúdo completo para um arquivo novo ou vazio
-# Usando 'EOF' entre aspas simples
-read -r -d '' FULL_CONTENT <<EOF
-<?xml version="1.0"?>
-<gameList>
-${GAME_ENTRY}
-</gameList>
-EOF
-
-# --- Início da Lógica ---
-
-echo "Verificando diretório $TARGET_DIR..."
-# Cria o diretório se não existir (-p evita erro se já existir e cria pais)
-mkdir -p "$TARGET_DIR" || { echo "Erro ao criar diretório $TARGET_DIR."; exit 1; }
-echo "Diretório verificado/criado com sucesso."
-
-# Verifica se o arquivo existe e NÃO está vazio
-if [ -f "$FILE_PATH" ] && [ -s "$FILE_PATH" ]; then
-    echo "Arquivo $FILE_PATH encontrado."
-
-    # Verifica se o cabeçalho e a tag <gameList> existem
-    # Usando grep -q para não exibir a saída e -F para tratar como string fixa
-    # Verificando as duas linhas separadamente para mais flexibilidade
-    if grep -qF '<?xml version="1.0"?>' "$FILE_PATH" && grep -q '<gameList>' "$FILE_PATH"; then
-        echo "Cabeçalho XML e tag <gameList> encontrados."
-
-        # Verifica se a entrada específica do jogo já existe para evitar duplicação
-        if grep -qF '<path>./- Windows Game Fix.sh</path>' "$FILE_PATH"; then
-            echo "A entrada para '- Windows Game Fix.sh' já existe. Nenhuma alteração necessária."
-        else
-            echo "Adicionando a entrada para '- Windows Game Fix.sh'..."
-            # Usa awk para inserir o GAME_ENTRY após a linha que contém <gameList>
-            # Isso é mais robusto do que sed para inserções multi-linha
-            awk -v game_entry="$GAME_ENTRY" '
-            /<\s*gameList\s*>/ {
-                print # Imprime a linha <gameList>
-                print game_entry # Imprime a nova entrada do jogo
-                next # Pula para a próxima linha sem executar a ação padrão de impressão
-            }
-            { print } # Imprime todas as outras linhas
-            ' "$FILE_PATH" > "$TEMP_FILE"
-
-            # Verifica se o awk foi executado com sucesso
-            if [ $? -eq 0 ]; then
-                # Move o arquivo temporário para o original
-                mv "$TEMP_FILE" "$FILE_PATH"
-                if [ $? -eq 0 ]; then
-                    echo "Entrada do jogo adicionada com sucesso em $FILE_PATH."
-                else
-                    echo "Erro ao mover o arquivo temporário para $FILE_PATH."
-                    exit 1
-                fi
-            else
-                echo "Erro ao processar o arquivo com awk."
-                # Não removemos $TEMP_FILE aqui porque o trap fará isso
-                exit 1
-            fi
-        fi
-    else
-        echo "Aviso: O arquivo $FILE_PATH existe mas não contém o cabeçalho esperado ('<?xml version=\"1.0\"?>' e '<gameList>')."
-        echo "Considerando como arquivo mal formatado ou vazio e sobrescrevendo com a estrutura completa."
-        echo "$FULL_CONTENT" > "$FILE_PATH"
-        if [ $? -eq 0 ]; then
-            echo "Arquivo $FILE_PATH sobrescrito com a estrutura padrão."
-        else
-            echo "Erro ao sobrescrever $FILE_PATH."
-            exit 1
-        fi
-    fi
-else
-    # O arquivo não existe ou está vazio
-    if [ ! -f "$FILE_PATH" ]; then
-        echo "Arquivo $FILE_PATH não encontrado. Criando novo arquivo..."
-    else
-        echo "Arquivo $FILE_PATH está vazio. Criando estrutura padrão..."
-    fi
-
-    # Cria o arquivo com o conteúdo completo
-    echo "$FULL_CONTENT" > "$FILE_PATH"
-    if [ $? -eq 0 ]; then
-        echo "Arquivo $FILE_PATH criado com sucesso com a estrutura padrão."
-    else
-        echo "Erro ao criar o arquivo $FILE_PATH."
-        exit 1
-    fi
+# comando para remover inforações antigas do "gamelist.xml"
+limpargamelist() {
+FULL_PATH="${GAMELIST_FILE_PATH}"
+# Verifica se o arquivo existe
+if [ ! -f "$FULL_PATH" ]; then
+    echo "Erro: O arquivo '$TARGET_FILE' não foi encontrado."
+    # exit 1
 fi
 
-# Aplica as permissões
-echo "Aplicando permissões (chmod 777) para $FILE_PATH..."
-chmod 777 "$FILE_PATH" || { echo "Erro ao aplicar permissões em $FILE_PATH."; exit 1; }
-echo "Permissões aplicadas com sucesso."
+# Verifica se as linhas específicas existem
+if grep -q "<game>" "$FULL_PATH" && grep -q "       <path>./- Windows Game Fix.sh</path>" "$FULL_PATH"; then
+    echo "As linhas de verificação foram encontradas. Iniciando a remoção de 52 linhas..."
 
-echo "Script concluído."
+    # Encontra o número da linha onde começa a primeira ocorrência de "<game>"
+    # que é seguida por "<path>./- Windows Game Fix.sh</path>"
+    START_LINE=$(grep -n -A 1 "<game>" "$FULL_PATH" | grep -B 1 "       <path>./- Windows Game Fix.sh</path>" | head -n 1 | cut -d: -f 1)
+
+    if [ -z "$START_LINE" ]; then
+        echo "Não foi possível determinar a linha inicial para a remoção."
+        # exit 1
+    fi
+
+    END_LINE=$((START_LINE + 51)) # 50 linhas abaixo da primeira, totalizando 52
+
+    echo "Removendo linhas de $START_LINE a $END_LINE..."
+
+    # Usa sed para excluir as linhas
+    sed -i "${START_LINE},${END_LINE}d" "$FULL_PATH"
+    echo "As linhas foram removidas com sucesso de '$TARGET_FILE'."
+else
+    echo "As linhas de verificação não foram encontradas. Nenhuma ação será tomada."
+fi
+}
+
+# Comando para instalar o idioma em Portugês Brasil
+ptbr() {
+    # Caminho do arquivo de idioma
+    local drl_file="/userdata/roms/ports/- Windows Game Fix.sh"
+
+    # Sobrescreve o arquivo com o conteúdo apropriado
+    cat > "$drl_file" << EOF
+#!/bin/bash
+winconfig-redist-pt
+EOF
+
+    # Ajusta as permissões
+    chmod 777 "$drl_file"
+
+# Sobrescreve o arquivo com o conteúdo apropriado
+    cat > "$ATALHO" << EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=WinConfig - Windows Game Fix
+Exec=winconfig-redist-pt
+Terminal=false
+Categories=Utility;Application;batocera.linux;
+Icon=/userdata/system/configs/bat-drl/WindowsGameFix-icon.png
+EOF
+
+    # Ajusta as permissões
+    chmod 777 "$ATALHO"
+    
+    # Executa o comando winconfig-redist-lang, se existir
+    if command -v winconfig-redist-lang >/dev/null 2>&1; then
+        winconfig-redist-lang
+    else
+        warning "Comando 'winconfig-redist-lang' não encontrado!"
+    fi
+}
+
+# Comando para instalar o idioma em Inglês
+ingles() {
+# --- Início da Lógica ---
+aplicargamelist
+
+    # Caminho do arquivo de idioma
+    local drl_file="/userdata/roms/ports/- Windows Game Fix.sh"
+
+    # Sobrescreve o arquivo com o conteúdo apropriado
+    cat > "$drl_file" << EOF
+#!/bin/bash
+winconfig-redist-en
+EOF
+
+    # Ajusta as permissões
+    chmod 777 "$drl_file"
+
+# Sobrescreve o arquivo com o conteúdo apropriado
+    cat > "$ATALHO" << EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=WinConfig - Windows Game Fix
+Exec=winconfig-redist-en
+Terminal=false
+Categories=Utility;Application;batocera.linux;
+Icon=/userdata/system/configs/bat-drl/WindowsGameFix-icon.png
+EOF
+
+    # Ajusta as permissões
+    chmod 777 "$ATALHO"
+    
+    # Executa o comando winconfig-redist-lang, se existir
+    if command -v winconfig-redist-lang >/dev/null 2>&1; then
+        winconfig-redist-lang
+    else
+        warning "Comando 'winconfig-redist-lang' não encontrado!"
+    fi
+}
+
+# Comando para instalar o idioma em Espanhol
+espanhol() {
+    # Caminho do arquivo de idioma
+    local drl_file="/userdata/roms/ports/- Windows Game Fix.sh"
+
+    # Sobrescreve o arquivo com o conteúdo apropriado
+    cat > "$drl_file" << EOF
+#!/bin/bash
+winconfig-redist-es
+EOF
+
+    # Ajusta as permissões
+    chmod 777 "$drl_file"
+
+# Sobrescreve o arquivo com o conteúdo apropriado
+    cat > "$ATALHO" << EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=WinConfig - Windows Game Fix
+Exec=winconfig-redist-es
+Terminal=false
+Categories=Utility;Application;batocera.linux;
+Icon=/userdata/system/configs/bat-drl/WindowsGameFix-icon.png
+EOF
+
+    # Ajusta as permissões
+    chmod 777 "$ATALHO"
+    
+    # Executa o comando winconfig-redist-lang, se existir
+    if command -v winconfig-redist-lang >/dev/null 2>&1; then
+        winconfig-redist-lang
+    else
+        warning "Comando 'winconfig-redist-lang' não encontrado!"
+    fi
+}
+
+# Comando para instalar o idioma em Italiano
+italiano() {
+    # Caminho do arquivo de idioma
+    local drl_file="/userdata/roms/ports/- Windows Game Fix.sh"
+
+    # Sobrescreve o arquivo com o conteúdo apropriado
+    cat > "$drl_file" << EOF
+#!/bin/bash
+winconfig-redist-it
+EOF
+
+    # Ajusta as permissões
+    chmod 777 "$drl_file"
+
+# Sobrescreve o arquivo com o conteúdo apropriado
+    cat > "$ATALHO" << EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=WinConfig - Windows Game Fix
+Exec=winconfig-redist-it
+Terminal=false
+Categories=Utility;Application;batocera.linux;
+Icon=/userdata/system/configs/bat-drl/WindowsGameFix-icon.png
+EOF
+
+    # Ajusta as permissões
+    chmod 777 "$ATALHO"
+    
+    # Executa o comando winconfig-redist-lang, se existir
+    if command -v winconfig-redist-lang >/dev/null 2>&1; then
+        winconfig-redist-lang
+    else
+        warning "Comando 'winconfig-redist-lang' não encontrado!"
+    fi
+}
+
+# Comando para instalar o idioma em Francês
+frances() {
+    # Caminho do arquivo de idioma
+    local drl_file="/userdata/roms/ports/- Windows Game Fix.sh"
+
+    # Sobrescreve o arquivo com o conteúdo apropriado
+    cat > "$drl_file" << EOF
+#!/bin/bash
+winconfig-redist-fr
+EOF
+
+    # Ajusta as permissões
+    chmod 777 "$drl_file"
+
+# Sobrescreve o arquivo com o conteúdo apropriado
+    cat > "$ATALHO" << EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=WinConfig - Windows Game Fix
+Exec=winconfig-redist-fr
+Terminal=false
+Categories=Utility;Application;batocera.linux;
+Icon=/userdata/system/configs/bat-drl/WindowsGameFix-icon.png
+EOF
+
+    # Ajusta as permissões
+    chmod 777 "$ATALHO"
+    
+    # Executa o comando winconfig-redist-lang, se existir
+    if command -v winconfig-redist-lang >/dev/null 2>&1; then
+        winconfig-redist-lang
+    else
+        warning "Comando 'winconfig-redist-lang' não encontrado!"
+    fi
+}
+
+# Script multilíngue de seleção de idioma - by DRL Edition
+# Exibe um menu interativo para escolher o idioma e executar comandos
+show_menu() {
+    clear
+
+    # Data e Hora
+    local data=$(date +%d/%m/%Y)
+    local hora=$(date +%H:%M:%S)
+
+    echo "========================================="
+    echo "         Language Selector - DRL Edition"
+    echo "========================================="
+    echo "Data / Date / Fecha: $data"
+    echo "Hora / Time / Ora / Heure: $hora"
+    echo
+    echo "Escolha seu idioma / Choose your language / Elige tu idioma / Scegli la lingua / Choisissez votre langue:"
+    echo "1: Português Brasil"
+    echo "2: English"
+    echo "3: Español"
+    echo "4: Italiano"
+    echo "5: Français"
+    echo
+    echo "Digite o número e pressione Enter / Type the number and press Enter / Escriba el número y presione Enter / Inserisci il numero e premi Invio / Entrez le numéro et appuyez sur Entrée:"
+    read -rp "> " opcao
+}
+
+while true; do
+    show_menu
+    case "$opcao" in
+        1)
+            echo "Instalando Idioma Português Brasil. Aguarde..."
+			clear
+            limpargamelist
+			clear
+            ptbr
+			clear
+            break
+            ;;
+        2)
+            echo "Installing English language. Please wait..."
+			clear
+            limpargamelist
+			clear
+            ingles
+			clear
+            break
+            ;;
+        3)
+            echo "Instalando idioma Español. Esperar..."
+			clear
+            limpargamelist
+			clear
+            espanhol
+			clear
+            break
+            ;;
+        4) # Adicionado
+            echo "Installazione della lingua Italiana. Aspettare..."
+			clear
+            limpargamelist
+			clear
+            italiano
+			clear
+            break
+            ;;
+        5) # Adicionado
+            echo "Installation de la langue Française. Attendez..."
+			clear
+            limpargamelist
+			clear
+            frances
+			clear
+            break
+            ;;
+        *)
+            echo -e "\nOpção inválida. Tente novamente / Invalid option. Try again. / Opción inválida. Intente nuevamente. / Opzione non valida. Riprova / Option invalide. Essayer à nouveau."
+            read -rp "Pressione Enter / Press Enter / Presione Enter / Premi Invio / Appuyez sur Entrée..."
+            ;;
+    esac
+done
+
+# 4. Executar comando `batocera-save-overlay`
+clear
+echo "Processo concluído com sucesso! / Process completed successfully! / ¡Proceso completado exitosamente! / Processo completato con successo! / Processus terminé avec succès!"
 
 exit 0
