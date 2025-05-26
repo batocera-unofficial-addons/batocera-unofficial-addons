@@ -12,7 +12,7 @@ Para iniciar a instalação da ferramenta, abra o gerenciador de arquivos em seu
 curl -L bit.ly/desktop-drl | bash
 ```
 
-Para que o processo de instalação tenha efeito, basta reiniciar seu batocera, ou seja, desligue sua máquina e ligue novamente.
+Para que o processo de instalação tenha efeito, basta reiniciar seu batocera. Ou seja, desligue sua máquina e ligue novamente.
 
 ## 🚀 Como utilizar?
 
@@ -22,7 +22,7 @@ Para sair do modo desktop e voltar ao frontend do batocera, basta pressionar a t
 
 **Observação:**
 
-O comando *Alt+F4* ainda funciona para fechar as janelas abertas e os jogos, entretanto, está combinação não fecha o Desktop. Para isso você obrigatoriamente deverá pressionar a tecla **F1** do seu teclado, ou os botões ***Start+Select*** do seu Joystick/gamepad.
+O comando *Alt+F4* ainda funciona para fechar as janelas abertas e os jogos, entretanto, esta combinação não fecha o Desktop. Para isso você obrigatoriamente deverá pressionar a tecla **F1** do seu teclado, ou os botões ***Start+Select*** do seu Joystick/gamepad.
 
 ***Esta ferramenta ainda está em fase de testes e desenvolvimento para melhoria contínua, e portanto você poderá encontrar bugs.***
 
