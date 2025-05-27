@@ -90,15 +90,14 @@ clear
 
 
 # Welcome message
-echo "Welcome to the automatic installer for the Winconfig by DRL Edition."
+echo "Welcome to the automatic installer for the Desktop_for_Batocera by DRL Edition."
 
 # Temporary directory for download
-TEMP_DIR="/userdata/tmp/Winconfig"
-DRL_FILE="$TEMP_DIR/Winconfig.DRL"
+TEMP_DIR="/userdata/tmp/Desktop_for_Batocera"
+DRL_FILE="$TEMP_DIR/Desktop_for_Batocera.DRL"
 EXTRACT_DIR="$TEMP_DIR/extracted"
 DEST_DIR="/"
 PORTS_DIR="/userdata/roms/ports"
-DEPS_INSTALLER="- Windows Game Fix.sh"
 
 # Create the temporary directories
 echo "Creating temporary directories..."
@@ -108,7 +107,7 @@ mkdir -p $PORTS_DIR
 
 # Download the DRL file
 echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Winconfig_Files_full_3.0.DRL"
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Desktop_for_batocera_2.0.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
@@ -127,48 +126,12 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Find and copy the Winconfig installer
-echo "Looking for Winconfig installer..."
-FOUND_INSTALLER=$(find "$EXTRACT_DIR" -type f -name "$DEPS_INSTALLER")
-if [ ! -z "$FOUND_INSTALLER" ]; then
-    echo "Found Winconfig installer. Copying to ports directory..."
-    cp "$FOUND_INSTALLER" "$PORTS_DIR/"
-    chmod 755 "$PORTS_DIR/$DEPS_INSTALLER"
-    echo "Winconfig installer copied successfully to $PORTS_DIR"
-else
-    echo "Warning: Winconfig installer not found in the extracted files"
-fi
-
 # Copy the extracted files to the root directory
 echo "Copying files to the system..."
 cp -r $EXTRACT_DIR/* $DEST_DIR
 
 # Create symbolic links
 echo "Creating symbolic links..."
-
-# Function to create a symbolic link and remove the target if it already exists
-create_symlink() {
-    local target="$1"
-    local link="$2"
-
-    # Remove existing file or directory
-    if [ -e "$link" ] || [ -L "$link" ]; then
-        echo "Removing existing link or file: $link"
-        rm -rf "$link"
-    fi
-
-    # Create the new symbolic link
-    ln -s "$target" "$link"
-    echo "Created symlink: $link → $target"
-}
-
-create_symlink "/userdata/system/configs/bat-drl/AntiMicroX" "/opt/AntiMicroX"
-create_symlink "/userdata/system/configs/bat-drl/AntiMicroX/antimicrox" "/usr/bin/antimicrox"
-
-# Set permissions for specific files
-echo "Setting permissions for specific files..."
-chmod 777 /userdata/system/configs/bat-drl/AntiMicroX/antimicrox
-chmod 777 /userdata/system/configs/bat-drl/AntiMicroX/antimicrox.sh
 
 # Clean up
 echo "Cleaning up..."
@@ -178,25 +141,5 @@ rm -rf $TEMP_DIR
 echo "Saving changes..."
 batocera-save-overlay
 echo "Installation completed successfully."
-
-# Gamelist config
-# Script para baixar, renomear, configurar permissões e mover um arquivo
-# para o diretório do sistema
-
-echo "Iniciando o processo de download e instalação..."
-
-# Download do arquivo
-echo "Baixando o arquivo..."
-wget -O /tmp/gamelistconfig.sh https://github.com/DRLEdition19/DRLEdition_Interface/raw/refs/heads/main/extra/Winconfig_gamelist_config.sh
-echo "Download concluído com sucesso."
-
-# Configura as permissões
-echo "Configurando permissões (chmod 777)..."
-chmod 777 /tmp/gamelistconfig.sh
-
-# Inicia a ferramenta para configurar o Idioma
-xterm -fs 14 -fg white -bg black -fa "Monospace" -en UTF-8 -sb -rightbar -e bash -c "PS1='[\u@\h \$PWD]# ' /bin/bash /tmp/gamelistconfig.sh"
-
-rm -r -f /tmp/gamelistconfig.sh
 
 exit 0
