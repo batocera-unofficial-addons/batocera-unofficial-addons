@@ -1,5 +1,5 @@
 # 🖥️ Desktop para Batocera
-
+ 
 Este projeto possui todos os recursos necessários para fornecer uma ferramenta totalmente funcional para seu batocera.
 
 ![image](https://github.com/DRLEdition19/DRLEdition_Interface/blob/main/extra/Desktop_for_Batocera.jpg?raw=true)
