@@ -1,7 +1,7 @@
 # 🎮 WinConfig - Windows Game Fix - para batocera
 
 Olá! 👋
-
+ 
 Seja bem vindo ao projeto de instalação do Winconfig - Windows Game Fix - para batocera!
 
 Este projeto possui todos os recursos necessários para fornecer uma ferramenta totalmente funcional para seu batocera.
