@@ -1,3 +1,5 @@
+[![Manual do WinConfig Windows Game Fix](https://img.shields.io/badge/Manual%20do%20WinConfig%20Windows%20Game%20Fix-Clique%20Aqui-blue?style=for-the-badge)](https://github.com/DRLEdition19/DRLEdition_Interface/blob/main/extra/README_MANUAL_WINCONFIG.md#-instru%C3%A7%C3%B5es-de-instala%C3%A7%C3%A3o)
+
 # 🎮 WinConfig - Windows Game Fix - para batocera
 
 Olá! 👋
