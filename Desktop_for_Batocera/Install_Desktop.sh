@@ -107,7 +107,7 @@ mkdir -p $PORTS_DIR
 
 # Download the DRL file
 echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Desktop_for_batocera_2.0.DRL"
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Desktop_for_batocera_4.0.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
@@ -139,6 +139,7 @@ rm -rf $TEMP_DIR
 
 # Save changes
 echo "Saving changes..."
+rm -f "/userdata/system/Desktop/gparted.desktop"
 batocera-save-overlay
 echo "Installation completed successfully."
 
