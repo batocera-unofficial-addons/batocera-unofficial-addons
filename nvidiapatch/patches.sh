@@ -62,8 +62,8 @@ cd "$tmp"
 				nvfbcpatch_file=/userdata/system/add-ons/sunshine/nvidia/batocera-sunshine-nvidia-fbcpatch.sh
 				nvfbcpatch_tmpfile=/userdata/system/add-ons/sunshine/nvidia/tmp/batocera-sunshine-nvidia-fbcpatch.sh
 				nvfbcpatch_link=https://raw.githubusercontent.com/keylase/nvidia-patch/master/patch-fbc.sh
-					curl -o "$nvpatch_tmpfile" --progress-bar "$nvpatch_link"
-					curl -o "$nvfbcpatch_tmpfile" --progress-bar "$nvfbcpatch_link"
+					curl -Lo "$nvpatch_tmpfile" --progress-bar "$nvpatch_link"
+					curl -Lo "$nvfbcpatch_tmpfile" --progress-bar "$nvfbcpatch_link"
 						# Check/update patchers 
 						# patch.sh 
 							if [[ "$(wc -c "$nvpatch_tmpfile" | awk '{print $1}')" < "10000" ]]; then 
