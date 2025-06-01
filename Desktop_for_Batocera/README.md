@@ -33,7 +33,7 @@ Para que o processo de instalação tenha efeito, basta reiniciar seu batocera. 
 
     * **Correção de Bugs*
     * **Implementação Aplicações padrão para determinados formatos de arquivos*
-    * **Implementado mais uma ferramenta para comprimir Jogos em ".wsquashfs" e/descompactá-lo.!*
+    * **Implementado mais uma ferramenta para comprimir Jogos em ".wsquashfs" e descompactá-lo*
     * **Adicionado ferramentas para descompactar arquivos compactados. (ex: .zip, .rar)*
     * **Adicionado a aplicação **WPS Officie** para a edição de arquivos office*
     * **Adicionado o **SM Player** para reprodução de vídeos e músicas*
