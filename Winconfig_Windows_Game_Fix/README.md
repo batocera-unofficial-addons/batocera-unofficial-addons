@@ -18,22 +18,33 @@ curl -L bit.ly/winconfig-drl | bash
 
 Você irá encontrar a ferramenta dentro da coleção **Ports**
 
+---
 ## 🧩 Implementações e Atualizações
-
 ***Atualização - 22.05.2025***
 
 **Durante a instalação, será perguntado qual idioma você deseja para a ferramenta.**
 **Esta ferramenta agora conta com os idiomas:**
 
-***-Portugês Brasil***
+**-Portugês Brasil**
 
-***-Inglês***
+**-Inglês**
 
-***-Espanhol***
+**-Espanhol**
 
-***-Italiano***
+**-Italiano**
 
-***-Francês***
+**-Francês**
+
+
+***Atualização - 31.05.2025***
+
+**Correção de Bugs**
+
+**Implementado a função "Redist - Criar Ambiente ".wine""**
+
+**Adicionado um desinstalador, para caso o usuário deseje remover a ferramenta "WinConfig - Windows Game Fix" (Você poderá encontrar este desinstalador dentro da pasta de aplicações do batocera)**
+---
+
 # 🎮 Suporte ao Gamepad
 ---
 ## Teclas e atalhos de controle de entrada para o Winconfig - Windows Game Fix - instalado no Batocera.
