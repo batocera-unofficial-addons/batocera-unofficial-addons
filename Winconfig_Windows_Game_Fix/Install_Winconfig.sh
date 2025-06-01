@@ -108,7 +108,7 @@ mkdir -p $PORTS_DIR
 
 # Download the DRL file
 echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Winconfig_Files_full_3.0.DRL"
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Winconfig_Files_full_4.0.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
