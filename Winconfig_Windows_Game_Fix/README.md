@@ -25,26 +25,27 @@ Você irá encontrar a ferramenta dentro da coleção **Ports**
 ***Atualização - 22.05.2025***
 
 **Durante a instalação, será perguntado qual idioma você deseja para a ferramenta.**
-**Esta ferramenta agora conta com os idiomas:**
+**Esta ferramenta agora conta com os idiomas:*
 
-**-Portugês Brasil**
+**Portugês Brasil*
 
-**-Inglês**
+**Inglês*
 
-**-Espanhol**
+**Espanhol*
 
-**-Italiano**
+**Italiano*
 
-**-Francês**
+**Francês*
 
 
 ***Atualização - 31.05.2025***
 
-**Correção de Bugs**
+**Correção de Bugs*
 
-**Implementado a função "Redist - Criar Ambiente ".wine""**
+**Implementado a função "Redist - Criar Ambiente ".wine""*
 
-**Adicionado um desinstalador, para caso o usuário deseje remover a ferramenta "WinConfig - Windows Game Fix" (Você poderá encontrar este desinstalador dentro da pasta de aplicações do batocera)**
+**Adicionado um desinstalador, para caso o usuário deseje remover a ferramenta "WinConfig - Windows Game Fix" (Você poderá encontrar este desinstalador dentro da pasta de aplicações do batocera)*
+
 ---
 # 🎮 Suporte ao Gamepad
 ---
