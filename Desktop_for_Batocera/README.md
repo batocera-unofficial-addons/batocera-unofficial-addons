@@ -44,6 +44,13 @@ Para que o processo de instalação tenha efeito, basta reiniciar seu batocera. 
     * **Desinstalador corrigido*
 
 * ***Adicionado um desinstalador, para caso o usuário deseje remover o "Desktop for Batocera" (Você poderá encontrar este desinstalador dentro da pasta de aplicações do batocera)***
+
+* ***Atualização - 04.06.2025***
+
+    * **Correção de Bugs*
+    * **Adicionado modo escuro*
+    * **Nova interface para o Screenrec*
+    * **Atalho do Desinstalador corrigido*
 ---
 
 ## 🚀 Como utilizar?
