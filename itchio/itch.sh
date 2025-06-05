@@ -4,15 +4,19 @@ APP_ID="io.itch.itch"
 APPNAME="itch.io"
 LAUNCHER_PATH="/userdata/roms/ports/itch.io.sh"
 
-# Check if Flathub remote exists, add if missing
-if ! flatpak remote-info flathub &> /dev/null; then
-    echo "Adding Flathub remote repository..."
-    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+# Ensure xmlstarlet is installed
+if ! command -v xmlstarlet &> /dev/null; then
+    echo "xmlstarlet is not installed. Please install xmlstarlet before running this script."
+    exit 1
 fi
 
 # Image URL and path
 LOGO_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/itchio/extra/itch-icon.png"
 PORTS_IMAGE_PATH="/userdata/roms/ports/images/itch-icon.png"
+
+# Add Flathub repository and install Itch.io
+    echo "Adding Flathub repository..."
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 echo "🔧 Installing Itch.io Flatpak..."
 flatpak install --user -y flathub $APP_ID
