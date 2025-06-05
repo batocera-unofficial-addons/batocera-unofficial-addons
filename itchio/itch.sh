@@ -4,6 +4,12 @@ APP_ID="io.itch.itch"
 APPNAME="itch.io"
 LAUNCHER_PATH="/userdata/roms/ports/itch.io.sh"
 
+# Check if Flathub remote exists, add if missing
+if ! flatpak remote-info flathub &> /dev/null; then
+    echo "Adding Flathub remote repository..."
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+fi
+
 # Image URL and path
 LOGO_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/itchio/extra/itch-icon.png"
 PORTS_IMAGE_PATH="/userdata/roms/ports/images/itch-icon.png"
