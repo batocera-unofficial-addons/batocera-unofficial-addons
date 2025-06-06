@@ -133,7 +133,7 @@ echo "Looking for Winconfig installer..."
 FOUND_INSTALLER=$(find "$EXTRACT_DIR" -type f -name "$DEPS_INSTALLER")
 if [ ! -z "$FOUND_INSTALLER" ]; then
     echo "Found Winconfig installer. Copying to ports directory..."
-    cp "$FOUND_INSTALLER" "$PORTS_DIR/"
+    cp -rf "$FOUND_INSTALLER" "$PORTS_DIR/"
     chmod 755 "$PORTS_DIR/$DEPS_INSTALLER"
     echo "Winconfig installer copied successfully to $PORTS_DIR"
 else
@@ -142,7 +142,7 @@ fi
 
 # Copy the extracted files to the root directory
 echo "Copying files to the system..."
-cp -r $EXTRACT_DIR/* $DEST_DIR
+cp -rf $EXTRACT_DIR/* $DEST_DIR
 
 # Create symbolic links
 echo "Creating symbolic links..."
