@@ -46,6 +46,13 @@ Você irá encontrar a ferramenta dentro da coleção **Ports**
 
 **Adicionado um desinstalador, para caso o usuário deseje remover a ferramenta "WinConfig - Windows Game Fix" (Você poderá encontrar este desinstalador dentro da pasta de aplicações do batocera)*
 
+
+***Atualização - 05.06.2025***
+
+**Correção de Bugs*
+
+**Aumento da capacidade de verificação (modo recursivo) de lançadores personalizados wine, para a instalação de dependências.*
+
 ---
 # 🎮 Suporte ao Gamepad
 ---

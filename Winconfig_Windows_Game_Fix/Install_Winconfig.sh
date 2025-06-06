@@ -102,13 +102,14 @@ DEPS_INSTALLER="- Windows Game Fix.sh"
 
 # Create the temporary directories
 echo "Creating temporary directories..."
+batocera-save-overlay 300
 mkdir -p $TEMP_DIR
 mkdir -p $EXTRACT_DIR
 mkdir -p $PORTS_DIR
 
 # Download the DRL file
 echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Winconfig_Files_full_4.0.DRL"
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Winconfig_Files_full_5.0.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
@@ -132,7 +133,7 @@ echo "Looking for Winconfig installer..."
 FOUND_INSTALLER=$(find "$EXTRACT_DIR" -type f -name "$DEPS_INSTALLER")
 if [ ! -z "$FOUND_INSTALLER" ]; then
     echo "Found Winconfig installer. Copying to ports directory..."
-    cp "$FOUND_INSTALLER" "$PORTS_DIR/"
+    cp -rf "$FOUND_INSTALLER" "$PORTS_DIR/"
     chmod 755 "$PORTS_DIR/$DEPS_INSTALLER"
     echo "Winconfig installer copied successfully to $PORTS_DIR"
 else
@@ -141,7 +142,7 @@ fi
 
 # Copy the extracted files to the root directory
 echo "Copying files to the system..."
-cp -r $EXTRACT_DIR/* $DEST_DIR
+cp -rf $EXTRACT_DIR/* $DEST_DIR
 
 # Create symbolic links
 echo "Creating symbolic links..."
@@ -162,7 +163,7 @@ create_symlink() {
     echo "Created symlink: $link → $target"
 }
 
-create_symlink "/userdata/system/configs/bat-drl/AntiMicroX" "/opt/AntiMicroX"
+# create_symlink "/userdata/system/configs/bat-drl/AntiMicroX" "/opt/AntiMicroX"
 create_symlink "/userdata/system/configs/bat-drl/AntiMicroX/antimicrox" "/usr/bin/antimicrox"
 
 # Set permissions for specific files
