@@ -163,7 +163,7 @@ create_symlink() {
     echo "Created symlink: $link → $target"
 }
 
-create_symlink "/userdata/system/configs/bat-drl/AntiMicroX" "/opt/AntiMicroX"
+# create_symlink "/userdata/system/configs/bat-drl/AntiMicroX" "/opt/AntiMicroX"
 create_symlink "/userdata/system/configs/bat-drl/AntiMicroX/antimicrox" "/usr/bin/antimicrox"
 
 # Set permissions for specific files
