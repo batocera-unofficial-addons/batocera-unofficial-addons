@@ -102,13 +102,14 @@ DEPS_INSTALLER="- Windows Game Fix.sh"
 
 # Create the temporary directories
 echo "Creating temporary directories..."
+batocera-save-overlay 300
 mkdir -p $TEMP_DIR
 mkdir -p $EXTRACT_DIR
 mkdir -p $PORTS_DIR
 
 # Download the DRL file
 echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Winconfig_Files_full_4.0.DRL"
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Winconfig_Files_full_5.0.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
