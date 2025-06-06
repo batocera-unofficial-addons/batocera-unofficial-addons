@@ -127,20 +127,21 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Copy the extracted files to the root directory
-echo "Copying files to the system..."
-cp -r $EXTRACT_DIR/* $DEST_DIR
+# Copia forçada dos arquivos extraídos para o diretório de destino, com sobrescrita
+echo "Copying files to the system (forced overwrite)..."
+cp -rf "$EXTRACT_DIR"/* "$DEST_DIR"
 
-# Create symbolic links
-echo "Creating symbolic links..."
+# Cria links simbólicos (adicione comandos específicos aqui, se necessário)
 
-# Clean up
+# Limpeza
 echo "Cleaning up..."
-rm -rf $TEMP_DIR
+rm -rf "$TEMP_DIR"
 
-# Save changes
+# Salva alterações
 echo "Saving changes..."
 rm -f "/userdata/system/Desktop/gparted.desktop"
+rm -f "/userdata/system/Desktop/vlc.desktop"
+rm -f "/userdata/system/Desktop/VLC.desktop"
 batocera-save-overlay
 echo "Installation completed successfully."
 
