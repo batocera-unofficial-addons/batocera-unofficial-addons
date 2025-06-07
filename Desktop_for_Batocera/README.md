@@ -56,11 +56,9 @@ Para que o processo de instalação tenha efeito, basta reiniciar seu batocera. 
 
     * **Correção de Bugs*
     * **Corrigido e ampliado o modo janela para as aplicações (Alguns emuladores foram afetados, e abrirão em modo janela. No entanto, isso não interfere à sua jogabilidade)*
+    * **Implementado uma função mais robusta para executar jogos a partir do gerenciador de arquivos. (Agora a função se chama "Run Game", e funciona para diversos emuladores, desde que os jogos estejam dentro das pastas de seus respectivos emuladores./ P.S: Esta função poderá não funcionar para alguns emuladores, ou tipo de extenção de jogos)*
 
-    * **Implementado uma função mais robusta para executar jogos a partir do gerenciador de arquivos. (Agora a função se chama "Run Game", e funciona para diversos emuladores, desde que os jogos estejam dentro das pastas de seus respectivos emuladores./ P.S: Esta função poderá não funcionar para lguns emuladores, ou tipo de extenção de jogos)*
 
-    * **Implentado uma função mais robusta para executar jogos a partir do gerenciador de arquivos. (Agora a função se chama "Run Game", e funciona para diversos emuladores, desde que os jogos estejam dentro das pastas de seus respectivos emuladores./ P.S: Esta função poderá não funcionar para lguns emuladores, ou tipo de extenção de jogos)*
-      
 ---
 
 ## 🚀 Como utilizar?
