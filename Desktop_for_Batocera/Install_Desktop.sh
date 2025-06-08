@@ -90,7 +90,7 @@ clear
 
 
 # Welcome message
-echo "Welcome to the automatic installer for the Desktop_for_Batocera 7.0 by DRL Edition."
+echo "Welcome to the automatic installer for the Desktop_for_Batocera 7.5 by DRL Edition."
 
 # Temporary directory for download
 TEMP_DIR="/userdata/tmp/Desktop_for_Batocera"
@@ -109,7 +109,7 @@ clear
 
 # Download the DRL file
 echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Desktop_for_batocera_7.0.DRL"
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Desktop_for_batocera_7.5.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
