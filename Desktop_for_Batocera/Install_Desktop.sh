@@ -90,7 +90,7 @@ clear
 
 
 # Welcome message
-echo "Welcome to the automatic installer for the Desktop_for_Batocera by DRL Edition."
+echo "Welcome to the automatic installer for the Desktop_for_Batocera 7.0 by DRL Edition."
 
 # Temporary directory for download
 TEMP_DIR="/userdata/tmp/Desktop_for_Batocera"
@@ -146,5 +146,6 @@ rm -f "/userdata/system/Desktop/VLC.desktop"
 batocera-save-overlay
 clear
 echo "Installation completed successfully."
+echo "For the Desktop to work properly, you will need to restart your machine."
 
 exit 0
