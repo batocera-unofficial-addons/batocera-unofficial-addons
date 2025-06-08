@@ -58,6 +58,11 @@ Para que o processo de instalação tenha efeito, basta reiniciar seu batocera. 
     * **Corrigido e ampliado o modo janela para as aplicações (Alguns emuladores foram afetados, e abrirão em modo janela. No entanto, isso não interfere à sua jogabilidade)*
     * **Implementado uma função mais robusta para executar jogos a partir do gerenciador de arquivos. (Agora a função se chama "Run Game", e funciona para diversos emuladores, desde que os jogos estejam dentro das pastas de seus respectivos emuladores./ P.S: Esta função poderá não funcionar para alguns emuladores, ou tipo de extenção de jogos)*
 
+* ***Atualização - 08.06.2025***
+
+    * **Correção de Bugs*
+    * **Implementado nova função para alterar o tema das bordas das janelas. Há um total de 59 temas disponível para escolher. Para utilizar esta nova função, basta executar o app "Pack Theme", ou clicar com o botão direito do mouse sobre a barra do relório. (Ao aplicar um novo tema, será necessário reiniciar sua máquina para que as alterações tenham efeito.)*
+    * **Para evitar problemas e otimizar ainda mais o sistema, foi removido a função de editar mimetypes, a fim de evitar conflitos no sistema de associação de atalhos.*
 
 ---
 

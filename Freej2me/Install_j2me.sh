@@ -160,7 +160,11 @@ rm -rf $TEMP_DIR
 # Save changes
 echo "Saving changes..."
 batocera-save-overlay
+clear
 
 type_text "Installation completed successfully."
-type_text "Developed by DRLEdition19"  
+type_text "Developed by DRLEdition19"
+desktop
+killall -9 pcmanfm
 killall -9 emulationstation
+exit 0
