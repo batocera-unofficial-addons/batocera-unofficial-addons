@@ -67,7 +67,7 @@ Para que o processo de instalação tenha efeito, basta reiniciar seu batocera. 
 * ***Atualização - 08.06.2025 - Versão 7.5***
 
     * **Correção de Bugs*
-    * **Implementado de menu de energia ao desktop no canto inferior direto da barra de tarefa. O Desktop agora conta com um menu de energia, o qual você consegue suspender, reiniciar ou desligar seu batocera.*
+    * **Implementado um menu de energia ao desktop no canto inferior direto da barra de tarefa. O Desktop agora conta com um menu de energia, o qual você consegue suspender, reiniciar ou desligar seu batocera.*
     * **O Screenrec agora conta com uma função para capturar o áudio pelo seu microfone. (P.S.: Por padrão, a caixa de seleção vem desmarcada, ou seja, desativada, para utilizar o microfone durante suas gravações, basta marcar a caixa antes de iniciar as gravações de tela)*
 
 ---
