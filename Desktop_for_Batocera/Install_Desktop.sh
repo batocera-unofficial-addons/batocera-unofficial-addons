@@ -105,10 +105,11 @@ batocera-save-overlay 300
 mkdir -p $TEMP_DIR
 mkdir -p $EXTRACT_DIR
 mkdir -p $PORTS_DIR
+clear
 
 # Download the DRL file
 echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Desktop_for_batocera_5.0.DRL"
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Desktop_for_batocera_7.0.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
@@ -143,6 +144,7 @@ rm -f "/userdata/system/Desktop/gparted.desktop"
 rm -f "/userdata/system/Desktop/vlc.desktop"
 rm -f "/userdata/system/Desktop/VLC.desktop"
 batocera-save-overlay
+clear
 echo "Installation completed successfully."
 
 exit 0
