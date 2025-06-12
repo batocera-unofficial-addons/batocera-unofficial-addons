@@ -21,37 +21,48 @@ curl -L bit.ly/winconfig-drl | bash
 Você irá encontrar a ferramenta dentro da coleção **Ports**
 
 ---
+## 📜 Novidades das Versões e Onde Pedir Ajuda
+
+**O WinConfig está sempre melhorando!**
+* **O WinConfig é atualizado com melhorias e novas funcionalidades, que estão em detalhes no manual completo.*
+**Precisa de Ajuda?**
+* **Dentro do WinConfig:** O botão `[Ajuda]` tem guias como este.
+
+---
 ## 🧩 Implementações e Atualizações
+***Atualização - 31.03.2025***
+* **Correção de Bugs*
+* **Lançamento base do projeto para o público*
+
+***Atualização - 02.04.2025***
+* **Correção de Bugs*
+* **Sistema de Backup '.bkpdrl', melhorias de UI e logs*
+
+***Atualização - 10.04.2025 a 22.04.2025***
+* **Correção de Bugs*
+* **Desenvolvimento e implementação da ferramenta Redist - Instalador de dependências*
+
 ***Atualização - 22.05.2025***
 
+* **Correção de Bugs*
 **Durante a instalação, será perguntado qual idioma você deseja para a ferramenta.**
-**Esta ferramenta agora conta com os idiomas:*
-
-**Portugês Brasil*
-
-**Inglês*
-
-**Espanhol*
-
-**Italiano*
-
-**Francês*
-
-
+* **Esta ferramenta agora conta com os idiomas:*
+    * **Portugês Brasil*
+    * **Inglês*
+    * **Espanhol*
+    * **Italiano*
+    * **Francês*
+  
 ***Atualização - 31.05.2025***
 
-**Correção de Bugs*
-
-**Implementado a função "Redist - Criar Ambiente ".wine""*
-
-**Adicionado um desinstalador, para caso o usuário deseje remover a ferramenta "WinConfig - Windows Game Fix" (Você poderá encontrar este desinstalador dentro da pasta de aplicações do batocera)*
-
+* **Correção de Bugs*
+* **Implementado a função "Redist - Criar Ambiente ".wine""*
+* **Adicionado um desinstalador, para caso o usuário deseje remover a ferramenta "WinConfig - Windows Game Fix" (Você poderá encontrar este desinstalador dentro da pasta de aplicações do batocera)*
 
 ***Atualização - 05.06.2025***
 
-**Correção de Bugs*
-
-**Aumento da capacidade de verificação (modo recursivo) de lançadores personalizados wine, para a instalação de dependências.*
+* **Correção de Bugs*
+* **Aumento da capacidade de verificação (modo recursivo) e varredura completa de lançadores personalizados wine, para a instalação de dependências mais preciso, assertivo e funcional.*
 
 ---
 # 🎮 Suporte ao Gamepad
