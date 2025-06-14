@@ -63,6 +63,12 @@ Para que o processo de instalação tenha efeito, basta reiniciar seu batocera. 
     * **Correção de Bugs*
     * **Implementado nova função para alterar o tema das bordas das janelas. Há um total de 59 temas disponível para escolher. Para utilizar esta nova função, basta executar o app "Pack Theme", ou clicar com o botão direito do mouse sobre a barra do relório. (Ao aplicar um novo tema, será necessário reiniciar sua máquina para que as alterações tenham efeito.)*
     * **Para evitar problemas e otimizar ainda mais o sistema, foi removido a função de editar mimetypes, a fim de evitar conflitos no sistema de associação de atalhos.*
+      
+* ***Atualização - 08.06.2025 - Versão 7.5***
+
+    * **Correção de Bugs*
+    * **Implementado um menu de energia ao desktop no canto inferior direto da barra de tarefa. O Desktop agora conta com um menu de energia, o qual você consegue suspender, reiniciar ou desligar seu batocera.*
+    * **O Screenrec agora conta com uma função para capturar o áudio pelo seu microfone. (P.S.: Por padrão, a caixa de seleção vem desmarcada, ou seja, desativada, para utilizar o microfone durante suas gravações, basta marcar a caixa antes de iniciar as gravações de tela)*
 
 ---
 
