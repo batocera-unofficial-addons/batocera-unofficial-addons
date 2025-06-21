@@ -25,6 +25,7 @@ Você irá encontrar a ferramenta dentro da coleção **Ports**
 
 **O WinConfig está sempre melhorando!**
 * **O WinConfig é atualizado com melhorias e novas funcionalidades, que estão em detalhes no manual completo.*
+
 **Precisa de Ajuda?**
 * **Dentro do WinConfig:** O botão `[Ajuda]` tem guias como este.
 
@@ -63,6 +64,14 @@ Você irá encontrar a ferramenta dentro da coleção **Ports**
 
 * **Correção de Bugs*
 * **Aumento da capacidade de verificação (modo recursivo) e varredura completa de lançadores personalizados wine, para a instalação de dependências mais preciso, assertivo e funcional.*
+
+***Atualização - 21.06.2025***
+
+* **Correção de Bugs*
+* **🍷 NOVA FUNCIONALIDADE: Integração completa do REDIST - WINETRICKS*
+* **Interface gráfica avançada para gerenciamento de componentes Windows*
+* **Gerenciamento de prefixos Wine com backup e restauração*
+* **Controle granular sobre DLLs, fontes, configurações e aplicativos Windows*
 
 ---
 # 🎮 Suporte ao Gamepad
