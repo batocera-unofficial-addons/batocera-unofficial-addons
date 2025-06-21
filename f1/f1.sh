@@ -10,7 +10,7 @@ GAME_LIST="/userdata/roms/ports/gamelist.xml"
 echo "Creating ${APP_NAME}.sh..."
 cat << 'EOF' > "/userdata/roms/ports/${APP_NAME}.sh"
 #!/bin/bash
-
+# Script adapted to work with the antimicrox implemented in "Desktop for Batocera 8.0 by DRL Edition"
 export XDG_MENU_PREFIX=batocera-
 export XDG_CONFIG_DIRS=/etc/xdg
 ANTIMICROX_PROFILE="/userdata/system/configs/bat-drl/Nav_Redist2.joystick.amgp"
