@@ -105,7 +105,7 @@ echo "Adding $APP_NAME to gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./${APP_NAME}.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/${APP_NAME,,}-logo.jpg" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/${APP_NAME}-logo.jpg" \
   "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
 
 # Step 5: Final refresh
