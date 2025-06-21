@@ -159,6 +159,35 @@ cp -rf "$EXTRACT_DIR"/* "$DEST_DIR"
 echo "Cleaning up..."
 rm -rf "$TEMP_DIR"
 
+# Salva alterações
+echo "Saving changes..."
+batocera-save-overlay
+clear
+
+# 2. Directory Creation
+echo "Creating necessary directories..."
+mkdir -p "$DESKTOP_DIR" || error_exit "Failed to create $DESKTOP_DIR"
+mkdir -p "$IMAGES_DIR" || error_exit "Failed to create $IMAGES_DIR"
+echo "Directories created."
+
+# 4. Image Download
+download_file "$MARQUEE_URL" "$MARQUEE_IMG"
+download_file "$THUMB_URL" "$THUMB_IMG"
+
+# 6. gamelist.xml Update
+echo "Updating gamelist.xml..."
+if [ ! -f "$GAMELIST_PATH" ] || [ ! -s "$GAMELIST_PATH" ]; then
+    create_new_gamelist
+else
+    create_backup
+    if check_entry; then
+        remove_entry
+    fi
+    add_entry
+fi
+echo "Gamelist.xml updated."
+clear
+
 # Step 1: Create the launcher script
 echo "Creating ${APP_NAME}.sh..."
 cat << 'EOF' > "/userdata/roms/ports/${APP_NAME}.sh"
@@ -213,40 +242,11 @@ EOF
 
 chmod +x "${APP_NAME}.sh"
 
-# Salva alterações
-echo "Saving changes..."
-batocera-save-overlay
-clear
-
 # Step 2: Refresh the Ports menu
 echo "Refreshing Ports menu..."
 curl -s http://127.0.0.1:1234/reloadgames
 
-# 2. Directory Creation
-echo "Creating necessary directories..."
-mkdir -p "$DESKTOP_DIR" || error_exit "Failed to create $DESKTOP_DIR"
-mkdir -p "$IMAGES_DIR" || error_exit "Failed to create $IMAGES_DIR"
-echo "Directories created."
-
-# 4. Image Download
-download_file "$MARQUEE_URL" "$MARQUEE_IMG"
-download_file "$THUMB_URL" "$THUMB_IMG"
-
-# 6. gamelist.xml Update
-echo "Updating gamelist.xml..."
-if [ ! -f "$GAMELIST_PATH" ] || [ ! -s "$GAMELIST_PATH" ]; then
-    create_new_gamelist
-else
-    create_backup
-    if check_entry; then
-        remove_entry
-    fi
-    add_entry
-fi
-echo "Gamelist.xml updated."
-clear
-
-# Step 5: Final refresh
+# Step 3: Final refresh
 curl -s http://127.0.0.1:1234/reloadgames
 
 echo "Done! ${APP_NAME} has been added."
