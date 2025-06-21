@@ -10,7 +10,52 @@ GAME_LIST="/userdata/roms/ports/gamelist.xml"
 echo "Creating ${APP_NAME}.sh..."
 cat << 'EOF' > "/userdata/roms/ports/${APP_NAME}.sh"
 #!/bin/bash
-filemanagerlauncher
+
+export XDG_MENU_PREFIX=batocera-
+export XDG_CONFIG_DIRS=/etc/xdg
+ANTIMICROX_PROFILE="/userdata/system/configs/bat-drl/Nav_Redist2.joystick.amgp"
+
+# fix for exfat on HOME + pcmanfm
+export XDG_CACHE_HOME=/tmp/xdg_cache
+ANTIMICROX_PROFILE="/userdata/system/configs/bat-drl/Nav_Redist2.joystick.amgp"
+
+# Fix xterm via F4 is not previously set up
+python << EOF
+import configparser
+F = '/userdata/system/.config/libfm/libfm.conf'
+c = configparser.ConfigParser()
+c.read(F)
+try:
+   t = c['config']['terminal']
+except:
+   t = None
+if (not t or t == ''):
+   with open(F, 'w') as wf:
+     c['config']['terminal'] = 'xterm'
+     c.write(wf)
+EOF
+
+### Inicia o AntiMicroX ###
+    if [ -e '/dev/input/js0' ]; then
+        antimicrox --hidden --profile "$ANTIMICROX_PROFILE" &
+        ANTIMICROX_PID=$!
+        success "AntiMicroX iniciado (PID: $ANTIMICROX_PID)"
+    else
+        warning "Nenhum joystick detectado"
+    fi
+
+### Inicia o desktop e o pcmanfm ###
+batocera-mouse show
+DISPLAY=${DISPLAY:-:0.0} pcmanfm /userdata
+batocera-mouse hide
+
+### Encerra o AntiMicroX, o desktop e o pcmanfm ###
+    if [ -n "${ANTIMICROX_PID}" ]; then
+        kill -9 "${ANTIMICROX_PID}" 2>/dev/null
+        pkill -9 "${ANTIMICROX_PID}" 2>/dev/null
+    fi
+    
+exit 0
 EOF
 
 chmod +x "${APP_NAME}.sh"
