@@ -79,7 +79,13 @@ Para que o processo de instalação tenha efeito, basta reiniciar seu batocera. 
     * **Implementado integração com **Antimicrox**. Agora o usuário poderá controlar seu **Desktop for Batocera** utilizando o controle joystick ou gamepad. (P.S.: Esta função somente é suportada quando o desktop está em execução, ao sair do modo desktop, o antimicrox é encerrado imediatamente)*
     * **O aplicativo **Pack Theme** agora conta com um novo botão, o **Taskbar Style Config.**, que serve para configurar a barra de tarefas, que antes possuía um atalho específico chamado **tint2conf**, agora está tudo integrado em somente um aplicativo*
     * **Agora o relógio mostra as horas utilizando o padrão de 12 horas*
-  
+
+* ***Atualização - 23.06.2025 - Versão 8.1***
+    * **Correção de Bugs*
+    * **Na barra de tarefas, o app Htop foi substituído pelo Btop*
+    * **A transparência da barra de tarefas foi removida, devido a ocorrência de bugs na usabilidade da função*
+    * **A barra de tarefas foi atualizada novamente, sendo removido o atalho do **tint2conf**, que foi substituído pelo **Pack Theme***
+
 ---
 
 ## 🚀 Como utilizar?
