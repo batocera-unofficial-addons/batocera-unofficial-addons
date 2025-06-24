@@ -86,6 +86,12 @@ Para que o processo de instalação tenha efeito, basta reiniciar seu batocera. 
     * **A transparência da barra de tarefas foi removida, devido a ocorrência de bugs na usabilidade da função*
     * **A barra de tarefas foi atualizada novamente, sendo removido o atalho do **tint2conf**, que foi substituído pelo **Pack Theme***
 
+* ***Atualização - 24.06.2025 - Versão 8.2***
+    * **Correção de Bugs*
+    * **Corrigido problema de bordas da barra de tarefas*
+    * **Implementado modo tela cheia para as instâncias do Steam e Steamlink, instalados via Flatpak*
+    * **Adicionado atalho para a pasta de jogos Steam, baixados da loja, no diretório **"/userdata/Steam Games Folder/"***
+
 ---
 
 ## 🚀 Como utilizar?
