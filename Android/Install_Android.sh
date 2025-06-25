@@ -216,8 +216,8 @@ fi
 
 # Extract the squashfs file
 echo "Extracting the DRL file..."
-# unsquashfs -f -d "$EXTRACT_DIR" "$DRL_FILE"
-unsquashfs -f -d "$DEST_DIR" "$DRL_FILE"
+unsquashfs -f -d "$EXTRACT_DIR" "$DRL_FILE"
+# unsquashfs -f -d "$DEST_DIR" "$DRL_FILE"
 
 # Check if extraction was successful
 if [ $? -ne 0 ]; then
@@ -242,8 +242,8 @@ echo "Gamelist.xml updated."
 clear
 
 # Copia forçada dos arquivos extraídos para o diretório de destino, com sobrescrita
-# echo "Copying files to the system (forced overwrite)..."
-# cp -rf "$EXTRACT_DIR"/* "$DEST_DIR"
+echo "Copying files to the system (forced overwrite)..."
+cp -rf "$EXTRACT_DIR"/* "$DEST_DIR"
 
 # Cria links simbólicos (adicione comandos específicos aqui, se necessário)
 
