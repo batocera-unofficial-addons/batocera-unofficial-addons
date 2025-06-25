@@ -110,6 +110,7 @@ apps=(
     ["7ZIP"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/7zip/7zip.sh | bash"
     ["AMAZON-LUNA"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/amazonluna/amazonluna.sh | bash"
     ["AMBERMOON"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/ambermoon/ambermoon.sh | bash"
+	["ANDROID"]="curl -Ls https://github.com/DRLEdition19/DRLEdition_Interface/raw/refs/heads/main/Android/Install_Android.sh | bash"
     ["ARMAGETRON"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/armagetron/armagetron.sh | bash"
     ["ARCADEMANAGER"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/arcademanager/arcademanager.sh | bash"
     ["ASSAULTCUBE"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/assaultcube/assaultcube.sh | bash"
@@ -232,6 +233,7 @@ descriptions=(
     ["OPENRGB"]="Manage RGB lighting on devices."
     ["WARZONE2100"]="Real-time strategy and tactics game."
     ["XONOTIC"]="Fast-paced open-source arena shooter."
+    ["ANDROID"]="Android System for Batocera (EXPERIMENTAL)."
     ["FREEJ2ME"]="J2ME classic game emulator."
     ["DESKTOP_FOR_BATOCERA"]="Desktop for batocera. (Native)"
     ["WINCONFIG-WINDOWS-GAME-FIX"]="This tool was developed to simplify the installation of dependencies, configuration and management of Windows games on the Batocera system. by DRL Edition"
@@ -287,7 +289,7 @@ descriptions=(
 declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64 ULTRASTAR"
-    ["Game Utilities"]="AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS BOTTLES SUNSHINE MOONLIGHT BRIDGE ITCHIO"
+    ["Game Utilities"]="ANDROID AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS BOTTLES SUNSHINE MOONLIGHT BRIDGE ITCHIO"
     ["System Utilities"]="DESKTOP_FOR_BATOCERA WINCONFIG-WINDOWS-GAME-FIX F1 TAILSCALE TELEGRAF WINEMANAGER VESKTOP CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP DESKTOP"
     ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER DOCKER EXTRAS X11VNC QEMU-GA SOAR DARK-MODE"
 )
