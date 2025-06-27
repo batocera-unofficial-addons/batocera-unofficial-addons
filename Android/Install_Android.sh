@@ -84,13 +84,14 @@ echo ""
 echo -ne "${PURPLE}"  # Cor roxa para a mensagem final
 type_text "Thank you for running this script!"  
 type_text "Developed by DRLEdition19"  
+type_text "Acknowledgements: KevoBatoYT"
 type_text "The installation will start in a few moments. Please wait..."
 sleep 2
 clear
 
 
 # Welcome message
-echo "Welcome to the automatic installer for the Android 5.0 by DRL Edition."
+echo "Welcome to the automatic installer for the Android 5.5 by DRL Edition."
 
 # Temporary directory for download
 TEMP_DIR="/userdata/tmp/Android"
@@ -104,6 +105,8 @@ APP_NAME="Android"
 APP_EXEC="Android"
 PORT_SCRIPT_PATH="${PORTS_DIR}/${APP_EXEC}.sh"
 PORT_SCRIPT_NAME="${APP_EXEC}.sh"
+DEST_FILE="/userdata/system/configs/bat-drl/Android/Android.iso"
+URL_ISO="https://sinalbr.dl.sourceforge.net/project/blissos-x86/Official/BlissOS16/Gapps/Generic/Bliss-v16.9.7-x86_64-OFFICIAL-gapps-20241011.iso?viasf=1"
 
 GAMELIST_ENTRY_CONTENT="	<game>
 		<path>./${PORT_SCRIPT_NAME}</path>
@@ -111,6 +114,7 @@ GAMELIST_ENTRY_CONTENT="	<game>
 		<desc>=========================================
 Info: ${APP_NAME} for Batocera
 Developer: DRL Edition 19
+Acknowledgements: KevoBatoYT
 =========================================</desc>
 		<image>./images/${APP_EXEC}-thumb.png</image>
 		<marquee>./images/${APP_EXEC}-marquee.png</marquee>
@@ -202,11 +206,15 @@ batocera-save-overlay
 mkdir -p $TEMP_DIR
 mkdir -p $EXTRACT_DIR
 mkdir -p $PORTS_DIR
+mkdir -p "/userdata/system/configs/bat-drl/Android"
 clear
 
 # Download the DRL file
+echo "Downloading the Android file (Bliss-v16.9.7-x86_64-OFFICIAL-gapps-20241011.iso)..."
+curl -L -o $DEST_FILE $URL_ISO
+clear
 echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Android_5.0.DRL"
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Android_5.5.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
@@ -255,6 +263,6 @@ rm -rf "$TEMP_DIR"
 batocera-save-overlay
 clear
 echo "Installation completed successfully."
-echo "Android 5.0 by DRL Edition"
+echo "Android 5.5 by DRL Edition"
 
 exit 0
