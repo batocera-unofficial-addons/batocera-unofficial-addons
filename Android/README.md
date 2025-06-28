@@ -54,7 +54,7 @@ Confira na tabela abaixo o que cada botão mágico do seu controle faz:
 | ↖️ **LB / L1**        | Botão Esquerdo do Mouse / Ação Secundária 1 |
 | ↗️ **RB / B2**       | Botão Direito do Mouse / Ação Secundária 2 |
 | ⬇️ **L3**       | No modo Janela, libera o ponteiro do mouse / Combinação das teclas "Ctrl+Alt+G" |
-| ⬇️ **R3**       | Alterna entre o modo tela cheia / Combinação das teclas "Ctrl+Alt+F" |
+| ⬇️ **R3**       | Alterna entre o modo tela cheia e o modo janela / Combinação das teclas "Ctrl+Alt+F" |
 
 ---
 
