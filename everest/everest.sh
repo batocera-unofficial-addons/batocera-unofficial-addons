@@ -48,7 +48,7 @@ Developer: KevoBatoYT
 =========================================</desc>
 		<image>./images/${APP_EXEC}-thumb.png</image>
 		<marquee>./images/${APP_EXEC}-marquee.png</marquee>
-		<thumbnail>./images/${APP_EXEC}-thumb.png</thumbnail>
+		<thumbnail>./images/${APP_EXEC}-marquee.png</thumbnail>
 		<fanart>./images/${APP_EXEC}-thumb.png</fanart>
 		<titleshot>./images/${APP_EXEC}-thumb.png</titleshot>
 		<cartridge>./images/${APP_EXEC}-thumb.png</cartridge>
