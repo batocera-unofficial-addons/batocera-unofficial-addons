@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # --- Variables ---
-APP_NAME="everest"
+APP_NAME="Everest"
 APP_ID="io.github.everestapi.Olympus"
-APP_EXEC="everest"
+APP_EXEC="Everest"
 DESKTOP_DIR="/userdata/system/.local/share/applications"
 PATH_DESKTOP="/userdata/system/Desktop/${APP_EXEC}.desktop"
 DESKTOP_FILE="${DESKTOP_DIR}/${APP_EXEC}.desktop"
@@ -14,10 +14,10 @@ BACKUP_PATH="${PORTS_DIR}/gamelist.xml.DRL"
 BIN_DIR="${PORTS_DIR}"
 
 # URLs
-MARQUEE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/everest/extra/everest-marquee.jpg"
-THUMB_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/everest/extra/everest-thumb.png"
+MARQUEE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/blob/main/everest/extra/everest-marquee.jpg?raw=true"
+THUMB_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/blob/main/everest/extra/everest-thumb.png?raw=true"
 
-MARQUEE_IMG="${IMAGES_DIR}/${APP_EXEC}-marquee.jpg"
+MARQUEE_IMG="${IMAGES_DIR}/${APP_EXEC}-marquee.png"
 THUMB_IMG="${IMAGES_DIR}/${APP_EXEC}-thumb.png"
 PORT_SCRIPT_PATH="${PORTS_DIR}/${APP_EXEC}.sh"
 PORT_SCRIPT_NAME="${APP_EXEC}.sh"
@@ -35,7 +35,7 @@ Icon=${MARQUEE_IMG}
 "
 
 PORT_SCRIPT_CONTENT="#!/bin/bash
-flatpak run $APP_ID --filesystem=host
+flatpak --filesystem="/userdata/" --filesystem=host:/:rw --filesystem=host --filesystem="/media" run $APP_ID
 "
 
 GAMELIST_ENTRY_CONTENT="	<game>
@@ -47,12 +47,12 @@ YouTube: youtube.com/@kevsbatocerabuilds
 Developer: KevoBatoYT
 =========================================</desc>
 		<image>./images/${APP_EXEC}-thumb.png</image>
-		<marquee>./images/${APP_EXEC}-marquee.jpg</marquee>
+		<marquee>./images/${APP_EXEC}-marquee.png</marquee>
 		<thumbnail>./images/${APP_EXEC}-thumb.png</thumbnail>
 		<fanart>./images/${APP_EXEC}-thumb.png</fanart>
 		<titleshot>./images/${APP_EXEC}-thumb.png</titleshot>
 		<cartridge>./images/${APP_EXEC}-thumb.png</cartridge>
-		<boxart>./images/${APP_EXEC}-marquee.jpg</boxart>
+		<boxart>./images/${APP_EXEC}-marquee.png</boxart>
 		<boxback>./images/${APP_EXEC}-thumb.png</boxback>
 		<wheel>./images/${APP_EXEC}-thumb.png</wheel>
 		<mix>./images/${APP_EXEC}-thumb.png</mix>
@@ -68,6 +68,7 @@ Developer: KevoBatoYT
 	</game>"
 
 # --- Functions ---
+
 
 # Function to display error message and exit
 error_exit() {
@@ -154,7 +155,7 @@ add_entry() {
 
 # 1. Initial Presentation
 echo "Starting the installation..."
-echo "everest"
+echo "Everest for Batocera"
 sleep 2 # Pause for viewing
 clear
 
@@ -168,11 +169,11 @@ else
     echo "Flathub remote already present for user."
 fi
 
-echo "Installing everest Flatpak (user install)..."
+echo "Installing Everest Flatpak (user install)..."
 flatpak install --user -y flathub "$APP_ID"
 
 echo "Setting permissions to allow full filesystem access..."
-flatpak override --user "$APP_ID" --filesystem=host
+flatpak override --filesystem="/userdata/" --filesystem=host:/:rw --filesystem=host --filesystem="/media"  "$APP_ID"
 
 # ----------------------------------
 clear
@@ -181,6 +182,7 @@ clear
 echo "Creating necessary directories..."
 mkdir -p "$DESKTOP_DIR" || error_exit "Failed to create $DESKTOP_DIR"
 mkdir -p "$IMAGES_DIR" || error_exit "Failed to create $IMAGES_DIR"
+chmod 777 "$GAMELIST_PATH"
 echo "Directories created."
 
 # 3. .desktop File Creation
@@ -196,7 +198,7 @@ download_file "$THUMB_URL" "$THUMB_IMG"
 # 5. Ports Script Creation
 echo "Creating ports script..."
 echo "$PORT_SCRIPT_CONTENT" > "$PORT_SCRIPT_PATH" || error_exit "Failed to create $PORT_SCRIPT_PATH"
-chmod +x "$PORT_SCRIPT_PATH" || error_exit "Failed to make $PORT_SCRIPT_PATH executable."
+chmod 777 "$PORT_SCRIPT_PATH" || error_exit "Failed to make $PORT_SCRIPT_PATH executable."
 echo "Ports script created."
 
 # 6. gamelist.xml Update
@@ -218,7 +220,7 @@ echo ""
 echo "========================================="
 echo "  Installation Complete!"
 echo "========================================="
-echo "everest Flatpak installed and launcher created!"
+echo "Everest Flatpak installed and launcher created!"
 echo "You may need to restart EmulationStation for the changes"
 echo "in the gamelist.xml and the new shortcut to appear."
 echo ""
