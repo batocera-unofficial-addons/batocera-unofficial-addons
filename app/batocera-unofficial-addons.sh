@@ -123,6 +123,7 @@ apps=(
     ["DISNEYPLUS"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/disneyplus/disneyplus.sh | bash"
     ["CLITOOLS"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/cli.sh | bash"
     ["ENDLESS-SKY"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/endlesssky/endlesssky.sh | bash"
+    ["EVEREST"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/everest/everest.sh | bash"
     ["FIREFOX"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/firefox/firefox.sh | bash"
     ["FIGHTCADE"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/fightcade/fightcade.sh | bash"
     ["FREEJ2ME"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/Freej2me/Install_j2me.sh | bash"
