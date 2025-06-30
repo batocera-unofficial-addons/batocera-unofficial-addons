@@ -234,6 +234,7 @@ descriptions=(
     ["OPENRGB"]="Manage RGB lighting on devices."
     ["WARZONE2100"]="Real-time strategy and tactics game."
     ["XONOTIC"]="Fast-paced open-source arena shooter."
+    ["ITCHIO"]="Indy Game Marketplace"
     ["ANDROID"]="Android System for Batocera (EXPERIMENTAL)."
     ["FREEJ2ME"]="J2ME classic game emulator."
     ["DESKTOP_FOR_BATOCERA"]="Desktop for batocera. (Native)"
@@ -264,6 +265,7 @@ descriptions=(
     ["CRUNCHYROLL"]="A streaming service focused on anime, manga, and Asian dramas"
     ["MUBI"]="A curated streaming platform that offers a selection of independent and classic films"
     ["TIDAL"]="Tidal HiFi, a music streaming service"
+    ["EVEREST"]="Celeste Mod Laoder"
     ["FREETUBE"]="An Open Source Desktop YouTube Player For Privacy-minded People"
     ["SUPERMARIOX"]="The greatest fan-made tribute to Super Mario of all time!"
     ["CELESTE64"]="Free 3D platformer, based around Celeste Mountain"
@@ -290,7 +292,7 @@ descriptions=(
 declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64 ULTRASTAR"
-    ["Game Utilities"]="ANDROID AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS BOTTLES SUNSHINE MOONLIGHT BRIDGE ITCHIO"
+    ["Game Utilities"]="ANDROID AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS BOTTLES SUNSHINE MOONLIGHT BRIDGE ITCHIO EVEREST"
     ["System Utilities"]="DESKTOP_FOR_BATOCERA WINCONFIG-WINDOWS-GAME-FIX F1 TAILSCALE TELEGRAF WINEMANAGER VESKTOP CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP DESKTOP"
     ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER DOCKER EXTRAS X11VNC QEMU-GA SOAR DARK-MODE"
 )
