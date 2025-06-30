@@ -103,6 +103,7 @@ apps=(
     ["IPTVNATOR"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/iptvnator/iptvnator.sh | bash"
     ["PORTMASTER"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/portmaster/portmaster.sh | bash"
     ["TAILSCALE"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/tailscale/tailscale.sh | bash"
+    ["TELEGRAF"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/telegraf/telegraf.sh | bash"
     ["VESKTOP"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/vesktop/vesktop.sh | bash"
     ["MINECRAFT"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/minecraft/bedrock.sh | bash"
     ["FREETUBE"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/freetube/freetube.sh | bash"
@@ -123,6 +124,7 @@ apps=(
 
 descriptions=(
     ["TAILSCALE"]="VPN service for secure Batocera connections."
+    ["TELEGRAF"]="Server agent for collecting and reporting metrics."
     ["CONTY"]="Standalone Linux distro container."
     ["VESKTOP"]="Discord client for Batocera."
     ["CHIAKI"]="PS4/PS5 Remote Play client."
@@ -151,7 +153,7 @@ declare -A categories
 categories=(
     ["Games"]="MINECRAFT SUPERMARIOX SUPERTUXKART CELESTE64"
     ["Game Utilities"]="PORTMASTER CHIAKI GREENLIGHT AMAZON-LUNA"
-    ["System Utilities"]="TAILSCALE VESKTOP IPTVNATOR FREETUBE F1 FIREFOX DESKTOP"
+    ["System Utilities"]="TAILSCALE TELEGRAF VESKTOP IPTVNATOR FREETUBE F1 FIREFOX DESKTOP"
     ["Developer Tools"]="CONTY DOCKER SOAR WAYVNC WAYVNC-HEADLESS DARK-MODE"
 )
 

@@ -3,7 +3,7 @@
 # Set variables
 APP_NAME="F1"
 LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/blob/main/f1/extra/f1key.jpg?raw=true"   # Replace with actual logo URL
-LOGO_PATH="/userdata/roms/ports/images/${APP_NAME}-logo.jpg"
+LOGO_PATH="/userdata/roms/ports/images/${APP_NAME,,}-logo.jpg"
 GAME_LIST="/userdata/roms/ports/gamelist.xml"
 
 # Temporary directory for download
@@ -62,6 +62,22 @@ ANTIMICROX_PROFILE="/userdata/system/configs/bat-drl/Nav_Redist2.joystick.amgp"
 export XDG_CACHE_HOME=/tmp/xdg_cache
 ANTIMICROX_PROFILE="/userdata/system/configs/bat-drl/Nav_Redist2.joystick.amgp"
 
+# Fix xterm via F4 is not previously set up
+python << EOF
+import configparser
+F = '/userdata/system/.config/libfm/libfm.conf'
+c = configparser.ConfigParser()
+c.read(F)
+try:
+   t = c['config']['terminal']
+except:
+   t = None
+if (not t or t == ''):
+   with open(F, 'w') as wf:
+     c['config']['terminal'] = 'xterm'
+     c.write(wf)
+EOF
+
 ### Inicia o AntiMicroX ###
     if [ -e '/dev/input/js0' ]; then
         antimicrox --hidden --profile "$ANTIMICROX_PROFILE" &
@@ -105,7 +121,7 @@ echo "Adding $APP_NAME to gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./${APP_NAME}.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/${APP_NAME}-logo.jpg" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/${APP_NAME,,}-logo.jpg" \
   "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
 
 # Step 5: Final refresh

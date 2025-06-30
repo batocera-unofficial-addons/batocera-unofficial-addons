@@ -90,7 +90,7 @@ clear
 
 
 # Welcome message
-echo "Welcome to the automatic installer for the Desktop_for_Batocera by DRL Edition."
+echo "Welcome to the automatic installer for the Desktop_for_Batocera 8.2 by DRL Edition."
 
 # Temporary directory for download
 TEMP_DIR="/userdata/tmp/Desktop_for_Batocera"
@@ -101,13 +101,15 @@ PORTS_DIR="/userdata/roms/ports"
 
 # Create the temporary directories
 echo "Creating temporary directories..."
+batocera-save-overlay 300
 mkdir -p $TEMP_DIR
 mkdir -p $EXTRACT_DIR
 mkdir -p $PORTS_DIR
+clear
 
 # Download the DRL file
 echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Desktop_for_batocera_5.0.DRL"
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Desktop_for_batocera_8.2.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
@@ -126,21 +128,25 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Copy the extracted files to the root directory
-echo "Copying files to the system..."
-cp -r $EXTRACT_DIR/* $DEST_DIR
+# Copia forçada dos arquivos extraídos para o diretório de destino, com sobrescrita
+echo "Copying files to the system (forced overwrite)..."
+cp -rf "$EXTRACT_DIR"/* "$DEST_DIR"
 
-# Create symbolic links
-echo "Creating symbolic links..."
+# Cria links simbólicos (adicione comandos específicos aqui, se necessário)
 
-# Clean up
+# Limpeza
 echo "Cleaning up..."
-rm -rf $TEMP_DIR
+rm -rf "$TEMP_DIR"
 
-# Save changes
+# Salva alterações
 echo "Saving changes..."
 rm -f "/userdata/system/Desktop/gparted.desktop"
+rm -f "/userdata/system/Desktop/vlc.desktop"
+rm -f "/userdata/system/Desktop/VLC.desktop"
 batocera-save-overlay
+clear
 echo "Installation completed successfully."
+echo "For the Desktop to work properly, you will need to restart your machine."
+echo "Desktop_for_Batocera 8.2 by DRL Edition"
 
 exit 0
