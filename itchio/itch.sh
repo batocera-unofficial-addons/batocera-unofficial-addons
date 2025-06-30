@@ -181,6 +181,7 @@ clear
 echo "Creating necessary directories..."
 mkdir -p "$DESKTOP_DIR" || error_exit "Failed to create $DESKTOP_DIR"
 mkdir -p "$IMAGES_DIR" || error_exit "Failed to create $IMAGES_DIR"
+chmod 777 "$GAMELIST_PATH"
 echo "Directories created."
 
 # 3. .desktop File Creation
@@ -196,7 +197,7 @@ download_file "$THUMB_URL" "$THUMB_IMG"
 # 5. Ports Script Creation
 echo "Creating ports script..."
 echo "$PORT_SCRIPT_CONTENT" > "$PORT_SCRIPT_PATH" || error_exit "Failed to create $PORT_SCRIPT_PATH"
-chmod +x "$PORT_SCRIPT_PATH" || error_exit "Failed to make $PORT_SCRIPT_PATH executable."
+chmod 777 "$PORT_SCRIPT_PATH" || error_exit "Failed to make $PORT_SCRIPT_PATH executable."
 echo "Ports script created."
 
 # 6. gamelist.xml Update
