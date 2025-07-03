@@ -90,7 +90,7 @@ clear
 
 
 # Welcome message
-echo "Welcome to the automatic installer for the Desktop_for_Batocera 8.2 by DRL Edition."
+echo "Welcome to the automatic installer for the Desktop_for_Batocera 8.5 by DRL Edition."
 
 # Temporary directory for download
 TEMP_DIR="/userdata/tmp/Desktop_for_Batocera"
@@ -101,7 +101,8 @@ PORTS_DIR="/userdata/roms/ports"
 
 # Create the temporary directories
 echo "Creating temporary directories..."
-batocera-save-overlay 300
+# batocera-save-overlay 300
+batocera-save-overlay
 mkdir -p $TEMP_DIR
 mkdir -p $EXTRACT_DIR
 mkdir -p $PORTS_DIR
@@ -109,7 +110,7 @@ clear
 
 # Download the DRL file
 echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Desktop_for_batocera_8.2.DRL"
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Desktop_for_batocera_8.5.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
@@ -119,7 +120,8 @@ fi
 
 # Extract the squashfs file
 echo "Extracting the DRL file..."
-unsquashfs -f -d "$EXTRACT_DIR" "$DRL_FILE"
+# unsquashfs -f -d "$EXTRACT_DIR" "$DRL_FILE"
+unsquashfs -f -d "$DEST_DIR" "$DRL_FILE"
 
 # Check if extraction was successful
 if [ $? -ne 0 ]; then
@@ -129,8 +131,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # Copia forçada dos arquivos extraídos para o diretório de destino, com sobrescrita
-echo "Copying files to the system (forced overwrite)..."
-cp -rf "$EXTRACT_DIR"/* "$DEST_DIR"
+# echo "Copying files to the system (forced overwrite)..."
+# cp -rf "$EXTRACT_DIR"/* "$DEST_DIR"
 
 # Cria links simbólicos (adicione comandos específicos aqui, se necessário)
 
@@ -147,6 +149,6 @@ batocera-save-overlay
 clear
 echo "Installation completed successfully."
 echo "For the Desktop to work properly, you will need to restart your machine."
-echo "Desktop_for_Batocera 8.2 by DRL Edition"
+echo "Desktop_for_Batocera 8.5 by DRL Edition"
 
 exit 0
