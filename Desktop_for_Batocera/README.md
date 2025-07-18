@@ -97,6 +97,12 @@ Para que o processo de instalação tenha efeito, basta reiniciar seu batocera. 
     * **Agora é possível montar e desmontar arquivos em formato ISO, IMG, BIN e outros, através do menu de contexto*
     * **O "Desktop For Batocera" agora conta com uma função que irá te alertar sempre que houver novas atualizações*
 
+* ***Atualização - 17.07.2025 - Versão 8.6***
+    * **Correção de Bugs*
+    * **Implementado o "CoreKeyboard" para utilizar o teclado virtual em telas sensível ao toque*
+    * **Função de atualização ativada*
+    * **Corrigido configurações de atalhos padrão*
+
 ---
 
 ## 🚀 Como utilizar?
