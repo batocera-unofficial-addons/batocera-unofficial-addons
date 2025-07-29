@@ -126,6 +126,7 @@ apps=(
     ["EVEREST"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/everest/everest.sh | bash"
     ["FIREFOX"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/firefox/firefox.sh | bash"
     ["FIGHTCADE"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/fightcade/fightcade.sh | bash"
+    ["FLATHUB"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/flathub/flathub.sh | bash"
     ["FREEJ2ME"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/Freej2me/Install_j2me.sh | bash"
     ["WINCONFIG-WINDOWS-GAME-FIX"]="curl -L https://github.com/DRLEdition19/DRLEdition_Interface/raw/refs/heads/main/Install_Winconfig.sh | bash"
     ["DESKTOP_FOR_BATOCERA"]="curl -L https://github.com/DRLEdition19/DRLEdition_Interface/raw/refs/heads/main/Install_Desktop.sh | bash"
@@ -225,6 +226,7 @@ descriptions=(
     ["NETFLIX"]="Netflix streaming app for Batocera."
     ["IPTVNATOR"]="IPTV client for watching live TV."
     ["FIREFOX"]="Mozilla Firefox browser."
+    ["FLATHUB"]="Browse different Flatpak applications."
     ["JAVA-RUNTIME"]="Install the Java Runtime on your batocera."
     ["SPOTIFY"]="Spotify music streaming client."
     ["CLITOOLS"]=">=V40! Various CLI tools including Docker, ZSH, Git etc."
@@ -293,7 +295,7 @@ declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64 ULTRASTAR"
     ["Game Utilities"]="ANDROID AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS BOTTLES SUNSHINE MOONLIGHT BRIDGE ITCHIO EVEREST"
-    ["System Utilities"]="DESKTOP_FOR_BATOCERA WINCONFIG-WINDOWS-GAME-FIX F1 TAILSCALE TELEGRAF WINEMANAGER VESKTOP CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP DESKTOP"
+    ["System Utilities"]="DESKTOP_FOR_BATOCERA WINCONFIG-WINDOWS-GAME-FIX F1 TAILSCALE TELEGRAF WINEMANAGER VESKTOP CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP DESKTOP FLATHUB"
     ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER DOCKER EXTRAS X11VNC QEMU-GA SOAR DARK-MODE"
 )
 
