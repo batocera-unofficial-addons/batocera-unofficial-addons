@@ -135,6 +135,7 @@ apps=(
     ["HEROIC"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/heroic/heroic.sh | bash"
     ["IPTVNATOR"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/iptvnator/iptvnator.sh | bash"
     ["ITCHIO"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/itchio/itch.sh | bash"
+    ["JDOWNLOADER"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/jdownloader/jdownloader.sh | bash"
     ["JAVA-RUNTIME"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/java/java.sh | bash"
     ["MINECRAFT"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/minecraft/minecraft.sh | bash"
     ["MOONLIGHT"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/moonlight/moonlight.sh | bash"
@@ -257,6 +258,7 @@ descriptions=(
     ["AMBERMOON"]="Ambermoon.net, a port of the classic"
     ["CUSTOMWINE"]="Download Wine/Proton versions"
     ["GPARTED"]="Linux partition manager"
+    ["JDOWNLOADER"]="NEEDS DESKTOP MODE ADDON TO WORK"
     ["YARG"]="Yet Another Rhythm Game"
     ["PLEX"]="Plex Media Player for streaming movies, TV shows, and music."
     ["OPENTTD"]="OpenTTD, an open source clone of Transport Tycoon Deluxe"
@@ -295,7 +297,7 @@ declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64 ULTRASTAR"
     ["Game Utilities"]="ANDROID AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS BOTTLES SUNSHINE MOONLIGHT BRIDGE ITCHIO EVEREST"
-    ["System Utilities"]="DESKTOP_FOR_BATOCERA WINCONFIG-WINDOWS-GAME-FIX F1 TAILSCALE TELEGRAF WINEMANAGER VESKTOP CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP DESKTOP FLATHUB"
+    ["System Utilities"]="DESKTOP_FOR_BATOCERA WINCONFIG-WINDOWS-GAME-FIX F1 TAILSCALE TELEGRAF WINEMANAGER VESKTOP CHROME YOUTUBE NETFLIX IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP DESKTOP FLATHUB JDOWNLOADER"
     ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER DOCKER EXTRAS X11VNC QEMU-GA SOAR DARK-MODE"
 )
 
