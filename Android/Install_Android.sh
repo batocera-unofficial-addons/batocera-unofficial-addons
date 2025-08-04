@@ -91,7 +91,7 @@ clear
 
 
 # Welcome message
-echo "Welcome to the automatic installer for the Android 5.5 by DRL Edition."
+echo "Welcome to the automatic installer for the Android 5.6.2 by DRL Edition."
 
 # Temporary directory for download
 TEMP_DIR="/userdata/tmp/Android"
@@ -106,7 +106,9 @@ APP_EXEC="Android"
 PORT_SCRIPT_PATH="${PORTS_DIR}/${APP_EXEC}.sh"
 PORT_SCRIPT_NAME="${APP_EXEC}.sh"
 DEST_FILE="/userdata/system/configs/bat-drl/Android/Android.iso"
-URL_ISO="https://sinalbr.dl.sourceforge.net/project/blissos-x86/Official/BlissOS16/Gapps/Generic/Bliss-v16.9.7-x86_64-OFFICIAL-gapps-20241011.iso?viasf=1"
+URL_ISO_GE16="https://sinalbr.dl.sourceforge.net/project/blissos-x86/Official/BlissOS16/Gapps/Generic/Bliss-v16.9.7-x86_64-OFFICIAL-gapps-20241011.iso?viasf=1"
+URL_ISO_GO14="https://sinalbr.dl.sourceforge.net/project/blissos-x86/Official/BlissOS14/OpenGApps/Go/Bliss-Go-v14.10.3-x86_64-OFFICIAL-opengapps-20241012.iso?viasf=1"
+URL_ISO_GO16="https://sinalbr.dl.sourceforge.net/project/blissos-x86/Official/BlissOS16/Gapps/Go/Bliss-Go-v16.9.7-x86_64-OFFICIAL-gapps-20241012.iso?viasf=1"
 
 GAMELIST_ENTRY_CONTENT="	<game>
 		<path>./${PORT_SCRIPT_NAME}</path>
@@ -202,41 +204,117 @@ add_entry() {
 # Create the temporary directories
 echo "Creating temporary directories..."
 # batocera-save-overlay 300
-batocera-save-overlay
+batocera-save-overlay 300
 mkdir -p $TEMP_DIR
 mkdir -p $EXTRACT_DIR
 mkdir -p $PORTS_DIR
 mkdir -p "/userdata/system/configs/bat-drl/Android"
+mkdir -p "/userdata/tmp"
+chmod 777 "$GAMELIST_PATH"
 clear
 
 # Download the DRL file
 
+echo # Blank line for better readability
 
-# --- VERIFICATION AND DOWNLOAD BLOCK ---
-echo "Checking if file needs to be downloaded: $DEST_FILE"
+# Function that encapsulates the entire selection and download process.
+# This avoids code repetition.
+start_download_process() {
+    clear
+    echo "Which version of Android would you like to install?"
+    echo "  1) BlissOS 16 Generic Version (Recommended for most hardware)"
+    echo "  2) BlissOS 16 GO Version (Optimized for computers with low processing power and RAM)"
+    echo
 
-# Check if the destination file does NOT exist
-if [ ! -f "$DEST_FILE" ]; then
-    # If it doesn't exist, start the download process
-    echo "Downloading the Android file (Bliss-v16.9.7-x86_64-OFFICIAL-gapps-20241011.iso)..."
-    echo "File not found. Starting download from $URL..."
+    # Loop to ensure the user enters a valid option
+    while true; do
+        read -p "Enter the number of your choice (1, 2): " choice
+        case $choice in
+            1|2)
+                break # Exits the loop if the choice is valid
+                ;;
+            *)
+                echo "Invalid option. Please enter a valid number."
+                ;;
+        esac
+    done
 
-    # Download the file
-    if curl -L -o "$DEST_FILE" "$URL_ISO"; then
+    # Defines variables based on the user's choice
+    case "$choice" in
+        1)
+            echo "You have selected the BlissOS 16 Generic Version."
+            URL=$URL_ISO_GE16
+            ;;
+        2)
+            echo "You have selected the BlissOS 16 GO Version."
+            URL=$URL_ISO_GO16
+            ;;
+    esac
+    
+    echo # Blank line for clarity
+    echo "Starting download of: $DEST_FILE"
+    sleep 4
+
+    # Downloads the file using the defined URL and filename
+    if curl -L -o "$DEST_FILE" "$URL"; then
         echo "Download completed successfully!"
     else
         echo "ERROR: An error occurred during the download."
         echo "The script cannot continue without the file. Exiting."
-        exit 1 # Exits the script because the required file could not be obtained
+        # exit 1 # Uncomment this line to make the script stop in case of an error.
     fi
+}
+
+# --- MAIN VERIFICATION LOGIC ---
+# The script now looks for ANY of the defined ISO files.
+echo "Checking for local ISO files..."
+sleep 2
+
+if [ -f "$DEST_FILE" ]; then
+    # If one or more files are found...
+    echo "A ISO installation file was already found."
+    
+    # Asks the user if they want to remove and download again.
+    while true; do
+        read -p "Do you want to remove the existing file and download a new one? (y/n): " remove_choice
+        case $remove_choice in
+            [Yy]*)
+                echo "Removing existing files..."
+                # The 'rm -f' command removes the files without asking for confirmation and does not error if one of them doesn't exist.
+                rm -f "$DEST_FILE"
+                echo "Files removed. Starting download process..."
+                sleep 2
+                start_download_process # Calls the download function
+                break
+                ;;
+            [Nn]*)
+                echo "Keeping the existing file. Download will be skipped."
+                # Sets the DEST_FILE variable to the file that already exists so the rest of the script can use it.
+                if [ -f "$DEST_FILE" ]; then
+                    DEST_FILE=$DEST_FILE
+                else
+                    DEST_FILE=$DEST_FILE
+                fi
+                echo "Continuing installation with file: $DEST_FILE"
+                sleep 4
+                break
+                ;;
+            *)
+                echo "Invalid option. Please enter 'y' for yes or 'n' for no."
+                ;;
+        esac
+    done
 else
-    # If the file already exists, just inform and continue
-    echo "File already exists. Downloading the ISO file is not necessary. Continuing installation...."
-    sleep 2
+    # If NO file is found, it starts the download process directly.
+    echo "No local installation file was found."
+    echo "The download process will be initiated."
+    sleep 3
+    start_download_process # Calls the download function
 fi
+
 clear
 echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Android_5.5.DRL"
+curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Android_5.6.2.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
@@ -285,6 +363,6 @@ rm -rf "$TEMP_DIR"
 batocera-save-overlay
 clear
 echo "Installation completed successfully."
-echo "Android 5.5 by DRL Edition"
+echo "Android 5.6.2 by DRL Edition"
 
 exit 0
