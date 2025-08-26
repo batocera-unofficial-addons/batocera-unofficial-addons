@@ -34,10 +34,10 @@ cat <<EOF > "$DESKTOP_FILE"
 Version=1.0
 Type=Application
 Name=InputLeap
-Exec=flatpak run $APP_ID --no-sandbox --socket=network --device=all --filesystem=host --share=network
+Exec=flatpak run io.github.input_leap.input-leap --no-sandbox --socket=network --device=all --filesystem=host --share=network
 Terminal=false
 Categories=Utility;Application;batocera.linux;
-Icon=/userdata/saves/flatpak/data/.local/share/flatpak/appstream/flathub/x86_64/active/icons/128x128/$APP_ID.png
+Icon=/userdata/saves/flatpak/data/.local/share/flatpak/appstream/flathub/x86_64/active/icons/128x128/io.github.input_leap.input-leap.png
 MimeType=text/plain
 EOF
 
