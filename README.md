@@ -77,8 +77,8 @@ This is a community project and is not affiliated with the official Batocera tea
 Use at your own discretion. For help, join the community Discord.
 
 ![Alt](https://repobeats.axiom.co/api/embed/afdaf47a9359eac5aef68253c1410c01e46fad08.svg "Repobeats analytics image")
-[![Stargazers](https://reporoster.com/stars/dark/batocera-unofficial-addons/batocera-unofficial-addons)](https://github.com/DTJW92/batocera-unofficial-addons/stargazers)
-[![Stargazers over time](https://starchart.cc/batocera-unofficial-addons/batocera-unofficial-addons.svg?variant=dark)](https://starchart.cc/DTJW92/batocera-unofficial-addons)
+[![Stargazers](https://reporoster.com/stars/dark/batocera-unofficial-addons/batocera-unofficial-addons)](https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/stargazers)
+[![Stargazers over time](https://starchart.cc/batocera-unofficial-addons/batocera-unofficial-addons.svg?variant=dark)](https://starchart.cc/batocera-unofficial-addons/batocera-unofficial-addons)
 
 
                     
