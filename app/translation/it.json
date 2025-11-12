@@ -113,7 +113,7 @@
   "and": "e",
   "more": "altro",
 
-  "uninstall": "Disinstalla"
+  "uninstall": "Disinstalla",
   "uninstall_error": "Impossibile generare il comando di disinstallazione per questa App.",
 
   "nothing_selected_update": "Non hai selezionato nulla da aggiornare.",
