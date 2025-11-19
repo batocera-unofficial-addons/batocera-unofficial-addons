@@ -78,7 +78,7 @@ restart)
             exit 0
         else
             echo "Sunshine is stopped. Going to update now"
-            curl -L https://bit.ly/BatoceraSunshine | bash
+            curl -L https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/sunshine/sunshine.sh | bash
             exit 1
         fi
         ;;

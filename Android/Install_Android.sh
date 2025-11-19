@@ -221,23 +221,17 @@ echo # Blank line for better readability
 # This avoids code repetition.
 start_download_process() {
     clear
-    echo "Which version of Android would you like to install?"
-    echo "  1) BlissOS 16 Generic Version (Recommended for most hardware)"
-    echo "  2) BlissOS 16 GO Version (Optimized for computers with low processing power and RAM)"
-    echo
 
-    # Loop to ensure the user enters a valid option
-    while true; do
-        read -p "Enter the number of your choice (1, 2): " choice
-        case $choice in
-            1|2)
-                break # Exits the loop if the choice is valid
-                ;;
-            *)
-                echo "Invalid option. Please enter a valid number."
-                ;;
-        esac
-    done
+    # Use dialog for version selection
+    choice=$(dialog --stdout --title "Android Version Selection" --menu \
+        "Which version of Android would you like to install?" 15 70 2 \
+        "1" "BlissOS 16 Generic Version (Recommended for most hardware)" \
+        "2" "BlissOS 16 GO Version (Optimized for low-end hardware)")
+
+    # If user cancelled, default to option 1
+    if [ -z "$choice" ]; then
+        choice=1
+    fi
 
     # Defines variables based on the user's choice
     case "$choice" in
@@ -273,37 +267,20 @@ sleep 2
 if [ -f "$DEST_FILE" ]; then
     # If one or more files are found...
     echo "A ISO installation file was already found."
-    
-    # Asks the user if they want to remove and download again.
-    while true; do
-        read -p "Do you want to remove the existing file and download a new one? (y/n): " remove_choice
-        case $remove_choice in
-            [Yy]*)
-                echo "Removing existing files..."
-                # The 'rm -f' command removes the files without asking for confirmation and does not error if one of them doesn't exist.
-                rm -f "$DEST_FILE"
-                echo "Files removed. Starting download process..."
-                sleep 2
-                start_download_process # Calls the download function
-                break
-                ;;
-            [Nn]*)
-                echo "Keeping the existing file. Download will be skipped."
-                # Sets the DEST_FILE variable to the file that already exists so the rest of the script can use it.
-                if [ -f "$DEST_FILE" ]; then
-                    DEST_FILE=$DEST_FILE
-                else
-                    DEST_FILE=$DEST_FILE
-                fi
-                echo "Continuing installation with file: $DEST_FILE"
-                sleep 4
-                break
-                ;;
-            *)
-                echo "Invalid option. Please enter 'y' for yes or 'n' for no."
-                ;;
-        esac
-    done
+
+    # Use dialog to ask if user wants to re-download
+    if dialog --stdout --title "Android Installation" --yesno \
+        "An ISO installation file was already found.\n\nDo you want to remove the existing file and download a new one?" 10 60; then
+        echo "Removing existing files..."
+        rm -f "$DEST_FILE"
+        echo "Files removed. Starting download process..."
+        sleep 2
+        start_download_process # Calls the download function
+    else
+        echo "Keeping the existing file. Download will be skipped."
+        echo "Continuing installation with file: $DEST_FILE"
+        sleep 4
+    fi
 else
     # If NO file is found, it starts the download process directly.
     echo "No local installation file was found."

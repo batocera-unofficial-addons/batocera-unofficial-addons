@@ -1,4 +1,5 @@
 #!/bin/bash
+# UPDATED 2025-11-14
 
 # Step 1: Detect system architecture
 echo "Detecting system architecture..."

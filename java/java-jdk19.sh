@@ -255,10 +255,9 @@ echo -e "${W}THIS WILL INSTALL JAVA-RUNTIME 19.0.1 FOR BATOCERA"
 echo -e "${W}USING $ORIGIN"
 echo
 echo -e "${W}$APPNAME WILL BE INSTALLED IN /USERDATA/SYSTEM/drl/$APPNAME"
-echo -e "${W}AND AVAILABLE AS A SYSTEM ADDON" 
+echo -e "${W}AND AVAILABLE AS A SYSTEM ADDON"
 echo
-echo -e "${G}> > > ${W}PRESS ENTER TO CONTINUE"
-read -p ""
+dialog --msgbox "JAVA RUNTIME 19.0.1 will be installed.\n\nPress OK to continue." 10 50
 echo; #line $cols '='; echo
 # --------------------------------------------------------------------
 # -- check system before proceeding

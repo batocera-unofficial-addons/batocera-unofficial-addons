@@ -17,59 +17,60 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
-# Prepare the selection menu using dialog
-cmd=(dialog --separate-output --checklist "Select Wine tkg-staging versions to download:" 22 76 16)
-options=()
-i=1
-
-# Parse JSON and build options array, filter only tkg-staging builds
-while IFS= read -r line; do
+# Build options for dialog menu - filter only tkg-staging builds (limit to first 20 for usability)
+menu_args=()
+i=0
+while IFS= read -r line && [ $i -lt 20 ]; do
     name=$(echo "$line" | jq -r '.name')
     tag=$(echo "$line" | jq -r '.tag_name')
-    description="${name} - ${tag}"
     tkg_staging_assets=$(echo "$line" | jq -c '.assets[] | select(.name | contains("staging-tkg"))')
     if [ -n "$tkg_staging_assets" ]; then
-        options+=($i "$description" off)
+        description="${name} - ${tag}"
+        menu_args+=("$tag" "$description")
         ((i++))
     fi
 done < <(echo "$release_data" | jq -c '.[]')
 
-# Show dialog, capture selections
-choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+# Show dialog menu for version selection
+choice=$(dialog --stdout --title "Select Wine TKG-Staging Version" --menu "Choose which Wine TKG-Staging version to install:" 20 80 12 "${menu_args[@]}")
 
-# Clear up the dialog artifacts
-clear
+if [ -z "$choice" ]; then
+    echo "Installation cancelled."
+    exit 1
+fi
 
-# Process selections
-for choice in $choices
-do
-    version=$(echo "$release_data" | jq -r ".[$choice-1].tag_name")
-    url=$(echo "$release_data" | jq -r ".[$choice-1].assets[] | select(.name | contains(\"staging-tkg\") and endswith(\"amd64.tar.xz\")).browser_download_url" | head -n1)
-    
-    # Define output folder
-    output_folder="${INSTALL_DIR}wine-${version}-staging-tkg"
-    
-    # Create directory for the selected version
-    mkdir -p "$output_folder"
+# Process the selected version
+version="$choice"
+url=$(echo "$release_data" | jq -r ".[] | select(.tag_name == \"$version\") | .assets[] | select(.name | contains(\"staging-tkg\") and endswith(\"amd64.tar.xz\")).browser_download_url" | head -n1)
+
+if [[ -z "$url" ]]; then
+    echo "No compatible download found for Wine ${version}."
+    exit 1
+fi
+
+# Define output folder
+output_folder="${INSTALL_DIR}wine-${version}-staging-tkg"
+
+# Create directory for the selected version
+mkdir -p "$output_folder"
+cd "$output_folder"
+
+# Download the selected version
+echo "Downloading wine ${version} from $url"
+wget -q --tries=10 --no-check-certificate --no-cache --no-cookies --show-progress -O "${output_folder}/wine-${version}-staging-tkg.tar.xz" "$url"
+
+# Check if the download was successful
+if [ -f "${output_folder}/wine-${version}-staging-tkg.tar.xz" ]; then
+    echo "Unpacking Wine ${version}..."
     cd "$output_folder"
+    tar --strip-components=1 -xf "${output_folder}/wine-${version}-staging-tkg.tar.xz"
+    rm "wine-${version}-staging-tkg.tar.xz"
+    echo "Installation of Wine ${version} complete."
+else
+    echo "Failed to download Wine ${version}."
+fi
 
-    # Download the selected version
-    echo "Downloading wine ${version} from $url"
-    wget -q --tries=10 --no-check-certificate --no-cache --no-cookies --show-progress -O "${output_folder}/wine-${version}-staging-tkg.tar.xz" "$url"
+# Return to the initial directory
+cd -
 
-    # Check if the download was successful
-    if [ -f "${output_folder}/wine-${version}-staging-tkg.tar.xz" ]; then
-        echo "Unpacking Wine ${version}..."
-        cd "$output_folder"
-        tar --strip-components=1 -xf "${output_folder}/wine-${version}-staging-tkg.tar.xz"
-        rm "wine-${version}-staging-tkg.tar.xz"
-        echo "Installation of Wine ${version} complete."
-    else
-        echo "Failed to download Wine ${version}."
-    fi
-
-    # Return to the initial directory
-    cd -
-done
-
-echo "All selected versions have been processed."
+echo "Installation complete."

@@ -67,4 +67,4 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
 curl http://127.0.0.1:1234/reloadgames
 echo
-echo "Installation complete! You can now launch $APP_NAME from the Ports menu."
+echo "Installation complete! You can now launch $APP_NAME from the Ports menu!"

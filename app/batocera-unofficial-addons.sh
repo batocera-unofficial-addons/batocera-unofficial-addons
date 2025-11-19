@@ -74,7 +74,6 @@ echo -e "\e[0m"
     echo " Install these add-ons at your own risk. They are not endorsed by the Batocera Devs nor are they supported." 
     echo " Please don't go into the official Batocera discord with issues, I can't help you there!"
     echo " Instead; head to https://discord.batoaddons.app and someone will be around to help you!"
-    echo " For guides, head to the Wiki at https://wiki.batoaddons.app"
     sleep 10
 }
 
@@ -134,7 +133,7 @@ apps=(
     ["GREENLIGHT"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/greenlight/greenlight.sh | bash"
     ["HEROIC"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/heroic/heroic.sh | bash"
     ["IPTVNATOR"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/iptvnator/iptvnator.sh | bash"
-	  ["INPUTLEAP"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/inputleap/inputleap.sh | bash"
+	["INPUTLEAP"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/inputleap/inputleap.sh | bash"
     ["ITCHIO"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/itchio/itch.sh | bash"
     ["JDOWNLOADER"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/jdownloader/jdownloader.sh | bash"
     ["JAVA-RUNTIME"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/java/java.sh | bash"
@@ -147,7 +146,7 @@ apps=(
     ["OPENRGB"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/openrgb/openrgb.sh | bash"
     ["PORTMASTER"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/portmaster/portmaster.sh | bash"
     ["QBITTORRENT"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/qbittorrent/qbittorrent.sh | bash"
-    ["SHADPS4"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/shadps4/shadps4.sh | bash"
+    ["SHADPS4"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/shadps4plus/shadps4plus.sh | bash"
     ["SPOTIFY"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/spotify/spotify.sh | bash"
     ["STEPMANIA"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/stepmania/stepmania.sh | bash"
     ["STREMIO"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/stremio/stremio.sh | bash"
@@ -166,7 +165,7 @@ apps=(
     ["XONOTIC"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/xonotic/xonotic.sh | bash"
     ["YOUTUBE"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/youtubetv.sh | bash"
     ["NVIDIACLOCKER"]="curl -Ls https://raw.githubusercontent.com/nicolai-6/batocera-nvidia-clocker/refs/heads/main/install.sh | bash"
-    ["CUSTOMWINE"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/wine-custom/wine.sh | bash"
+    #["CUSTOMWINE"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/wine-custom/wine.sh | bash"
     ["GPARTED"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/gparted/gparted.sh | bash"
     ["YARG"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/yarg/yarg.sh | bash"
     ["PLEX"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/plex/plex.sh | bash"
@@ -197,6 +196,7 @@ apps=(
     ["BRIDGE"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/bridge/bridge.sh | bash"
     ["SOAR"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/soar/soar.sh | bash"
     ["DARK-MODE"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/dark/dark.sh | bash"
+	#["RGSX"]="curl -L bit.ly/rgsx-install | sh"
 )
 
 
@@ -210,7 +210,7 @@ descriptions=(
     ["WINEMANAGER"]="Manage Windows games with Wine on Batocera."
     ["WINE-DEPENDENCIES-x86"]="Install Windows x86 dependencies with Wine on Batocera."
     ["WINE-DEPENDENCIES-x64"]="Install Windows x64 dependencies with Wine on Batocera."
-    ["SHADPS4"]="UPDATED 25/04 | Experimental PS4 streaming client."
+    ["SHADPS4"]="UPDATED 11/11 ShadPS4Plus | Experimental PS4 streaming client."
     ["CONTY"]="Standalone Linux distro container."
     ["MINECRAFT"]="Minecraft: Java or Bedrock Edition."
     ["ARMAGETRON"]="Tron-style light cycle game."
@@ -285,12 +285,13 @@ descriptions=(
     ["EXTRAS"]="Various scripts, including motion support."
     ["ULTRASTAR"]="UltraStar Deluxe, a free and open source karaoke game."
     ["F1"]="Adds a shortcut in Ports to open the file manager."
-    ["DESKTOP"]="Adds desktop mode to Batocera access it via Ports."
+    #["DESKTOP"]="Adds desktop mode to Batocera access it via Ports."
     ["X11VNC"]="Remote control your Batocera desktop over VNC."
     ["QEMU-GA"]="For use with VM instances"
     ["BRIDGE"]-"Chart downloader for CloneHero/YARG"
     ["SOAR"]="Soar package manager integrated with BUA"
     ["DARK-MODE"]="Custom service to enable/disable F1 dark mode"
+	#["RGSX"]="Retro Game Sets Xtra, A free, user-friendly ROM downloader for Batocera"
 )
 
 
@@ -298,7 +299,7 @@ descriptions=(
 declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64 ULTRASTAR"
-    ["Game Utilities"]="ANDROID AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS BOTTLES SUNSHINE MOONLIGHT BRIDGE ITCHIO EVEREST"
+    ["Game Utilities"]="ANDROID AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS BOTTLES SUNSHINE MOONLIGHT BRIDGE ITCHIO EVEREST RGSX"
     ["System Utilities"]="DESKTOP_FOR_BATOCERA WINCONFIG-WINDOWS-GAME-FIX F1 TAILSCALE TELEGRAF WINEMANAGER VESKTOP CHROME YOUTUBE NETFLIX INPUTLEAP IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP DESKTOP FLATHUB JDOWNLOADER"
     ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER DOCKER EXTRAS X11VNC QEMU-GA SOAR DARK-MODE"
 )

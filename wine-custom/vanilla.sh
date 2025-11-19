@@ -17,54 +17,55 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
-# Prepare the selection menu using dialog
-cmd=(dialog --separate-output --checklist "Select Wine/Proton versions to download:" 22 76 16)
-options=()
-i=1
-
-# Parse JSON and build options array
-while IFS= read -r line; do
+# Build options for dialog menu (limit to first 20 for usability)
+menu_args=()
+i=0
+while IFS= read -r line && [ $i -lt 20 ]; do
     name=$(echo "$line" | jq -r '.name')
     tag=$(echo "$line" | jq -r '.tag_name')
     description="${name} - ${tag}"
-    options+=($i "$description" off)
+    menu_args+=("$tag" "$description")
     ((i++))
 done < <(echo "$release_data" | jq -c '.[]')
 
-# Show dialog, capture selections
-choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+# Show dialog menu for version selection
+choice=$(dialog --stdout --title "Select Wine/Proton Version" --menu "Choose which Wine/Proton version to install:" 20 80 12 "${menu_args[@]}")
 
-# Clear up the dialog artifacts
-clear
+if [ -z "$choice" ]; then
+    echo "Installation cancelled."
+    exit 1
+fi
 
-# Process selections
-for choice in $choices
-do
-    version=$(echo "$release_data" | jq -r ".[$choice-1].tag_name")
-    url=$(echo "$release_data" | jq -r ".[$choice-1].assets[] | select(.name | endswith(\"amd64.tar.xz\")).browser_download_url" | head -n1)
+# Process the selected version
+version="$choice"
+url=$(echo "$release_data" | jq -r ".[] | select(.tag_name == \"$version\") | .assets[] | select(.name | endswith(\"amd64.tar.xz\")).browser_download_url" | head -n1)
 
-    # Create directory for the selected version
-    mkdir -p "${INSTALL_DIR}wine-${version}"
-    cd "${INSTALL_DIR}wine-${version}"
+if [[ -z "$url" ]]; then
+    echo "No compatible download found for Wine ${version}."
+    exit 1
+fi
 
-    # Download the selected version
-    echo "Downloading wine ${version} from $url"
-    wget -q --tries=10 --no-check-certificate --no-cache --no-cookies --show-progress -O "${INSTALL_DIR}wine-${version}/wine-${version}.tar.xz" "$url"
+# Create directory for the selected version
+mkdir -p "${INSTALL_DIR}wine-${version}"
+cd "${INSTALL_DIR}wine-${version}"
 
-    # Check if the download was successful
-    if [ -f "${INSTALL_DIR}wine-${version}/wine-${version}.tar.xz" ]; then
-        echo "Unpacking Wine ${version}..."
-        cd ${INSTALL_DIR}wine-${version}
-        tar --strip-components=1 -xf "${INSTALL_DIR}wine-${version}/wine-${version}.tar.xz"
-        rm "wine-${version}.tar.xz"
-        echo "Installation of Wine ${version} complete."
-    else
-        echo "Failed to download Wine ${version}."
-    fi
+# Download the selected version
+echo "Downloading wine ${version} from $url"
+wget -q --tries=10 --no-check-certificate --no-cache --no-cookies --show-progress -O "${INSTALL_DIR}wine-${version}/wine-${version}.tar.xz" "$url"
 
-    # Return to the initial directory
-    cd -
-done
+# Check if the download was successful
+if [ -f "${INSTALL_DIR}wine-${version}/wine-${version}.tar.xz" ]; then
+    echo "Unpacking Wine ${version}..."
+    cd ${INSTALL_DIR}wine-${version}
+    tar --strip-components=1 -xf "${INSTALL_DIR}wine-${version}/wine-${version}.tar.xz"
+    rm "wine-${version}.tar.xz"
+    echo "Installation of Wine ${version} complete."
+else
+    echo "Failed to download Wine ${version}."
+fi
 
-echo "All selected versions have been processed."
+# Return to the initial directory
+cd -
+
+echo "Installation complete."
 

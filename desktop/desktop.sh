@@ -75,56 +75,41 @@ elif [ "$total_ram" -gt 4000000 ]; then shm_size="2gb"
 else shm_size="1gb"
 fi
 
-# Step 4: Select base distro
-while true; do
-    echo "Select a base distro:"
-    echo "1) alpine"
-    echo "2) ubuntu"
-    echo "3) fedora"
-    echo "4) arch"
-    echo "5) debian"
-    read -rp "Enter number (1-5): " choice < /dev/tty
-    case "$choice" in
-        1)
-            distro="alpine"
-            echo -e "\n⚠️  Alpine does NOT support NVIDIA GPU passthrough.\n"
-            read -rp "Continue with Alpine or go back? [c = continue, b = back]: " response < /dev/tty
-            [[ "${response,,}" == "c" ]] && break
-            ;;
-        2) distro="ubuntu"; break ;;
-        3) distro="fedora"; break ;;
-        4) distro="arch"; break ;;
-        5) distro="debian"; break ;;
-        *) echo "Invalid input. Try again." ;;
-    esac
-done
+# Step 4: Select base distro using dialog menu
+distro=$(dialog --stdout --title "Select Base Distro" --menu "Choose which Linux distribution to use:" 18 70 5 \
+    "alpine" "Alpine (Fast lightweight)" \
+    "ubuntu" "Ubuntu (Popular stable)" \
+    "fedora" "Fedora (Modern packages)" \
+    "arch" "Arch (Rolling release)" \
+    "debian" "Debian (Very stable)")
 
-# Step 5: Select desktop environment
-while true; do
-    echo "Select a desktop environment:"
-    echo "1) xfce"
-    echo "2) kde"
-    echo "3) mate"
-    echo "4) i3"
-    echo "5) openbox"
-    echo "6) icewm"
-    read -rp "Enter number (1-6): " de_choice < /dev/tty
-    case "$de_choice" in
-        1) env="xfce"; break ;;
-        2) env="kde"; break ;;
-        3) env="mate"; break ;;
-        4) env="i3"; break ;;
-        5) env="openbox"; break ;;
-        6) env="icewm"; break ;;
-        *) echo "Invalid input. Try again." ;;
-    esac
-done
+if [ -z "$distro" ]; then
+    echo "Installation cancelled."
+    exit 1
+fi
+
+# Show warning for Alpine
+if [ "$distro" = "alpine" ]; then
+    dialog --msgbox "Alpine does NOT support NVIDIA GPU passthrough. Click OK to continue anyway." 10 60
+fi
+
+# Step 5: Select desktop environment using dialog menu
+env=$(dialog --stdout --title "Select Desktop Environment" --menu "Choose which desktop environment to install:" 18 70 6 \
+    "xfce" "XFCE (Lightweight recommended)" \
+    "kde" "KDE (Feature-rich)" \
+    "mate" "MATE (Traditional)" \
+    "i3" "i3 (Tiling WM)" \
+    "openbox" "Openbox (Minimal)" \
+    "icewm" "IceWM (Very light)")
+
+if [ -z "$env" ]; then
+    echo "Installation cancelled."
+    exit 1
+fi
 
 tag="$([[ $distro == "alpine" && $env == "xfce" ]] && echo "latest" || echo "$distro-$env")"
 
-echo "You selected: $tag"
-read -rp "Proceed with installation? [y/N]: " confirm < /dev/tty
-[[ "${confirm,,}" != "y" ]] && echo "Installation cancelled." && exit 1
+echo "Installing $distro with $env..."
 
 docker pull lscr.io/linuxserver/webtop:$tag
 

@@ -8,7 +8,7 @@ INSTALL_DIR="/userdata/system/wine/custom/"
 mkdir -p "$INSTALL_DIR"
 
 # Check for required commands
-for cmd in jq dialog wget curl tar; do
+for cmd in jq wget curl tar; do
     if ! command -v $cmd &> /dev/null; then
         echo "Error: $cmd is not installed."
         exit 1
@@ -25,81 +25,78 @@ if [[ $? -ne 0 || -z "$release_data" ]]; then
     exit 1
 fi
 
-# Prepare the selection menu using dialog
-cmd=(dialog --separate-output --checklist "Select Proton-GE versions to download:" 22 76 16)
-options=()
-i=1
-
-# Parse JSON and build options array
-while IFS= read -r line; do
+# Build options for dialog menu (limit to first 20 for usability)
+menu_args=()
+i=0
+while IFS= read -r line && [ $i -lt 20 ]; do
     name=$(echo "$line" | jq -r '.name')
     tag=$(echo "$line" | jq -r '.tag_name')
     description="${name} - ${tag}"
-    options+=($i "$description" off)
+    menu_args+=("$tag" "$description")
     ((i++))
 done < <(echo "$release_data" | jq -c '.[]')
 
-# Show dialog, capture selections
-choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+# Show dialog menu for version selection
+choice=$(dialog --stdout --title "Select Proton-GE Version" --menu "Choose which Proton-GE version to install:" 20 80 12 "${menu_args[@]}")
 
-# Clear up the dialog artifacts
-clear
+if [ -z "$choice" ]; then
+    echo "Installation cancelled."
+    exit 1
+fi
 
-# Process selections
-for choice in $choices; do
-    version=$(echo "$release_data" | jq -r ".[$choice-1].tag_name")
-    url=$(echo "$release_data" | jq -r ".[$choice-1].assets[] | select(.name | endswith(\".tar.gz\")).browser_download_url" | head -n1)
+# Process the selected version
+version="$choice"
+url=$(echo "$release_data" | jq -r ".[] | select(.tag_name == \"$version\") | .assets[] | select(.name | endswith(\".tar.gz\")).browser_download_url" | head -n1)
 
-    if [[ -z "$url" ]]; then
-        echo "No compatible download found for Proton ${version}."
-        continue
-    fi
+if [[ -z "$url" ]]; then
+    echo "No compatible download found for Proton ${version}."
+    exit 1
+fi
 
-    # Create directory for the selected version
-    version_dir="${INSTALL_DIR}proton-${version}"
-    mkdir -p "$version_dir"
-    cd "$version_dir" || { echo "Failed to change directory."; exit 1; }
+# Create directory for the selected version
+version_dir="${INSTALL_DIR}proton-${version}"
+mkdir -p "$version_dir"
+cd "$version_dir" || { echo "Failed to change directory."; exit 1; }
 
-    # Download the selected version
-    echo "Downloading Proton-GE ${version} from $url"
-    wget -q --tries=10 --no-check-certificate --no-cache --no-cookies --show-progress -O "${version_dir}/proton-${version}.tar.gz" "$url"
+# Download the selected version
+echo "Downloading Proton-GE ${version} from $url"
+wget -q --tries=10 --no-check-certificate --no-cache --no-cookies --show-progress -O "${version_dir}/proton-${version}.tar.gz" "$url"
 
-    # Check if the download was successful
-    if [ -f "${version_dir}/proton-${version}.tar.gz" ]; then
-        echo "Unpacking Proton-GE ${version} in ${version_dir}..."
-        
-        # Unpack the .tar.gz file
-        tar -xzf "${version_dir}/proton-${version}.tar.gz" --strip-components=1
-        
-        # Check if extraction was successful
-        if [ "$(ls -A "$version_dir")" ]; then
-            echo "Unpacking successful."
-            rm "proton-${version}.tar.gz"
+# Check if the download was successful
+if [ -f "${version_dir}/proton-${version}.tar.gz" ]; then
+    echo "Unpacking Proton-GE ${version} in ${version_dir}..."
 
-            # Check if a "files" folder exists
-            if [ -d "${version_dir}/files" ]; then
-                echo "Moving files from 'files' folder to parent directory..."
-                
-                # Move files from the "files" folder to the parent directory
-                mv "${version_dir}/files/"* "${version_dir}/"
-                
-                # Remove the "files" folder
-                rmdir "${version_dir}/files"
-                
-                echo "'files' folder processed and deleted."
-            fi
-        else
-            echo "Unpacking failed, directory is empty."
+    # Unpack the .tar.gz file
+    tar -xzf "${version_dir}/proton-${version}.tar.gz" --strip-components=1
+
+    # Check if extraction was successful
+    if [ "$(ls -A "$version_dir")" ]; then
+        echo "Unpacking successful."
+        rm "proton-${version}.tar.gz"
+
+        # Check if a "files" folder exists
+        if [ -d "${version_dir}/files" ]; then
+            echo "Moving files from 'files' folder to parent directory..."
+
+            # Move files from the "files" folder to the parent directory
+            mv "${version_dir}/files/"* "${version_dir}/"
+
+            # Remove the "files" folder
+            rmdir "${version_dir}/files"
+
+            echo "'files' folder processed and deleted."
         fi
-        
-        echo "Installation of Proton-GE ${version} complete."
     else
-        echo "Failed to download Proton-GE ${version}."
+        echo "Unpacking failed, directory is empty."
     fi
 
-    # Return to the initial directory
-    cd - > /dev/null
-done
+    echo "Installation of Proton-GE ${version} complete."
+else
+    echo "Failed to download Proton-GE ${version}."
+fi
 
-echo "All selected versions have been processed."
+# Return to the initial directory
+cd - > /dev/null
+
+echo "Installation complete."
 

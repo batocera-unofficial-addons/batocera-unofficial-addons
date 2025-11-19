@@ -6,7 +6,7 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    app_url="https://github.com/unknownskl/greenlight/releases/download/v2.3.1/Greenlight-2.3.1.AppImage"
+    app_url="https://github.com/unknownskl/greenlight/releases/download/v2.3.3/Greenlight-2.3.3.AppImage"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1

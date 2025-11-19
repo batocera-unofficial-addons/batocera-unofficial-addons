@@ -51,7 +51,7 @@ install_downloader() {
 }
 
 while true; do
-    choice=$(dialog --clear --backtitle "Batocera Downloaders" \
+    choice=$(dialog --stdout --clear --backtitle "Batocera Downloaders" \
         --title "Choose a Downloader to Install" \
         --menu "Select a client to install or manage:" 25 75 20 \
         1  "qBittorrent    (8080) - Full-featured modern torrent UI" \
@@ -66,8 +66,7 @@ while true; do
         10 "FlareSolverr   (8191) - Anti-bot proxy for Prowlarr" \
         11 "rTorrent       (5000) - Backend for Flood or CLI power users" \
         12 "Usenet Blackhole - Folder-based Usenet fallback (no container)" \
-        13 "Exit" \
-        3>&1 1>&2 2>&3)
+        13 "Exit")
 
     case "$choice" in
         1)
