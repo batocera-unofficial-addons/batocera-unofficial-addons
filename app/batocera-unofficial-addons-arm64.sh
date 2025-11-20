@@ -6,8 +6,12 @@ install_bua() {
     curl -L install.batoaddons.app | bash
 }
 
-if grep -q 'DTJW92' "$LAUNCH_PATH"; then
+if grep -q 'DIALOGRC' "$LAUNCH_PATH"; then
+    rm -f /userdata/roms/ports/bua.sh.keys
     install_bua
+    dialog --title "UPDATED" --msgbox \
+		"BUA has been updated! A whole new look! Please report any issues to the discord!\n\nJust reopen the app to take a look..." 10 60
+    exit 0
 fi
 
 # Function to display animated title with colors

@@ -1,0 +1,4826 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import os
+import sys
+import threading
+import subprocess
+import pygame
+import json
+import base64
+import io
+import re
+from datetime import datetime, timezone
+from urllib.parse import urlparse
+import urllib.request
+import urllib.parse
+import time
+from typing import Dict, List, Tuple
+
+# ------------------------------
+# Translation System
+# ------------------------------
+
+# Translation cache
+TRANSLATIONS: Dict[str, Dict[str, str]] = {}
+CURRENT_LANGUAGE = "en"
+LANGUAGE_FILE = "/userdata/system/add-ons/bua_language.txt"
+RESOLUTION_FILE = "/userdata/system/add-ons/bua_resolution.txt"
+
+# Cache for available languages (to avoid checking GitHub every time)
+AVAILABLE_LANGUAGES_CACHE: List[Tuple[str, str, str]] = []
+LANGUAGES_CACHE_CHECKED = False
+
+# Directories to search for translation files (local fallback)
+TRANSLATION_DIRS = [
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "translations", "Verified"),
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "translations"),
+    "/userdata/system/add-ons/translations/Verified",
+    "/userdata/system/add-ons/translations",
+    "translations/Verified",
+    "translations",
+]
+
+# GitHub URL for translations
+TRANSLATION_BASE_URL = "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/translation"
+
+def load_translation_file(lang_code: str) -> Dict[str, str]:
+    """Load a translation JSON file from GitHub only"""
+    try:
+        github_url = f"{TRANSLATION_BASE_URL}/{lang_code}.json"
+        print(f"Attempting to load translation from: {github_url}")
+        import urllib.request
+        req = urllib.request.Request(github_url, headers={"User-Agent": "BUA-Installer"})
+        with urllib.request.urlopen(req, timeout=10) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            print(f"Successfully loaded translation {lang_code} from GitHub ({len(data)} keys)")
+            return data
+    except Exception as e:
+        print(f"ERROR: Could not load translation {lang_code} from GitHub: {e}")
+        print(f"URL attempted: {github_url}")
+        return {}
+
+def get_batocera_language() -> str:
+    """Read system language from batocera.conf"""
+    batocera_conf = "/userdata/system/batocera.conf"
+    if os.path.exists(batocera_conf):
+        try:
+            with open(batocera_conf, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith('system.language='):
+                        # Extract language code (e.g., "en_US" -> "en")
+                        lang_value = line.split('=', 1)[1].strip()
+                        # Map batocera locale codes to our language codes
+                        if lang_value.startswith('en_'):
+                            return 'en'
+                        elif lang_value.startswith('es_'):
+                            return 'es'
+                        elif lang_value.startswith('fr_'):
+                            return 'fr'
+                        elif lang_value.startswith('de_'):
+                            return 'de'
+                        elif lang_value.startswith('it_'):
+                            return 'it'
+                        elif lang_value.startswith('pt_BR'):
+                            return 'pt_BR'
+                        elif lang_value.startswith('pt_'):
+                            return 'pt'
+                        elif lang_value.startswith('ru_'):
+                            return 'ru'
+                        elif lang_value.startswith('ja_'):
+                            return 'ja'
+                        elif lang_value.startswith('zh_CN'):
+                            return 'zh'
+                        elif lang_value.startswith('zh_TW'):
+                            return 'zh_TW'
+                        elif lang_value.startswith('ko_'):
+                            return 'ko'
+                        elif lang_value.startswith('ar_'):
+                            return 'ar'
+                        elif lang_value.startswith('nl_'):
+                            return 'nl'
+                        elif lang_value.startswith('pl_'):
+                            return 'pl'
+                        elif lang_value.startswith('tr_'):
+                            return 'tr'
+                        elif lang_value.startswith('vi_'):
+                            return 'vi'
+                        elif lang_value.startswith('th_'):
+                            return 'th'
+                        elif lang_value.startswith('sv_'):
+                            return 'sv'
+                        elif lang_value.startswith('no_'):
+                            return 'no'
+                        elif lang_value.startswith('da_'):
+                            return 'da'
+                        elif lang_value.startswith('fi_'):
+                            return 'fi'
+                        elif lang_value.startswith('cs_'):
+                            return 'cs'
+                        elif lang_value.startswith('hu_'):
+                            return 'hu'
+                        elif lang_value.startswith('ro_'):
+                            return 'ro'
+                        elif lang_value.startswith('uk_'):
+                            return 'uk'
+                        elif lang_value.startswith('el_'):
+                            return 'el'
+                        elif lang_value.startswith('he_'):
+                            return 'he'
+                        elif lang_value.startswith('hi_'):
+                            return 'hi'
+                        elif lang_value.startswith('id_'):
+                            return 'id'
+                        elif lang_value.startswith('ms_'):
+                            return 'ms'
+        except Exception as e:
+            print(f"Error reading batocera.conf: {e}")
+    return "en"
+
+def load_language():
+    """Load saved language preference"""
+    global CURRENT_LANGUAGE, TRANSLATIONS
+
+    # Priority 1: Check if user has manually set a language in BUA
+    user_set_language = False
+    try:
+        if os.path.exists(LANGUAGE_FILE):
+            with open(LANGUAGE_FILE, 'r') as f:
+                lang = f.read().strip()
+                if lang:
+                    CURRENT_LANGUAGE = lang
+                    user_set_language = True
+    except Exception:
+        pass
+
+    # Priority 2: If no user preference, use batocera.conf language
+    if not user_set_language:
+        CURRENT_LANGUAGE = get_batocera_language()
+
+    # Load English as fallback
+    if "en" not in TRANSLATIONS:
+        TRANSLATIONS["en"] = load_translation_file("en")
+
+    # Load current language
+    if CURRENT_LANGUAGE != "en" and CURRENT_LANGUAGE not in TRANSLATIONS:
+        TRANSLATIONS[CURRENT_LANGUAGE] = load_translation_file(CURRENT_LANGUAGE)
+
+def save_language(lang: str):
+    """Save language preference and reload translations"""
+    global CURRENT_LANGUAGE, TRANSLATIONS
+    try:
+        os.makedirs(os.path.dirname(LANGUAGE_FILE), exist_ok=True)
+        with open(LANGUAGE_FILE, 'w') as f:
+            f.write(lang)
+    except Exception:
+        pass
+
+    # Update current language
+    CURRENT_LANGUAGE = lang
+
+    # Load the new language if not already loaded or force reload
+    TRANSLATIONS[lang] = load_translation_file(lang)
+
+def t(key: str) -> str:
+    """Translate a key to the current language"""
+    # Try current language
+    if CURRENT_LANGUAGE in TRANSLATIONS:
+        value = TRANSLATIONS[CURRENT_LANGUAGE].get(key)
+        if value:
+            return value
+
+    # Fallback to English
+    if "en" in TRANSLATIONS:
+        value = TRANSLATIONS["en"].get(key)
+        if value:
+            return value
+
+    # Last resort: return key itself
+    return key
+
+def check_language_exists(lang_data: Tuple[str, str, str], results: list, lock: threading.Lock):
+    """Check if a language file exists on GitHub (threaded helper)"""
+    name, code, native = lang_data
+    github_url = f"{TRANSLATION_BASE_URL}/{code}.json"
+    try:
+        req = urllib.request.Request(github_url, headers={"User-Agent": "BUA-Installer"}, method='HEAD')
+        with urllib.request.urlopen(req, timeout=2) as response:
+            if response.status == 200:
+                with lock:
+                    results.append((name, code, native))
+    except Exception:
+        # File doesn't exist on GitHub, skip it
+        pass
+
+def get_available_languages() -> List[Tuple[str, str, str]]:
+    """Get list of available languages as (name, code, native_name) tuples from GitHub"""
+    global AVAILABLE_LANGUAGES_CACHE, LANGUAGES_CACHE_CHECKED
+
+    # Return cached result if already checked
+    if LANGUAGES_CACHE_CHECKED:
+        return AVAILABLE_LANGUAGES_CACHE
+
+    # All potential languages - will be filtered to only show what exists on GitHub
+    # Format: (English name, code, native name)
+    all_languages = [
+        ("Arabic", "ar", "العربية"),
+        ("Chinese (Simplified)", "zh", "简体中文"),
+        ("Chinese (Traditional)", "zh_TW", "繁體中文"),
+        ("Czech", "cs", "Čeština"),
+        ("Danish", "da", "Dansk"),
+        ("Dutch", "nl", "Nederlands"),
+        ("English", "en", "English"),
+        ("Finnish", "fi", "Suomi"),
+        ("French", "fr", "Français"),
+        ("German", "de", "Deutsch"),
+        ("Greek", "el", "Ελληνικά"),
+        ("Hebrew", "he", "עברית"),
+        ("Hindi", "hi", "हिन्दी"),
+        ("Hungarian", "hu", "Magyar"),
+        ("Indonesian", "id", "Bahasa Indonesia"),
+        ("Italian", "it", "Italiano"),
+        ("Japanese", "ja", "日本語"),
+        ("Korean", "ko", "한국어"),
+        ("Malay", "ms", "Bahasa Melayu"),
+        ("Norwegian", "no", "Norsk"),
+        ("Polish", "pl", "Polski"),
+        ("Portuguese", "pt", "Português"),
+        ("Portuguese (Brazil)", "pt_BR", "Português (Brasil)"),
+        ("Romanian", "ro", "Română"),
+        ("Russian", "ru", "Русский"),
+        ("Spanish", "es", "Español"),
+        ("Swedish", "sv", "Svenska"),
+        ("Thai", "th", "ไทย"),
+        ("Turkish", "tr", "Türkçe"),
+        ("Ukrainian", "uk", "Українська"),
+        ("Vietnamese", "vi", "Tiếng Việt"),
+    ]
+
+    # Check which languages actually exist on GitHub (in parallel for speed)
+    available_languages = []
+    lock = threading.Lock()
+    threads = []
+
+    for lang_data in all_languages:
+        thread = threading.Thread(target=check_language_exists, args=(lang_data, available_languages, lock))
+        thread.daemon = True
+        thread.start()
+        threads.append(thread)
+
+    # Wait for all checks to complete (max 3 seconds total)
+    for thread in threads:
+        thread.join(timeout=3)
+
+    # Always ensure English is available as fallback
+    if not any(lang[1] == "en" for lang in available_languages):
+        available_languages.append(("English", "en", "English"))
+
+    # Cache the result
+    AVAILABLE_LANGUAGES_CACHE = sorted(available_languages, key=lambda x: x[0])
+    LANGUAGES_CACHE_CHECKED = True
+
+    return AVAILABLE_LANGUAGES_CACHE
+
+# Language will be loaded during splash screen
+# load_language() - moved to play_splash_and_load()
+
+# ------------------------------
+# Installation History Manager
+# ------------------------------
+
+HISTORY_FILE = "/userdata/system/add-ons/bua_history.json"
+
+def load_history() -> Dict:
+    """Load installation history from file"""
+    try:
+        if os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, 'r') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"Error loading history: {e}")
+    return {}
+
+def save_history(history: Dict):
+    """Save installation history to file"""
+    try:
+        os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)
+        with open(HISTORY_FILE, 'w') as f:
+            json.dump(history, f, indent=2)
+    except Exception as e:
+        print(f"Error saving history: {e}")
+
+def mark_installed(app_name: str, success: bool):
+    """Mark an app as installed in history"""
+    history = load_history()
+    if app_name not in history:
+        history[app_name] = []
+    
+    history[app_name].append({
+        'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'success': success
+    })
+    save_history(history)
+
+def is_installed(app_name: str) -> bool:
+    """Check if app has been successfully installed"""
+    history = load_history()
+    if app_name in history:
+        # Check if any installation was successful
+        return any(entry['success'] for entry in history[app_name])
+    return False
+
+def get_last_install_date(app_name: str) -> str:
+    """Get the last successful installation date"""
+    history = load_history()
+    if app_name in history:
+        successful = [e for e in history[app_name] if e['success']]
+        if successful:
+            return successful[-1]['date']
+    return None
+
+def mark_uninstalled(app_name: str):
+    """Remove an app from installation history"""
+    history = load_history()
+    if app_name in history:
+        del history[app_name]
+        save_history(history)
+
+def get_uninstall_command(install_cmd: str) -> str:
+    """Convert an installation command to an uninstall command.
+    Replaces .sh with _uninstall.sh in the URL.
+
+    Example:
+    https://.../ 7zip/7zip.sh -> https://.../7zip/7zip_uninstall.sh
+    """
+    import re
+    # Find the .sh URL in the curl command
+    match = re.search(r'(https://[^\s]+)\.sh', install_cmd)
+    if match:
+        base_url = match.group(1)
+        # Replace .sh with _uninstall.sh
+        uninstall_url = f"{base_url}_uninstall.sh"
+        # Create the curl command
+        return f"curl -Ls {uninstall_url} | bash"
+    return None
+
+# ------------------------------
+# Apps and Install Commands
+# ------------------------------
+
+# Base URL for BUA repository scripts
+BUA_BASE_URL = "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main"
+
+def bua(path: str) -> str:
+    """Helper to build BUA install command from relative path"""
+    return f"curl -L {BUA_BASE_URL}/{path} | bash"
+
+APPS: Dict[str, str] = {
+    "7zip": bua("7zip/7zip.sh"),
+    "Amazon Luna": bua("amazonluna/amazonluna.sh"),
+    "Ambermoon": bua("ambermoon/ambermoon.sh"),
+    "Android": bua("Android/Install_Android.sh"),
+    "Armagetron": bua("armagetron/armagetron.sh"),
+    "Arcade Manager": bua("arcademanager/arcademanager.sh"),
+    "Assault Cube": bua("assaultcube/assaultcube.sh"),
+    "Brave": bua("brave/brave.sh"),
+    "Chiaki": bua("chiaki/chiaki.sh"),
+    "Chrome": bua("chrome/chrome.sh"),
+    "Clone Hero": bua("clonehero/clonehero.sh"),
+    "Conty": bua("conty/conty.sh"),
+    "CS Portable": bua("csportable/csportable.sh"),
+    "Disney Plus": bua("disneyplus/disneyplus.sh"),
+    "CLI Tools": bua("docker/cli.sh"),
+    "Endless Sky": bua("endlesssky/endlesssky.sh"),
+    "Everest": bua("everest/everest.sh"),
+    "Firefox": bua("firefox/firefox.sh"),
+    "Fightcade": bua("fightcade/fightcade.sh"),
+    "Flathub": bua("flathub/flathub.sh"),
+    "Freej2me": bua("Freej2me/Install_j2me.sh"),
+    "Winconfig (Windows Game Fix)": bua("Winconfig_Windows_Game_Fix/Install_Winconfig.sh"),
+    "Desktop For Batocera": bua("Desktop_for_Batocera/Install_Desktop.sh"),
+    "Free Droid RPG": bua("freedroidrpg/freedroidrpg.sh"),
+    "Greenlight": bua("greenlight/greenlight.sh"),
+    "Heroic": bua("heroic/heroic.sh"),
+    "IPTV Nator": bua("iptvnator/iptvnator.sh"),
+    "Input Leap": bua("inputleap/inputleap.sh"),
+    "Itch.io": bua("itchio/itch.sh"),
+    "JDownloader": bua("jdownloader/jdownloader.sh"),
+    "Java Runtime": bua("java/java.sh"),
+    "Minecraft": bua("minecraft/minecraft.sh"),
+    "Moonlight": bua("moonlight/moonlight.sh"),
+    "Netflix": bua("netflix/netflix.sh"),
+    "NVIDIA Patcher": bua("nvidiapatch/nvidiapatch.sh"),
+    "OBS": bua("obs/obs.sh"),
+    "OpenRA": bua("openra/openra.sh"),
+    "OpenRGB": bua("openrgb/openrgb.sh"),
+    "PortMaster": bua("portmaster/portmaster.sh"),
+    "qBittorrent": bua("qbittorrent/qbittorrent.sh"),
+    "ShadPS4": bua("shadps4plus/shadps4plus.sh"),
+    "Spotify": bua("spotify/spotify.sh"),
+    "StepMania": bua("stepmania/stepmania.sh"),
+    "Stremio": bua("stremio/stremio.sh"),
+    "Sunshine": bua("sunshine/sunshine.sh"),
+    "SuperTux": bua("supertux/supertux.sh"),
+    "SuperTuxKart": bua("supertuxkart/supertuxkart.sh"),
+    "Switch": bua("switch/switch.sh"),
+    "Tailscale": bua("tailscale/tailscale.sh"),
+    "Telegraf": bua("telegraf/telegraf.sh"),
+    "Twitch": bua("twitch/twitch.sh"),
+    "Vesktop": bua("vesktop/vesktop.sh"),
+    "Warzone 2100": bua("warzone2100/warzone2100.sh"),
+    "Wine Dependencies x86": bua("winemanager/install_redist_dependencies32.sh"),
+    "Wine Dependencies x64": bua("winemanager/install_redist_dependencies64.sh"),
+    "Wine Manager": bua("winemanager/winemanager.sh"),
+    "Xonotic": bua("xonotic/xonotic.sh"),
+    "YouTube": bua("youtubetv/youtubetv.sh"),
+    "NVIDIA Clocker": "curl -Ls https://raw.githubusercontent.com/nicolai-6/batocera-nvidia-clocker/refs/heads/main/install.sh | bash",
+    "Custom Wine": bua("wine-custom/wine.sh"),
+    "GParted": bua("gparted/gparted.sh"),
+    "YARG": bua("yarg/yarg.sh"),
+    "Plex": bua("plex/plex.sh"),
+    "OpenTTD": bua("openttd/openttd.sh"),
+    "Luanti": bua("luanti/luanti.sh"),
+    "Parsec": bua("parsec/parsec.sh"),
+    "HBO Max": bua("hbomax/hbomax.sh"),
+    "Prime Video": bua("prime/prime.sh"),
+    "Crunchyroll": bua("crunchyroll/crunchyroll.sh"),
+    "Mubi": bua("mubi/mubi.sh"),
+    "Tidal": bua("tidal/tidal.sh"),
+    "FreeTube": bua("freetube/freetube.sh"),
+    "Super Mario X": bua("supermariox/supermariox.sh"),
+    "Celeste 64": bua("celeste64/celeste64.sh"),
+    "Steam": bua("steam/steam.sh"),
+    "Lutris": bua("lutris/lutris.sh"),
+    "FileZilla": bua("filezilla/filezilla.sh"),
+    "PeaZip": bua("peazip/peazip.sh"),
+    "VLC": bua("vlc/vlc.sh"),
+    "Docker": bua("docker/docker.sh"),
+    "Bottles": bua("bottles/bottles.sh"),
+    "Extras": bua("extra/extra.sh"),
+    "UltraStar": bua("usdeluxe/usdeluxe.sh"),
+    "F1": bua("f1/f1.sh"),
+    "Desktop": bua("desktop/desktop.sh"),
+    "X11VNC": bua("x11vnc/x11vnc.sh"),
+    "QEMU GA": bua("qga/qga.sh"),
+    "Bridge": bua("bridge/bridge.sh"),
+    "Soar": bua("soar/soar.sh"),
+    "Dark Mode": bua("dark/dark.sh"),
+    "VClean": bua("vclean/vclean.sh"),
+    "RGSX": "curl -L bit.ly/rgsx-install | sh",
+}
+
+# --- Integrated Windows Freeware installers (previously separate bash menu) ---
+# These run upstream installer scripts directly within the existing runner.
+APPS.update({
+    "Maldita Castilla": bua("windows/castilla.sh"),
+    "Celeste": bua("windows/celeste.sh"),
+    "Donkey Kong Advanced": bua("windows/dka.sh"),
+    "Spelunky": bua("windows/spelunky.sh"),
+    "Zelda 2 PC Remake": bua("windows/zelda2.sh"),
+    "Zelda - Dungeons of Infinity": bua("windows/zeldadoi.sh"),
+    "Space Quest 3D": bua("windows/sq3d.sh"),
+    "Super Smash Flash 2": bua("windows/ssf2.sh"),
+    "TMNT Rescue Palooza": bua("windows/tmntrp.sh"),
+    "Crash Bandicoot - Back In Time": bua("windows/cbbit.sh"),
+    "Sonic Triple Trouble 16bit": bua("windows/stt.sh"),
+    "Modern Modern Chef": bua("windows/mmc.sh"),
+    "Sonic Robo Blast 2": bua("windows/srb2.sh"),
+    "Super Smash Bros CMC+": bua("windows/cmc+.sh"),
+})
+
+# --- Integrated Docker app installers (previously separate bash menu) ---
+APPS.update({
+    "CasaOS": bua("docker/casaos.sh"),
+    "UmbrelOS": bua("docker/umbrelos.sh"),
+    "Arch KDE (Webtop)": bua("docker/archkde.sh"),
+    "Ubuntu MATE (Webtop)": bua("docker/ubuntumate.sh"),
+    "Alpine XFCE (Webtop)": bua("docker/alpinexfce.sh"),
+    "Jellyfin": bua("docker/jellyfin.sh"),
+    "Emby": bua("docker/emby.sh"),
+    "Arr-In-One": bua("docker/arrinone.sh"),
+    "Arr-In-One Downloaders": bua("docker/arrdownloaders.sh"),
+})
+
+DESCRIPTIONS: Dict[str, str] = {
+    "Sunshine": "Game streaming app for remote play on Batocera.",
+    "Moonlight": "Stream PC games on Batocera.",
+    "NVIDIA Patcher": "Enable NVIDIA GPU support on Batocera.",
+    "Switch": "Nintendo Switch emulator for Batocera.",
+    "Tailscale": "VPN service for secure Batocera connections.",
+    "Telegraf": "Server agent for collecting and reporting metrics.",
+    "Wine Manager": "Manage Windows games with Wine on Batocera.",
+    "Wine Dependencies x86": "Install Windows x86 dependencies with Wine on Batocera.",
+    "Wine Dependencies x64": "Install Windows x64 dependencies with Wine on Batocera.",
+    "ShadPS4": "UPDATED 11/11 to ShadPS4Plus | Experimental PS4 streaming client.",
+    "Conty": "Standalone Linux distro container.",
+    "Minecraft": "Minecraft: Java or Bedrock Edition.",
+    "Armagetron": "Tron-style light cycle game.",
+    "Clone Hero": "Guitar Hero clone for Batocera.",
+    "Stremio": "Stremio video streaming app for Batocera.",
+    "Vesktop": "Discord client for Batocera.",
+    "Endless Sky": "Space exploration game.",
+    "Chiaki": "PS4/PS5 Remote Play client.",
+    "Chrome": "Google Chrome web browser.",
+    "Amazon Luna": "Amazon Luna game streaming client.",
+    "PortMaster": "Download and manage games on handhelds.",
+    "Greenlight": "Client for xCloud and Xbox streaming.",
+    "Heroic": "Epic, GOG, and Amazon Games launcher.",
+    "YouTube": "YouTube client for Batocera.",
+    "Netflix": "Netflix streaming app for Batocera.",
+    "IPTV Nator": "IPTV client for watching live TV.",
+    "Input Leap": "Share Keyboard and mouse with other OSes.",
+    "Firefox": "Mozilla Firefox browser.",
+    "Flathub": "Browse different Flatpak applications.",
+    "Java Runtime": "Install the Java Runtime on your batocera.",
+    "Spotify": "Spotify music streaming client.",
+    "CLI Tools": ">=V40! Various CLI tools including Docker, ZSH, Git etc.",
+    "Arcade Manager": "Manage arcade ROMs and games.",
+    "CS Portable": "Fan-made portable Counter-Strike.",
+    "Brave": "Privacy-focused Brave browser.",
+    "OpenRGB": "Manage RGB lighting on devices.",
+    "Warzone 2100": "Real-time strategy and tactics game.",
+    "Xonotic": "Fast-paced open-source arena shooter.",
+    "Itch.io": "Indy Game Marketplace",
+    "Android": "Android System for Batocera (EXPERIMENTAL).",
+    "Freej2me": "J2ME classic game emulator.",
+    "Desktop For Batocera": "Desktop for batocera. (Native)",
+    "Winconfig (Windows Game Fix)": "Tool to simplify dependencies/config for Windows games (DRL Edition)",
+    "Fightcade": "*UPDATED* Play classic arcade games online.",
+    "SuperTuxKart": "Free and open-source kart racer.",
+    "OpenRA": "Modernized RTS for Command & Conquer.",
+    "Assault Cube": "Multiplayer first-person shooter game.",
+    "OBS": "Streaming and video recording software.",
+    "SuperTux": "2D platformer starring Tux the Linux mascot.",
+    "Free Droid RPG": "Open-source role-playing game for Batocera.",
+    "Disney Plus": "Disney+ streaming app for Batocera.",
+    "Twitch": "Twitch streaming app for Batocera.",
+    "NVIDIA Clocker": "A CLI/Ports program to overclock NVIDIA GPUs",
+    "7zip": "A free and open-source file archiver",
+    "qBittorrent": "Free and open-source BitTorrent client",
+    "StepMania": "A dancemat compatible rhythm video game and engine",
+    "Ambermoon": "Ambermoon.net, a port of the classic",
+    "Custom Wine": "Download Wine/Proton versions",
+    "GParted": "Linux partition manager",
+    "JDownloader": "NEEDS DESKTOP MODE ADDON TO WORK",
+    "YARG": "Yet Another Rhythm Game",
+    "Plex": "Plex Media Player",
+    "OpenTTD": "Open source clone of Transport Tycoon Deluxe",
+    "Luanti": "Voxel sandbox (Minecraft-like)",
+    "Parsec": "Remote desktop & game streaming",
+    "HBO Max": "HBO Max streaming app",
+    "Prime Video": "Amazon Prime Video streaming app",
+    "Crunchyroll": "Anime-focused streaming service",
+    "Mubi": "Curated cinema platform",
+    "Tidal": "HiFi music streaming",
+    "Everest": "Celeste Mod Loader",
+    "FreeTube": "Privacy-minded YouTube client",
+    "Super Mario X": "Fan-made Super Mario tribute",
+    "Celeste 64": "Free 3D platformer (Celeste)",
+    "Steam": "Steam Big Picture / Desktop",
+    "Lutris": "Open source game manager",
+    "FileZilla": "Cross-platform FTP client",
+    "PeaZip": "Free and open-source file archiver",
+    "VLC": "VLC media player",
+    "Docker": "Docker/Podman/Portainer AIO.",
+    "Bottles": "Run Windows software on Linux",
+    "Extras": "Various scripts, incl. motion support.",
+    "UltraStar": "UltraStar Deluxe karaoke",
+    "F1": "Ports shortcut to file manager",
+    "Desktop": "Desktop mode (Ports)",
+    "X11VNC": "Remote control over VNC",
+    "QEMU GA": "Guest agent for VMs",
+    "Bridge": "Chart downloader for CloneHero/YARG",
+    "Soar": "Soar package manager (integrated with BUA)",
+    "Dark Mode": "Toggle F1 dark mode",
+    "VClean": "Service to clean the Batocera version string (removes extra flags)",
+    "RGSX": "Retro Game Sets Xtra. A free, user-friendly ROM downloader for Batocera",
+}
+
+# Descriptions for integrated Windows Freeware entries
+DESCRIPTIONS.update({
+    "Maldita Castilla": "Arcade action platformer",
+    "Celeste": "Indie platformer classic",
+    "Donkey Kong Advanced": "Fan remake/port",
+    "Spelunky": "Rogue-like platformer",
+    "Zelda 2 PC Remake": "Fan remake of Zelda II",
+    "Zelda - Dungeons of Infinity": "Zelda-inspired project",
+    "Space Quest 3D": "Fan project tribute",
+    "Super Smash Flash 2": "Fan fighting game",
+    "TMNT Rescue Palooza": "Beat 'em up fan game",
+    "Crash Bandicoot - Back In Time": "Fan game",
+    "Sonic Triple Trouble 16bit": "Fan remake",
+    "Modern Modern Chef": "Indie title",
+    "Sonic Robo Blast 2": "Doom-based Sonic fangame",
+    "Super Smash Bros CMC+": "Fan crossover",
+})
+
+# Descriptions for integrated Docker apps
+DESCRIPTIONS.update({
+    "CasaOS": "Simple home server UI and app store",
+    "UmbrelOS": "Self-hosted OS with app marketplace",
+    "Arch KDE (Webtop)": "Arch Linux desktop in browser (noVNC)",
+    "Ubuntu MATE (Webtop)": "Ubuntu MATE desktop in browser (noVNC)",
+    "Alpine XFCE (Webtop)": "Alpine XFCE desktop in browser (noVNC)",
+    "Jellyfin": "Open-source media server",
+    "Emby": "Media server and streaming",
+    "Arr-In-One": "All-in-one media management stack",
+    "Arr-In-One Downloaders": "Downloaders companion stack",
+})
+
+CATEGORIES: Dict[str, List[str]] = {
+    "Games": [
+        "Minecraft", "Armagetron", "Clone Hero", "Endless Sky", "CS Portable",
+        "Warzone 2100", "Xonotic", "Fightcade", "SuperTuxKart", "OpenRA",
+        "Assault Cube", "SuperTux", "Free Droid RPG", "StepMania", "Ambermoon",
+        "YARG", "OpenTTD", "Luanti", "Super Mario X", "Celeste 64", "UltraStar"
+    ],
+    "Windows Freeware": [
+        "Maldita Castilla",
+        "Celeste",
+        "Donkey Kong Advanced",
+        "Spelunky",
+        "Zelda 2 PC Remake",
+        "Zelda - Dungeons of Infinity",
+        "Space Quest 3D",
+        "Super Smash Flash 2",
+        "TMNT Rescue Palooza",
+        "Crash Bandicoot - Back In Time",
+        "Sonic Triple Trouble 16bit",
+        "Modern Modern Chef",
+        "Sonic Robo Blast 2",
+        "Super Smash Bros CMC+",
+    ],
+    "Docker Menu": [
+        "CasaOS",
+        "UmbrelOS",
+        "Arch KDE (Webtop)",
+        "Ubuntu MATE (Webtop)",
+        "Alpine XFCE (Webtop)",
+        "Jellyfin",
+        "Emby",
+        "Arr-In-One",
+        "Arr-In-One Downloaders",
+    ],
+    "Game Utilities": [
+        "Android", "Amazon Luna", "PortMaster", "Greenlight", "ShadPS4",
+        "Chiaki", "Heroic", "Switch", "Parsec", "Java Runtime", "Freej2me",
+        "Steam", "Lutris", "Bottles", "Sunshine", "Moonlight", "Bridge",
+        "Itch.io", "Everest", "RGSX"
+    ],
+    "System Utilities": [
+        "Desktop For Batocera", "Winconfig (Windows Game Fix)", "F1", "Tailscale",
+        "Telegraf", "Wine Manager", "Vesktop", "Chrome", "YouTube", "Netflix",
+        "Input Leap", "IPTV Nator", "Firefox", "Spotify", "Arcade Manager", "Brave",
+        "OpenRGB", "OBS", "Stremio", "Disney Plus", "Twitch", "7zip", "qBittorrent",
+        "GParted", "Custom Wine", "Plex", "HBO Max", "Prime Video", "Crunchyroll",
+        "Mubi", "Tidal", "FreeTube", "FileZilla", "PeaZip", "Desktop", "Flathub",
+        "JDownloader"
+    ],
+    "Developer Tools": [
+        "NVIDIA Patcher", "Conty", "CLI Tools", "NVIDIA Clocker", "Docker",
+        "Extras", "X11VNC", "QEMU GA", "Soar", "Dark Mode", "VClean"
+    ],
+}
+
+def get_top_level() -> List[Tuple[str, str]]:
+    """Generate top-level menu items with current language translations"""
+    return [
+        (t("games"), t("games_desc")),
+        (t("windows_freeware"), t("windows_freeware_desc")),
+        (t("game_utilities"), t("game_utilities_desc")),
+        (t("system_utilities"), t("system_utilities_desc")),
+        (t("developer_tools"), t("developer_tools_desc")),
+        (t("docker_menu"), t("docker_menu_desc")),
+        (t("updater"), t("updater_desc")),
+        (t("settings"), t("settings_desc")),
+        (t("exit"), t("exit_desc")),
+    ]
+
+# TOP_LEVEL will be initialized after translations load in play_splash_and_load()
+TOP_LEVEL = None
+
+SPECIAL_TOPLEVEL_RUN: Dict[str, str] = {
+    # "Windows Freeware" and "Docker Menu" integrated as categories in the UI
+}
+
+# ------------------------------
+# Pygame UI helpers
+# ------------------------------
+
+pygame.init()
+# Window caption will be set after translations load in play_splash_and_load()
+
+# Resolution save/load functions
+def load_saved_resolution():
+    """Load saved resolution preference"""
+    try:
+        if os.path.exists(RESOLUTION_FILE):
+            with open(RESOLUTION_FILE, 'r') as f:
+                res = f.read().strip()
+                if res and 'x' in res:
+                    parts = res.split('x')
+                    return int(parts[0]), int(parts[1])
+    except Exception:
+        pass
+    return None
+
+def save_resolution(width: int, height: int):
+    """Save resolution preference"""
+    try:
+        os.makedirs(os.path.dirname(RESOLUTION_FILE), exist_ok=True)
+        with open(RESOLUTION_FILE, 'w') as f:
+            f.write(f"{width}x{height}")
+    except Exception:
+        pass
+
+# Native fullscreen/window to avoid blurry scaling
+def init_display():
+    global screen, W, H
+    # Try to load saved resolution first
+    saved_res = load_saved_resolution()
+
+    if saved_res:
+        # Use saved resolution in fullscreen
+        screen = pygame.display.set_mode(saved_res, pygame.FULLSCREEN)
+    elif os.environ.get("BUA_WINDOWED"):
+        screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
+    else:
+        # Use desktop size
+        try:
+            dw, dh = pygame.display.get_desktop_sizes()[0]
+        except Exception:
+            info = pygame.display.Info()
+            dw, dh = info.current_w, info.current_h
+        screen = pygame.display.set_mode((dw, dh), pygame.FULLSCREEN)
+    W, H = screen.get_size()
+
+init_display()
+clock = pygame.time.Clock()
+
+# UI scale to keep elements readable at high resolutions
+UI_SCALE = max(1.0, min(W/1280.0, H/720.0))
+def S(n: int) -> int:
+    return int(round(n * UI_SCALE))
+
+def load_fonts():
+    # DejaVu Sans for primary UI - good Latin/Cyrillic/Greek coverage
+    # Note: DejaVu Sans doesn't support Arabic, Hebrew, CJK, Indic scripts
+    # Those will show as squares in language names, but that's acceptable
+    # since we show "English (Native)" format anyway
+
+    primary = pygame.font.SysFont("DejaVu Sans", 24)
+    small = pygame.font.SysFont("DejaVu Sans", 18)
+    big = pygame.font.SysFont("DejaVu Sans", 36, bold=True)
+    return primary, small, big
+
+FONT, FONT_SMALL, FONT_BIG = load_fonts()
+
+# Batocera brand-inspired palette
+# Dark slate background, slate cards, cyan-blue accents
+BG = (12, 16, 20)
+CARD = (52, 64, 72)
+ACCENT = (0, 168, 224)
+FG = (235, 242, 247)
+MUTED = (153, 163, 173)
+SELECT = (0, 120, 180)
+
+# ---------- Assets & Background ----------
+LOGO_SURF = None
+WHEEL_SURF = None
+BACKGROUND_SURF = None  # Will be created in init_assets()
+BUTTON_ICONS: Dict[str, pygame.Surface] = {}
+# You can point to hosted images via per-key envs (e.g. BUA_BTN_A_URL)
+# or set a common base URL via BUA_BTN_BASE_URL where files are named as below.
+DEFAULT_BUTTONS_BASE_URL = os.environ.get("BUA_BTN_BASE_URL") or \
+    "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/extra"
+
+# Controller style detection and mapping
+PAD_STYLE = "xbox"  # xbox | playstation | nintendo | generic | keyboard
+# Optional user override set from Settings (None => auto/detect/env)
+PAD_STYLE_USER_OVERRIDE: str | None = None
+# Map logical A/B/X/Y prompts to icon keys by style (for rendering)
+STYLE_ICON_MAP: Dict[str, Dict[str, str]] = {
+    "xbox": {"A": "A", "B": "B", "X": "X", "Y": "Y"},
+    "playstation": {"A": "CROSS", "B": "CIRCLE", "X": "SQUARE", "Y": "TRIANGLE"},
+    # For Nintendo, physical labels are A(right), B(bottom), X(top), Y(left).
+    # Map logical buttons to Nintendo icons by position: A(bottom)->B, B(back)->A, X(left)->Y, Y(top)->X.
+    "nintendo": {"A": "B", "B": "A", "X": "Y", "Y": "X"},
+    "generic": {"A": "A", "B": "B", "X": "X", "Y": "Y"},
+    "keyboard": {"A": "A", "B": "B", "X": "X", "Y": "Y"},
+}
+
+# Runtime joystick button mapping (for input)
+# This normalizes diverse controller layouts into logical buttons.
+# Values can be overridden with environment variables, e.g. BUA_BTN_START=9
+BTN_A = 0
+BTN_B = 1
+BTN_X = 2
+BTN_Y = 3
+BTN_LB = 4
+BTN_RB = 5
+BTN_BACK = 6
+BTN_START = 7
+BTN_L3 = 8
+BTN_R3 = 9
+
+def _env_int(name: str, default: int) -> int:
+    try:
+        val = os.environ.get(name)
+        if val is None:
+            return default
+        return int(val)
+    except Exception:
+        return default
+
+def _detect_ps_profile() -> str:
+    """Differentiate common PlayStation mappings.
+    Returns 'ps_dinput' for older/DirectInput-style pads (PS3/Sixaxis/etc),
+    otherwise 'ps_sdl' for modern SDL-mapped DualShock/DualSense.
+    """
+    try:
+        names = []
+        for i in range(pygame.joystick.get_count()):
+            try:
+                nm = pygame.joystick.Joystick(i).get_name() or ""
+                names.append(nm.lower())
+            except Exception:
+                pass
+        s = " ".join(names)
+        if any(k in s for k in ["ps3", "sixaxis", "dualshock 3", "shanwan", "gasia", "bda ps3", "playstation 3"]):
+            return "ps_dinput"
+    except Exception:
+        pass
+    return "ps_sdl"
+
+def _base_map(style: str) -> Dict[str, int]:
+    # Default Xbox/XInput-style mapping
+    if style == "xbox" or style == "generic" or style == "nintendo":
+        return {
+            "A": 0, "B": 1, "X": 2, "Y": 3,
+            "LB": 4, "RB": 5, "BACK": 6, "START": 7,
+            "L3": 8, "R3": 9,
+        }
+    if style == "playstation":
+        ps_prof = _detect_ps_profile()
+        if ps_prof == "ps_dinput":
+            # Common DirectInput mapping seen on PS3-era controllers
+            return {
+                "A": 0,  # Cross (bottom)
+                "B": 1,  # Circle (right)
+                "X": 2,  # Square (left)
+                "Y": 3,  # Triangle (top)
+                "LB": 4, # L1
+                "RB": 5, # R1
+                # L2/R2 are 6/7 as buttons on many DInput pads
+                "BACK": 8,   # Select
+                "START": 9,  # Start/Options
+                "L3": 10,
+                "R3": 11,
+            }
+        # Modern SDL mapping for DS4/DS5 (Options index 9)
+        return {
+            "A": 0, "B": 1, "X": 3, "Y": 2,
+            "LB": 4, "RB": 5, "BACK": 8, "START": 9,
+            "L3": 11, "R3": 12,
+        }
+    # Fallback
+    return {
+        "A": 0, "B": 1, "X": 2, "Y": 3,
+        "LB": 4, "RB": 5, "BACK": 6, "START": 7,
+        "L3": 8, "R3": 9,
+    }
+
+def _guid_override_map(style: str) -> Dict[str, int] | None:
+    """Return a per-device override mapping when we know a pad's raw
+    button indices differ from our base map.
+
+    Currently handles Nintendo Switch Pro Controller on Linux when it
+    reports GUID '050000007e0500000920000001800000'.
+
+    The mapping below reflects captured Pygame button indices:
+    A=2, B=3, X=5, Y=4, LB=6, RB=7, BACK=10, START=11, L3=12, R3=13.
+    """
+    try:
+        if style != "nintendo":
+            return None
+        # Only apply on Linux where this GUID/ordering occurs.
+        if not sys.platform.startswith("linux"):
+            return None
+        known_overrides: Dict[str, Dict[str, int]] = {
+            # Switch Pro Controller (Linux, Bluetooth), GUID seen in the wild.
+            "050000007e0500000920000001800000": {
+                "A": 2, "B": 3, "X": 5, "Y": 4,
+                "LB": 6, "RB": 7, "BACK": 10, "START": 11,
+                "L3": 12, "R3": 13,
+            },
+        }
+        # Collect connected joystick GUIDs and try to match.
+        detected: List[str] = []
+        try:
+            for i in range(pygame.joystick.get_count()):
+                try:
+                    g = pygame.joystick.Joystick(i).get_guid()  # type: ignore[attr-defined]
+                    if isinstance(g, str) and g:
+                        detected.append(g.lower())
+                except Exception:
+                    pass
+        except Exception:
+            pass
+        for g in detected:
+            if g in known_overrides:
+                return known_overrides[g]
+    except Exception:
+        pass
+    return None
+
+def update_button_mapping():
+    """Update global BTN_* constants based on PAD_STYLE and env overrides."""
+    global BTN_A, BTN_B, BTN_X, BTN_Y, BTN_LB, BTN_RB, BTN_BACK, BTN_START, BTN_L3, BTN_R3
+    base = _base_map(PAD_STYLE)
+    # Apply per-GUID override if a known device is connected
+    _ovr = _guid_override_map(PAD_STYLE)
+    if _ovr:
+        base.update(_ovr)
+    BTN_A    = _env_int("BUA_BTN_A",    base.get("A", 0))
+    BTN_B    = _env_int("BUA_BTN_B",    base.get("B", 1))
+    BTN_X    = _env_int("BUA_BTN_X",    base.get("X", 2))
+    BTN_Y    = _env_int("BUA_BTN_Y",    base.get("Y", 3))
+    BTN_LB   = _env_int("BUA_BTN_LB",   base.get("LB", 4))
+    BTN_RB   = _env_int("BUA_BTN_RB",   base.get("RB", 5))
+    BTN_BACK = _env_int("BUA_BTN_BACK", base.get("BACK", 6))
+    BTN_START= _env_int("BUA_BTN_START",base.get("START", 7))
+    BTN_L3   = _env_int("BUA_BTN_L3",   base.get("L3", 8))
+    BTN_R3   = _env_int("BUA_BTN_R3",   base.get("R3", 9))
+
+# ------------------------------
+# Optional: manual button mapper
+# ------------------------------
+
+# Where to persist a manual button map
+CONTROLS_FILE = "/userdata/system/add-ons/bua_controls.json"
+
+def _load_saved_button_map() -> dict:
+    try:
+        if os.path.exists(CONTROLS_FILE):
+            with open(CONTROLS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f) or {}
+                if isinstance(data, dict):
+                    return data
+    except Exception:
+        pass
+    return {}
+
+def _apply_saved_button_map_if_any() -> bool:
+    """If a manual mapping exists, apply it by setting env vars and updating globals.
+    Returns True if applied.
+    """
+    data = _load_saved_button_map()
+    required = ["A","B","X","Y","LB","RB","BACK","START","L3","R3"]
+    if all(k in data and isinstance(data[k], int) for k in required):
+        os.environ["BUA_BTN_A"] = str(data["A"])  # type: ignore[arg-type]
+        os.environ["BUA_BTN_B"] = str(data["B"])  # type: ignore[arg-type]
+        os.environ["BUA_BTN_X"] = str(data["X"])  # type: ignore[arg-type]
+        os.environ["BUA_BTN_Y"] = str(data["Y"])  # type: ignore[arg-type]
+        os.environ["BUA_BTN_LB"] = str(data["LB"])  # type: ignore[arg-type]
+        os.environ["BUA_BTN_RB"] = str(data["RB"])  # type: ignore[arg-type]
+        os.environ["BUA_BTN_BACK"] = str(data["BACK"])  # type: ignore[arg-type]
+        os.environ["BUA_BTN_START"] = str(data["START"])  # type: ignore[arg-type]
+        os.environ["BUA_BTN_L3"] = str(data["L3"])  # type: ignore[arg-type]
+        os.environ["BUA_BTN_R3"] = str(data["R3"])  # type: ignore[arg-type]
+        # Lock into a generic style label to avoid flipping icons unexpectedly
+        os.environ["BUA_PAD_STYLE"] = os.environ.get("BUA_PAD_STYLE", "generic")
+        # Recompute globals
+        update_button_mapping()
+        return True
+    return False
+
+def _save_button_map(mapping: dict) -> None:
+    try:
+        os.makedirs(os.path.dirname(CONTROLS_FILE), exist_ok=True)
+        with open(CONTROLS_FILE, "w", encoding="utf-8") as f:
+            json.dump(mapping, f, indent=2)
+    except Exception:
+        pass
+
+def run_manual_button_mapper() -> bool:
+    """Blocking mini-wizard to manually map controller buttons.
+    Returns True if a complete map was saved and applied.
+    """
+    if pygame.joystick.get_count() <= 0:
+        return False
+
+    order = [
+        ("A", "Press the bottom face button (A/Cross)"),
+        ("B", "Press the right face button (B/Circle)"),
+        ("X", "Press the left face button (X/Square)"),
+        ("Y", "Press the top face button (Y/Triangle)"),
+        ("LB","Press Left Bumper (L1)"),
+        ("RB","Press Right Bumper (R1)"),
+        ("BACK","Press Back/Select"),
+        ("START","Press Start/Options"),
+        ("L3","Press Left Stick (L3)"),
+        ("R3","Press Right Stick (R3)"),
+    ]
+    mapping: dict[str,int] = {}
+
+    hold_ms_required = 500
+    last = None
+    progress = 0
+    start_ts = 0
+
+    # Simple overlay panel renderer
+    def draw_panel(title: str, desc: str, prog: float):
+        draw_background(screen)
+        cx, cy = W//2, H//2
+        box_w, box_h = min(S(700), W - S(80)), S(280)
+        rect = pygame.Rect(cx - box_w//2, cy - box_h//2, box_w, box_h)
+        pygame.draw.rect(screen, CARD, rect, border_radius=12)
+        pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=12)
+        draw_text(screen, t("controller_setup"), FONT_BIG, FG, (rect.x + S(16), rect.y + S(12)))
+        draw_text(screen, title, FONT, FG, (rect.x + S(16), rect.y + S(64)))
+        draw_text(screen, desc, FONT_SMALL, MUTED, (rect.x + S(16), rect.y + S(96)))
+        # progress bar
+        bar_x, bar_y, bar_w, bar_h = rect.x + S(16), rect.y + box_h - S(60), box_w - S(32), S(20)
+        pygame.draw.rect(screen, (30, 34, 44), (bar_x, bar_y, bar_w, bar_h), border_radius=6)
+        fill_w = int(bar_w * max(0.0, min(1.0, prog)))
+        if fill_w > 0:
+            pygame.draw.rect(screen, ACCENT, (bar_x, bar_y, fill_w, bar_h), border_radius=6)
+        pygame.draw.rect(screen, (200,200,210), (bar_x, bar_y, bar_w, bar_h), width=2, border_radius=6)
+        pygame.display.flip()
+
+    idx = 0
+    # Consume stale events
+    pygame.event.get()
+    while idx < len(order):
+        label, desc = order[idx]
+        title = t("hold_button_for").format(label=label)
+        draw_panel(title, desc, progress/hold_ms_required)
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                return False
+            # Allow cancel with Escape or B/Back
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+                return False
+            if e.type == pygame.JOYBUTTONDOWN:
+                if last is None:
+                    last = (e.button, pygame.time.get_ticks())
+                    start_ts = last[1]
+                elif last and last[0] != e.button:
+                    # restart hold if changed
+                    last = (e.button, pygame.time.get_ticks())
+                    start_ts = last[1]
+            if e.type == pygame.JOYBUTTONUP:
+                if last and e.button == last[0]:
+                    last = None
+                    progress = 0
+        if last is not None:
+            now = pygame.time.get_ticks()
+            progress = now - start_ts
+            draw_panel(title, desc, progress/hold_ms_required)
+            if progress >= hold_ms_required:
+                mapping[label] = last[0]
+                last = None
+                progress = 0
+                idx += 1
+                # small debounce delay
+                pygame.time.wait(200)
+        pygame.time.wait(10)
+
+    # Persist and apply
+    _save_button_map(mapping)
+    _apply_saved_button_map_if_any()
+    return True
+
+def set_pad_style_choice(choice: str) -> None:
+    """Set or clear the user-selected controller layout.
+    choice: 'auto', 'xbox', 'playstation', 'nintendo', 'generic'
+    """
+    global PAD_STYLE_USER_OVERRIDE, PAD_STYLE
+    choice = (choice or "").strip().lower()
+    if choice == "auto":
+        PAD_STYLE_USER_OVERRIDE = None
+        PAD_STYLE = detect_pad_style()
+    elif choice in ("xbox", "playstation", "nintendo", "generic"):
+        PAD_STYLE_USER_OVERRIDE = choice
+        PAD_STYLE = choice
+    else:
+        # Ignore invalid, keep current
+        return
+    update_button_mapping()
+
+# Keyboard hint mapping for visible prompts when no gamepad
+KEYBOARD_HINT_MAP: Dict[str, str] = {
+    "A": "Enter",
+    "B": "Esc",
+    "X": "X",
+    "Y": "A",  # Select all
+    "START": "Space",
+    "LB": "PgUp",
+    "RB": "PgDn",
+    "BACK": "AltGr",
+}
+def _try_load(path: str):
+    try:
+        return pygame.image.load(path).convert_alpha()
+    except Exception:
+        return None
+
+
+def _from_url(url: str | None):
+    if not url:
+        return None
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "BUA-Icons"})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = resp.read()
+        return pygame.image.load(io.BytesIO(data)).convert_alpha()
+    except Exception:
+        return None
+
+def init_assets():
+    global LOGO_SURF, WHEEL_SURF, BACKGROUND_SURF, BUTTON_ICONS
+    LOGO_SURF = None
+    WHEEL_SURF = None
+    BUTTON_ICONS = {}
+    # Preferred watermark/background logo (try hosted first)
+    if DEFAULT_BUTTONS_BASE_URL:
+        remote_logo = _from_url(DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/batocera-unofficial-addons.png")
+        if remote_logo is not None:
+            LOGO_SURF = remote_logo
+    if LOGO_SURF is None:
+        logo_candidates = [
+            os.path.join(os.sep, "images", "BatoceraUnofficialAddons.png"),
+            os.path.join("images", "BatoceraUnofficialAddons.png"),
+            os.path.join("assets", "logo.png"),
+            "logo.png",
+            os.path.join("assets", "images", "logo.png"),
+            os.path.join("images", "batocera-unofficial-addons.png"),
+        ]
+        for p in logo_candidates:
+            if os.path.exists(p):
+                surf = _try_load(p)
+                if surf is not None:
+                    LOGO_SURF = surf
+                    break
+
+    # Top bar text-replacement (Wheel) image
+    if DEFAULT_BUTTONS_BASE_URL:
+        remote_wheel = _from_url(DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/batocera-unofficial-addons-wheel.png")
+        if remote_wheel is not None:
+            WHEEL_SURF = remote_wheel
+    if WHEEL_SURF is None:
+        wheel_candidates = [
+            os.path.join(os.sep, "images", "BatoceraUnofficialAddons_Wheel.png"),
+            os.path.join("images", "BatoceraUnofficialAddons_Wheel.png"),
+            os.path.join("images", "batocera-unofficial-addons-wheel.png"),
+        ]
+        for p in wheel_candidates:
+            if os.path.exists(p):
+                surf = _try_load(p)
+                if surf is not None:
+                    WHEEL_SURF = surf
+                    break
+
+    # Optional ABXY icons
+    # 1) Try explicit per-key hosted URLs
+    for key in ("A", "B", "X", "Y"):
+        if key in BUTTON_ICONS:
+            continue
+        env_url = os.environ.get(f"BUA_BTN_{key}_URL")
+        surf = _from_url(env_url)
+        if surf is not None:
+            BUTTON_ICONS[key] = surf
+
+    # 2) Try files if not provided by base64
+    base_dirs = [
+        os.path.join(os.sep, "images", "buttons"),
+        os.path.join("images", "buttons"),
+        os.path.join("assets", "buttons"),
+        "images",
+        "assets",
+        os.curdir,
+    ]
+    name_patterns = [
+        "btn_{k}.png",
+        "button_{k}.png",
+        "{k}.png",
+        "abxy_{k}.png",
+    ]
+    for key in ("a", "b", "x", "y"):
+        if key.upper() in BUTTON_ICONS:
+            continue
+        env_key = os.environ.get(f"BUA_BTN_{key.upper()}")
+        surf = None
+        if env_key and os.path.exists(env_key):
+            surf = _try_load(env_key)
+        if surf is None:
+            for d in base_dirs:
+                for pat in name_patterns:
+                    p = os.path.join(d, pat.format(k=key))
+                    if os.path.exists(p):
+                        surf = _try_load(p)
+                        if surf is not None:
+                            break
+                if surf is not None:
+                    break
+        if surf is not None:
+            BUTTON_ICONS[key.upper()] = surf
+
+    # 2b) Try a common hosted base URL if provided
+    if DEFAULT_BUTTONS_BASE_URL:
+        for key in ("a", "b", "x", "y"):
+            kU = key.upper()
+            if kU in BUTTON_ICONS:
+                continue
+            # include uppercase/hyphen variants preferred by the repo
+            repo_names = [
+                f"btn_{key.upper()}.png",
+                f"btn-{key.upper()}.png",
+            ]
+            tried = repo_names + name_patterns
+            for pat in tried:
+                # pat may already be a full name
+                if "{k}" in pat:
+                    fname = pat.format(k=key)
+                else:
+                    fname = pat
+                url = DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/" + fname
+                surf = _from_url(url)
+                if surf is not None:
+                    BUTTON_ICONS[kU] = surf
+                    break
+
+    # Load PlayStation synonyms (CROSS/CIRCLE/SQUARE/TRIANGLE) from URLs/files
+    ps_keys = ["CROSS", "CIRCLE", "SQUARE", "TRIANGLE"]
+    # per-key URL
+    for key in ps_keys:
+        if key in BUTTON_ICONS:
+            continue
+        env_url = os.environ.get(f"BUA_BTN_{key}_URL")
+        surf = _from_url(env_url)
+        if surf is not None:
+            BUTTON_ICONS[key] = surf
+    # common base URL
+    if DEFAULT_BUTTONS_BASE_URL:
+        # Exact names from the provided repo
+        direct_map = {
+            "cross": "btn_cro.png",
+            "circle": "btn_cir.png",
+            "square": "btn_squ.png",
+            "triangle": "btn_tri.png",
+        }
+        ps_name_patterns = [
+            "ps_{k}.png",
+            "playstation_{k}.png",
+            "button_{k}.png",
+        ]
+        for key in ["cross", "circle", "square", "triangle"]:
+            kU = key.upper()
+            if kU in BUTTON_ICONS:
+                continue
+            # try exact repo filename first
+            url = DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/" + direct_map[key]
+            surf = _from_url(url)
+            if surf is not None:
+                BUTTON_ICONS[kU] = surf
+                continue
+            for pat in ps_name_patterns:
+                url = DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/" + pat.format(k=key)
+                surf = _from_url(url)
+                if surf is not None:
+                    BUTTON_ICONS[kU] = surf
+                    break
+
+    # 3) As a final fallback, procedurally draw simple ABXY icons
+    def make_icon(fill_dir: str) -> pygame.Surface:
+        size = 96
+        surf = pygame.Surface((size, size), pygame.SRCALPHA)
+        cx, cy = size // 2, size // 2
+        r = size // 2 - 2
+        # Diamond (rotated square)
+        pts = [(cx, cy - r), (cx + r, cy), (cx, cy + r), (cx - r, cy)]
+        pygame.draw.polygon(surf, (255, 255, 255), pts)
+        pygame.draw.polygon(surf, (0, 0, 0), pts, width=4)
+        # Circle positions
+        off = r - 22
+        positions = {
+            "Y": (cx, cy - off),
+            "B": (cx + off, cy),
+            "A": (cx, cy + off),
+            "X": (cx - off, cy),
+        }
+        for k, (px, py) in positions.items():
+            if k == fill_dir:
+                pygame.draw.circle(surf, (0, 0, 0), (px, py), 14)
+                pygame.draw.circle(surf, (0, 0, 0), (px, py), 14, width=2)
+            else:
+                pygame.draw.circle(surf, (0, 0, 0), (px, py), 14, width=3)
+                pygame.draw.circle(surf, (255, 255, 255), (px, py), 13, width=0)
+        return surf
+
+    for key in ("A", "B", "X", "Y"):
+        if key not in BUTTON_ICONS:
+            BUTTON_ICONS[key] = make_icon(key)
+
+    # Load Start/Play icon for Start button if available
+    if "START" not in BUTTON_ICONS:
+        # Try hosted play-button.png first
+        play_url = DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/play-button.png" if DEFAULT_BUTTONS_BASE_URL else None
+        start_surf = _from_url(play_url)
+        if start_surf is None:
+            # Look in local common paths
+            for p in [
+                os.path.join("images", "play-button.png"),
+                os.path.join("assets", "play-button.png"),
+                "play-button.png",
+            ]:
+                if os.path.exists(p):
+                    start_surf = _try_load(p)
+                    if start_surf is not None:
+                        break
+        if start_surf is not None:
+            BUTTON_ICONS["START"] = start_surf
+
+    # Load Back/Select icon if available (e.g., btn_sel.png on the hosted repo)
+    if "BACK" not in BUTTON_ICONS:
+        back_candidates = [
+            "btn_sel.png",
+            "select.png",
+            "btn_back.png",
+            "back.png",
+        ]
+        back_surf = None
+        # Try hosted first
+        if DEFAULT_BUTTONS_BASE_URL:
+            for n in back_candidates:
+                url = DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/" + n
+                back_surf = _from_url(url)
+                if back_surf is not None:
+                    break
+        # Local fallbacks
+        if back_surf is None:
+            for n in back_candidates:
+                for p in [os.path.join("images", n), os.path.join("assets", n), n]:
+                    if os.path.exists(p):
+                        back_surf = _try_load(p)
+                        if back_surf is not None:
+                            break
+                if back_surf is not None:
+                    break
+        if back_surf is not None:
+            BUTTON_ICONS["BACK"] = back_surf
+
+    # Load shoulder button icons (LB/RB) if available
+    if "LB" not in BUTTON_ICONS or "RB" not in BUTTON_ICONS:
+        lb_names = ["btn_lb.png", "lb.png"]
+        rb_names = ["btn_rb.png", "rb.png"]
+        def try_load_names(names):
+            for n in names:
+                url = DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/" + n if DEFAULT_BUTTONS_BASE_URL else None
+                surf = _from_url(url)
+                if surf is not None:
+                    return surf
+                # local fallbacks
+                for p in [os.path.join("images", n), os.path.join("assets", n), n]:
+                    if os.path.exists(p):
+                        s = _try_load(p)
+                        if s is not None:
+                            return s
+            return None
+        if "LB" not in BUTTON_ICONS:
+            lb_surf = try_load_names(lb_names)
+            if lb_surf is not None:
+                BUTTON_ICONS["LB"] = lb_surf
+        if "RB" not in BUTTON_ICONS:
+            rb_surf = try_load_names(rb_names)
+            if rb_surf is not None:
+                BUTTON_ICONS["RB"] = rb_surf
+
+    # Build a textured background once
+    BACKGROUND_SURF = pygame.Surface((W, H)).convert()
+    BACKGROUND_SURF.fill(BG)
+    # Subtle vertical gradient
+    grad = pygame.Surface((W, H), pygame.SRCALPHA)
+    for i in range(H):
+        a = int(40 * (i / H))
+        pygame.draw.line(grad, (0, 0, 0, a), (0, i), (W, i))
+    BACKGROUND_SURF.blit(grad, (0, 0))
+    # Vignette
+    vignette = pygame.Surface((W, H), pygame.SRCALPHA)
+    steps = 10
+    for s in range(steps):
+        r = int(max(W, H) * (0.6 + 0.4 * s / steps))
+        alpha = int(12 + 22 * s / steps)
+        pygame.draw.circle(vignette, (0, 0, 0, alpha), (W // 2, H // 2), r, width=3)
+    BACKGROUND_SURF.blit(vignette, (0, 0))
+    # Large logo background, centered and filling the whole screen
+    if LOGO_SURF is not None:
+        try:
+            # Scale-to-cover (fill), keep aspect ratio, center
+            cover_scale = max(W / LOGO_SURF.get_width(), H / LOGO_SURF.get_height())
+            new_w = max(1, int(LOGO_SURF.get_width() * cover_scale))
+            new_h = max(1, int(LOGO_SURF.get_height() * cover_scale))
+            wm = pygame.transform.smoothscale(LOGO_SURF, (new_w, new_h)).convert_alpha()
+            # Subtle dim so foreground text remains readable
+            tint = pygame.Surface(wm.get_size(), pygame.SRCALPHA)
+            tint.fill((0, 0, 0, 210))
+            wm.blit(tint, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
+            BACKGROUND_SURF.blit(wm, ((W - wm.get_width()) // 2, (H - wm.get_height()) // 2))
+        except Exception:
+            pass
+
+def draw_background(surf):
+    if BACKGROUND_SURF is not None:
+        surf.blit(BACKGROUND_SURF, (0, 0))
+    else:
+        # Fallback if assets haven't loaded yet
+        surf.fill(BG)
+
+# Assets will be loaded during splash screen
+# init_assets() - moved to play_splash_and_load()
+
+# Handle window resizing (windowed mode) to keep background and fonts crisp
+def handle_resize(new_w: int, new_h: int):
+    if not os.environ.get("BUA_WINDOWED"):
+        return
+    global screen, W, H, UI_SCALE, FONT, FONT_SMALL, FONT_BIG
+    screen = pygame.display.set_mode((new_w, new_h), pygame.RESIZABLE)
+    W, H = screen.get_size()
+    UI_SCALE = max(1.0, min(W/1280.0, H/720.0))
+    FONT, FONT_SMALL, FONT_BIG = load_fonts()
+    init_assets()
+
+# Controller support
+pygame.joystick.init()
+JOYS = [pygame.joystick.Joystick(i) for i in range(pygame.joystick.get_count())]
+for j in JOYS:
+    j.init()
+LAST_JOY_COUNT = pygame.joystick.get_count()
+
+
+def detect_pad_style() -> str:
+    # If user picked a style in Settings, prefer that here
+    if PAD_STYLE_USER_OVERRIDE in ("xbox", "playstation", "nintendo", "generic"):
+        return PAD_STYLE_USER_OVERRIDE
+    forced = os.environ.get("BUA_PAD_STYLE", "").strip().lower()
+    if forced in ("xbox", "playstation", "nintendo", "generic"):
+        return forced
+    # Heuristic from connected joystick names
+    try:
+        if pygame.joystick.get_count() == 0:
+            return "keyboard"
+        names = []
+        for i in range(pygame.joystick.get_count()):
+            try:
+                js = pygame.joystick.Joystick(i)
+                nm = js.get_name() or ""
+                names.append(nm.lower())
+            except Exception:
+                pass
+        s = " ".join(names)
+        if any(k in s for k in ["sony", "playstation", "dualsense", "dualshock", "ps4", "ps5"]):
+            return "playstation"
+        if any(k in s for k in ["xbox", "xinput", "microsoft", "360", "one", "series"]):
+            return "xbox"
+        if any(k in s for k in ["nintendo", "switch", "pro controller"]):
+            return "nintendo"
+    except Exception:
+        pass
+    return "keyboard" if pygame.joystick.get_count() == 0 else "xbox"
+
+
+# Decide pad style (updates dynamically on connect/disconnect)
+PAD_STYLE = detect_pad_style()
+update_button_mapping()
+
+# If a saved manual mapping exists, apply it now. If not, and we seem to have
+# an unknown/keyboard style despite a connected joystick, optionally prompt the
+# user to run the manual mapper once on first run (gated by env var).
+_applied_saved = _apply_saved_button_map_if_any()
+if not _applied_saved:
+    try:
+        # Default to auto-mapping on first run (can be disabled with BUA_AUTOMAP_ON_FIRST_RUN=0)
+        _auto = os.environ.get("BUA_AUTOMAP_ON_FIRST_RUN", "1").strip() in ("1","true","yes")
+        if pygame.joystick.get_count() > 0 and (PAD_STYLE == "keyboard" or _auto):
+            run_manual_button_mapper()
+    except Exception:
+        pass
+def input_style_label() -> str:
+    """Return a concise label of the current input device.
+    - If a gamepad is connected: show its reported device name (first device).
+    - If multiple pads: append "+N" for additional devices.
+    - If no gamepad: show "Keyboard".
+    """
+    try:
+        count = pygame.joystick.get_count()
+        if count <= 0:
+            return "Keyboard"
+        name = JOYS[0].get_name() if JOYS else "Controller"
+        name = name or "Controller"
+        if count > 1:
+            return f"{name} (+{count-1})"
+        return name
+    except Exception:
+        return "Keyboard"
+
+
+def draw_text(surf, text, font, color, pos):
+    img = font.render(text, True, color)
+    surf.blit(img, pos)
+
+
+def wrap(text: str, width: int, font) -> List[str]:
+    words = text.split()
+    lines, line = [], ""
+    for w in words:
+        test = (line + " " + w).strip()
+        if font.size(test)[0] <= width:
+            line = test
+        else:
+            lines.append(line)
+            line = w
+    if line:
+        lines.append(line)
+    return lines
+
+
+ICON_RENDER_CACHE: Dict[tuple, pygame.Surface] = {}
+
+
+def _scale_and_style_icon(icon: pygame.Surface, w: int, h: int) -> pygame.Surface:
+    """Scale icon and optionally invert colors for visibility.
+    Uses cache keyed by (id(icon), w, h, mode).
+    Control with env var BUA_ICON_INVERT: '0' (off), '1' (force), 'auto' (default).
+    """
+    mode = (os.environ.get("BUA_ICON_INVERT", "auto") or "auto").lower()
+    key = (id(icon), w, h, mode)
+    cached = ICON_RENDER_CACHE.get(key)
+    if cached is not None:
+        return cached
+    try:
+        scaled = pygame.transform.smoothscale(icon, (w, h))
+    except Exception:
+        scaled = pygame.transform.scale(icon, (w, h))
+
+    def avg_luma(s: pygame.Surface) -> float:
+        # Sample every 2px to keep it fast and skip transparent pixels
+        w_, h_ = s.get_size()
+        total = 0
+        count = 0
+        for yy in range(0, h_, 2):
+            for xx in range(0, w_, 2):
+                r, g, b, a = s.get_at((xx, yy))
+                if a < 10:
+                    continue
+                total += 0.2126 * r + 0.7152 * g + 0.0722 * b
+                count += 1
+        return (total / max(1, count)) if count else 255.0
+
+    def invert_inplace(s: pygame.Surface) -> None:
+        w_, h_ = s.get_size()
+        s.lock()
+        try:
+            for yy in range(h_):
+                for xx in range(w_):
+                    r, g, b, a = s.get_at((xx, yy))
+                    if a == 0:
+                        continue
+                    s.set_at((xx, yy), (255 - r, 255 - g, 255 - b, a))
+        finally:
+            s.unlock()
+
+    if mode == "1" or mode == "true" or mode == "on":
+        out = scaled.copy()
+        invert_inplace(out)
+        ICON_RENDER_CACHE[key] = out
+        return out
+    if mode == "auto":
+        l = avg_luma(scaled)
+        # If icon is dark (low luma), invert to brighten on dark background
+        if l < 90.0:
+            out = scaled.copy()
+            invert_inplace(out)
+            ICON_RENDER_CACHE[key] = out
+            return out
+    ICON_RENDER_CACHE[key] = scaled
+    return scaled
+
+
+def draw_hints_line(surf, hint_text: str, font, color, pos):
+    """Draw a hint line, replacing A/B/X/Y with icons when available.
+    Accepts separators '|' or ',' and segments like 'A=toggle'.
+    """
+    x, y = pos
+    segments = [s.strip() for s in re.split(r"[|,]", hint_text) if s.strip()]
+    # Layout tuning
+    sep_text = " | "
+    icon_label_gap = 8  # px between icon/keycap and label
+    segment_gap_extra = 4  # extra px after separator
+    for i, seg in enumerate(segments):
+        if "=" in seg:
+            key, label = seg.split("=", 1)
+            key = key.strip().upper()
+ 
+            raw_label = label.strip()
+ 
+            def capfirst(s: str) -> str:
+ 
+                return s[:1].upper() + s[1:] if s else s
+ 
+            label = capfirst(raw_label)
+            # Remap logical key to current controller style
+            mapped = STYLE_ICON_MAP.get(PAD_STYLE, STYLE_ICON_MAP["generic"]).get(key, key)
+            if key == "START":
+                mapped = "START"
+            icon = BUTTON_ICONS.get(mapped) or BUTTON_ICONS.get(key)
+            # Keyboard style: draw keycaps instead of icons
+            if PAD_STYLE == "keyboard":
+                kb = KEYBOARD_HINT_MAP.get(key) or KEYBOARD_HINT_MAP.get(mapped)
+                if kb:
+                    # Support combos like Ctrl+A
+                    tokens = [t.strip() for t in kb.split("+")]
+                    for t_i, tok in enumerate(tokens):
+                        # draw keycap
+                        pad_x = 6
+                        pad_y = 2
+                        txt_img = font.render(tok, True, color)
+                        kw, kh = txt_img.get_width() + pad_x*2, txt_img.get_height() + pad_y*2
+                        rect = pygame.Rect(x, y + (font.get_height() - kh)//2, kw, kh)
+                        pygame.draw.rect(surf, (240, 243, 248), rect, border_radius=6)
+                        pygame.draw.rect(surf, (120, 130, 150), rect, width=2, border_radius=6)
+                        surf.blit(txt_img, (rect.x + pad_x, rect.y + pad_y))
+                        x += kw
+                        if t_i < len(tokens) - 1:
+                            plus_img = font.render("+", True, color)
+                            surf.blit(plus_img, (x + 4, y))
+                            x += plus_img.get_width() + 8
+                    if label:
+                        # small gap before label text
+                        x += icon_label_gap
+                        img = font.render(label, True, color)
+                        surf.blit(img, (x, y))
+                        x += img.get_width()
+                    # done with this segment — draw separator here to keep spacing
+                    if i < len(segments) - 1:
+                        sep_img = font.render(sep_text, True, color)
+                        surf.blit(sep_img, (x, y))
+                        x += sep_img.get_width() + segment_gap_extra
+                    continue
+                # If no kb mapping, fall back to icon/text below
+            if icon is not None:
+                # Preserve aspect ratio: scale by target height and derive width
+                h = max(16, int(font.get_height() * 0.9))
+                iw, ih = icon.get_width(), icon.get_height() or 1
+                w = max(1, int(iw * (h / ih)))
+                icon_s = _scale_and_style_icon(icon, w, h)
+                surf.blit(icon_s, (x, y - (h - font.get_height()) // 2))
+                x += w + icon_label_gap
+                if label:
+                    img = font.render(label, True, color)
+                    surf.blit(img, (x, y))
+                    x += img.get_width()
+            else:
+                txt = f"{key}={label}" if label else key
+                img = font.render(txt, True, color)
+                surf.blit(img, (x, y))
+                x += img.get_width()
+        else:
+            img = font.render(seg, True, color)
+            surf.blit(img, (x, y))
+            x += img.get_width()
+        if i < len(segments) - 1:
+            sep_img = font.render(sep_text, True, color)
+            surf.blit(sep_img, (x, y))
+            x += sep_img.get_width() + segment_gap_extra
+
+def draw_hints_block_right(surf, hint_text: str, font, color, pos, line_gap: int = 6):
+    """Draw hints one per line, right-aligned to pos.x.
+    Supports the same syntax as draw_hints_line for segments: 'A=Action | B=Back'.
+    """
+    rx, y = pos
+    segments = [s.strip() for s in re.split(r"[|,]", hint_text) if s.strip()]
+
+    def measure_and_draw(seg: str, draw: bool, y_draw: int) -> int:
+        x_local = 0
+        # Copy of single-segment rendering from draw_hints_line
+        if "=" in seg:
+            key, label = seg.split("=", 1)
+            key = key.strip().upper()
+            raw_label = label.strip()
+            def capfirst(s: str) -> str:
+                return s[:1].upper() + s[1:] if s else s
+            label = capfirst(raw_label)
+            mapped = STYLE_ICON_MAP.get(PAD_STYLE, STYLE_ICON_MAP["generic"]).get(key, key)
+            if key == "START":
+                mapped = "START"
+            icon = BUTTON_ICONS.get(mapped) or BUTTON_ICONS.get(key)
+            if PAD_STYLE == "keyboard":
+                kb = KEYBOARD_HINT_MAP.get(key) or KEYBOARD_HINT_MAP.get(mapped)
+                if kb:
+                    tokens = [t.strip() for t in kb.split("+")]
+                    for t_i, tok in enumerate(tokens):
+                        txt_img = font.render(tok, True, color)
+                        kw, kh = txt_img.get_width() + 12, txt_img.get_height() + 4
+                        if draw:
+                            rect = pygame.Rect(rx - (kw + x_local), y_draw + (font.get_height() - kh)//2, kw, kh)
+                            pygame.draw.rect(surf, (240,243,248), rect, border_radius=6)
+                            pygame.draw.rect(surf, (120,130,150), rect, width=2, border_radius=6)
+                            surf.blit(txt_img, (rect.x + 6, rect.y + 2))
+                        x_local += kw
+                        if t_i < len(tokens) - 1:
+                            plus_img = font.render("+", True, color)
+                            if draw:
+                                surf.blit(plus_img, (rx - (x_local + plus_img.get_width() + 8), y_draw))
+                            x_local += plus_img.get_width() + 8
+                    if label:
+                        img = font.render(label, True, color)
+                        if draw:
+                            surf.blit(img, (rx - (x_local + 8 + img.get_width()), y_draw))
+                        x_local += 8 + img.get_width()
+                    return x_local
+            if icon is not None:
+                h = max(16, int(font.get_height() * 0.9))
+                iw, ih = icon.get_width(), icon.get_height() or 1
+                w = max(1, int(iw * (h / ih)))
+                if draw:
+                    icon_s = _scale_and_style_icon(icon, w, h)
+                    surf.blit(icon_s, (rx - (x_local + w), y_draw - (h - font.get_height()) // 2))
+                x_local += w + 8
+                if label:
+                    img = font.render(label, True, color)
+                    if draw:
+                        surf.blit(img, (rx - (x_local + img.get_width()), y_draw))
+                    x_local += img.get_width()
+                return x_local
+            # fallback text
+            txt = f"{key}={label}" if label else key
+            img = font.render(txt, True, color)
+            if draw:
+                surf.blit(img, (rx - (x_local + img.get_width()), y_draw))
+            x_local += img.get_width()
+            return x_local
+        else:
+            img = font.render(seg, True, color)
+            if draw:
+                surf.blit(img, (rx - img.get_width(), y_draw))
+            return img.get_width()
+
+    y_cursor = y
+    for seg in segments:
+        w = measure_and_draw(seg, False, y_cursor)
+        measure_and_draw(seg, True, y_cursor)
+        y_cursor += font.get_height() + line_gap
+
+
+def draw_persistent_hints(surf) -> None:
+    """Draw persistent hints - currently disabled as hints are shown inline on each screen."""
+    pass
+
+# ------------------------------
+# Process runner with live log
+# ------------------------------
+
+class Runner:
+    def __init__(self):
+        self.lines: List[str] = []
+        self.proc: subprocess.Popen | None = None
+        self.lock = threading.Lock()
+        self.done = False
+        self.returncode: int | None = None
+        self.error_output: str = ""
+        self.last_dialog_title: str | None = None
+        self.last_dialog_text: str | None = None
+        self.last_dialog_type: str | None = None  # Type of dialog (msgbox, yesno, menu)
+        self.last_dialog_items: List[str] = []  # Menu items (tag|description pairs)
+        self.last_dialog_resp_file: str | None = None  # Response file path
+        self.detected_urls: List[str] = []  # URLs found during installation
+        self.url_shown = False  # Track if we've already shown the URL dialog
+        self.last_line: str = ""  # Track previous line for context
+        self.menu_request: dict | None = None  # Menu selection request
+        self.menu_response: str | None = None  # User's menu selection response
+
+    def append(self, text: str):
+        with self.lock:
+            for ln in text.splitlines():
+                # Intercept dialog markers emitted by our wrapper
+                if ln.startswith("__BUA_DIALOG__"):
+                    # Expected formats:
+                    # __BUA_DIALOG__ type=<type> title_b64=<...> text_b64=<...> items_b64=<...> resp=<file>
+                    # or fallback: __BUA_DIALOG__ type=<type> title=<...> text=<...> items=<...> resp=<file>
+                    print(f"[BUA Python] Detected __BUA_DIALOG__ marker: {ln[:100]}")
+                    try:
+                        parts = ln.split()
+                        kv = {}
+                        for p in parts[1:]:
+                            if "=" in p:
+                                k, v = p.split("=", 1)
+                                kv[k] = v
+
+                        # Extract dialog type
+                        self.last_dialog_type = kv.get("type", "msgbox")
+                        print(f"[BUA Python] Parsed dialog type: {self.last_dialog_type}, resp_file: {kv.get('resp')}")
+
+                        # Extract title
+                        if "title_b64" in kv:
+                            self.last_dialog_title = base64.b64decode(kv["title_b64"]).decode("utf-8", "ignore")
+                        elif "title" in kv:
+                            self.last_dialog_title = kv["title"]
+
+                        # Extract text
+                        if "text_b64" in kv:
+                            decoded_text = base64.b64decode(kv["text_b64"]).decode("utf-8", "ignore")
+                            self.last_dialog_text = decoded_text.replace("\\n", "\n")
+                        elif "text" in kv:
+                            self.last_dialog_text = kv["text"].replace("\\n", "\n")
+
+                        # Extract menu items (pipe-separated)
+                        if "items_b64" in kv:
+                            decoded_items = base64.b64decode(kv["items_b64"]).decode("utf-8", "ignore")
+                            self.last_dialog_items = decoded_items.split("|") if decoded_items else []
+                        elif "items" in kv:
+                            self.last_dialog_items = kv["items"].split("|") if kv["items"] else []
+
+                        # Extract response file path
+                        self.last_dialog_resp_file = kv.get("resp")
+
+                    except Exception as e:
+                        # If parsing fails, log the error
+                        print(f"[BUA Python] Error parsing dialog marker: {e}")
+                        import traceback
+                        traceback.print_exc()
+                    continue
+
+                # Intercept menu selection requests
+                if ln.startswith("__BUA_MENU__"):
+                    # Format: __BUA_MENU__ title=<...> options=<key1:Label1,key2:Label2,...>
+                    try:
+                        parts = ln.split(None, 1)[1]  # Get everything after __BUA_MENU__
+                        import shlex
+                        kv = {}
+                        for token in shlex.split(parts):
+                            if "=" in token:
+                                k, v = token.split("=", 1)
+                                kv[k] = v
+
+                        if "title" in kv and "options" in kv:
+                            # Parse options: "key1:Label1,key2:Label2"
+                            options = []
+                            for opt in kv["options"].split(","):
+                                if ":" in opt:
+                                    key, label = opt.split(":", 1)
+                                    options.append((key.strip(), label.strip()))
+
+                            self.menu_request = {
+                                "title": kv["title"],
+                                "options": options
+                            }
+                    except Exception as e:
+                        print(f"Error parsing menu request: {e}")
+                    continue
+                self.lines.append(ln)
+
+                # Detect important URLs in output (authentication links, etc.)
+                if ("http://" in ln or "https://" in ln) and ln.strip():
+                    # Check if this is an important URL (authentication, login, visit, etc.)
+                    ln_lower = ln.lower()
+                    # Look for auth-related keywords in current or previous line
+                    is_important = any(keyword in ln_lower or keyword in self.last_line.lower()
+                                     for keyword in ["authenticate", "login", "visit", "authorization", "auth", "setup"])
+
+                    # Exclude warning/config/download URLs and wget/curl output
+                    is_excluded = any(keyword in ln_lower for keyword in [
+                        "warning", "see http", "config",
+                        "download", "downloading", "fetching", "getting",
+                        "curl", "wget", "github.com", "raw.githubusercontent",
+                        "resolving", "connecting", "saving to", "http request sent",
+                        "wohlsoft.ru", "sourceforge.net"
+                    ]) or ln.strip().startswith("--20")  # Exclude wget timestamps like --2025-11-13
+
+                    if is_important and not is_excluded:
+                        # Include context if previous line had relevant text
+                        if "authenticate" in self.last_line.lower() or "visit" in self.last_line.lower():
+                            self.detected_urls.append(self.last_line.strip())
+                        self.detected_urls.append(ln.strip())
+
+                self.last_line = ln
+
+                # keep log manageable
+                if len(self.lines) > 1000:
+                    self.lines = self.lines[-1000:]
+
+    def run(self, cmd: str):
+        # Execute the command and wait for completion
+        # Add 'wait' to ensure all background processes finish
+        full_cmd = f"({cmd}); wait"
+
+        self.proc = subprocess.Popen(
+            ["bash", "-c", full_cmd],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+        def reader():
+            assert self.proc and self.proc.stdout
+            output_lines = []
+            for line in self.proc.stdout:
+                stripped = line.rstrip("\n")
+                self.append(stripped)
+                output_lines.append(stripped)
+            self.proc.wait()
+            self.returncode = self.proc.returncode
+            # Store last 10 lines for error display
+            self.error_output = "\n".join(output_lines[-10:])
+            self.done = True
+        t = threading.Thread(target=reader, daemon=True)
+        t.start()
+
+    def kill(self):
+        if self.proc and self.proc.poll() is None:
+            try:
+                self.proc.terminate()
+            except Exception:
+                pass
+
+
+# ------------------------------
+# Screens
+# ------------------------------
+
+class BaseScreen:
+    def handle(self, events):
+        pass
+    def update(self):
+        pass
+    def draw(self):
+        pass
+
+
+class MenuScreen(BaseScreen):
+    def __init__(self, title: str, items: List[Tuple[str, str]]):
+        self.title = title
+        # Keep an immutable copy for filtering
+        self.all_items = list(items)
+        self.items = list(items)
+        self.idx = 0
+        self.stats = self.calculate_stats() if title == "Batocera Unofficial Add-Ons" else None
+        self.search_mode = False
+        self.search_query = ""
+        self.keyboard = OnScreenKeyboard()
+
+    def calculate_stats(self):
+        """Calculate installation statistics"""
+        history = load_history()
+        total_installed = len([k for k in history if any(e['success'] for e in history[k])])
+        
+        # Count by category
+        category_stats = {}
+        for cat_name, app_list in CATEGORIES.items():
+            installed = sum(1 for app in app_list if is_installed(app))
+            category_stats[cat_name] = (installed, len(app_list))
+        
+        return {
+            'total_installed': total_installed,
+            'total_available': len(APPS),
+            'category_stats': category_stats
+        }
+
+    def handle(self, events):
+        # If in search mode, route input to on-screen keyboard
+        if self.search_mode:
+            key = self.keyboard.handle(events)
+            if key:
+                if key == "BACKSPACE":
+                    self.search_query = self.search_query[:-1]
+                elif key == "ENTER":
+                    # Submit global search
+                    q = self.search_query.lower().strip()
+                    self.search_mode = False
+                    if q:
+                        # Gather matches across all categories/apps
+                        def matches(k: str) -> bool:
+                            if q in k.lower():
+                                return True
+                            return q in DESCRIPTIONS.get(k, "").lower()
+                        all_keys = sorted(APPS.keys())
+                        results = [k for k in all_keys if matches(k)]
+                        if results:
+                            push_screen(GlobalSearchScreen(query=self.search_query, app_keys=results))
+                        else:
+                            push_screen(NoResultsScreen(self.search_query))
+                    else:
+                        # Empty query: just close keyboard
+                        pass
+                elif key == "EXIT":
+                    # Cancel search entirely
+                    self.search_mode = False
+                    self.search_query = ""
+                else:
+                    self.search_query += key
+            # While typing, ignore other inputs
+            return
+
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                # Toggle search on the main menu with X
+                if e.key == pygame.K_x:
+                    self.search_mode = True
+                    self.search_query = ""
+                    return
+                if e.key in (pygame.K_DOWN,):
+                    self.idx = (self.idx + 1) % len(self.items)
+                if e.key in (pygame.K_UP,):
+                    self.idx = (self.idx - 1) % len(self.items)
+                # Keyboard A -> Enter (activate per hints)
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    self.activate()
+                if e.key == pygame.K_ESCAPE:
+                    if self.title != "Batocera Unofficial Add-Ons":
+                        pop_screen()
+            if e.type == pygame.JOYHATMOTION:
+                # D-Pad
+                x, y = e.value
+                if y == -1:
+                    self.idx = (self.idx + 1) % len(self.items)
+                elif y == 1:
+                    self.idx = (self.idx - 1) % len(self.items)
+            if e.type == pygame.JOYBUTTONDOWN:
+                # Normalize to logical buttons via BTN_*
+                if e.button in (BTN_A,):
+                    self.activate()
+                if e.button in (BTN_B, BTN_BACK):
+                    if self.title != "Batocera Unofficial Add-Ons":
+                        pop_screen()
+                if e.button in (BTN_START,):
+                    self.activate()
+                # X button enters search
+                if e.button == BTN_X:
+                    self.search_mode = True
+                    self.search_query = ""
+                    return
+
+    def filter_items(self):
+        """(Unused during global search) Retained for potential future filtering."""
+        self.items = list(self.all_items)
+        self.idx = 0
+
+    def activate(self):
+        name, _desc = self.items[self.idx]
+        # Map translated names back to English category keys
+        category_map = {
+            t("games"): "Games",
+            t("windows_freeware"): "Windows Freeware",
+            t("game_utilities"): "Game Utilities",
+            t("system_utilities"): "System Utilities",
+            t("developer_tools"): "Developer Tools",
+            t("docker_menu"): "Docker Menu",
+        }
+
+        if name == t("exit"):
+            pygame.quit(); sys.exit(0)
+        if name in SPECIAL_TOPLEVEL_RUN:
+            cmd = SPECIAL_TOPLEVEL_RUN[name]
+            push_screen(RunListScreen([(name, cmd)], title=name))
+            return
+        if name == t("settings"):
+            push_screen(SettingsScreen())
+            return
+        if name == t("updater"):
+            push_screen(UpdaterScreen())
+            return
+        # category -> check list screen
+        english_name = category_map.get(name, name)
+        if english_name in CATEGORIES:
+            apps = sorted(CATEGORIES[english_name])
+            push_screen(ChecklistScreen(category=name, app_keys=apps))
+
+    def draw(self):
+        draw_background(screen)
+        header_y = S(18)
+        header_h = 0
+        try:
+            if WHEEL_SURF is not None:
+                # --- Trim transparent padding first ---
+                trimmed_rect = WHEEL_SURF.get_bounding_rect()  # auto-detect non-transparent area
+                trimmed = WHEEL_SURF.subsurface(trimmed_rect).copy()
+
+                # --- Wheel logo height (set to 100)
+                target_h = S(100)
+                scale = target_h / trimmed.get_height()
+                target_w = int(trimmed.get_width() * scale)
+                wheel = pygame.transform.smoothscale(trimmed, (target_w, target_h))
+
+            # --- Draw centered horizontally or aligned as before ---
+                x = (screen.get_width() - target_w) // 2
+                screen.blit(wheel, (x, header_y))
+                header_h = target_h
+            else:
+                draw_text(screen, self.title, FONT_BIG, FG, (40, 30))
+                header_h = FONT_BIG.get_height()
+        except Exception:
+            draw_text(screen, self.title, FONT_BIG, FG, (40, 30))
+            header_h = FONT_BIG.get_height()
+
+        # Search overlay when typing
+        if self.search_mode:
+            search_box = pygame.Rect(S(40), header_y + header_h + S(10), W - S(80), S(50))
+            pygame.draw.rect(screen, CARD, search_box, border_radius=8)
+            pygame.draw.rect(screen, ACCENT, search_box, width=2, border_radius=8)
+            # Keyboard draws its own input at the top
+            self.keyboard.draw(screen, self.search_query)
+            return
+
+        # Show stats on main menu
+        if self.stats:
+            # Place stats under the header/banner
+            stats_y = header_y + header_h + S(12)
+            total_text = (
+                f"{t('installed')}: {self.stats['total_installed']} {t('of')} {self.stats['total_available']} {t('addons')}"
+                f"  |  A={t('hint_open')}  |  X={t('hint_search')}  |  Back={t('hint_back_settings')}  |  {t('input')}: {input_style_label()}"
+            )
+            draw_hints_line(screen, total_text, FONT_SMALL, ACCENT, (S(40), stats_y))
+
+        list_y = (stats_y + S(35)) if self.stats else (header_y + header_h + S(20))
+
+        # Create reverse mapping from translated to English category names
+        category_map = {
+            t("games"): "Games",
+            t("windows_freeware"): "Windows Freeware",
+            t("game_utilities"): "Game Utilities",
+            t("system_utilities"): "System Utilities",
+            t("developer_tools"): "Developer Tools",
+            t("docker_menu"): "Docker Menu",
+        }
+
+        # Scrollable cards sized to fit the screen height
+        total = len(self.items)
+        row_pitch = S(70)
+        row_h = S(60)
+        bottom_pad = S(40)
+        avail_h = max(0, H - list_y - bottom_pad)
+        rows = max(1, min(total, avail_h // row_pitch))
+        top = 0 if total <= rows else max(0, min(self.idx - rows // 2, total - rows))
+        view = self.items[top:top + rows]
+
+        x = S(40)
+        for i, (name, desc) in enumerate(view):
+            actual_idx = top + i
+            y = list_y + i * row_pitch
+            rect = pygame.Rect(x, y, W - S(80), row_h)
+            pygame.draw.rect(screen, CARD, rect, border_radius=12)
+            if actual_idx == self.idx:
+                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=12)
+
+            # Category name
+            draw_text(screen, name, FONT, FG, (rect.x + S(16), rect.y + S(10)))
+
+            # Show category stats if available
+            # Map translated name back to English for stats lookup
+            english_name = category_map.get(name, name)
+            if self.stats and english_name in self.stats['category_stats']:
+                installed, total = self.stats['category_stats'][english_name]
+                stat_text = f"[{installed}/{total}]"
+                stat_color = ACCENT if installed > 0 else MUTED
+                draw_text(screen, stat_text, FONT_SMALL, stat_color, (rect.x + S(16), rect.y + S(32)))
+                desc_x = rect.x + S(90)
+            else:
+                desc_x = rect.x + S(16)
+
+            # Description - calculate available width properly
+            available_width = rect.x + rect.w - desc_x - S(16)  # Leave 16px padding on right
+            lines = wrap(desc, available_width, FONT_SMALL)
+            for li, ln in enumerate(lines[:2]):
+                draw_text(screen, ln, FONT_SMALL, MUTED, (desc_x, rect.y + S(34) + li*S(18)))
+            
+            # per-card hint removed (now shown in top bar)
+
+
+class ConfirmDialog(BaseScreen):
+    def __init__(self, title: str, message: List[str], on_confirm, on_cancel):
+        self.title = title
+        self.message = message  # List of lines
+        self.on_confirm = on_confirm
+        self.on_cancel = on_cancel
+        self.selected = 0  # 0 = Yes, 1 = No
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key in (pygame.K_LEFT, pygame.K_RIGHT):
+                    self.selected = 1 - self.selected
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):  # Confirm (Enter)
+                    self.activate()
+                if e.key == pygame.K_ESCAPE:  # Cancel (Esc)
+                    self.on_cancel()
+                    pop_screen()
+            if e.type == pygame.JOYHATMOTION:
+                x, _y = e.value
+                if x != 0:
+                    self.selected = 1 - self.selected
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_START):  # A or Start
+                    self.activate()
+                if e.button in (BTN_B, BTN_BACK):  # B or Back
+                    self.on_cancel()
+                    pop_screen()
+
+    def activate(self):
+        if self.selected == 0:
+            self.on_confirm()
+        else:
+            self.on_cancel()
+        pop_screen()
+
+    def draw(self):
+        draw_background(screen)
+        
+        # Semi-transparent overlay
+        overlay = pygame.Surface((W, H))
+        overlay.set_alpha(180)
+        overlay.fill(BG)
+        screen.blit(overlay, (0, 0))
+        
+        # Dialog box
+        dialog_w = 800
+        dialog_h = 300
+        dialog_x = (W - dialog_w) // 2
+        dialog_y = (H - dialog_h) // 2
+        dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h)
+        pygame.draw.rect(screen, CARD, dialog_rect, border_radius=15)
+        pygame.draw.rect(screen, ACCENT, dialog_rect, width=3, border_radius=15)
+        
+        # Title
+        draw_text(screen, self.title, FONT_BIG, FG, (dialog_x + 30, dialog_y + 30))
+        
+        # Message lines
+        msg_y = dialog_y + 80
+        for line in self.message:
+            draw_text(screen, line, FONT, MUTED, (dialog_x + 30, msg_y))
+            msg_y += 30
+        
+        # Buttons
+        button_y = dialog_y + dialog_h - 70
+        button_w = 150
+        button_h = 45
+        
+        # Yes button
+        yes_x = dialog_x + dialog_w // 2 - button_w - 20
+        yes_rect = pygame.Rect(yes_x, button_y, button_w, button_h)
+        yes_color = ACCENT if self.selected == 0 else CARD
+        pygame.draw.rect(screen, yes_color, border_radius=8, rect=yes_rect)
+        if self.selected == 0:
+            pygame.draw.rect(screen, FG, yes_rect, width=3, border_radius=8)
+        draw_text(screen, t("yes"), FONT, FG, (yes_x + 50, button_y + 10))
+        
+        # No button
+        no_x = dialog_x + dialog_w // 2 + 20
+        no_rect = pygame.Rect(no_x, button_y, button_w, button_h)
+        no_color = (255, 100, 100) if self.selected == 1 else CARD
+        pygame.draw.rect(screen, no_color, border_radius=8, rect=no_rect)
+        if self.selected == 1:
+            pygame.draw.rect(screen, FG, no_rect, width=3, border_radius=8)
+        draw_text(screen, t("no"), FONT, FG, (no_x + 55, button_y + 10))
+
+
+class InfoDialog(BaseScreen):
+    def __init__(self, title: str, message: List[str], on_close=None):
+        self.title = title
+        self.message = message
+        self.on_close = on_close
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key in (pygame.K_ESCAPE, pygame.K_RETURN, pygame.K_KP_ENTER):
+                    if self.on_close:
+                        try:
+                            self.on_close()
+                        except Exception:
+                            pass
+                    pop_screen()
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_B, BTN_BACK, BTN_START):  # A/B/Back/Start
+                    if self.on_close:
+                        try:
+                            self.on_close()
+                        except Exception:
+                            pass
+                    pop_screen()
+
+    def draw(self):
+        draw_background(screen)
+
+        overlay = pygame.Surface((W, H))
+        overlay.set_alpha(180)
+        overlay.fill(BG)
+        screen.blit(overlay, (0, 0))
+
+        dialog_w = min(W - S(120), S(900))
+        dialog_h = min(H - S(120), S(600))
+        dialog_x = (W - dialog_w) // 2
+        dialog_y = (H - dialog_h) // 2
+        dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h)
+        pygame.draw.rect(screen, CARD, dialog_rect, border_radius=15)
+        pygame.draw.rect(screen, ACCENT, dialog_rect, width=3, border_radius=15)
+
+        draw_text(screen, self.title, FONT_BIG, FG, (dialog_x + S(30), dialog_y + S(30)))
+
+        # Message box area
+        msg_rect = pygame.Rect(dialog_x + S(30), dialog_y + S(90), dialog_w - S(60), dialog_h - S(160))
+        pygame.draw.rect(screen, (30, 34, 44), msg_rect, border_radius=10)
+
+        # Render multi-line text with wrapping
+        y = msg_rect.y + S(10)
+        for raw_line in self.message:
+            if not raw_line:
+                y += S(8)
+                continue
+            for ln in wrap(raw_line, msg_rect.w - S(20), FONT):
+                if y > msg_rect.bottom - S(20):
+                    break
+                draw_text(screen, ln, FONT, (210, 215, 225), (msg_rect.x + S(10), y))
+                y += S(22)
+
+        # OK button
+        btn_w, btn_h = S(120), S(45)
+        btn_rect = pygame.Rect(dialog_x + (dialog_w - btn_w)//2, dialog_y + dialog_h - S(60), btn_w, btn_h)
+        pygame.draw.rect(screen, ACCENT, btn_rect, border_radius=8)
+        draw_text(screen, t("ok"), FONT, FG, (btn_rect.x + (btn_w - FONT.size(t("ok"))[0])//2, btn_rect.y + S(10)))
+
+
+class InteractiveDialog(BaseScreen):
+    """Dialog for yes/no questions, menu selections, and checklists from bash scripts"""
+    def __init__(self, dialog_type: str, title: str, message: str, items: List[str], resp_file: str):
+        """
+        dialog_type: 'yesno', 'menu', or 'checklist'
+        title: Dialog title
+        message: Dialog message/question
+        items: For menu/checklist: list of alternating tags, descriptions, and status (on/off). For yesno: empty list.
+        resp_file: Path to file where response should be written
+        """
+        self.dialog_type = dialog_type
+        self.title = title
+        self.message = message.split("\n")  # Split into lines for rendering
+        self.resp_file = resp_file
+        self.idx = 0
+        self.scroll_offset = 0
+
+        if dialog_type == "menu":
+            # Parse items as alternating tag/description pairs
+            self.options = []
+            for i in range(0, len(items), 2):
+                if i + 1 < len(items):
+                    tag = items[i]
+                    desc = items[i + 1]
+                    self.options.append((tag, desc))
+            self.checked = []  # Not used for menu
+        elif dialog_type == "checklist":
+            # Parse items as alternating tag/description/status triples
+            self.options = []
+            self.checked = []
+            for i in range(0, len(items), 3):
+                if i + 2 < len(items):
+                    tag = items[i]
+                    desc = items[i + 1]
+                    status = items[i + 2]
+                    self.options.append((tag, desc))
+                    # Status is "on" or "off"
+                    self.checked.append(status.lower() == "on")
+        else:  # yesno
+            self.options = [("0", "Yes"), ("1", "No")]
+            self.checked = []
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key in (pygame.K_DOWN,):
+                    self.idx = (self.idx + 1) % len(self.options)
+                if e.key in (pygame.K_UP,):
+                    self.idx = (self.idx - 1) % len(self.options)
+                if e.key == pygame.K_SPACE:
+                    # Toggle checkbox for checklist mode
+                    if self.dialog_type == "checklist" and 0 <= self.idx < len(self.checked):
+                        self.checked[self.idx] = not self.checked[self.idx]
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    self.select()
+                if e.key == pygame.K_ESCAPE:
+                    self.cancel()
+            if e.type == pygame.JOYHATMOTION:
+                _x, y = e.value
+                if y == -1:
+                    self.idx = (self.idx + 1) % len(self.options)
+                elif y == 1:
+                    self.idx = (self.idx - 1) % len(self.options)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button == BTN_X:
+                    # Toggle checkbox with X button
+                    if self.dialog_type == "checklist" and 0 <= self.idx < len(self.checked):
+                        self.checked[self.idx] = not self.checked[self.idx]
+                if e.button in (BTN_A, BTN_START):
+                    self.select()
+                if e.button in (BTN_B, BTN_BACK):
+                    self.cancel()
+
+    def select(self):
+        """User confirmed selection"""
+        if self.dialog_type == "checklist":
+            # For checklist, return quoted list of selected tags
+            selected = [self.options[i][0] for i in range(len(self.options)) if self.checked[i]]
+            response = " ".join(f'"{tag}"' for tag in selected)
+            self.write_response(response)
+        else:
+            # For menu/yesno, return single tag
+            tag, _label = self.options[self.idx]
+            self.write_response(tag)
+        pop_screen()
+
+    def cancel(self):
+        """User cancelled - write cancel response"""
+        if self.dialog_type == "yesno":
+            self.write_response("1")  # No/cancel
+        else:  # menu/checklist
+            self.write_response("")  # Empty string for cancel
+        pop_screen()
+
+    def write_response(self, response: str):
+        """Write response to file so bash script can continue"""
+        try:
+            with open(self.resp_file, "w") as f:
+                f.write(response)
+        except Exception as e:
+            print(f"Error writing response to {self.resp_file}: {e}")
+
+    def draw(self):
+        draw_background(screen)
+
+        # Semi-transparent overlay
+        overlay = pygame.Surface((W, H))
+        overlay.set_alpha(180)
+        overlay.fill(BG)
+        screen.blit(overlay, (0, 0))
+
+        # Dialog box
+        dialog_w = min(W - S(80), S(900))
+        dialog_h = min(H - S(100), S(700))
+        dialog_x = (W - dialog_w) // 2
+        dialog_y = (H - dialog_h) // 2
+        dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h)
+        pygame.draw.rect(screen, CARD, dialog_rect, border_radius=15)
+        pygame.draw.rect(screen, ACCENT, dialog_rect, width=3, border_radius=15)
+
+        # Title
+        draw_text(screen, self.title, FONT_BIG, FG, (dialog_x + S(30), dialog_y + S(30)))
+
+        # Message box area
+        msg_y = dialog_y + S(80)
+        msg_h = S(120)
+        msg_rect = pygame.Rect(dialog_x + S(30), msg_y, dialog_w - S(60), msg_h)
+        pygame.draw.rect(screen, (30, 34, 44), msg_rect, border_radius=10)
+
+        # Render message text
+        y = msg_rect.y + S(10)
+        for raw_line in self.message:
+            if not raw_line:
+                y += S(8)
+                continue
+            for ln in wrap(raw_line, msg_rect.w - S(20), FONT):
+                if y > msg_rect.bottom - S(20):
+                    break
+                draw_text(screen, ln, FONT, (210, 215, 225), (msg_rect.x + S(10), y))
+                y += S(22)
+
+        # Hints
+        if self.dialog_type == "checklist":
+            hint = f"X={t('hint_toggle') or 'Toggle'} | A={t('hint_confirm') or 'Confirm'} | B={t('hint_cancel') or 'Cancel'}"
+        else:
+            hint = f"A={t('hint_select') or 'Select'} | B={t('hint_cancel') or 'Cancel'}"
+        draw_hints_line(screen, hint, FONT_SMALL, ACCENT, (dialog_x + S(30), msg_rect.bottom + S(15)))
+
+        # Options list area
+        list_y = msg_rect.bottom + S(50)
+        list_h = dialog_h - (list_y - dialog_y) - S(30)
+        item_h = S(50)
+
+        # Calculate scrolling
+        visible_items = max(1, list_h // item_h)
+
+        if self.idx < self.scroll_offset:
+            self.scroll_offset = self.idx
+        elif self.idx >= self.scroll_offset + visible_items:
+            self.scroll_offset = self.idx - visible_items + 1
+
+        max_scroll = max(0, len(self.options) - visible_items)
+        self.scroll_offset = max(0, min(self.scroll_offset, max_scroll))
+
+        # Draw options (only visible ones)
+        for i in range(self.scroll_offset, min(len(self.options), self.scroll_offset + visible_items)):
+            tag, label = self.options[i]
+            display_index = i - self.scroll_offset
+            opt_y = list_y + display_index * item_h
+
+            opt_rect = pygame.Rect(dialog_x + S(30), opt_y, dialog_w - S(60), item_h - S(5))
+
+            if i == self.idx:
+                pygame.draw.rect(screen, SELECT, opt_rect, border_radius=8)
+                pygame.draw.rect(screen, ACCENT, opt_rect, width=3, border_radius=8)
+            else:
+                pygame.draw.rect(screen, (30, 34, 44), opt_rect, border_radius=8)
+
+            # Draw checkbox for checklist mode
+            text_x = opt_rect.x + S(15)
+            if self.dialog_type == "checklist":
+                # Draw checkbox
+                checkbox_size = S(20)
+                checkbox_x = opt_rect.x + S(15)
+                checkbox_y = opt_rect.y + (opt_rect.h - checkbox_size) // 2
+                checkbox_rect = pygame.Rect(checkbox_x, checkbox_y, checkbox_size, checkbox_size)
+
+                # Box outline
+                pygame.draw.rect(screen, FG, checkbox_rect, width=2, border_radius=3)
+
+                # Checkmark if checked
+                if self.checked[i]:
+                    # Draw X mark
+                    pygame.draw.line(screen, ACCENT,
+                                   (checkbox_x + S(4), checkbox_y + S(4)),
+                                   (checkbox_x + checkbox_size - S(4), checkbox_y + checkbox_size - S(4)), 3)
+                    pygame.draw.line(screen, ACCENT,
+                                   (checkbox_x + checkbox_size - S(4), checkbox_y + S(4)),
+                                   (checkbox_x + S(4), checkbox_y + checkbox_size - S(4)), 3)
+
+                text_x = checkbox_x + checkbox_size + S(15)
+
+            draw_text(screen, label, FONT, FG, (text_x, opt_rect.y + S(12)))
+
+        # Draw scroll indicators if needed
+        if len(self.options) > visible_items:
+            # Show up arrow if not at top
+            if self.scroll_offset > 0:
+                arrow_up_y = list_y - S(15)
+                pygame.draw.polygon(screen, ACCENT, [
+                    (dialog_x + dialog_w // 2, arrow_up_y - S(10)),
+                    (dialog_x + dialog_w // 2 - S(10), arrow_up_y),
+                    (dialog_x + dialog_w // 2 + S(10), arrow_up_y)
+                ])
+
+            # Show down arrow if not at bottom
+            if self.scroll_offset + visible_items < len(self.options):
+                arrow_down_y = list_y + list_h + S(5)
+                pygame.draw.polygon(screen, ACCENT, [
+                    (dialog_x + dialog_w // 2, arrow_down_y + S(10)),
+                    (dialog_x + dialog_w // 2 - S(10), arrow_down_y),
+                    (dialog_x + dialog_w // 2 + S(10), arrow_down_y)
+                ])
+
+
+class MenuSelectionDialog(BaseScreen):
+    def __init__(self, title: str, options: List[Tuple[str, str]], callback):
+        """
+        options: List of (key, label) tuples
+        callback: Function to call with selected key
+        """
+        self.title = title
+        self.options = options
+        self.callback = callback
+        self.idx = 0
+        self.scroll_offset = 0
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key in (pygame.K_DOWN,):
+                    self.idx = (self.idx + 1) % len(self.options)
+                if e.key in (pygame.K_UP,):
+                    self.idx = (self.idx - 1) % len(self.options)
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    self.select()
+                if e.key == pygame.K_ESCAPE:
+                    pop_screen()
+            if e.type == pygame.JOYHATMOTION:
+                _x, y = e.value
+                if y == -1:
+                    self.idx = (self.idx + 1) % len(self.options)
+                elif y == 1:
+                    self.idx = (self.idx - 1) % len(self.options)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_START):
+                    self.select()
+                if e.button in (BTN_B, BTN_BACK):
+                    pop_screen()
+
+    def select(self):
+        key, _label = self.options[self.idx]
+        self.callback(key)
+        pop_screen()
+
+    def draw(self):
+        draw_background(screen)
+
+        # Semi-transparent overlay
+        overlay = pygame.Surface((W, H))
+        overlay.set_alpha(180)
+        overlay.fill(BG)
+        screen.blit(overlay, (0, 0))
+
+        # Dialog box
+        dialog_w = min(W - S(80), S(800))
+        dialog_h = min(H - S(100), S(600))
+        dialog_x = (W - dialog_w) // 2
+        dialog_y = (H - dialog_h) // 2
+        dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h)
+        pygame.draw.rect(screen, CARD, dialog_rect, border_radius=15)
+        pygame.draw.rect(screen, ACCENT, dialog_rect, width=3, border_radius=15)
+
+        # Title
+        draw_text(screen, self.title, FONT_BIG, FG, (dialog_x + S(30), dialog_y + S(30)))
+
+        # Hints
+        hint = f"A={t('hint_select')} | B={t('hint_return')}"
+        draw_hints_line(screen, hint, FONT_SMALL, ACCENT, (dialog_x + S(30), dialog_y + S(70)))
+
+        # Options list area
+        list_y = dialog_y + S(110)
+        list_h = dialog_h - S(150)
+
+        # Calculate scrolling
+        item_h = S(50)
+        visible_items = max(1, list_h // item_h)
+
+        if self.idx < self.scroll_offset:
+            self.scroll_offset = self.idx
+        elif self.idx >= self.scroll_offset + visible_items:
+            self.scroll_offset = self.idx - visible_items + 1
+
+        max_scroll = max(0, len(self.options) - visible_items)
+        self.scroll_offset = max(0, min(self.scroll_offset, max_scroll))
+
+        # Draw options
+        for i in range(self.scroll_offset, min(len(self.options), self.scroll_offset + visible_items)):
+            _key, label = self.options[i]
+            display_index = i - self.scroll_offset
+            opt_y = list_y + display_index * item_h
+
+            opt_rect = pygame.Rect(dialog_x + S(30), opt_y, dialog_w - S(60), item_h - S(5))
+
+            if i == self.idx:
+                pygame.draw.rect(screen, SELECT, opt_rect, border_radius=8)
+                pygame.draw.rect(screen, ACCENT, opt_rect, width=3, border_radius=8)
+            else:
+                pygame.draw.rect(screen, (30, 34, 44), opt_rect, border_radius=8)
+
+            draw_text(screen, label, FONT, FG, (opt_rect.x + S(15), opt_rect.y + S(12)))
+
+
+class ChecklistScreen(BaseScreen):
+    def __init__(self, category: str, app_keys: List[str]):
+        self.category = category
+        self.all_items = app_keys
+        self.items = app_keys  # Filtered list
+        self.idx = 0
+        self.selected: Dict[str, bool] = {k: False for k in self.all_items}
+        self.queue_message = ""
+        self.queue_message_time = 0
+        self.search_mode = False
+        self.search_query = ""
+        self.last_action_time = 0
+        self.action_cooldown = 0.2  # 200ms cooldown to prevent double inputs
+        self.keyboard = OnScreenKeyboard()
+
+    def handle(self, events):
+        current_time = pygame.time.get_ticks() / 1000.0
+        # Category screens do not support on-screen keyboard search
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    pop_screen()
+                    return
+                if e.key in (pygame.K_DOWN,):
+                    self.idx = (self.idx + 1) % len(self.items)
+                if e.key in (pygame.K_UP,):
+                    self.idx = (self.idx - 1) % len(self.items)
+                # Match hints: Enter toggles selection (A)
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    if current_time - self.last_action_time > self.action_cooldown:
+                        key = self.items[self.idx]
+                        # Special handling for Custom Wine - run directly instead of selecting
+                        if key == "Custom Wine":
+                            push_screen(RunListScreen([(key, APPS[key])], title=key))
+                        else:
+                            self.selected[key] = not self.selected[key]
+                        self.last_action_time = current_time
+                # A to select all / deselect all (keyboard)
+                if e.key == pygame.K_a:
+                    if all(self.selected.get(k, False) for k in self.items):
+                        for key in self.items:
+                            self.selected[key] = False
+                    else:
+                        for key in self.items:
+                            self.selected[key] = True
+                # Space opens the queue/add action (Start)
+                if e.key == pygame.K_SPACE:
+                    if current_time - self.last_action_time > self.action_cooldown:
+                        self.install_selected()
+                        self.last_action_time = current_time
+                # (Removed keyboard Y shortcut; A handles select all per hints)
+            if e.type == pygame.JOYHATMOTION:
+                _x, y = e.value
+                if y == -1:
+                    self.idx = (self.idx + 1) % len(self.items)
+                elif y == 1:
+                    self.idx = (self.idx - 1) % len(self.items)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A,):  # A
+                    if current_time - self.last_action_time > self.action_cooldown:
+                        key = self.items[self.idx]
+                        # Special handling for Custom Wine - run directly instead of selecting
+                        if key == "Custom Wine":
+                            push_screen(RunListScreen([(key, APPS[key])], title=key))
+                        else:
+                            self.selected[key] = not self.selected[key]
+                        self.last_action_time = current_time
+                if e.button in (BTN_START,):  # Start
+                    if current_time - self.last_action_time > self.action_cooldown:
+                        self.install_selected()
+                        self.last_action_time = current_time
+                if e.button in (BTN_B, BTN_BACK):  # B/Back
+                    pop_screen(); return
+                if e.button == BTN_Y:  # Y button -> toggle select all
+                    if all(self.selected.get(k, False) for k in self.items):
+                        for key in self.items:
+                            self.selected[key] = False
+                    else:
+                        for key in self.items:
+                            self.selected[key] = True
+
+    def filter_items(self):
+        """
+        Filter the visible app list (by key or description) within this category.
+        Previously this mistakenly filtered TOP_LEVEL tuples, breaking search.
+        """
+        q = self.search_query.lower().strip()
+        if not q:
+            self.items = list(self.all_items)
+        else:
+            def matches(k: str) -> bool:
+                if q in k.lower():
+                    return True
+                return q in DESCRIPTIONS.get(k, "").lower()
+            self.items = [k for k in self.all_items if matches(k)]
+        self.idx = 0
+
+    def install_selected(self):
+        selected_items = [(k, APPS[k]) for k, v in self.selected.items() if v]
+        
+        if selected_items:
+            # Check if any are already installed
+            already_installed = [(k, cmd) for k, cmd in selected_items if is_installed(k)]
+            not_installed = [(k, cmd) for k, cmd in selected_items if not is_installed(k)]
+            
+            if already_installed and not not_installed:
+                # All selected are already installed - show confirmation
+                names = [k for k, _ in already_installed]
+                last_date = get_last_install_date(names[0])
+                
+                if len(already_installed) == 1:
+                    msg = [
+                        f"{names[0]} {t('previously_installed')}",
+                        f"{t('last_installed')} {last_date}",
+                        "",
+                        t("install_again")
+                    ]
+                else:
+                    msg = [
+                        f"{len(already_installed)} {t('selected_installed')}",
+                        f"{t('last_prefix')} {last_date})",
+                        "",
+                        t("install_them_again")
+                    ]
+                
+                def on_confirm():
+                    for item in already_installed:
+                        if item not in INSTALL_QUEUE:
+                            INSTALL_QUEUE.append(item)
+                    for k in self.selected:
+                        self.selected[k] = False
+                    self.queue_message = f"{t('added')} {len(already_installed)} {t('to_queue')}"
+                    self.queue_message_time = pygame.time.get_ticks() / 1000.0
+                
+                def on_cancel():
+                    pass
+
+                push_screen(ConfirmDialog(t("reinstall_confirmation"), msg, on_confirm, on_cancel))
+                
+            else:
+                # Add all to queue (with confirmation if some are installed)
+                if already_installed:
+                    names = ", ".join([k for k, _ in already_installed[:3]])
+                    if len(already_installed) > 3:
+                        names += f" {t('and')} {len(already_installed) - 3} {t('more')}"
+
+                    msg = [
+                        f"{t('some_installed')} {names}",
+                        "",
+                        f"{t('items_to_queue')}"
+                    ]
+                    
+                    def on_confirm():
+                        for item in selected_items:
+                            if item not in INSTALL_QUEUE:
+                                INSTALL_QUEUE.append(item)
+                        for k in self.selected:
+                            self.selected[k] = False
+                        self.queue_message = f"{t('added')} {len(selected_items)} {t('to_queue')}"
+                        self.queue_message_time = pygame.time.get_ticks() / 1000.0
+
+                    def on_cancel():
+                        pass
+
+                    push_screen(ConfirmDialog(t("add_to_queue"), msg, on_confirm, on_cancel))
+                else:
+                    # None installed, add directly
+                    for item in selected_items:
+                        if item not in INSTALL_QUEUE:
+                            INSTALL_QUEUE.append(item)
+                    for k in self.selected:
+                        self.selected[k] = False
+                    self.queue_message = f"{t('added')} {len(selected_items)} {t('to_queue')}"
+                    self.queue_message_time = pygame.time.get_ticks() / 1000.0
+        else:
+            # No items selected - show queue
+            push_screen(QueueScreen())
+
+    def draw(self):
+        draw_background(screen)
+        draw_text(screen, f"{self.category}", FONT_BIG, FG, (40, 30))
+
+        # Show queue count and installation stats
+        installed_count = sum(1 for k in self.all_items if is_installed(k))
+
+        # Normal view (search disabled at category level)
+        any_selected = any(self.selected.get(k, False) for k in self.items) if self.items else False
+        all_selected = all(self.selected.get(k, False) for k in self.items) if self.items else False
+        y_label = t("hint_remove_all") if all_selected else t("hint_add_all")
+        start_label = t("hint_start") if any_selected else t("queue")
+        queue_text = (
+            f"{t('queue')}: {len(INSTALL_QUEUE)} | {t('installed')}: {installed_count}/{len(self.all_items)} "
+            f"| A={t('hint_toggle')} | Y={y_label} | Start={start_label} | B={t('hint_return')} | Back={t('hint_back_settings')}"
+        )
+        draw_hints_line(screen, queue_text, FONT_SMALL, ACCENT, (S(40), S(70)))
+        base_y = S(110)
+        
+        # Show temporary message if items were just added to queue
+        current_time = pygame.time.get_ticks() / 1000.0
+        if self.queue_message and (current_time - self.queue_message_time) < 2.0:
+            msg_color = ACCENT
+            draw_text(screen, self.queue_message, FONT, msg_color, (40, base_y))
+            base_y += 40
+        
+        # Items list
+        if not self.items:
+            draw_text(screen, t("no_addons_category"), FONT, MUTED, (40, base_y))
+            return
+        
+        # scroll logic
+        rows = 10
+        top = max(0, min(self.idx - rows//2, len(self.items)-rows))
+        view = self.items[top:top+rows]
+        
+        for i, key in enumerate(view):
+            actual_idx = top + i
+            rect = pygame.Rect(S(40), base_y + i*S(55), W - S(80), S(50))
+            pygame.draw.rect(screen, CARD, rect, border_radius=10)
+            if actual_idx == self.idx:
+                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=10)
+            
+            # checkbox
+            box = pygame.Rect(rect.x + S(14), rect.y + S(12), S(24), S(24))
+            pygame.draw.rect(screen, FG if self.selected[key] else MUTED, box, width=2)
+            if self.selected[key]:
+                pygame.draw.line(screen, FG, (box.x + S(4), box.centery), (box.centerx, box.bottom - S(5)), 3)
+                pygame.draw.line(screen, FG, (box.centerx, box.bottom - S(5)), (box.right - S(4), box.y + S(5)), 3)
+            
+            # "Already installed" indicator
+            installed = is_installed(key)
+            if installed:
+                # Small green dot indicator
+                dot_x = box.right + S(8)
+                dot_y = box.y + S(4)
+                pygame.draw.circle(screen, ACCENT, (dot_x, dot_y), S(5))
+            
+            # labels
+            name_x = box.right + (S(20) if installed else S(12))
+            draw_text(screen, key, FONT, FG, (name_x, rect.y + S(8)))
+            desc = DESCRIPTIONS.get(key, "")
+            if desc:
+                draw_text(screen, desc, FONT_SMALL, MUTED, (name_x, rect.y + S(30)))
+        
+        # no search keyboard on category screens
+
+
+class GlobalSearchScreen(BaseScreen):
+    def __init__(self, query: str, app_keys: List[str]):
+        self.query = query
+        self.all_items = app_keys  # flat list of matching keys
+        self.items = app_keys
+        self.idx = 0
+        self.selected: Dict[str, bool] = {k: False for k in self.all_items}
+        self.queue_message = ""
+        self.queue_message_time = 0
+        self.last_action_time = 0
+        self.action_cooldown = 0.2
+        # Build grouped flat list with non-selectable headers
+        self.key_to_cat = {}
+        for cat, keys in CATEGORIES.items():
+            for k in keys:
+                if k in self.all_items and k not in self.key_to_cat:
+                    self.key_to_cat[k] = cat
+        # Any keys not in CATEGORIES fall into 'Other'
+        for k in self.all_items:
+            if k not in self.key_to_cat:
+                self.key_to_cat[k] = 'Other'
+        self.collapsed = set()  # categories currently collapsed
+        self.flat = self._build_flat_grouped(self.all_items)
+
+    def _build_flat_grouped(self, app_keys: List[str]):
+        grouped: Dict[str, List[str]] = {}
+        for k in app_keys:
+            grouped.setdefault(self.key_to_cat.get(k, 'Other'), []).append(k)
+        # Sort categories by name and items alphabetically
+        flat = []
+        for cat in sorted(grouped.keys()):
+            keys = sorted(grouped[cat])
+            flat.append(("header", cat, len(keys)))
+            if cat not in self.collapsed:
+                for k in keys:
+                    flat.append(("app", k))
+        return flat
+
+    def handle(self, events):
+        current_time = pygame.time.get_ticks() / 1000.0
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    pop_screen(); return
+                if e.key in (pygame.K_DOWN,):
+                    self.idx = (self.idx + 1) % len(self.flat)
+                if e.key in (pygame.K_UP,):
+                    self.idx = (self.idx - 1) % len(self.flat)
+                if e.key == pygame.K_x:
+                    self.toggle_header()
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    if current_time - self.last_action_time > self.action_cooldown and self.flat:
+                        item = self.flat[self.idx]
+                        if item[0] == "app":
+                            key = item[1]
+                            self.selected[key] = not self.selected[key]
+                            self.last_action_time = current_time
+                # A toggles select all in current view (keyboard)
+                if e.key == pygame.K_a:
+                    # Build list of visible app keys
+                    visible_apps = [it[1] for it in self.flat if it[0] == "app"]
+                    if all(self.selected.get(k, False) for k in visible_apps):
+                        for k in visible_apps:
+                            self.selected[k] = False
+                    else:
+                        for k in visible_apps:
+                            self.selected[k] = True
+                if e.key == pygame.K_SPACE:
+                    if current_time - self.last_action_time > self.action_cooldown:
+                        self.install_selected()
+                        self.last_action_time = current_time
+                # No 'select all' via keyboard; Y is reserved on gamepad only
+            if e.type == pygame.JOYHATMOTION:
+                _x, y = e.value
+                if y == -1:
+                    self.idx = (self.idx + 1) % len(self.flat)
+                elif y == 1:
+                    self.idx = (self.idx - 1) % len(self.flat)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A,):  # A
+                    if current_time - self.last_action_time > self.action_cooldown and self.flat:
+                        item = self.flat[self.idx]
+                        if item[0] == "app":
+                            key = item[1]
+                            self.selected[key] = not self.selected[key]
+                            self.last_action_time = current_time
+                if e.button == BTN_X:  # X -> collapse/expand category
+                    self.toggle_header()
+                if e.button in (BTN_START,):  # Start -> install
+                    if current_time - self.last_action_time > self.action_cooldown:
+                        self.install_selected()
+                        self.last_action_time = current_time
+                if e.button in (BTN_B, BTN_BACK):  # B/Back
+                    pop_screen(); return
+
+    def toggle_header(self):
+        if not self.flat:
+            return
+        item = self.flat[self.idx]
+        if item[0] == "header":
+            cat = item[1]
+            if cat in self.collapsed:
+                self.collapsed.remove(cat)
+            else:
+                self.collapsed.add(cat)
+            self.flat = self._build_flat_grouped(self.all_items)
+            # Keep selection on the same header if possible
+            for i, it in enumerate(self.flat):
+                if it[0] == "header" and it[1] == cat:
+                    self.idx = i
+                    break
+
+    def install_selected(self):
+        selected_items = [(k, APPS[k]) for k, v in self.selected.items() if v]
+        if not selected_items:
+            push_screen(QueueScreen()); return
+        for item in selected_items:
+            if item not in INSTALL_QUEUE:
+                INSTALL_QUEUE.append(item)
+        for k in self.selected:
+            self.selected[k] = False
+        self.queue_message = f"Added {len(selected_items)} item(s) to queue"
+        self.queue_message_time = pygame.time.get_ticks() / 1000.0
+
+    def draw(self):
+        draw_background(screen)
+        title = f"{t('search_results')}: '{self.query}'"
+        draw_text(screen, title, FONT_BIG, FG, (40, 30))
+
+        any_selected = any(self.selected.values()) if hasattr(self, "selected") else False
+        start_label = t("hint_start") if any_selected else t("queue")
+        count_text = (
+            f"{t('found')} {len(self.all_items)} add-ons | {t('queue')}: {len(INSTALL_QUEUE)} | "
+            f"A={t('hint_toggle')}, Start={start_label}, X={t('hint_collapse_expand')}, B={t('hint_return')} | Back={t('hint_back_settings')}"
+        )
+        draw_hints_line(screen, count_text, FONT_SMALL, ACCENT, (40, 70))
+
+        base_y = S(110)
+        current_time = pygame.time.get_ticks() / 1000.0
+        if self.queue_message and (current_time - self.queue_message_time) < 2.0:
+            draw_text(screen, self.queue_message, FONT, ACCENT, (40, base_y))
+            base_y += 40
+
+        if not self.all_items:
+            draw_text(screen, t("no_search_match"), FONT, MUTED, (40, base_y + 20))
+            # Icon hint for returning (avoid repetition)
+            draw_hints_line(screen, f"B={t('hint_return')}", FONT_SMALL, ACCENT, (40, base_y + 55))
+            return
+
+        rows = 10
+        top = max(0, min(self.idx - rows//2, len(self.flat)-rows))
+        view = self.flat[top:top+rows]
+
+        for i, item in enumerate(view):
+            actual_idx = top + i
+            if item[0] == "header":
+                cat = item[1]
+                count = item[2]
+                rect = pygame.Rect(S(40), base_y + i*S(58), W - S(80), S(40))
+                pygame.draw.rect(screen, CARD, rect, border_radius=8)
+                if actual_idx == self.idx:
+                    pygame.draw.rect(screen, SELECT, rect, width=2, border_radius=8)
+                # ASCII indicators for collapsed/expanded
+                prefix = ">" if cat in self.collapsed else "v"
+                draw_text(screen, f"{prefix} {cat} [{count}]", FONT, FG, (rect.x + S(12), rect.y + S(8)))
+                continue
+
+            # app row
+            key = item[1]
+            rect = pygame.Rect(S(40), base_y + i*S(58), W - S(80), S(50))
+            pygame.draw.rect(screen, CARD, rect, border_radius=10)
+            if actual_idx == self.idx:
+                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=10)
+
+            # checkbox
+            box = pygame.Rect(rect.x + S(14), rect.y + S(12), S(24), S(24))
+            pygame.draw.rect(screen, FG if self.selected[key] else MUTED, box, width=2)
+            if self.selected[key]:
+                pygame.draw.line(screen, FG, (box.x + S(4), box.centery), (box.centerx, box.bottom - S(5)), 3)
+                pygame.draw.line(screen, FG, (box.centerx, box.bottom - S(5)), (box.right - S(4), box.y + S(5)), 3)
+
+            # Installed indicator
+            installed = is_installed(key)
+            if installed:
+                dot_x = box.right + S(8)
+                dot_y = box.y + S(4)
+                pygame.draw.circle(screen, ACCENT, (dot_x, dot_y), S(5))
+
+            name_x = box.right + (S(20) if installed else S(12))
+            draw_text(screen, key, FONT, FG, (name_x, rect.y + S(8)))
+            desc = DESCRIPTIONS.get(key, "")
+            if desc:
+                draw_text(screen, desc, FONT_SMALL, MUTED, (name_x, rect.y + S(30)))
+
+
+class NoResultsScreen(BaseScreen):
+    def __init__(self, query: str):
+        self.query = query
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_ESCAPE):
+                    pop_screen(); return
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_B, BTN_BACK, BTN_START):
+                    pop_screen(); return
+
+    def draw(self):
+        draw_background(screen)
+        draw_text(screen, t("search_results"), FONT_BIG, FG, (40, 30))
+        draw_text(screen, f"{t('no_addons_found')} '{self.query}'.", FONT, MUTED, (40, 90))
+        # Use concise icon-based hint
+        draw_hints_line(screen, f"B={t('hint_return')} | Back={t('hint_back_settings')}", FONT_SMALL, ACCENT, (40, 130))
+
+class QueueScreen(BaseScreen):
+    def __init__(self):
+        self.idx = 0
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    pop_screen(); return
+                if e.key in (pygame.K_DOWN,):
+                    if INSTALL_QUEUE:
+                        self.idx = (self.idx + 1) % (len(INSTALL_QUEUE) + 1)
+                if e.key in (pygame.K_UP,):
+                    if INSTALL_QUEUE:
+                        self.idx = (self.idx - 1) % (len(INSTALL_QUEUE) + 1)
+                # Reorder with PageUp/PageDown (keyboard)
+                if e.key == pygame.K_PAGEUP:
+                    self.move_item(-1)
+                if e.key == pygame.K_PAGEDOWN:
+                    self.move_item(1)
+                # Clear via Y key
+                if e.key == pygame.K_y:
+                    # Clear entire queue
+                    INSTALL_QUEUE.clear()
+                    self.idx = 0
+                # Enter key behavior: if on START row, start install; otherwise remove item
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    if self.idx == len(INSTALL_QUEUE) and INSTALL_QUEUE:
+                        # On START row - begin install
+                        self.start_install()
+                    elif 0 <= self.idx < len(INSTALL_QUEUE):
+                        # On queue item - remove it
+                        INSTALL_QUEUE.pop(self.idx)
+                        if self.idx >= len(INSTALL_QUEUE) and self.idx > 0:
+                            self.idx -= 1
+                # Space key always starts install if queue has items
+                if e.key == pygame.K_SPACE:
+                    if INSTALL_QUEUE:
+                        self.start_install()
+            if e.type == pygame.JOYHATMOTION:
+                _x, y = e.value
+                if y == -1 and INSTALL_QUEUE:
+                    self.idx = (self.idx + 1) % (len(INSTALL_QUEUE) + 1)
+                elif y == 1 and INSTALL_QUEUE:
+                    self.idx = (self.idx - 1) % (len(INSTALL_QUEUE) + 1)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A,):  # A - remove item or start install
+                    if self.idx == len(INSTALL_QUEUE) and INSTALL_QUEUE:
+                        self.start_install()
+                    elif 0 <= self.idx < len(INSTALL_QUEUE):
+                        INSTALL_QUEUE.pop(self.idx)
+                        if self.idx >= len(INSTALL_QUEUE) and self.idx > 0:
+                            self.idx -= 1
+                # LB/RB for moving items within the queue
+                if e.button == BTN_LB:  # LB
+                    self.move_item(-1)
+                if e.button == BTN_RB:  # RB
+                    self.move_item(1)
+                if e.button == BTN_Y:  # Y -> clear entire queue
+                    INSTALL_QUEUE.clear()
+                    self.idx = 0
+                if e.button in (BTN_START,):  # Start - begin install
+                    if INSTALL_QUEUE:
+                        self.start_install()
+                if e.button in (BTN_B, BTN_BACK):  # B/Back
+                    pop_screen(); return
+
+    def start_install(self):
+        if INSTALL_QUEUE:
+            jobs = list(INSTALL_QUEUE)
+            INSTALL_QUEUE.clear()
+            push_screen(RunListScreen(jobs, title=t("installing_from_queue")))
+
+    def draw(self):
+        draw_background(screen)
+        draw_text(screen, t("installation_queue"), FONT_BIG, FG, (40, 30))
+
+        if not INSTALL_QUEUE:
+            draw_text(screen, t("queue_empty"), FONT, MUTED, (40, 100))
+            # Icon hint for returning
+            draw_hints_line(screen, f"B={t('hint_return')} | Back={t('hint_back_settings')}", FONT_SMALL, ACCENT, (40, 140))
+            draw_text(screen, t("queue_add_items"), FONT_SMALL, ACCENT, (40, 170))
+        else:
+            on_start_row = (self.idx == len(INSTALL_QUEUE)) and bool(INSTALL_QUEUE)
+            a_label = t("hint_start") if on_start_row else t("hint_remove")
+            hint = (
+                f"{t('queue_items').replace('X', str(len(INSTALL_QUEUE)))} | A={a_label} | "
+                f"LB={t('hint_move_up')} | RB={t('hint_move_down')} | Y={t('hint_clear')} | Start={t('hint_begin')} | B={t('hint_return')} | Back={t('hint_back_settings')}"
+            )
+            draw_hints_line(screen, hint, FONT_SMALL, ACCENT, (40, 70))
+
+            base_y = 110
+            # Scrollable queue list including the Start row as the last item
+            rows = 10
+            total_rows = len(INSTALL_QUEUE) + 1  # include Start row
+            if total_rows <= rows:
+                top = 0
+            else:
+                top = max(0, min(self.idx - rows // 2, total_rows - rows))
+
+            visible_rows = min(rows, total_rows - top)
+            for i in range(visible_rows):
+                r_index = top + i
+                y = base_y + i * 55
+                if r_index < len(INSTALL_QUEUE):
+                    # Queue item
+                    name, _cmd = INSTALL_QUEUE[r_index]
+                    rect = pygame.Rect(40, y, W - 80, 48)
+                    pygame.draw.rect(screen, CARD, rect, border_radius=10)
+                    if r_index == self.idx:
+                        pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=10)
+                    draw_text(screen, f"{r_index + 1}. {name}", FONT, FG, (rect.x + 16, rect.y + 12))
+                else:
+                    # Start row
+                    start_rect = pygame.Rect(40, y, W - 80, 55)
+                    pygame.draw.rect(screen, ACCENT if self.idx == len(INSTALL_QUEUE) else CARD, start_rect, border_radius=10)
+                    if self.idx == len(INSTALL_QUEUE):
+                        pygame.draw.rect(screen, SELECT, start_rect, width=3, border_radius=10)
+                    draw_text(screen, f">>> {t('start_install')} ({len(INSTALL_QUEUE)} {t('items_lowercase')}) <<<", FONT, FG, (start_rect.x + 16, start_rect.y + 15))
+    def move_item(self, delta: int):
+        # Move the currently selected queue item up/down
+        if 0 <= self.idx < len(INSTALL_QUEUE):
+            new_idx = max(0, min(self.idx + delta, len(INSTALL_QUEUE) - 1))
+            if new_idx != self.idx:
+                item = INSTALL_QUEUE.pop(self.idx)
+                INSTALL_QUEUE.insert(new_idx, item)
+                self.idx = new_idx
+
+
+class RunListScreen(BaseScreen):
+    def __init__(self, jobs: List[Tuple[str, str]], title: str = None):
+        self.jobs = jobs
+        self.title = title if title is not None else t("running_installers")
+        self.runner = Runner()
+        self.current = 0
+        self.started = False
+        self.all_finished = False
+        self.spinner_frame = 0
+        self.spinner_chars = ["|", "/", "-", "\\"]
+        self.job_results = []  # Track success/failure of each job
+        self.show_log = False  # Toggle to show error log
+        self.pulse_offset = 0  # For animated progress bar pulse
+
+    def start_next(self):
+        if self.current >= len(self.jobs):
+            self.all_finished = True
+            return
+        name, cmd = self.jobs[self.current]
+        # Create a fresh runner for each job
+        self.runner = Runner()
+
+        # Wrap all 'dialog' calls globally to capture end-of-install messages
+        dialog_wrap = ""
+        if not os.environ.get("BUA_DISABLE_DIALOG_WRAP"):
+            dialog_wrap = (
+                "function dialog(){ "
+                "echo '[BUA] Dialog called with:' \"$@\" >&2; "
+                "local dtype=\"\" title=\"\" text=\"\" menu_items=\"\"; "
+                "local next_title=0 next_text=0 skip_count=0 skip_backtitle=0; "
+                "for arg in \"$@\"; do "
+                "  case \"$arg\" in "
+                "    --title) next_title=1 ;; "
+                "    --backtitle) skip_backtitle=1 ;; "
+                "    --msgbox) dtype=\"msgbox\"; next_text=1 ;; "
+                "    --infobox) dtype=\"infobox\"; next_text=1 ;; "
+                "    --yesno) dtype=\"yesno\"; next_text=1 ;; "
+                "    --menu) dtype=\"menu\"; next_text=1 ;; "
+                "    --checklist) dtype=\"checklist\"; next_text=1 ;; "
+                "    --stdout|--clear) ;; "
+                "    *) "
+                "      if [ $skip_backtitle -eq 1 ]; then skip_backtitle=0; "
+                "      elif [ $next_title -eq 1 ]; then title=\"$arg\"; next_title=0; "
+                "      elif [ $next_text -eq 1 ]; then text=\"$arg\"; next_text=0; skip_count=3; "
+                "      elif [ $skip_count -gt 0 ]; then skip_count=$((skip_count - 1)); "
+                "      elif [ \"$dtype\" = \"menu\" ] || [ \"$dtype\" = \"checklist\" ]; then "
+                "        if [ -z \"$menu_items\" ]; then menu_items=\"$arg\"; else menu_items=\"$menu_items|$arg\"; fi; "
+                "      fi ;; "
+                "  esac; "
+                "done; "
+                "if [ -n \"$dtype\" ]; then "
+                "  echo '[BUA] Detected dtype:' \"$dtype\" 'title:' \"$title\" >&2; "
+                "  echo '[BUA] Menu items:' \"$menu_items\" >&2; "
+                "  local resp_file=\"/tmp/bua_dialog_$$.resp\"; rm -f \"$resp_file\"; "
+                "  if command -v base64 >/dev/null 2>&1; then "
+                "    t_b64=$(printf %s \"$title\" | base64 -w0 2>/dev/null || printf %s \"$title\" | base64); "
+                "    m_b64=$(printf %s \"$text\" | base64 -w0 2>/dev/null || printf %s \"$text\" | base64); "
+                "    i_b64=$(printf %s \"$menu_items\" | base64 -w0 2>/dev/null || printf %s \"$menu_items\" | base64); "
+                "    echo '[BUA] Emitting marker with resp file:' \"$resp_file\" >&2; "
+                "    echo __BUA_DIALOG__ type=$dtype title_b64=$t_b64 text_b64=$m_b64 items_b64=$i_b64 resp=$resp_file >&2; "
+                "  else "
+                "    echo __BUA_DIALOG__ type=$dtype title=\"$title\" text=\"$text\" items=\"$menu_items\" resp=$resp_file >&2; "
+                "  fi; "
+                "  if [ \"$dtype\" = \"infobox\" ]; then "
+                "    echo '[BUA] Infobox - continuing immediately' >&2; "
+                "    echo 0 > \"$resp_file\"; sleep 0.05; rm -f \"$resp_file\"; return 0; "
+                "  fi; "
+                "  while [ ! -f \"$resp_file\" ]; do sleep 0.1; done; "
+                "  local result=$(cat \"$resp_file\"); rm -f \"$resp_file\"; "
+                "  if [ \"$dtype\" = \"yesno\" ]; then "
+                "    if [ \"$result\" = \"0\" ]; then return 0; else return 1; fi; "
+                "  elif [ \"$dtype\" = \"menu\" ] || [ \"$dtype\" = \"checklist\" ]; then "
+                "    if [ -n \"$result\" ]; then echo \"$result\"; return 0; else return 1; fi; "
+                "  else "
+                "    return 0; "
+                "  fi; "
+                "fi; "
+                "return 0; }; export -f dialog; "
+            )
+
+        # Wrap curl to intercept ES refresh calls (curl http://127.0.0.1:1234/reloadgames)
+        es_wrap = (
+            "function curl(){ "
+            "if echo \"$@\" | grep -q '127.0.0.1:1234/reloadgames'; then "
+            "echo '[BUA] Deferring ES refresh until batch complete'; return 0; "
+            "else command curl \"$@\"; fi; }; "
+            "export -f curl; "
+        )
+
+        # Wrap batocera-save-overlay to suppress reboot prompts
+        overlay_wrap = (
+            "function batocera-save-overlay(){ "
+            "echo '[BUA] Saving overlay...'; "
+            "command batocera-save-overlay \"$@\" 2>&1 | grep -v 'reboot'; "
+            "return 0; }; "
+            "export -f batocera-save-overlay; "
+        )
+
+        # Add debug markers to track execution
+        debug_start = f"echo '[BUA] Starting installation: {name}'; "
+        debug_end = "; echo '[BUA] Installation finished'"
+
+        # Special handling for curl | bash commands - inject wrappers into the piped script
+        if "curl" in cmd and "|" in cmd and "bash" in cmd:
+            # Download script to temp file, prepend wrappers, then execute
+            # This ensures the dialog wrapper is available to the downloaded script
+            parts = cmd.split("|", 1)
+            if len(parts) == 2:
+                curl_part = parts[0].strip()
+                wrapper_code = f"{dialog_wrap}{es_wrap}{overlay_wrap}"
+                cmd = (
+                    f"{debug_start}"
+                    f"TMPSCRIPT=$(mktemp); "
+                    f"{curl_part} > \"$TMPSCRIPT\"; "
+                    f"( {wrapper_code} source \"$TMPSCRIPT\" ); "
+                    f"rm -f \"$TMPSCRIPT\""
+                    f"{debug_end}"
+                )
+            else:
+                cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{debug_start}{cmd}{debug_end}"
+        else:
+            cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{debug_start}{cmd}{debug_end}"
+
+        self.runner.run(cmd)
+        self.started = True
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    self.runner.kill(); pop_screen(); return
+                if e.key == pygame.K_x:  # X to toggle log view
+                    self.show_log = not self.show_log
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_B, BTN_BACK):  # B/Back
+                    self.runner.kill(); pop_screen(); return
+                if e.button in (BTN_A, BTN_START):  # A/Start to continue
+                    if self.all_finished:
+                        pop_screen(); return
+                if e.button in (BTN_X,):  # X button to toggle log
+                    self.show_log = not self.show_log
+
+    def update(self):
+        if self.all_finished:
+            return
+
+        # Check if a menu selection is requested
+        if not self.runner.done and self.runner.menu_request and not self.runner.menu_response:
+            menu_data = self.runner.menu_request
+
+            def on_select(key):
+                self.runner.menu_response = key
+                # Send the response to the script via stdin
+                if self.runner.proc and self.runner.proc.stdin:
+                    try:
+                        self.runner.proc.stdin.write(f"{key}\n")
+                        self.runner.proc.stdin.flush()
+                    except Exception as e:
+                        print(f"Error sending menu response: {e}")
+
+            push_screen(MenuSelectionDialog(
+                title=menu_data["title"],
+                options=menu_data["options"],
+                callback=on_select
+            ))
+            # Clear the request so we don't show it again
+            self.runner.menu_request = None
+
+        # Check if URLs have been detected during installation (e.g., auth links)
+        if not self.runner.done and not self.runner.url_shown and self.runner.detected_urls:
+            # Show URLs in a dialog while installation is still running
+            job_name = self.jobs[self.current][0]
+            push_screen(InfoDialog(title=job_name, message=self.runner.detected_urls[-10:]))
+            self.runner.url_shown = True
+
+        # Check if msgbox/infobox is requested (use InfoDialog for these)
+        if not self.runner.done and self.runner.last_dialog_type in ("msgbox", "infobox") and self.runner.last_dialog_resp_file:
+            title = self.runner.last_dialog_title or ""
+            text = self.runner.last_dialog_text or ""
+            resp_file = self.runner.last_dialog_resp_file
+
+            def on_close_msgbox():
+                # Write "0" to response file when user closes msgbox
+                try:
+                    with open(resp_file, "w") as f:
+                        f.write("0")
+                except Exception as e:
+                    print(f"Error writing msgbox response: {e}")
+
+            push_screen(InfoDialog(title=title, message=text.split("\n"), on_close=on_close_msgbox))
+
+            # Clear the dialog so we don't show it again
+            self.runner.last_dialog_type = None
+            self.runner.last_dialog_title = None
+            self.runner.last_dialog_text = None
+            self.runner.last_dialog_resp_file = None
+
+        # Check if an interactive dialog (yesno/menu/checklist) is requested
+        elif not self.runner.done and self.runner.last_dialog_type in ("yesno", "menu", "checklist") and self.runner.last_dialog_resp_file:
+            dtype = self.runner.last_dialog_type
+            title = self.runner.last_dialog_title or ""
+            text = self.runner.last_dialog_text or ""
+            items = self.runner.last_dialog_items
+            resp_file = self.runner.last_dialog_resp_file
+
+            # Show interactive dialog
+            push_screen(InteractiveDialog(dtype, title, text, items, resp_file))
+
+            # Clear the dialog so we don't show it again
+            self.runner.last_dialog_type = None
+            self.runner.last_dialog_title = None
+            self.runner.last_dialog_text = None
+            self.runner.last_dialog_resp_file = None
+
+        if not self.started:
+            self.start_next()
+        else:
+            if self.runner.done:
+                # Record result
+                rc = self.runner.returncode
+                success = rc == 0
+                self.job_results.append(success)
+
+                # Save to history
+                job_name = self.jobs[self.current][0]
+                # Check if this is an uninstall job
+                if "(Uninstall)" in job_name:
+                    # Remove from history if uninstall succeeded
+                    if success:
+                        # Extract app name (remove " (Uninstall)" suffix)
+                        app_name = job_name.replace(" (Uninstall)", "")
+                        mark_uninstalled(app_name)
+                else:
+                    # Regular install - mark as installed
+                    mark_installed(job_name, success)
+                # If the installer emitted a dialog message, show it as an in-app message box
+                if self.runner.last_dialog_title or self.runner.last_dialog_text:
+                    title = self.runner.last_dialog_title or job_name
+                    text = self.runner.last_dialog_text or ""
+                    lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+                    push_screen(InfoDialog(title=title, message=lines))
+                # If installation succeeded and output contains URLs, show them
+                elif success:
+                    # Look for URLs in the last 20 lines of output
+                    url_lines = []
+                    for line in self.runner.lines[-20:]:
+                        # Detect http/https URLs
+                        if "http://" in line or "https://" in line:
+                            url_lines.append(line.strip())
+                    # If we found URLs, show them in a dialog
+                    if url_lines:
+                        push_screen(InfoDialog(title=job_name, message=url_lines))
+                # Refresh top-level menu stats after every install
+                try:
+                    for _s in SCREENS:
+                        if isinstance(_s, MenuScreen):
+                            _s.stats = _s.calculate_stats()
+                except Exception:
+                    pass
+                
+                self.current += 1
+                self.started = False
+                if self.current < len(self.jobs):
+                    pass  # Continue to next job
+                else:
+                    self.all_finished = True
+
+    def draw(self):
+        draw_background(screen)
+        
+        # If showing log, display it instead of progress
+        if self.show_log:
+            draw_text(screen, t("installation_log"), FONT_BIG, FG, (40, 30))
+            # Icon hints: X hides log, B returns
+            draw_hints_line(screen, f"X={t('hint_hide_log')} | B={t('hint_return')} | Back={t('hint_back_settings')}", FONT_SMALL, ACCENT, (40, 70))
+            log_rect = pygame.Rect(40, 90, W-80, H-140)
+            pygame.draw.rect(screen, CARD, log_rect, border_radius=12)
+            
+            with self.runner.lock:
+                view = self.runner.lines[-35:]
+            y = log_rect.y + 12
+            for ln in view:
+                if y > log_rect.bottom - 20:
+                    break
+                draw_text(screen, ln, FONT_SMALL, (210, 215, 225), (log_rect.x+12, y))
+                y += 18
+            return
+        
+        draw_text(screen, self.title, FONT_BIG, FG, (40, 30))
+        draw_hints_line(screen, f"B={t('hint_return')} | X={t('hint_view_log')} | Back={t('hint_back_settings')}", FONT_SMALL, ACCENT, (40, 70))
+        
+        # Progress info with spinner
+        progress_y = 100
+        total_jobs = len(self.jobs)
+        completed = len(self.job_results)
+
+        if self.started and not self.runner.done:
+            # Animate spinner
+            self.spinner_frame = (self.spinner_frame + 1) % (len(self.spinner_chars) * 3)
+            spinner = self.spinner_chars[self.spinner_frame // 3]
+            status_text = f"{spinner} {t('installing')} {completed + 1} of {total_jobs}: {self.jobs[self.current][0]}"
+        elif self.all_finished:
+            status_text = t("all_complete")
+        else:
+            status_text = t("preparing")
+
+        draw_text(screen, status_text, FONT, FG, (40, progress_y))
+        
+        # Summary count
+        success_count = sum(self.job_results) if self.job_results else 0
+        fail_count = len(self.job_results) - success_count if self.job_results else 0
+        summary = f"{t('completed')}: {completed}/{total_jobs}"
+        if fail_count > 0:
+            summary += f" ({success_count} {t('succeeded')}, {fail_count} {t('failed')})"
+        draw_text(screen, summary, FONT_SMALL, MUTED, (40, progress_y + 30))
+        
+        # Installation list with large cards
+        list_y = progress_y + 80
+        draw_text(screen, t("installation_queue_title"), FONT, FG, (40, list_y))
+
+        # Auto-scroll to keep current job visible
+        max_visible = 8
+        if self.started and self.current < len(self.jobs):
+            # Center the current job in the visible range
+            start_idx = max(0, min(self.current - max_visible // 2, len(self.jobs) - max_visible))
+        else:
+            start_idx = 0
+
+        card_y = list_y + 40
+        visible_jobs = self.jobs[start_idx:start_idx + max_visible]
+
+        for i, (name, _cmd) in enumerate(visible_jobs):
+            actual_idx = start_idx + i
+            if i >= max_visible:
+                break
+            
+            # Large card for each item
+            card_rect = pygame.Rect(40, card_y, W - 80, 60)
+            pygame.draw.rect(screen, CARD, card_rect, border_radius=10)
+            
+            # Status indicator box on left
+            box = pygame.Rect(card_rect.x + 20, card_rect.y + 15, 26, 26)
+
+            if actual_idx < len(self.job_results):
+                # Job completed - show success or failure
+                if self.job_results[actual_idx]:
+                    # Success - green checkmark
+                    pygame.draw.rect(screen, (100, 255, 100), box, width=2)
+                    pygame.draw.line(screen, (100, 255, 100), (box.x+4, box.centery), (box.centerx, box.bottom-5), 3)
+                    pygame.draw.line(screen, (100, 255, 100), (box.centerx, box.bottom-5), (box.right-4, box.y+5), 3)
+                    status_color = (100, 255, 100)
+                    status_text = t("completed")
+                else:
+                    # Failed - red X
+                    pygame.draw.rect(screen, (255, 100, 100), box, width=2)
+                    pygame.draw.line(screen, (255, 100, 100), (box.x+4, box.y+4), (box.right-4, box.bottom-4), 3)
+                    pygame.draw.line(screen, (255, 100, 100), (box.right-4, box.y+4), (box.x+4, box.bottom-4), 3)
+                    status_color = (255, 100, 100)
+                    status_text = t("failed")
+
+                # Highlight the card if selected
+                if actual_idx == self.current - 1 and self.started:
+                    pygame.draw.rect(screen, status_color, card_rect, width=2, border_radius=10)
+
+            elif actual_idx == self.current and self.started:
+                # Currently installing - animated box
+                pygame.draw.rect(screen, (255, 200, 100), card_rect, width=3, border_radius=10)
+                pygame.draw.rect(screen, (255, 200, 100), box, width=2)
+                # Pulsing fill
+                pulse = abs(((self.spinner_frame * 2) % 60) - 30) / 30.0
+                inner_size = int(12 * pulse)
+                if inner_size > 0:
+                    inner_rect = box.inflate(-inner_size, -inner_size)
+                    pygame.draw.rect(screen, (255, 200, 100), inner_rect)
+                status_color = (255, 200, 100)
+                status_text = t("installing")
+            else:
+                # Pending - gray empty box
+                pygame.draw.rect(screen, MUTED, box, width=2)
+                status_color = MUTED
+                status_text = t("queued")
+
+            # Item name
+            draw_text(screen, name, FONT, FG if actual_idx <= self.current else MUTED, (box.right + 16, card_rect.y + 10))
+
+            # Status text
+            draw_text(screen, status_text, FONT_SMALL, status_color, (box.right + 16, card_rect.y + 33))
+
+            card_y += 65
+
+        # Show "... and X more" indicator if there are items below the visible range
+        remaining_below = len(self.jobs) - (start_idx + len(visible_jobs))
+        if remaining_below > 0:
+            draw_text(screen, t("and_more_items").format(count=remaining_below), FONT_SMALL, MUTED, (60, card_y))
+
+
+# ------------------------------
+# Updater Screen
+# ------------------------------
+
+def parse_github_raw_url(cmd: str):
+    """Extract (owner, repo, branch, path) from a GitHub raw URL inside a shell cmd.
+    Supports both github.com/.../raw/... and raw.githubusercontent.com forms.
+    Returns None if cannot parse.
+    """
+    try:
+        # Find first URL-looking token
+        parts = cmd.split()
+        url = None
+        for p in parts:
+            if p.startswith("http://") or p.startswith("https://"):
+                url = p
+                break
+        if not url:
+            return None
+        u = urlparse(url)
+        if u.netloc == "github.com":
+            # /{owner}/{repo}/raw/{branch}/{path...}
+            # or /{owner}/{repo}/raw/refs/heads/{branch}/{path}
+            seg = [s for s in u.path.split("/") if s]
+            if len(seg) >= 5 and seg[2] == "raw":
+                owner, repo = seg[0], seg[1]
+                if seg[3] == "refs" and len(seg) >= 7 and seg[4] == "heads":
+                    branch = seg[5]
+                    path = "/".join(seg[6:])
+                else:
+                    branch = seg[3]
+                    path = "/".join(seg[4:])
+                return owner, repo, branch, path
+        if u.netloc == "raw.githubusercontent.com":
+            # /{owner}/{repo}/{branch}/{path...}
+            seg = [s for s in u.path.split("/") if s]
+            if len(seg) >= 4:
+                owner, repo, branch = seg[0], seg[1], seg[2]
+                # refs/heads/<branch>
+                if branch == "refs" and len(seg) >= 5 and seg[3] == "heads":
+                    branch = seg[4]
+                    path = "/".join(seg[5:])
+                else:
+                    path = "/".join(seg[3:])
+                return owner, repo, branch, path
+    except Exception:
+        return None
+    return None
+
+
+def github_latest_commit_date(owner: str, repo: str, branch: str, path: str) -> float | None:
+    """Return epoch seconds of the latest commit date for a file path on a branch.
+
+    Note: Some repos have author.date newer than committer.date (e.g., amended or
+    rebased commits). To be resilient, take the max(author.date, committer.date).
+    """
+    try:
+        api = (
+            f"https://api.github.com/repos/{owner}/{repo}/commits?"
+            + urllib.parse.urlencode({"path": path, "sha": branch})
+        )
+        req = urllib.request.Request(api, headers={"User-Agent": "BUA-Updater"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8", "ignore"))
+            if isinstance(data, list) and data:
+                latest = data[0].get("commit", {})
+                ts: list[float] = []
+                try:
+                    a = latest.get("author", {}).get("date")
+                    if isinstance(a, str):
+                        ts.append(datetime.strptime(a, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp())
+                except Exception:
+                    pass
+                try:
+                    c = latest.get("committer", {}).get("date")
+                    if isinstance(c, str):
+                        ts.append(datetime.strptime(c, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp())
+                except Exception:
+                    pass
+                if ts:
+                    return max(ts)
+    except Exception:
+        return None
+    return None
+
+
+class UpdaterScreen(BaseScreen):
+    def __init__(self):
+        self.items: List[Tuple[str, str, bool, str]] = []  # (app, status_text, needs_update, detail)
+        self.idx = 0
+        self.selected: Dict[str, bool] = {}
+        self.loading = True
+        self.error: str | None = None
+        self.needs_rescan = False
+        self.uninstalling_app: str | None = None  # Track which app is being uninstalled
+        self.runner: Runner | None = None  # Runner for inline uninstall
+        self.github_cache: Dict[str, tuple] = {}  # Cache GitHub API results: {app: (status, needs_update, detail)}
+        threading.Thread(target=self._scan, daemon=True).start()
+
+    def _scan(self, use_cache=False):
+        try:
+            installed_apps = [k for k in APPS.keys() if is_installed(k)]
+            results = []
+            for app in installed_apps:
+                # If using cache and we have cached data for this app, reuse it
+                if use_cache and app in self.github_cache:
+                    status, needs, detail = self.github_cache[app]
+                    results.append((app, status, needs, detail))
+                    continue
+
+                # Otherwise, fetch from GitHub API
+                cmd = APPS.get(app, "")
+                parsed = parse_github_raw_url(cmd)
+                last_date_str = get_last_install_date(app)
+                last_ts = 0.0
+                if last_date_str:
+                    try:
+                        last_ts = datetime.strptime(last_date_str, "%Y-%m-%d %H:%M:%S").timestamp()
+                    except Exception:
+                        last_ts = 0.0
+                if parsed:
+                    owner, repo, branch, path = parsed
+                    remote_ts = github_latest_commit_date(owner, repo, branch, path)
+                    if remote_ts is None:
+                        status = t("unknown_api_error")
+                        needs = False
+                        detail = f"{owner}/{repo}:{branch}/{path}"
+                    else:
+                        if remote_ts > last_ts + 1:  # small skew tolerance
+                            status = t("update_available")
+                            needs = True
+                            detail = time.strftime("%Y-%m-%d %H:%M", time.gmtime(remote_ts))
+                        else:
+                            status = t("up_to_date")
+                            needs = False
+                            detail = time.strftime("%Y-%m-%d %H:%M", time.gmtime(remote_ts))
+                else:
+                    status = t("unknown_source")
+                    needs = False
+                    detail = ""
+
+                # Cache the result
+                self.github_cache[app] = (status, needs, detail)
+                results.append((app, status, needs, detail))
+
+            # Sort: updates first, then by name
+            results.sort(key=lambda x: (not x[2], x[0].lower()))
+            self.items = results
+            self.selected = {app: needs for app, _s, needs, _d in self.items if needs}
+        except Exception as e:
+            self.error = str(e)
+        finally:
+            self.loading = False
+
+    def rescan(self, use_cache=True):
+        """Trigger a rescan of installed apps (uses cache by default to avoid GitHub API calls)"""
+        self.loading = True
+        self.items = []
+        self.idx = 0
+        self.selected = {}
+        self.error = None
+        threading.Thread(target=lambda: self._scan(use_cache=use_cache), daemon=True).start()
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    pop_screen(); return
+                if e.key in (pygame.K_DOWN,):
+                    if not self.loading and self.items:
+                        self.idx = min(self.idx + 1, len(self.items)-1)
+                if e.key in (pygame.K_UP,):
+                    if not self.loading and self.items:
+                        self.idx = max(self.idx - 1, 0)
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    if not self.loading and self.items:
+                        app = self.items[self.idx][0]
+                        needs = self.items[self.idx][2]
+                        if needs:
+                            self.selected[app] = not self.selected.get(app, False)
+                if e.key == pygame.K_SPACE:  # Start on keyboard
+                    self.queue_updates()
+            if e.type == pygame.JOYHATMOTION:
+                _x, y = e.value
+                if y == -1:
+                    self.idx = min(self.idx + 1, max(0, len(self.items)-1))
+                elif y == 1:
+                    self.idx = max(self.idx - 1, 0)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_B, BTN_BACK):  # B/Back
+                    pop_screen(); return
+                if e.button in (BTN_A,):  # A toggle
+                    if not self.loading and self.items:
+                        app = self.items[self.idx][0]
+                        if self.items[self.idx][2]:
+                            self.selected[app] = not self.selected.get(app, False)
+                if e.button in (BTN_START,):  # Start -> queue
+                    self.queue_updates()
+                if e.button in (BTN_Y,):  # Y -> uninstall
+                    self.uninstall_app()
+
+    def uninstall_app(self):
+        """Uninstall the currently selected app inline"""
+        if self.loading or not self.items or self.uninstalling_app:
+            return
+        app = self.items[self.idx][0]
+        cmd = APPS.get(app)
+        if not cmd:
+            return
+
+        # Generate uninstall command
+        uninstall_cmd = get_uninstall_command(cmd)
+        if not uninstall_cmd:
+            push_screen(InfoDialog(t("uninstall"), [t("uninstall_error")]))
+            return
+
+        # Start inline uninstall
+        self.uninstalling_app = app
+        self.runner = Runner()
+        self.runner.run(uninstall_cmd)
+
+    def queue_updates(self):
+        if self.loading:
+            return
+        selected_apps = [app for app in self.selected if self.selected[app]]
+        if not selected_apps:
+            push_screen(InfoDialog(t("updater"), [t("nothing_selected_update")]))
+            return
+        for app in selected_apps:
+            cmd = APPS.get(app)
+            if cmd:
+                item = (app, cmd)
+                if item not in INSTALL_QUEUE:
+                    INSTALL_QUEUE.append(item)
+        push_screen(QueueScreen())
+        pop_screen()  # close updater
+
+    def update(self):
+        """Check if we need to rescan after returning from uninstall"""
+        if self.needs_rescan and not self.loading:
+            self.needs_rescan = False
+            self.rescan()
+
+        # Check if inline uninstall finished
+        if self.uninstalling_app and self.runner and self.runner.done:
+            success = self.runner.returncode == 0
+            if success:
+                # Remove from history
+                mark_uninstalled(self.uninstalling_app)
+            self.uninstalling_app = None
+            self.runner = None
+            # Trigger rescan to refresh list
+            self.rescan()
+
+    def draw(self):
+        draw_background(screen)
+        draw_text(screen, t("updater_title"), FONT_BIG, FG, (40, 30))
+        current_needs = False
+        if not self.loading and self.items:
+            try:
+                current_needs = bool(self.items[self.idx][2])
+            except Exception:
+                current_needs = False
+        hint_parts = []
+        if current_needs:
+            hint_parts.append(f"A={t('hint_toggle')}")
+        hint_parts.append(f"Y={t('hint_uninstall')}")
+        hint_parts.append(f"Start={t('hint_queue')}")
+        hint_parts.append(f"B={t('hint_return')}")
+        hint_parts.append(f"Back={t('hint_back_settings')}")
+        draw_hints_line(screen, " | ".join(hint_parts), FONT_SMALL, ACCENT, (40, 70))
+
+        if self.loading:
+            draw_text(screen, t("scanning_updates"), FONT, MUTED, (40, 100))
+            return
+        if self.error:
+            draw_text(screen, f"{t('error')}: {self.error}", FONT, (255, 120, 120), (40, 100))
+            return
+        if not self.items:
+            draw_text(screen, t("no_installed"), FONT, MUTED, (40, 100))
+            return
+
+        base_y = 110
+        rows = 10
+        top = max(0, min(self.idx - rows//2, max(0, len(self.items)-rows)))
+        view = self.items[top:top+rows]
+
+        for i, (app, status, needs, detail) in enumerate(view):
+            actual = top + i
+            rect = pygame.Rect(40, base_y + i*55, W - 80, 50)
+            pygame.draw.rect(screen, CARD, rect, border_radius=10)
+            if actual == self.idx:
+                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=10)
+            # checkbox only for needs==True
+            box = pygame.Rect(rect.x + 14, rect.y + 12, 24, 24)
+            if needs:
+                pygame.draw.rect(screen, FG if self.selected.get(app, False) else MUTED, box, width=2)
+                if self.selected.get(app, False):
+                    pygame.draw.line(screen, FG, (box.x+4, box.centery), (box.centerx, box.bottom-5), 3)
+                    pygame.draw.line(screen, FG, (box.centerx, box.bottom-5), (box.right-4, box.y+5), 3)
+                name_x = box.right + 12
+            else:
+                name_x = rect.x + 14
+            draw_text(screen, app, FONT, FG, (name_x, rect.y + 8))
+            # status + detail - or show uninstall progress if uninstalling
+            if self.uninstalling_app == app and self.runner:
+                # Show uninstall progress
+                if self.runner.done:
+                    status_text = "Uninstall complete" if self.runner.returncode == 0 else "Uninstall failed"
+                else:
+                    status_text = "Uninstalling..."
+                draw_text(screen, status_text, FONT_SMALL, ACCENT, (name_x, rect.y + 30))
+            else:
+                color = ACCENT if needs else MUTED
+                suffix = f" — {detail}" if detail else ""
+                draw_text(screen, status + suffix, FONT_SMALL, color, (name_x, rect.y + 30))
+
+
+class OnScreenKeyboard:
+    def __init__(self):
+        # Use space-separated rows so each character is an individual key
+        self.keys = [
+            "Q W E R T Y U I O P",
+            "A S D F G H J K L",
+            "Z X C V B N M",
+            "SPACE BACKSPACE",
+            "ENTER EXIT",
+        ]
+        self.key_width = S(80)
+        self.key_height = S(60)
+        self.margin = S(10)
+        self.selected_row = 0
+        self.selected_col = 0
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.KEYDOWN:
+                # Direct physical keyboard typing support
+                if pygame.K_a <= e.key <= pygame.K_z:
+                    return chr(e.key - pygame.K_a + ord('A'))
+                if pygame.K_0 <= e.key <= pygame.K_9:
+                    return chr(e.key - pygame.K_0 + ord('0'))
+                if e.key == pygame.K_SPACE:
+                    return " "
+                if e.key == pygame.K_BACKSPACE:
+                    return "BACKSPACE"
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    return "ENTER"
+                if e.key == pygame.K_ESCAPE:
+                    return "EXIT"
+
+                # Navigate OSK with arrows; select with A
+                if e.key == pygame.K_DOWN:
+                    self.selected_row = min(self.selected_row + 1, len(self.keys) - 1)
+                    self.selected_col = min(self.selected_col, len(self.keys[self.selected_row].split()) - 1)
+                if e.key == pygame.K_UP:
+                    self.selected_row = max(self.selected_row - 1, 0)
+                    self.selected_col = min(self.selected_col, len(self.keys[self.selected_row].split()) - 1)
+                if e.key == pygame.K_RIGHT:
+                    self.selected_col = min(self.selected_col + 1, len(self.keys[self.selected_row].split()) - 1)
+                if e.key == pygame.K_LEFT:
+                    self.selected_col = max(self.selected_col - 1, 0)
+                if e.key == pygame.K_a:
+                    return self.select_key()
+            if e.type == pygame.JOYHATMOTION:
+                x, y = e.value
+                if y == -1:
+                    self.selected_row = min(self.selected_row + 1, len(self.keys) - 1)
+                    self.selected_col = min(self.selected_col, len(self.keys[self.selected_row].split()) - 1)
+                elif y == 1:
+                    self.selected_row = max(self.selected_row - 1, 0)
+                    self.selected_col = min(self.selected_col, len(self.keys[self.selected_row].split()) - 1)
+                if x == 1:
+                    self.selected_col = min(self.selected_col + 1, len(self.keys[self.selected_row].split()) - 1)
+                elif x == -1:
+                    self.selected_col = max(self.selected_col - 1, 0)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_START):  # A or Start -> select
+                    return self.select_key()
+                if e.button in (BTN_B, BTN_BACK):  # B/Back -> exit keyboard
+                    return "EXIT"
+        return None
+
+    def select_key(self):
+        row = self.keys[self.selected_row].split()
+        key = row[self.selected_col]
+        if key == "SPACE":
+            return " "
+        elif key == "BACKSPACE":
+            return "BACKSPACE"
+        elif key == "ENTER":
+            return "ENTER"
+        elif key == "EXIT":
+            return "EXIT"
+        else:
+            return key
+
+    def draw(self, surf, current_text: str = ""):
+        # Draw semi-transparent overlay
+        overlay = pygame.Surface((W, H))
+        overlay.set_alpha(180)
+        overlay.fill(BG)
+        surf.blit(overlay, (0, 0))
+
+        # Compute dynamic box size to fully cover keys (with variable widths)
+        padding = S(40)
+        total_rows = len(self.keys)
+
+        def key_w(k: str) -> int:
+            # Uniform sizing: all letters use key_width;
+            # SPACE, BACKSPACE, ENTER, EXIT use the same wider width
+            if k in ("SPACE", "BACKSPACE", "ENTER", "EXIT"):
+                return self.key_width * 2
+            return self.key_width
+
+        # Width of each row using variable key widths
+        row_widths = []
+        for row in self.keys:
+            cols = row.split()
+            w = sum(key_w(k) for k in cols) + max(0, len(cols) - 1) * self.margin
+            row_widths.append(w)
+        keys_block_width = max(row_widths) if row_widths else 0
+        keys_height = total_rows * self.key_height + max(0, total_rows - 1) * self.margin
+
+        # Include input field and spacing inside the box height
+        input_h = S(50)
+        input_spacing = S(20)
+        box_width = keys_block_width + 2 * padding
+        box_height = input_h + input_spacing + keys_height + 2 * padding
+        box_x = (W - box_width) // 2
+        box_y = (H - box_height) // 2
+        pygame.draw.rect(surf, CARD, (box_x, box_y, box_width, box_height), border_radius=15)
+        pygame.draw.rect(surf, ACCENT, (box_x, box_y, box_width, box_height), width=3, border_radius=15)
+
+        # Text input field at the top of the keyboard box
+        input_rect = pygame.Rect(box_x + S(20), box_y + S(20), box_width - S(40), input_h)
+        pygame.draw.rect(surf, (30, 34, 44), input_rect, border_radius=8)
+        pygame.draw.rect(surf, ACCENT, input_rect, width=2, border_radius=8)
+        draw_text(surf, f"{t('search')}: {current_text}_", FONT, FG, (input_rect.x + S(12), input_rect.y + S(10)))
+
+        # Draw keys centered per row inside box
+        x_start = box_x + padding
+        y_start = input_rect.bottom + input_spacing
+        for row_idx, row in enumerate(self.keys):
+            cols = row.split()
+            row_width = sum(key_w(k) for k in cols) + max(0, len(cols) - 1) * self.margin
+            row_x_offset = (keys_block_width - row_width) // 2
+            cx = x_start + row_x_offset
+            for col_idx, key in enumerate(cols):
+                w = key_w(key)
+                rect = pygame.Rect(
+                    cx,
+                    y_start + row_idx * (self.key_height + self.margin),
+                    w,
+                    self.key_height,
+                )
+                # Draw key background
+                pygame.draw.rect(surf, CARD, rect, border_radius=8)
+                # Draw selection border if selected
+                if row_idx == self.selected_row and col_idx == self.selected_col:
+                    pygame.draw.rect(surf, SELECT, rect, width=3, border_radius=8)
+                # Center the key label
+                label = FONT.render(key, True, FG)
+                lx = rect.x + (rect.w - label.get_width()) // 2
+                ly = rect.y + (rect.h - label.get_height()) // 2
+                surf.blit(label, (lx, ly))
+                cx += w + self.margin
+
+
+# ------------------------------
+# Screen stack helpers and queue
+# ------------------------------
+
+SCREENS: List[BaseScreen] = []
+INSTALL_QUEUE: List[Tuple[str, str]] = []  # Global queue for installs
+
+class SettingsScreen(BaseScreen):
+    def __init__(self):
+        self.items = [
+            (t("controller_layout"), t("controller_layout_desc")),
+            (t("configure_buttons"), t("configure_buttons_desc")),
+            (t("language"), t("language_desc")),
+            (t("resolution"), t("resolution_desc")),
+        ]
+        self.idx = 0
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key in (pygame.K_ESCAPE,):
+                    pop_screen(); return
+                if e.key in (pygame.K_DOWN,):
+                    self.idx = (self.idx + 1) % len(self.items)
+                if e.key in (pygame.K_UP,):
+                    self.idx = (self.idx - 1) % len(self.items)
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    self.activate()
+            if e.type == pygame.JOYHATMOTION:
+                x, y = e.value
+                if y == -1:
+                    self.idx = (self.idx + 1) % len(self.items)
+                elif y == 1:
+                    self.idx = (self.idx - 1) % len(self.items)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_START):
+                    self.activate()
+                if e.button in (BTN_B, BTN_BACK):
+                    pop_screen(); return
+
+    def activate(self):
+        name = self.items[self.idx][0]
+        if name == t("controller_layout"):
+            push_screen(ControllerLayoutScreen())
+        elif name == t("configure_buttons"):
+            ok = run_manual_button_mapper()
+            msg = [t("controller_mapped") if ok else t("mapping_canceled")]
+            push_screen(InfoDialog(t("settings_title"), msg))
+        elif name == t("language"):
+            push_screen(LanguageScreen())
+        elif name == t("resolution"):
+            push_screen(ResolutionScreen())
+
+    def draw(self):
+        draw_background(screen)
+        draw_text(screen, t("settings_title"), FONT_BIG, FG, (40, 30))
+        hint = f"A={t('hint_open')} | B={t('hint_return')} | Back={t('hint_close_settings')}"
+        draw_hints_line(screen, hint, FONT_SMALL, ACCENT, (40, 70))
+        base_y = 110
+        y = base_y
+        card_w = min(W - S(80), S(900))
+        card_x = (W - card_w) // 2
+        pad_y = S(10)
+        gap = S(6)
+        spacing = S(12)
+        for i, (name, desc) in enumerate(self.items):
+            name_img = FONT.render(name, True, FG)
+            desc_img = FONT_SMALL.render(desc, True, MUTED) if desc else None
+            content_h = name_img.get_height() + ((gap + desc_img.get_height()) if desc_img else 0)
+            rect_h = max(S(60), content_h + pad_y * 2)
+            rect = pygame.Rect(card_x, y, card_w, rect_h)
+            pygame.draw.rect(screen, CARD, rect, border_radius=10)
+            if i == self.idx:
+                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=10)
+            nx = rect.x + S(14)
+            ny = rect.y + pad_y
+            screen.blit(name_img, (nx, ny))
+            if desc_img:
+                dy = ny + name_img.get_height() + gap
+                screen.blit(desc_img, (nx, dy))
+            y += rect_h + spacing
+
+
+class ControllerLayoutScreen(BaseScreen):
+    def __init__(self):
+        self.options = [
+            (t("auto_detected"), "auto"),
+            ("Xbox", "xbox"),
+            ("PlayStation", "playstation"),
+            ("Nintendo", "nintendo"),
+            ("Generic", "generic"),
+        ]
+        style = PAD_STYLE_USER_OVERRIDE if PAD_STYLE_USER_OVERRIDE else "auto"
+        self.idx = next((i for i, (_n, v) in enumerate(self.options) if v == style), 0)
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key in (pygame.K_ESCAPE,):
+                    pop_screen(); return
+                if e.key in (pygame.K_DOWN,):
+                    self.idx = (self.idx + 1) % len(self.options)
+                if e.key in (pygame.K_UP,):
+                    self.idx = (self.idx - 1) % len(self.options)
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    self.apply_choice()
+            if e.type == pygame.JOYHATMOTION:
+                _x, y = e.value
+                if y == -1:
+                    self.idx = (self.idx + 1) % len(self.options)
+                elif y == 1:
+                    self.idx = (self.idx - 1) % len(self.options)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_START):
+                    self.apply_choice()
+                if e.button in (BTN_B, BTN_BACK):
+                    pop_screen(); return
+
+    def apply_choice(self):
+        _label, val = self.options[self.idx]
+        set_pad_style_choice(val)
+        msg = [f"{t('layout_set_to')} {PAD_STYLE}"]
+        push_screen(InfoDialog(t("settings"), msg))
+
+    def draw(self):
+        draw_background(screen)
+        title = t("controller_layout_title")
+        draw_text(screen, title, FONT_BIG, FG, (40, 30))
+        hint = f"A={t('hint_select')} | B={t('hint_return')} | Back={t('hint_back_settings')}"
+        draw_hints_line(screen, hint, FONT_SMALL, ACCENT, (40, 70))
+
+        base_y = 110
+        card_w = min(W - S(80), S(900))
+        card_x = (W - card_w) // 2
+        draw_text(screen, f"{t('device')}: {input_style_label()}", FONT_SMALL, MUTED, (card_x, base_y))
+        draw_text(screen, f"{t('current')}: {PAD_STYLE}", FONT_SMALL, MUTED, (card_x, base_y + 24))
+        base_y += 48
+        for i, (label, _val) in enumerate(self.options):
+            rect = pygame.Rect(card_x, base_y + i*48, card_w, 42)
+            pygame.draw.rect(screen, CARD, rect, border_radius=10)
+            if i == self.idx:
+                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=10)
+            draw_text(screen, label, FONT, FG, (rect.x + 14, rect.y + 8))
+
+
+class LanguageScreen(BaseScreen):
+    def __init__(self):
+        self.options = get_available_languages()  # List of (name, code, native_name) tuples
+        # Find current language index
+        self.idx = next((i for i, (_n, code, _native) in enumerate(self.options) if code == CURRENT_LANGUAGE), 0)
+        self.scroll_offset = 0
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    pop_screen(); return
+                if e.key in (pygame.K_DOWN,):
+                    self.idx = (self.idx + 1) % len(self.options)
+                    self.adjust_scroll()
+                if e.key in (pygame.K_UP,):
+                    self.idx = (self.idx - 1) % len(self.options)
+                    self.adjust_scroll()
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    self.apply_choice()
+            if e.type == pygame.JOYHATMOTION:
+                _x, y = e.value
+                if y == -1:
+                    self.idx = (self.idx + 1) % len(self.options)
+                    self.adjust_scroll()
+                elif y == 1:
+                    self.idx = (self.idx - 1) % len(self.options)
+                    self.adjust_scroll()
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_START):
+                    self.apply_choice()
+                if e.button in (BTN_B, BTN_BACK):
+                    pop_screen(); return
+
+    def adjust_scroll(self):
+        """Adjust scroll offset to keep selected item visible"""
+        item_height = 48
+        visible_items = (H - 180) // item_height  # Approximate visible area
+
+        if self.idx < self.scroll_offset:
+            self.scroll_offset = self.idx
+        elif self.idx >= self.scroll_offset + visible_items:
+            self.scroll_offset = self.idx - visible_items + 1
+
+        # Clamp scroll offset
+        max_scroll = max(0, len(self.options) - visible_items)
+        self.scroll_offset = max(0, min(self.scroll_offset, max_scroll))
+
+    def apply_choice(self):
+        global CURRENT_LANGUAGE, TRANSLATIONS, TOP_LEVEL
+        _name, code, native = self.options[self.idx]
+
+        # Save and load the new language
+        save_language(code)
+
+        # Refresh TOP_LEVEL menu with new translations
+        TOP_LEVEL = get_top_level()
+
+        # Update all screens in the stack with new translations
+        for screen in SCREENS:
+            if isinstance(screen, MenuScreen):
+                screen.title = t("main_title")
+                screen.items = TOP_LEVEL
+                # Recalculate stats to update translated strings
+                if screen.stats:
+                    screen.stats = screen.calculate_stats()
+            elif isinstance(screen, SettingsScreen):
+                # Refresh settings items with new translations
+                screen.items = [
+                    (t("controller_layout"), t("controller_layout_desc")),
+                    (t("configure_buttons"), t("configure_buttons_desc")),
+                    (t("language"), t("language_desc")),
+                    (t("resolution"), t("resolution_desc")),
+                ]
+
+        msg = [f"{t('language')}: {native}"]
+        push_screen(InfoDialog(t("settings_title"), msg))
+
+    def draw(self):
+        draw_background(screen)
+        draw_text(screen, t("language"), FONT_BIG, FG, (40, 30))
+        hint = f"A={t('hint_select')} | B={t('hint_return')} | Back={t('hint_back_settings')}"
+        draw_hints_line(screen, hint, FONT_SMALL, ACCENT, (40, 70))
+
+        base_y = 110
+        card_w = min(W - S(80), S(900))
+        card_x = (W - card_w) // 2
+
+        # Get current language's native name for display
+        current_native = next((native for _name, code, native in self.options if code == CURRENT_LANGUAGE), CURRENT_LANGUAGE.upper())
+        draw_text(screen, f"{t('current')}: {current_native}", FONT_SMALL, MUTED, (card_x, base_y))
+        base_y += 36
+
+        # Calculate visible area
+        item_height = 48
+        visible_start_y = base_y
+        visible_end_y = H - 40
+
+        # Only render visible items
+        for i in range(len(self.options)):
+            display_idx = i - self.scroll_offset
+            y_pos = base_y + display_idx * item_height
+
+            # Skip items outside visible area
+            if y_pos + item_height < visible_start_y or y_pos > visible_end_y:
+                continue
+
+            _name, _code, native = self.options[i]
+            rect = pygame.Rect(card_x, y_pos, card_w, 42)
+            pygame.draw.rect(screen, CARD, rect, border_radius=10)
+            if i == self.idx:
+                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=10)
+
+            # Show native language name
+            display_text = native
+            text_surf = FONT.render(display_text, True, FG)
+            screen.blit(text_surf, (rect.x + 14, rect.y + 8))
+
+
+class ResolutionScreen(BaseScreen):
+    def __init__(self):
+        # Common resolution options (including CRT resolutions)
+        self.options = [
+            ("640x480", 640, 480),
+            ("800x600", 800, 600),
+            ("1024x768", 1024, 768),
+            ("1280x960", 1280, 960),
+            ("1280x1024", 1280, 1024),
+            ("1600x1200", 1600, 1200),
+            ("800x480", 800, 480),
+            ("1024x600", 1024, 600),
+            ("1280x720", 1280, 720),
+            ("1280x800", 1280, 800),
+            ("1366x768", 1366, 768),
+            ("1600x900", 1600, 900),
+            ("1920x1080", 1920, 1080),
+            ("2560x1440", 2560, 1440),
+            ("3840x2160", 3840, 2160),
+            ("Native", 0, 0),
+        ]
+        self.idx = 0
+        self.scroll_offset = 0
+        # Find current resolution
+        current_w, current_h = W, H
+        for i, (label, w, h) in enumerate(self.options):
+            if label == "Native" and not load_saved_resolution():
+                self.idx = i
+                break
+            elif w == current_w and h == current_h:
+                self.idx = i
+                break
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key in (pygame.K_ESCAPE,):
+                    pop_screen(); return
+                if e.key in (pygame.K_DOWN,):
+                    self.idx = (self.idx + 1) % len(self.options)
+                if e.key in (pygame.K_UP,):
+                    self.idx = (self.idx - 1) % len(self.options)
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    self.apply_choice()
+            if e.type == pygame.JOYHATMOTION:
+                _x, y = e.value
+                if y == -1:
+                    self.idx = (self.idx + 1) % len(self.options)
+                elif y == 1:
+                    self.idx = (self.idx - 1) % len(self.options)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_START):
+                    self.apply_choice()
+                if e.button in (BTN_B, BTN_BACK):
+                    pop_screen(); return
+
+    def apply_choice(self):
+        global screen, W, H, UI_SCALE, FONT, FONT_SMALL, FONT_BIG
+        label, w, h = self.options[self.idx]
+
+        try:
+            if label == "Native":
+                # Remove saved resolution file to use auto-detect on next launch
+                try:
+                    if os.path.exists(RESOLUTION_FILE):
+                        os.remove(RESOLUTION_FILE)
+                except Exception:
+                    pass
+                # Use native desktop resolution
+                try:
+                    dw, dh = pygame.display.get_desktop_sizes()[0]
+                except Exception:
+                    info = pygame.display.Info()
+                    dw, dh = info.current_w, info.current_h
+                w, h = dw, dh
+            else:
+                # Save specific resolution
+                save_resolution(w, h)
+
+            # Quit pygame display to allow resolution change
+            pygame.display.quit()
+
+            # Reinitialize with new resolution
+            pygame.display.init()
+            pygame.display.set_caption(t('main_title'))
+            screen = pygame.display.set_mode((w, h), pygame.FULLSCREEN)
+
+            # Update globals
+            W, H = screen.get_size()
+            UI_SCALE = max(1.0, min(W/1280.0, H/720.0))
+            FONT, FONT_SMALL, FONT_BIG = load_fonts()
+            init_assets()
+
+            msg = [f"{t('resolution')}: {label} ({W}x{H})"]
+            push_screen(InfoDialog(t("settings_title"), msg))
+        except Exception as e:
+            # If resolution change fails, show error
+            msg = [f"{t('error')}: {str(e)}"]
+            push_screen(InfoDialog(t("settings_title"), msg))
+
+    def draw(self):
+        draw_background(screen)
+        draw_text(screen, t("resolution"), FONT_BIG, FG, (40, 30))
+        hint = f"A={t('hint_select')} | B={t('hint_return')} | Back={t('hint_close_settings')}"
+        draw_hints_line(screen, hint, FONT_SMALL, ACCENT, (40, 70))
+
+        base_y = 110
+        card_w = min(W - S(80), S(900))
+        card_x = (W - card_w) // 2
+
+        # Show current resolution (actual W x H, not what's selected)
+        current_label = f"{W}x{H}"
+        # Check if it matches "Native" (native desktop res)
+        try:
+            dw, dh = pygame.display.get_desktop_sizes()[0]
+            if W == dw and H == dh and not load_saved_resolution():
+                current_label = "Native"
+        except Exception:
+            pass
+
+        draw_text(screen, f"{t('current')}: {current_label}", FONT_SMALL, MUTED, (card_x, base_y))
+        base_y += 36
+
+        # Calculate visible area
+        item_height = 52
+        visible_start_y = base_y
+        visible_end_y = H - 40
+        visible_items = max(1, (visible_end_y - visible_start_y) // item_height)
+
+        # Auto-scroll to keep selection visible
+        if self.idx < self.scroll_offset:
+            self.scroll_offset = self.idx
+        elif self.idx >= self.scroll_offset + visible_items:
+            self.scroll_offset = self.idx - visible_items + 1
+
+        # Clamp scroll offset
+        max_scroll = max(0, len(self.options) - visible_items)
+        self.scroll_offset = max(0, min(self.scroll_offset, max_scroll))
+
+        # Draw resolution options (only visible ones)
+        for i in range(self.scroll_offset, min(len(self.options), self.scroll_offset + visible_items)):
+            label, _w, _h = self.options[i]
+            display_index = i - self.scroll_offset
+            card_y = base_y + display_index * item_height
+
+            # Skip if outside visible area
+            if card_y + 48 < visible_start_y or card_y > visible_end_y:
+                continue
+
+            rect = pygame.Rect(card_x, card_y, card_w, 48)
+
+            # Highlight selection
+            if i == self.idx:
+                pygame.draw.rect(screen, CARD, rect, border_radius=10)
+                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=10)
+            else:
+                pygame.draw.rect(screen, CARD, rect, border_radius=10)
+
+            # Show resolution label
+            text_surf = FONT.render(label, True, FG)
+            screen.blit(text_surf, (rect.x + 14, rect.y + 8))
+
+
+def push_screen(s: BaseScreen):
+    SCREENS.append(s)
+
+def pop_screen():
+    if SCREENS:
+        SCREENS.pop()
+
+
+def main():
+    push_screen(MenuScreen(t("main_title"), TOP_LEVEL))
+    while True:
+        events = pygame.event.get()
+        # Handle window resize for windowed mode
+        # React to device add/remove and resizing
+        global PAD_STYLE, JOYS, LAST_JOY_COUNT
+        curr_count = pygame.joystick.get_count()
+        if curr_count != LAST_JOY_COUNT:
+            # Rebuild joystick handles
+            JOYS = [pygame.joystick.Joystick(i) for i in range(curr_count)]
+            for j in JOYS:
+                try:
+                    j.init()
+                except Exception:
+                    pass
+            LAST_JOY_COUNT = curr_count
+            PAD_STYLE = detect_pad_style()
+            update_button_mapping()
+
+        open_settings = False
+        for ev in events:
+            if ev.type == pygame.VIDEORESIZE and os.environ.get("BUA_WINDOWED"):
+                handle_resize(ev.w, ev.h)
+            # Pygame 2 joy hotplug events
+            if ev.type in (getattr(pygame, 'JOYDEVICEADDED', None), getattr(pygame, 'JOYDEVICEREMOVED', None)):
+                PAD_STYLE = detect_pad_style()
+                update_button_mapping()
+                # If a controller was just added and no mapping exists, prompt user to map it
+                if ev.type == getattr(pygame, 'JOYDEVICEADDED', None):
+                    if pygame.joystick.get_count() > 0 and not _load_saved_button_map():
+                        # Check if auto-mapping is enabled (default yes)
+                        _auto = os.environ.get("BUA_AUTOMAP_ON_FIRST_RUN", "1").strip() in ("1","true","yes")
+                        if _auto:
+                            try:
+                                ok = run_manual_button_mapper()
+                                if ok:
+                                    msg = [t("controller_mapped") if hasattr(t, '__call__') else "Controller mapped successfully!"]
+                                    push_screen(InfoDialog(t("settings_title") if hasattr(t, '__call__') else "Settings", msg))
+                            except Exception:
+                                pass
+            # Global: Back opens Settings
+            if ev.type == pygame.JOYBUTTONDOWN:
+                try:
+                    if ev.button == BTN_BACK:
+                        open_settings = True
+                except Exception:
+                    pass
+            # Keyboard AltGr (Right Alt) acts as Back -> open Settings
+            if ev.type == pygame.KEYDOWN:
+                try:
+                    if ev.key == pygame.K_RALT:
+                        open_settings = True
+                except Exception:
+                    pass
+        # If requested, open Settings and consume the Back event for this frame
+        if open_settings:
+            try:
+                top = SCREENS[-1] if SCREENS else None
+                if not isinstance(top, (SettingsScreen, ControllerLayoutScreen)):
+                    push_screen(SettingsScreen())
+                # Filter out Back button events so Settings doesn't immediately close
+                events = [e for e in events if not (
+                    (getattr(e, 'type', None) == pygame.JOYBUTTONDOWN and getattr(e, 'button', None) == BTN_BACK)
+                    or (getattr(e, 'type', None) == pygame.KEYDOWN and getattr(e, 'key', None) == pygame.K_RALT)
+                )]
+            except Exception:
+                pass
+        if not SCREENS:
+            break
+        curr = SCREENS[-1]
+        curr.handle(events)
+        curr.update()
+        curr.draw()
+        # Persistent hints overlay across all screens
+        draw_persistent_hints(screen)
+        pygame.display.flip()
+        clock.tick(60)
+
+
+def play_splash_and_load():
+    """Play splash video while loading assets and translations in background."""
+    import tempfile
+
+    # Start background loading immediately
+    loading_complete = threading.Event()
+
+    def load_in_background():
+        """Load translations and assets in background."""
+        try:
+            # Load translations
+            load_language()
+            # Load assets (images, icons)
+            init_assets()
+        except Exception as e:
+            print(f"[BUA] Error loading assets: {e}")
+        finally:
+            loading_complete.set()
+
+    print("[BUA] Loading assets in background...")
+    loader_thread = threading.Thread(target=load_in_background, daemon=True)
+    loader_thread.start()
+
+    # Download and play splash video while loading
+    splash_url = "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra/splash.mp4"
+
+    try:
+        print("[BUA] Downloading splash video...")
+        req = urllib.request.Request(splash_url, headers={"User-Agent": "BUA-Splash"})
+        with urllib.request.urlopen(req, timeout=10) as response:
+            splash_data = response.read()
+
+        # Save to temp file
+        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as f:
+            f.write(splash_data)
+            splash_file = f.name
+
+        print(f"[BUA] Playing splash video...")
+
+        # Play video in the pygame window using cv2
+        try:
+            import cv2
+
+            video = cv2.VideoCapture(splash_file)
+            fps = video.get(cv2.CAP_PROP_FPS) or 30
+            frame_delay = 1.0 / fps
+
+            global screen
+            video_running = True
+            last_frame_time = 0
+
+            while video_running and not loading_complete.is_set():
+                current_time = pygame.time.get_ticks() / 1000.0
+
+                # Only read next frame if enough time has passed
+                if current_time - last_frame_time >= frame_delay:
+                    ret, frame = video.read()
+
+                    if not ret:
+                        # Loop video
+                        video.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                        continue
+
+                    # Convert BGR to RGB
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+                    # Scale frame to screen size
+                    frame = cv2.resize(frame, (screen.get_width(), screen.get_height()))
+
+                    # Transpose for pygame
+                    frame = frame.swapaxes(0, 1)
+
+                    # Convert to pygame surface and display
+                    frame_surface = pygame.surfarray.make_surface(frame)
+
+                    # Center the frame on screen
+                    x = (screen.get_width() - frame_surface.get_width()) // 2
+                    y = (screen.get_height() - frame_surface.get_height()) // 2
+
+                    # Display frame centered
+                    screen.fill((0, 0, 0))  # Clear screen with black
+                    screen.blit(frame_surface, (x, y))
+                    pygame.display.flip()
+
+                    last_frame_time = current_time
+
+                # Handle events to prevent freezing
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        video_running = False
+
+                pygame.time.Clock().tick(60)
+
+            video.release()
+
+        except (ImportError, Exception) as e:
+            print(f"[BUA] Could not play video with cv2: {e}, showing loading screen instead")
+            # Show a simple loading screen if ffplay not available (e.g., on Windows)
+            splash_screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+            splash_screen.fill((20, 24, 31))
+
+            # Show loading text
+            font = pygame.font.Font(None, 72)
+            text = font.render("Loading...", True, (235, 242, 247))
+            text_rect = text.get_rect(center=(splash_screen.get_width() // 2, splash_screen.get_height() // 2))
+            splash_screen.blit(text, text_rect)
+            pygame.display.flip()
+
+            loading_complete.wait()
+
+        # Clean up
+        try:
+            os.unlink(splash_file)
+        except:
+            pass
+
+    except Exception as e:
+        print(f"[BUA] Could not play splash video: {e}")
+        # Just wait for loading without video
+        loading_complete.wait()
+
+    # Wait for loading to complete if not already done
+    loading_complete.wait()
+
+    # Initialize TOP_LEVEL now that translations are loaded
+    global TOP_LEVEL
+    TOP_LEVEL = get_top_level()
+
+    # Set window caption now that translations are loaded
+    pygame.display.set_caption(t('main_title'))
+
+    print("[BUA] Ready!")
+
+if __name__ == "__main__":
+    try:
+        play_splash_and_load()
+        main()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        # Refresh EmulationStation gamelist once when exiting
+        # (instead of after each individual installation)
+        try:
+            import subprocess
+            print("[BUA] Refreshing EmulationStation gamelists...")
+            subprocess.run(["curl", "http://127.0.0.1:1234/reloadgames"],
+                         check=False, timeout=10, capture_output=True)
+        except Exception as e:
+            print(f"[BUA] Could not refresh ES: {e}")
+
+
