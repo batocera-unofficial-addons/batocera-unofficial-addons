@@ -30,6 +30,8 @@ CHANGELOG = """
     Kill switch wired in to all launchers and Big Picture Mode with hotkey + start
     Steam removed from ports and added to Steam ES category. Please reinstall and delete the ports launcher!
     A known issue is that occasionally a webpage will open instead of Big Picture Mode, this is due to Steam changes and is being worked on. Hotkey + start to kill Steam and relaunch Big Picture Mode.
+    
+- Removed L3 and R3 from controller mappings due to issues with Steam Deck users.
 """.strip()
 
 # ------------------------------
@@ -963,8 +965,6 @@ BTN_LB = 4
 BTN_RB = 5
 BTN_BACK = 6
 BTN_START = 7
-BTN_L3 = 8
-BTN_R3 = 9
 
 def _env_int(name: str, default: int) -> int:
     try:
@@ -978,7 +978,7 @@ def _env_int(name: str, default: int) -> int:
 def update_button_mapping():
     """Update global BTN_* constants from environment variables only.
     No default mappings - buttons must be set via manual mapping or env vars."""
-    global BTN_A, BTN_B, BTN_X, BTN_Y, BTN_LB, BTN_RB, BTN_BACK, BTN_START, BTN_L3, BTN_R3
+    global BTN_A, BTN_B, BTN_X, BTN_Y, BTN_LB, BTN_RB, BTN_BACK, BTN_START
     # Only use environment variables, no fallback defaults
     BTN_A    = _env_int("BUA_BTN_A",    0)
     BTN_B    = _env_int("BUA_BTN_B",    1)
@@ -988,8 +988,6 @@ def update_button_mapping():
     BTN_RB   = _env_int("BUA_BTN_RB",   5)
     BTN_BACK = _env_int("BUA_BTN_BACK", 6)
     BTN_START= _env_int("BUA_BTN_START",7)
-    BTN_L3   = _env_int("BUA_BTN_L3",   8)
-    BTN_R3   = _env_int("BUA_BTN_R3",   9)
 
 # ------------------------------
 # Optional: manual button mapper
@@ -1014,7 +1012,7 @@ def _apply_saved_button_map_if_any() -> bool:
     Returns True if applied.
     """
     data = _load_saved_button_map()
-    required = ["A","B","X","Y","LB","RB","BACK","START","L3","R3"]
+    required = ["A","B","X","Y","LB","RB","BACK","START"]
     if all(k in data and isinstance(data[k], int) for k in required):
         os.environ["BUA_BTN_A"] = str(data["A"])  # type: ignore[arg-type]
         os.environ["BUA_BTN_B"] = str(data["B"])  # type: ignore[arg-type]
@@ -1024,8 +1022,6 @@ def _apply_saved_button_map_if_any() -> bool:
         os.environ["BUA_BTN_RB"] = str(data["RB"])  # type: ignore[arg-type]
         os.environ["BUA_BTN_BACK"] = str(data["BACK"])  # type: ignore[arg-type]
         os.environ["BUA_BTN_START"] = str(data["START"])  # type: ignore[arg-type]
-        os.environ["BUA_BTN_L3"] = str(data["L3"])  # type: ignore[arg-type]
-        os.environ["BUA_BTN_R3"] = str(data["R3"])  # type: ignore[arg-type]
         # Lock into a generic style label to avoid flipping icons unexpectedly
         os.environ["BUA_PAD_STYLE"] = os.environ.get("BUA_PAD_STYLE", "generic")
         # Recompute globals
@@ -1057,8 +1053,6 @@ def run_manual_button_mapper() -> bool:
         ("RB", t("btn_desc_rb")),
         ("BACK", t("btn_desc_back")),
         ("START", t("btn_desc_start")),
-        ("L3", t("btn_desc_l3")),
-        ("R3", t("btn_desc_r3")),
     ]
     mapping: dict[str,int] = {}
 
