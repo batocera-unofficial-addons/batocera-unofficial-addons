@@ -86,23 +86,4 @@ chmod +x "$custom_startup"
 curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/shadps4plus/es_ps4/es_ps4_install.sh | bash
 
 # Finish
-# Show dialog box for reboot confirmation
-dialog --clear --title "Reboot Required" \
-  --yesno "ShadPS4 setup is complete, a reboot is required.\n\nWould you like to reboot now?" 10 60
-
-response=$?
-
-clear
-case $response in
-  0)
-    echo "Rebooting..."
-    sleep 2
-    reboot
-    ;;
-  1)
-    echo "Reboot cancelled. You can reboot manually later."
-    ;;
-  255)
-    echo "No selection made. Skipping reboot."
-    ;;
-esac
+killall -9 emulationstation

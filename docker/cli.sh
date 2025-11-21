@@ -46,7 +46,7 @@ cli_apps="• Zsh (with Oh My Zsh, plugins, Powerlevel10k, .zshrc, and p10k.zsh)
 dialog --title "Batocera-CLI Available Tools" --msgbox "The following CLI apps are included:\n$cli_apps" 30 70
 
 # Confirm installation
-dialog --title "Continue Installation?" --yesno "Would you like to proceed with installing the Batocera-CLI package?" 8 60
+dialog --stdout --title "Continue Installation?" --yesno "Would you like to proceed with installing the Batocera-CLI package?" 8 60
 if [[ $? -ne 0 ]]; then
     dialog --title "Installation Canceled" --msgbox "The installation has been canceled." 8 60
     exit 1

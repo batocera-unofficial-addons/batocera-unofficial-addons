@@ -48,6 +48,8 @@
   "hint_select": "Seleccionar",
   "hint_close_settings": "Cerrar Ajustes",
   "hint_uninstall": "Desinstalar",
+  "hint_cancel": "Cancelar",
+  "hint_confirm": "Confirmar",
 
   "installation_queue": "Cola de Instalación",
   "queue_empty": "La cola está vacía.",
@@ -131,6 +133,20 @@
   "items_lowercase": "elementos",
   "hold_button_for": "Mantén presionado el botón para {label}",
 
+  "btn_desc_a": "Presiona el botón inferior (A/Cruz)",
+  "btn_desc_b": "Presiona el botón derecho (B/Círculo)",
+  "btn_desc_x": "Presiona el botón izquierdo (X/Cuadrado)",
+  "btn_desc_y": "Presiona el botón superior (Y/Triángulo)",
+  "btn_desc_lb": "Presiona el Gatillo Izquierdo (L1)",
+  "btn_desc_rb": "Presiona el Gatillo Derecho (R1)",
+  "btn_desc_back": "Presiona Atrás/Select",
+  "btn_desc_start": "Presiona Start/Opciones",
+  "btn_desc_l3": "Presiona el Stick Izquierdo (L3)",
+  "btn_desc_r3": "Presiona el Stick Derecho (R3)",
+
   "resolution": "Resolución",
-  "resolution_desc": "Cambiar resolución de la interfaz"
+  "resolution_desc": "Cambiar resolución de la interfaz",
+
+  "cards_per_page": "Tarjetas por Página",
+  "cards_per_page_desc": "Establece cuántas tarjetas mostrar en los menús (Auto/3/4/5/6/7/8/10)"
 }

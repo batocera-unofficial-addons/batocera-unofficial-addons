@@ -7,19 +7,15 @@ if ! command -v dialog &> /dev/null; then
 fi
 
 # Step 1: Display a dialog menu for the user to select Minecraft Edition
-dialog --clear --backtitle "Minecraft Launcher Setup" \
+edition_choice=$(dialog --stdout --clear --backtitle "Minecraft Launcher Setup" \
     --title "Select Minecraft Edition" \
     --menu "Choose your Minecraft Edition:" 15 50 4 \
     1 "Java Edition (Lunar Client)" \
     2 "Eaglercraft (Online and FREE)" \
     3 "Official Java Edition (Controller Support)" \
-    4 "Bedrock Edition" 2> /tmp/edition_choice.txt
+    4 "Bedrock Edition")
 
 clear
-
-# Read the user's choice from the temporary file
-edition_choice=$(< /tmp/edition_choice.txt)
-rm -f /tmp/edition_choice.txt
 
 # Check if the user pressed Cancel
 if [ -z "$edition_choice" ]; then

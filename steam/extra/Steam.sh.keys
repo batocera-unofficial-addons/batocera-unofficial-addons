@@ -2,9 +2,9 @@
     "actions_player1": [
         {
             "trigger": ["hotkey", "start"],
-            "type": "key",
-            "target": ["KEY_LEFTALT", "KEY_F4"],
-	    "description": "Press Alt+F4"
+            "type": "exec",
+            "target": "pkill -f steam",
+            "description": "Kill Steam"
         },
         {
             "trigger": ["hotkey", "l2"],

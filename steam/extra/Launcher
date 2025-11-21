@@ -1,0 +1,70 @@
+#!/bin/bash
+export DISPLAY=:0.0
+
+# Check if Big Picture mode is requested
+BIG_PICTURE_MODE="$1"
+echo "Launcher called with parameter: '$BIG_PICTURE_MODE'"
+
+# Path to the steam launcher generator script
+LAUNCHER_SCRIPT="/userdata/system/add-ons/steam/create-steam-launchers.sh"
+
+# Start the launcher generator in the background
+if [[ -f "$LAUNCHER_SCRIPT" ]]; then
+  echo "Starting Steam launcher generator..."
+  "$LAUNCHER_SCRIPT" &
+  LAUNCHER_PID=$!
+  echo "Launcher generator running with PID: $LAUNCHER_PID"
+fi
+
+# Launch Steam in background
+ulimit -H -n 819200 && ulimit -S -n 819200 && sysctl -w fs.inotify.max_user_watches=8192000 vm.max_map_count=2147483642 fs.file-max=8192000 >/dev/null 2>&1
+
+if [[ "$BIG_PICTURE_MODE" == *"gamepadui"* ]] || [[ "$BIG_PICTURE_MODE" == "-gamepadui" ]]; then
+  echo "Launching Steam in Big Picture Mode..."
+  /userdata/system/add-ons/steam/steam fim-exec steam -gamepadui &
+else
+  echo "Launching Steam in normal mode..."
+  /userdata/system/add-ons/steam/steam fim-exec steam &
+fi
+
+echo "Steam launched. Waiting for window to appear..."
+
+# Wait for Steam window to appear (up to 60 seconds)
+TIMEOUT=60
+ELAPSED=0
+STEAM_FOUND=0
+
+while [ $ELAPSED -lt $TIMEOUT ]; do
+  if wmctrl -l | grep -qi "Steam"; then
+    STEAM_FOUND=1
+    break
+  fi
+  sleep 1
+  ELAPSED=$((ELAPSED + 1))
+done
+
+if [ $STEAM_FOUND -eq 0 ]; then
+  echo "Steam window did not appear within $TIMEOUT seconds. Exiting..."
+  exit 1
+fi
+
+echo "Steam window detected. Monitoring until it closes..."
+
+# Monitor - wait until Steam window disappears
+while wmctrl -l | grep -qi "Steam"; do
+  sleep 2
+done
+
+echo "Steam window closed."
+
+# Kill the launcher generator first
+if [[ -n "$LAUNCHER_PID" ]]; then
+  echo "Stopping launcher generator (PID: $LAUNCHER_PID)..."
+  kill "$LAUNCHER_PID" 2>/dev/null
+  echo "Launcher generator stopped."
+fi
+
+# Kill all remaining Steam processes
+echo "Killing all remaining Steam processes..."
+pkill -f steam
+curl http://127.0.0.1:1234/reloadgames

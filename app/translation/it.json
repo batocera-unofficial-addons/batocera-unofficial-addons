@@ -48,6 +48,8 @@
   "hint_select": "Seleziona",
   "hint_close_settings": "Chiudi Impostazioni",
   "hint_uninstall": "Disinstalla",
+  "hint_cancel": "Annulla",
+  "hint_confirm": "Conferma",
 
   "installation_queue": "Coda di Installazione",
   "queue_empty": "La coda è vuota.",
@@ -127,6 +129,20 @@
   "items_lowercase": "oggetti",
   "hold_button_for": "Tieni premuto il pulsante per {label}",
 
+  "btn_desc_a": "Premi il pulsante inferiore (A/Croce)",
+  "btn_desc_b": "Premi il pulsante destro (B/Cerchio)",
+  "btn_desc_x": "Premi il pulsante sinistro (X/Quadrato)",
+  "btn_desc_y": "Premi il pulsante superiore (Y/Triangolo)",
+  "btn_desc_lb": "Premi il Grilletto Sinistro (L1)",
+  "btn_desc_rb": "Premi il Grilletto Destro (R1)",
+  "btn_desc_back": "Premi Indietro/Select",
+  "btn_desc_start": "Premi Start/Opzioni",
+  "btn_desc_l3": "Premi lo Stick Sinistro (L3)",
+  "btn_desc_r3": "Premi lo Stick Destro (R3)",
+
   "resolution": "Risoluzione",
-  "resolution_desc": "Cambia la risoluzione dell'interfaccia"
+  "resolution_desc": "Cambia la risoluzione dell'interfaccia",
+
+  "cards_per_page": "Schede per Pagina",
+  "cards_per_page_desc": "Imposta quante schede mostrare nei menu (Auto/3/4/5/6/7/8/10)"
 }

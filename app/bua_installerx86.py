@@ -16,6 +16,21 @@ import urllib.request
 import urllib.parse
 import time
 from typing import Dict, List, Tuple
+import hashlib
+
+# ------------------------------
+# Changelog
+# ------------------------------
+# Edit this section to add changelog entries. Leave empty to disable.
+# This will be shown once to users when they first launch after an update.
+
+CHANGELOG = """
+- Steam has had a big update!
+    Now supports ES launchers with auto scraping.
+    Kill switch wired in to all launchers and Big Picture Mode with hotkey + start
+    Steam removed from ports and added to Steam ES category. Please reinstall and delete the ports launcher!
+    A known issue is that occasionally a webpage will open instead of Big Picture Mode, this is due to Steam changes and is being worked on. Hotkey + start to kill Steam and relaunch Big Picture Mode.
+""".strip()
 
 # ------------------------------
 # Translation System
@@ -26,6 +41,12 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {}
 CURRENT_LANGUAGE = "en"
 LANGUAGE_FILE = "/userdata/system/add-ons/bua_language.txt"
 RESOLUTION_FILE = "/userdata/system/add-ons/bua_resolution.txt"
+CARDS_PER_PAGE_FILE = "/userdata/system/add-ons/bua_cards_per_page.txt"
+CHANGELOG_HASH_FILE = "/userdata/system/add-ons/bua_changelog_hash.txt"
+
+# Default and current cards per page setting
+DEFAULT_CARDS_PER_PAGE = "auto"  # "auto" or a number like "3", "5", "7", etc.
+CARDS_PER_PAGE = DEFAULT_CARDS_PER_PAGE
 
 # Cache for available languages (to avoid checking GitHub every time)
 AVAILABLE_LANGUAGES_CACHE: List[Tuple[str, str, str]] = []
@@ -330,6 +351,43 @@ def is_installed(app_name: str) -> bool:
         return any(entry['success'] for entry in history[app_name])
     return False
 
+def scan_installed_addons_directory() -> dict:
+    """Scan /userdata/system/add-ons directory for installed apps.
+    Returns dict mapping app_name -> directory modification timestamp (or None if not found)."""
+    addons_dir = "/userdata/system/add-ons"
+    found_apps = {}
+
+    try:
+        if not os.path.exists(addons_dir):
+            return {}
+
+        # List all items in add-ons directory
+        items = os.listdir(addons_dir)
+
+        # Match directory/file names against known app names
+        for app_name in APPS.keys():
+            dir_path = None
+            # Check if app name exists as directory or file
+            if app_name in items:
+                dir_path = os.path.join(addons_dir, app_name)
+            # Also check with common variations
+            elif app_name.replace(' ', '_') in items:
+                dir_path = os.path.join(addons_dir, app_name.replace(' ', '_'))
+            elif app_name.replace(' ', '-') in items:
+                dir_path = os.path.join(addons_dir, app_name.replace(' ', '-'))
+
+            if dir_path and os.path.exists(dir_path):
+                try:
+                    # Get modification time of the directory
+                    mtime = os.path.getmtime(dir_path)
+                    found_apps[app_name] = mtime
+                except Exception:
+                    found_apps[app_name] = None
+    except Exception:
+        pass
+
+    return found_apps
+
 def get_last_install_date(app_name: str) -> str:
     """Get the last successful installation date"""
     history = load_history()
@@ -464,6 +522,7 @@ APPS: Dict[str, str] = {
     "X11VNC": bua("x11vnc/x11vnc.sh"),
     "QEMU GA": bua("qga/qga.sh"),
     "Bridge": bua("bridge/bridge.sh"),
+    "Sandtrix": bua("sandtrix/sandtrix.sh"),
     "Soar": bua("soar/soar.sh"),
     "Dark Mode": bua("dark/dark.sh"),
     "VClean": bua("vclean/vclean.sh"),
@@ -480,13 +539,17 @@ APPS.update({
     "Zelda 2 PC Remake": bua("windows/zelda2.sh"),
     "Zelda - Dungeons of Infinity": bua("windows/zeldadoi.sh"),
     "Space Quest 3D": bua("windows/sq3d.sh"),
+    "Streets of Rage Remake": bua("windows/sorr.sh"),
+    "Super Crate Box": bua("windows/scb.sh"),
     "Super Smash Flash 2": bua("windows/ssf2.sh"),
     "TMNT Rescue Palooza": bua("windows/tmntrp.sh"),
     "Crash Bandicoot - Back In Time": bua("windows/cbbit.sh"),
     "Sonic Triple Trouble 16bit": bua("windows/stt.sh"),
     "Modern Modern Chef": bua("windows/mmc.sh"),
     "Sonic Robo Blast 2": bua("windows/srb2.sh"),
+    "Sonic Time Twisted": bua("windows/sttw.sh"),
     "Super Smash Bros CMC+": bua("windows/cmc+.sh"),
+    "Unreal Tournament": bua("windows/ut.sh"),
 })
 
 # --- Integrated Docker app installers (previously separate bash menu) ---
@@ -591,6 +654,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "X11VNC": "Remote control over VNC",
     "QEMU GA": "Guest agent for VMs",
     "Bridge": "Chart downloader for CloneHero/YARG",
+    "Sandtrix": "Falling sand physics puzzle game",
     "Soar": "Soar package manager (integrated with BUA)",
     "Dark Mode": "Toggle F1 dark mode",
     "VClean": "Service to clean the Batocera version string (removes extra flags)",
@@ -606,13 +670,17 @@ DESCRIPTIONS.update({
     "Zelda 2 PC Remake": "Fan remake of Zelda II",
     "Zelda - Dungeons of Infinity": "Zelda-inspired project",
     "Space Quest 3D": "Fan project tribute",
+    "Streets of Rage Remake": "Enhanced beat 'em up remake",
+    "Super Crate Box": "Fast-paced arcade platformer",
     "Super Smash Flash 2": "Fan fighting game",
     "TMNT Rescue Palooza": "Beat 'em up fan game",
     "Crash Bandicoot - Back In Time": "Fan game",
     "Sonic Triple Trouble 16bit": "Fan remake",
     "Modern Modern Chef": "Indie title",
     "Sonic Robo Blast 2": "Doom-based Sonic fangame",
+    "Sonic Time Twisted": "Time-traveling Sonic fan game",
     "Super Smash Bros CMC+": "Fan crossover",
+        "Unreal Tournament": "Classic competitive first-person shooter",
 })
 
 # Descriptions for integrated Docker apps
@@ -633,7 +701,8 @@ CATEGORIES: Dict[str, List[str]] = {
         "Minecraft", "Armagetron", "Clone Hero", "Endless Sky", "CS Portable",
         "Warzone 2100", "Xonotic", "Fightcade", "SuperTuxKart", "OpenRA",
         "Assault Cube", "SuperTux", "Free Droid RPG", "StepMania", "Ambermoon",
-        "YARG", "OpenTTD", "Luanti", "Super Mario X", "Celeste 64", "UltraStar"
+        "YARG", "OpenTTD", "Luanti", "Super Mario X", "Celeste 64", "UltraStar",
+        "Sandtrix"
     ],
     "Windows Freeware": [
         "Maldita Castilla",
@@ -643,13 +712,17 @@ CATEGORIES: Dict[str, List[str]] = {
         "Zelda 2 PC Remake",
         "Zelda - Dungeons of Infinity",
         "Space Quest 3D",
+        "Streets of Rage Remake",
+        "Super Crate Box",
         "Super Smash Flash 2",
         "TMNT Rescue Palooza",
         "Crash Bandicoot - Back In Time",
         "Sonic Triple Trouble 16bit",
         "Modern Modern Chef",
         "Sonic Robo Blast 2",
+        "Sonic Time Twisted",
         "Super Smash Bros CMC+",
+        "Unreal Tournament",
     ],
     "Docker Menu": [
         "CasaOS",
@@ -709,6 +782,7 @@ SPECIAL_TOPLEVEL_RUN: Dict[str, str] = {
 # ------------------------------
 
 pygame.init()
+pygame.mouse.set_visible(False)
 # Window caption will be set after translations load in play_splash_and_load()
 
 # Resolution save/load functions
@@ -731,6 +805,74 @@ def save_resolution(width: int, height: int):
         os.makedirs(os.path.dirname(RESOLUTION_FILE), exist_ok=True)
         with open(RESOLUTION_FILE, 'w') as f:
             f.write(f"{width}x{height}")
+    except Exception:
+        pass
+
+def load_saved_cards_per_page():
+    """Load saved cards per page preference"""
+    global CARDS_PER_PAGE
+    try:
+        if os.path.exists(CARDS_PER_PAGE_FILE):
+            with open(CARDS_PER_PAGE_FILE, 'r') as f:
+                value = f.read().strip()
+                if value:
+                    CARDS_PER_PAGE = value
+                    return value
+    except Exception:
+        pass
+    return DEFAULT_CARDS_PER_PAGE
+
+def save_cards_per_page(value: str):
+    """Save cards per page preference (e.g., 'auto', '3', '5', '7')"""
+    global CARDS_PER_PAGE
+    try:
+        os.makedirs(os.path.dirname(CARDS_PER_PAGE_FILE), exist_ok=True)
+        with open(CARDS_PER_PAGE_FILE, 'w') as f:
+            f.write(value)
+        CARDS_PER_PAGE = value
+    except Exception:
+        pass
+
+def get_visible_items(list_h: int, item_h: int) -> int:
+    """Calculate number of visible items based on user preference.
+    If CARDS_PER_PAGE is 'auto', calculate based on available space.
+    Otherwise, use the specified number."""
+    global CARDS_PER_PAGE
+    try:
+        if CARDS_PER_PAGE == "auto":
+            return max(1, list_h // item_h)
+        else:
+            return max(1, int(CARDS_PER_PAGE))
+    except Exception:
+        return max(1, list_h // item_h)
+
+def should_show_changelog() -> bool:
+    """Check if changelog should be shown (has content and hasn't been shown for this version)."""
+    if not CHANGELOG or not CHANGELOG.strip():
+        return False
+
+    # Hash the current changelog content
+    current_hash = hashlib.md5(CHANGELOG.encode('utf-8')).hexdigest()
+
+    # Check if we've shown this version before
+    try:
+        if os.path.exists(CHANGELOG_HASH_FILE):
+            with open(CHANGELOG_HASH_FILE, 'r') as f:
+                shown_hash = f.read().strip()
+                if shown_hash == current_hash:
+                    return False  # Already shown this changelog
+    except Exception:
+        pass
+
+    return True
+
+def mark_changelog_shown():
+    """Mark the current changelog as shown by saving its hash."""
+    try:
+        current_hash = hashlib.md5(CHANGELOG.encode('utf-8')).hexdigest()
+        os.makedirs(os.path.dirname(CHANGELOG_HASH_FILE), exist_ok=True)
+        with open(CHANGELOG_HASH_FILE, 'w') as f:
+            f.write(current_hash)
     except Exception:
         pass
 
@@ -833,125 +975,21 @@ def _env_int(name: str, default: int) -> int:
     except Exception:
         return default
 
-def _detect_ps_profile() -> str:
-    """Differentiate common PlayStation mappings.
-    Returns 'ps_dinput' for older/DirectInput-style pads (PS3/Sixaxis/etc),
-    otherwise 'ps_sdl' for modern SDL-mapped DualShock/DualSense.
-    """
-    try:
-        names = []
-        for i in range(pygame.joystick.get_count()):
-            try:
-                nm = pygame.joystick.Joystick(i).get_name() or ""
-                names.append(nm.lower())
-            except Exception:
-                pass
-        s = " ".join(names)
-        if any(k in s for k in ["ps3", "sixaxis", "dualshock 3", "shanwan", "gasia", "bda ps3", "playstation 3"]):
-            return "ps_dinput"
-    except Exception:
-        pass
-    return "ps_sdl"
-
-def _base_map(style: str) -> Dict[str, int]:
-    # Default Xbox/XInput-style mapping
-    if style == "xbox" or style == "generic" or style == "nintendo":
-        return {
-            "A": 0, "B": 1, "X": 2, "Y": 3,
-            "LB": 4, "RB": 5, "BACK": 6, "START": 7,
-            "L3": 8, "R3": 9,
-        }
-    if style == "playstation":
-        ps_prof = _detect_ps_profile()
-        if ps_prof == "ps_dinput":
-            # Common DirectInput mapping seen on PS3-era controllers
-            return {
-                "A": 0,  # Cross (bottom)
-                "B": 1,  # Circle (right)
-                "X": 2,  # Square (left)
-                "Y": 3,  # Triangle (top)
-                "LB": 4, # L1
-                "RB": 5, # R1
-                # L2/R2 are 6/7 as buttons on many DInput pads
-                "BACK": 8,   # Select
-                "START": 9,  # Start/Options
-                "L3": 10,
-                "R3": 11,
-            }
-        # Modern SDL mapping for DS4/DS5 (Options index 9)
-        return {
-            "A": 0, "B": 1, "X": 3, "Y": 2,
-            "LB": 4, "RB": 5, "BACK": 8, "START": 9,
-            "L3": 11, "R3": 12,
-        }
-    # Fallback
-    return {
-        "A": 0, "B": 1, "X": 2, "Y": 3,
-        "LB": 4, "RB": 5, "BACK": 6, "START": 7,
-        "L3": 8, "R3": 9,
-    }
-
-def _guid_override_map(style: str) -> Dict[str, int] | None:
-    """Return a per-device override mapping when we know a pad's raw
-    button indices differ from our base map.
-
-    Currently handles Nintendo Switch Pro Controller on Linux when it
-    reports GUID '050000007e0500000920000001800000'.
-
-    The mapping below reflects captured Pygame button indices:
-    A=2, B=3, X=5, Y=4, LB=6, RB=7, BACK=10, START=11, L3=12, R3=13.
-    """
-    try:
-        if style != "nintendo":
-            return None
-        # Only apply on Linux where this GUID/ordering occurs.
-        if not sys.platform.startswith("linux"):
-            return None
-        known_overrides: Dict[str, Dict[str, int]] = {
-            # Switch Pro Controller (Linux, Bluetooth), GUID seen in the wild.
-            "050000007e0500000920000001800000": {
-                "A": 2, "B": 3, "X": 5, "Y": 4,
-                "LB": 6, "RB": 7, "BACK": 10, "START": 11,
-                "L3": 12, "R3": 13,
-            },
-        }
-        # Collect connected joystick GUIDs and try to match.
-        detected: List[str] = []
-        try:
-            for i in range(pygame.joystick.get_count()):
-                try:
-                    g = pygame.joystick.Joystick(i).get_guid()  # type: ignore[attr-defined]
-                    if isinstance(g, str) and g:
-                        detected.append(g.lower())
-                except Exception:
-                    pass
-        except Exception:
-            pass
-        for g in detected:
-            if g in known_overrides:
-                return known_overrides[g]
-    except Exception:
-        pass
-    return None
-
 def update_button_mapping():
-    """Update global BTN_* constants based on PAD_STYLE and env overrides."""
+    """Update global BTN_* constants from environment variables only.
+    No default mappings - buttons must be set via manual mapping or env vars."""
     global BTN_A, BTN_B, BTN_X, BTN_Y, BTN_LB, BTN_RB, BTN_BACK, BTN_START, BTN_L3, BTN_R3
-    base = _base_map(PAD_STYLE)
-    # Apply per-GUID override if a known device is connected
-    _ovr = _guid_override_map(PAD_STYLE)
-    if _ovr:
-        base.update(_ovr)
-    BTN_A    = _env_int("BUA_BTN_A",    base.get("A", 0))
-    BTN_B    = _env_int("BUA_BTN_B",    base.get("B", 1))
-    BTN_X    = _env_int("BUA_BTN_X",    base.get("X", 2))
-    BTN_Y    = _env_int("BUA_BTN_Y",    base.get("Y", 3))
-    BTN_LB   = _env_int("BUA_BTN_LB",   base.get("LB", 4))
-    BTN_RB   = _env_int("BUA_BTN_RB",   base.get("RB", 5))
-    BTN_BACK = _env_int("BUA_BTN_BACK", base.get("BACK", 6))
-    BTN_START= _env_int("BUA_BTN_START",base.get("START", 7))
-    BTN_L3   = _env_int("BUA_BTN_L3",   base.get("L3", 8))
-    BTN_R3   = _env_int("BUA_BTN_R3",   base.get("R3", 9))
+    # Only use environment variables, no fallback defaults
+    BTN_A    = _env_int("BUA_BTN_A",    0)
+    BTN_B    = _env_int("BUA_BTN_B",    1)
+    BTN_X    = _env_int("BUA_BTN_X",    2)
+    BTN_Y    = _env_int("BUA_BTN_Y",    3)
+    BTN_LB   = _env_int("BUA_BTN_LB",   4)
+    BTN_RB   = _env_int("BUA_BTN_RB",   5)
+    BTN_BACK = _env_int("BUA_BTN_BACK", 6)
+    BTN_START= _env_int("BUA_BTN_START",7)
+    BTN_L3   = _env_int("BUA_BTN_L3",   8)
+    BTN_R3   = _env_int("BUA_BTN_R3",   9)
 
 # ------------------------------
 # Optional: manual button mapper
@@ -1011,16 +1049,16 @@ def run_manual_button_mapper() -> bool:
         return False
 
     order = [
-        ("A", "Press the bottom face button (A/Cross)"),
-        ("B", "Press the right face button (B/Circle)"),
-        ("X", "Press the left face button (X/Square)"),
-        ("Y", "Press the top face button (Y/Triangle)"),
-        ("LB","Press Left Bumper (L1)"),
-        ("RB","Press Right Bumper (R1)"),
-        ("BACK","Press Back/Select"),
-        ("START","Press Start/Options"),
-        ("L3","Press Left Stick (L3)"),
-        ("R3","Press Right Stick (R3)"),
+        ("A", t("btn_desc_a")),
+        ("B", t("btn_desc_b")),
+        ("X", t("btn_desc_x")),
+        ("Y", t("btn_desc_y")),
+        ("LB", t("btn_desc_lb")),
+        ("RB", t("btn_desc_rb")),
+        ("BACK", t("btn_desc_back")),
+        ("START", t("btn_desc_start")),
+        ("L3", t("btn_desc_l3")),
+        ("R3", t("btn_desc_r3")),
     ]
     mapping: dict[str,int] = {}
 
@@ -1458,6 +1496,14 @@ for j in JOYS:
     j.init()
 LAST_JOY_COUNT = pygame.joystick.get_count()
 
+# Analog stick support for navigation (for arcade cabinets without dpad)
+ANALOG_DEADZONE = 0.5  # Threshold for detecting stick movement
+ANALOG_REPEAT_DELAY = 0.15  # Seconds between repeated inputs when holding stick
+last_analog_vertical_time = 0.0  # Track timing for vertical stick movement
+last_analog_horizontal_time = 0.0  # Track timing for horizontal stick movement
+last_analog_vertical_state = 0  # -1 (up), 0 (neutral), 1 (down)
+last_analog_horizontal_state = 0  # -1 (left), 0 (neutral), 1 (right)
+
 
 def detect_pad_style() -> str:
     # If user picked a style in Settings, prefer that here
@@ -1494,18 +1540,6 @@ def detect_pad_style() -> str:
 PAD_STYLE = detect_pad_style()
 update_button_mapping()
 
-# If a saved manual mapping exists, apply it now. If not, and we seem to have
-# an unknown/keyboard style despite a connected joystick, optionally prompt the
-# user to run the manual mapper once on first run (gated by env var).
-_applied_saved = _apply_saved_button_map_if_any()
-if not _applied_saved:
-    try:
-        # Default to auto-mapping on first run (can be disabled with BUA_AUTOMAP_ON_FIRST_RUN=0)
-        _auto = os.environ.get("BUA_AUTOMAP_ON_FIRST_RUN", "1").strip() in ("1","true","yes")
-        if pygame.joystick.get_count() > 0 and (PAD_STYLE == "keyboard" or _auto):
-            run_manual_button_mapper()
-    except Exception:
-        pass
 def input_style_label() -> str:
     """Return a concise label of the current input device.
     - If a gamepad is connected: show its reported device name (first device).
@@ -1523,6 +1557,62 @@ def input_style_label() -> str:
         return name
     except Exception:
         return "Keyboard"
+
+
+def process_analog_navigation(events) -> tuple:
+    """
+    Process analog stick events for navigation (supports arcade cabinets).
+    Returns tuple: (vertical_movement, horizontal_movement)
+    - vertical_movement: -1 (up), 0 (none), 1 (down)
+    - horizontal_movement: -1 (left), 0 (none), 1 (right)
+
+    Uses deadzone and repeat delay to prevent accidental inputs.
+    """
+    global last_analog_vertical_time, last_analog_horizontal_time
+    global last_analog_vertical_state, last_analog_horizontal_state
+
+    vertical = 0
+    horizontal = 0
+    current_time = pygame.time.get_ticks() / 1000.0
+
+    for e in events:
+        if e.type == pygame.JOYAXISMOTION:
+            # Axis 0 = Left stick X (horizontal), Axis 1 = Left stick Y (vertical)
+            if e.axis == 1:  # Vertical axis (left stick Y)
+                if e.value < -ANALOG_DEADZONE:  # Up
+                    new_state = -1
+                elif e.value > ANALOG_DEADZONE:  # Down
+                    new_state = 1
+                else:
+                    new_state = 0
+                    last_analog_vertical_state = 0
+
+                # Only trigger if state changed or enough time passed
+                if new_state != 0:
+                    if (new_state != last_analog_vertical_state or
+                        current_time - last_analog_vertical_time >= ANALOG_REPEAT_DELAY):
+                        vertical = new_state
+                        last_analog_vertical_time = current_time
+                        last_analog_vertical_state = new_state
+
+            elif e.axis == 0:  # Horizontal axis (left stick X)
+                if e.value < -ANALOG_DEADZONE:  # Left
+                    new_state = -1
+                elif e.value > ANALOG_DEADZONE:  # Right
+                    new_state = 1
+                else:
+                    new_state = 0
+                    last_analog_horizontal_state = 0
+
+                # Only trigger if state changed or enough time passed
+                if new_state != 0:
+                    if (new_state != last_analog_horizontal_state or
+                        current_time - last_analog_horizontal_time >= ANALOG_REPEAT_DELAY):
+                        horizontal = new_state
+                        last_analog_horizontal_time = current_time
+                        last_analog_horizontal_state = new_state
+
+    return (vertical, horizontal)
 
 
 def draw_text(surf, text, font, color, pos):
@@ -1894,7 +1984,8 @@ class Runner:
                         "download", "downloading", "fetching", "getting",
                         "curl", "wget", "github.com", "raw.githubusercontent",
                         "resolving", "connecting", "saving to", "http request sent",
-                        "wohlsoft.ru", "sourceforge.net"
+                        "wohlsoft.ru", "sourceforge.net",
+                        ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico"
                     ]) or ln.strip().startswith("--20")  # Exclude wget timestamps like --2025-11-13
 
                     if is_important and not is_excluded:
@@ -2021,6 +2112,13 @@ class MenuScreen(BaseScreen):
                     self.search_query += key
             # While typing, ignore other inputs
             return
+
+        # Process analog stick for navigation (arcade cabinet support)
+        analog_v, _analog_h = process_analog_navigation(events)
+        if analog_v == 1:  # Down
+            self.idx = (self.idx + 1) % len(self.items)
+        elif analog_v == -1:  # Up
+            self.idx = (self.idx - 1) % len(self.items)
 
         for e in events:
             if e.type == pygame.QUIT:
@@ -2162,7 +2260,7 @@ class MenuScreen(BaseScreen):
         row_h = S(60)
         bottom_pad = S(40)
         avail_h = max(0, H - list_y - bottom_pad)
-        rows = max(1, min(total, avail_h // row_pitch))
+        rows = min(total, get_visible_items(avail_h, row_pitch))
         top = 0 if total <= rows else max(0, min(self.idx - rows // 2, total - rows))
         view = self.items[top:top + rows]
 
@@ -2208,6 +2306,11 @@ class ConfirmDialog(BaseScreen):
         self.selected = 0  # 0 = Yes, 1 = No
 
     def handle(self, events):
+        # Process analog stick for navigation (arcade cabinet support)
+        _analog_v, analog_h = process_analog_navigation(events)
+        if analog_h != 0:  # Left or Right
+            self.selected = 1 - self.selected
+
         for e in events:
             if e.type == pygame.QUIT:
                 pygame.quit(); sys.exit(0)
@@ -2354,6 +2457,68 @@ class InfoDialog(BaseScreen):
         btn_rect = pygame.Rect(dialog_x + (dialog_w - btn_w)//2, dialog_y + dialog_h - S(60), btn_w, btn_h)
         pygame.draw.rect(screen, ACCENT, btn_rect, border_radius=8)
         draw_text(screen, t("ok"), FONT, FG, (btn_rect.x + (btn_w - FONT.size(t("ok"))[0])//2, btn_rect.y + S(10)))
+
+
+class ChangelogDialog(BaseScreen):
+    """Display changelog on first run when content exists"""
+    def __init__(self):
+        pass
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key in (pygame.K_ESCAPE, pygame.K_RETURN, pygame.K_KP_ENTER):
+                    mark_changelog_shown()
+                    pop_screen()
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_B, BTN_BACK, BTN_START):
+                    mark_changelog_shown()
+                    pop_screen()
+
+    def draw(self):
+        draw_background(screen)
+
+        overlay = pygame.Surface((W, H))
+        overlay.set_alpha(180)
+        overlay.fill(BG)
+        screen.blit(overlay, (0, 0))
+
+        dialog_w = min(W - S(120), S(900))
+        dialog_h = min(H - S(120), S(700))
+        dialog_x = (W - dialog_w) // 2
+        dialog_y = (H - dialog_h) // 2
+        dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h)
+        pygame.draw.rect(screen, CARD, dialog_rect, border_radius=15)
+        pygame.draw.rect(screen, ACCENT, dialog_rect, width=3, border_radius=15)
+
+        # Title
+        title_text = "What's New"
+        draw_text(screen, title_text, FONT_BIG, FG, (dialog_x + S(30), dialog_y + S(30)))
+
+        # Changelog content area
+        msg_rect = pygame.Rect(dialog_x + S(30), dialog_y + S(90), dialog_w - S(60), dialog_h - S(160))
+        pygame.draw.rect(screen, (30, 34, 44), msg_rect, border_radius=10)
+
+        # Render changelog text with wrapping
+        y = msg_rect.y + S(15)
+        for raw_line in CHANGELOG.split('\n'):
+            if not raw_line:
+                y += S(8)
+                continue
+            for ln in wrap(raw_line, msg_rect.w - S(20), FONT):
+                if y > msg_rect.bottom - S(20):
+                    break
+                draw_text(screen, ln, FONT, (210, 215, 225), (msg_rect.x + S(10), y))
+                y += S(22)
+
+        # Close button
+        btn_w, btn_h = S(120), S(45)
+        btn_rect = pygame.Rect(dialog_x + (dialog_w - btn_w)//2, dialog_y + dialog_h - S(60), btn_w, btn_h)
+        pygame.draw.rect(screen, ACCENT, btn_rect, border_radius=8)
+        btn_text = t("ok")
+        draw_text(screen, btn_text, FONT, FG, (btn_rect.x + (btn_w - FONT.size(btn_text)[0])//2, btn_rect.y + S(10)))
 
 
 class InteractiveDialog(BaseScreen):
@@ -2512,7 +2677,7 @@ class InteractiveDialog(BaseScreen):
         item_h = S(50)
 
         # Calculate scrolling
-        visible_items = max(1, list_h // item_h)
+        visible_items = get_visible_items(list_h, item_h)
 
         if self.idx < self.scroll_offset:
             self.scroll_offset = self.idx
@@ -2596,6 +2761,13 @@ class MenuSelectionDialog(BaseScreen):
         self.scroll_offset = 0
 
     def handle(self, events):
+        # Process analog stick for navigation (arcade cabinet support)
+        analog_v, _analog_h = process_analog_navigation(events)
+        if analog_v == 1:  # Down
+            self.idx = (self.idx + 1) % len(self.options)
+        elif analog_v == -1:  # Up
+            self.idx = (self.idx - 1) % len(self.options)
+
         for e in events:
             if e.type == pygame.QUIT:
                 pygame.quit(); sys.exit(0)
@@ -2656,7 +2828,7 @@ class MenuSelectionDialog(BaseScreen):
 
         # Calculate scrolling
         item_h = S(50)
-        visible_items = max(1, list_h // item_h)
+        visible_items = get_visible_items(list_h, item_h)
 
         if self.idx < self.scroll_offset:
             self.scroll_offset = self.idx
@@ -2701,6 +2873,14 @@ class ChecklistScreen(BaseScreen):
     def handle(self, events):
         current_time = pygame.time.get_ticks() / 1000.0
         # Category screens do not support on-screen keyboard search
+
+        # Process analog stick for navigation (arcade cabinet support)
+        analog_v, _analog_h = process_analog_navigation(events)
+        if analog_v == 1:  # Down
+            self.idx = (self.idx + 1) % len(self.items)
+        elif analog_v == -1:  # Up
+            self.idx = (self.idx - 1) % len(self.items)
+
         for e in events:
             if e.type == pygame.QUIT:
                 pygame.quit(); sys.exit(0)
@@ -2893,9 +3073,11 @@ class ChecklistScreen(BaseScreen):
         if not self.items:
             draw_text(screen, t("no_addons_category"), FONT, MUTED, (40, base_y))
             return
-        
+
         # scroll logic
-        rows = 10
+        item_pitch = S(55)
+        avail_h = H - base_y - S(40)
+        rows = min(len(self.items), get_visible_items(avail_h, item_pitch))
         top = max(0, min(self.idx - rows//2, len(self.items)-rows))
         view = self.items[top:top+rows]
         
@@ -2971,6 +3153,14 @@ class GlobalSearchScreen(BaseScreen):
 
     def handle(self, events):
         current_time = pygame.time.get_ticks() / 1000.0
+
+        # Process analog stick for navigation (arcade cabinet support)
+        analog_v, _analog_h = process_analog_navigation(events)
+        if analog_v == 1:  # Down
+            self.idx = (self.idx + 1) % len(self.flat)
+        elif analog_v == -1:  # Up
+            self.idx = (self.idx - 1) % len(self.flat)
+
         for e in events:
             if e.type == pygame.QUIT:
                 pygame.quit(); sys.exit(0)
@@ -3082,7 +3272,9 @@ class GlobalSearchScreen(BaseScreen):
             draw_hints_line(screen, f"B={t('hint_return')}", FONT_SMALL, ACCENT, (40, base_y + 55))
             return
 
-        rows = 10
+        item_pitch = S(58)
+        avail_h = H - base_y - S(40)
+        rows = min(len(self.flat), get_visible_items(avail_h, item_pitch))
         top = max(0, min(self.idx - rows//2, len(self.flat)-rows))
         view = self.flat[top:top+rows]
 
@@ -3155,6 +3347,13 @@ class QueueScreen(BaseScreen):
         self.idx = 0
 
     def handle(self, events):
+        # Process analog stick for navigation (arcade cabinet support)
+        analog_v, _analog_h = process_analog_navigation(events)
+        if analog_v == 1 and INSTALL_QUEUE:  # Down
+            self.idx = (self.idx + 1) % (len(INSTALL_QUEUE) + 1)
+        elif analog_v == -1 and INSTALL_QUEUE:  # Up
+            self.idx = (self.idx - 1) % (len(INSTALL_QUEUE) + 1)
+
         for e in events:
             if e.type == pygame.QUIT:
                 pygame.quit(); sys.exit(0)
@@ -3245,8 +3444,10 @@ class QueueScreen(BaseScreen):
 
             base_y = 110
             # Scrollable queue list including the Start row as the last item
-            rows = 10
+            item_pitch = 55
+            avail_h = H - base_y - 40
             total_rows = len(INSTALL_QUEUE) + 1  # include Start row
+            rows = min(total_rows, get_visible_items(avail_h, item_pitch))
             if total_rows <= rows:
                 top = 0
             else:
@@ -3379,6 +3580,48 @@ class RunListScreen(BaseScreen):
             "export -f batocera-save-overlay; "
         )
 
+        # Wrap whiptail, zenity, and other dialog tools to auto-answer prompts
+        # This prevents installers from opening interactive windows that require manual exit
+        interactive_wrap = (
+            "function whiptail(){ "
+            "echo '[BUA] Auto-answering whiptail dialog'; "
+            "return 0; }; "
+            "export -f whiptail; "
+            "function zenity(){ "
+            "echo '[BUA] Auto-answering zenity dialog'; "
+            "return 0; }; "
+            "export -f zenity; "
+            "function kdialog(){ "
+            "echo '[BUA] Auto-answering kdialog'; "
+            "return 0; }; "
+            "export -f kdialog; "
+            "function xdialog(){ "
+            "echo '[BUA] Auto-answering xdialog'; "
+            "return 0; }; "
+            "export -f xdialog; "
+        )
+
+        # Wrap dangerous system commands that installers shouldn't call
+        # Prevents killing critical processes or switching to desktop mode
+        system_wrap = (
+            "function killall(){ "
+            "local target=\"$1\"; "
+            "if [[ \"$target\" == \"emulationstation\" ]] || [[ \"$target\" == \"pcmanfm\" ]]; then "
+            "echo '[BUA] Blocked killall for critical process:' \"$target\"; "
+            "if [[ \"$target\" == \"emulationstation\" ]]; then "
+            "touch /tmp/bua_killall_es_deferred; "
+            "fi; "
+            "return 0; "
+            "else "
+            "command killall \"$@\"; "
+            "fi; }; "
+            "export -f killall; "
+            "function desktop(){ "
+            "echo '[BUA] Blocked desktop mode switch during installation'; "
+            "return 0; }; "
+            "export -f desktop; "
+        )
+
         # Add debug markers to track execution
         debug_start = f"echo '[BUA] Starting installation: {name}'; "
         debug_end = "; echo '[BUA] Installation finished'"
@@ -3390,7 +3633,7 @@ class RunListScreen(BaseScreen):
             parts = cmd.split("|", 1)
             if len(parts) == 2:
                 curl_part = parts[0].strip()
-                wrapper_code = f"{dialog_wrap}{es_wrap}{overlay_wrap}"
+                wrapper_code = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}"
                 cmd = (
                     f"{debug_start}"
                     f"TMPSCRIPT=$(mktemp); "
@@ -3400,9 +3643,9 @@ class RunListScreen(BaseScreen):
                     f"{debug_end}"
                 )
             else:
-                cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{debug_start}{cmd}{debug_end}"
+                cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{debug_start}{cmd}{debug_end}"
         else:
-            cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{debug_start}{cmd}{debug_end}"
+            cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{debug_start}{cmd}{debug_end}"
 
         self.runner.run(cmd)
         self.started = True
@@ -3765,6 +4008,11 @@ def github_latest_commit_date(owner: str, repo: str, branch: str, path: str) -> 
     return None
 
 
+# Global GitHub cache that persists across UpdaterScreen instances
+# This prevents "unknown API error" when re-entering the updater
+GITHUB_CACHE: Dict[str, tuple] = {}  # {app: (status, needs_update, detail)}
+
+
 class UpdaterScreen(BaseScreen):
     def __init__(self):
         self.items: List[Tuple[str, str, bool, str]] = []  # (app, status_text, needs_update, detail)
@@ -3775,17 +4023,25 @@ class UpdaterScreen(BaseScreen):
         self.needs_rescan = False
         self.uninstalling_app: str | None = None  # Track which app is being uninstalled
         self.runner: Runner | None = None  # Runner for inline uninstall
-        self.github_cache: Dict[str, tuple] = {}  # Cache GitHub API results: {app: (status, needs_update, detail)}
         threading.Thread(target=self._scan, daemon=True).start()
 
     def _scan(self, use_cache=False):
         try:
-            installed_apps = [k for k in APPS.keys() if is_installed(k)]
+            # Get apps from JSON history
+            json_installed = [k for k in APPS.keys() if is_installed(k)]
+
+            # Scan directory for apps not in JSON (returns dict: app_name -> mtime)
+            dir_installed_dict = scan_installed_addons_directory()
+
+            # Combine both lists, removing duplicates
+            installed_apps = list(set(json_installed + list(dir_installed_dict.keys())))
+            installed_apps.sort()
+
             results = []
             for app in installed_apps:
                 # If using cache and we have cached data for this app, reuse it
-                if use_cache and app in self.github_cache:
-                    status, needs, detail = self.github_cache[app]
+                if use_cache and app in GITHUB_CACHE:
+                    status, needs, detail = GITHUB_CACHE[app]
                     results.append((app, status, needs, detail))
                     continue
 
@@ -3794,6 +4050,8 @@ class UpdaterScreen(BaseScreen):
                 parsed = parse_github_raw_url(cmd)
                 last_date_str = get_last_install_date(app)
                 last_ts = 0.0
+                is_from_directory_only = (last_date_str is None or last_date_str == "")
+
                 if last_date_str:
                     try:
                         last_ts = datetime.strptime(last_date_str, "%Y-%m-%d %H:%M:%S").timestamp()
@@ -3812,16 +4070,26 @@ class UpdaterScreen(BaseScreen):
                             needs = True
                             detail = time.strftime("%Y-%m-%d %H:%M", time.gmtime(remote_ts))
                         else:
-                            status = t("up_to_date")
+                            # Show special status for directory-only apps with their directory timestamp
+                            if is_from_directory_only:
+                                status = "Installed (no history)"
+                                # Use directory modification time if available
+                                dir_mtime = dir_installed_dict.get(app)
+                                if dir_mtime:
+                                    detail = time.strftime("%Y-%m-%d %H:%M", time.localtime(dir_mtime))
+                                else:
+                                    detail = ""
+                            else:
+                                status = t("up_to_date")
+                                detail = time.strftime("%Y-%m-%d %H:%M", time.gmtime(remote_ts))
                             needs = False
-                            detail = time.strftime("%Y-%m-%d %H:%M", time.gmtime(remote_ts))
                 else:
                     status = t("unknown_source")
                     needs = False
                     detail = ""
 
-                # Cache the result
-                self.github_cache[app] = (status, needs, detail)
+                # Cache the result globally
+                GITHUB_CACHE[app] = (status, needs, detail)
                 results.append((app, status, needs, detail))
 
             # Sort: updates first, then by name
@@ -3843,6 +4111,14 @@ class UpdaterScreen(BaseScreen):
         threading.Thread(target=lambda: self._scan(use_cache=use_cache), daemon=True).start()
 
     def handle(self, events):
+        # Process analog stick for navigation (arcade cabinet support)
+        analog_v, _analog_h = process_analog_navigation(events)
+        if not self.loading and self.items:
+            if analog_v == 1:  # Down
+                self.idx = min(self.idx + 1, len(self.items) - 1)
+            elif analog_v == -1:  # Up
+                self.idx = max(self.idx - 1, 0)
+
         for e in events:
             if e.type == pygame.QUIT:
                 pygame.quit(); sys.exit(0)
@@ -3858,11 +4134,13 @@ class UpdaterScreen(BaseScreen):
                 if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
                     if not self.loading and self.items:
                         app = self.items[self.idx][0]
-                        needs = self.items[self.idx][2]
-                        if needs:
+                        needs_update = self.items[self.idx][2]
+                        if needs_update:
+                            # Toggle selection for apps that need updates
                             self.selected[app] = not self.selected.get(app, False)
                 if e.key == pygame.K_SPACE:  # Start on keyboard
-                    self.queue_updates()
+                    if not self.loading:
+                        self.queue_updates()
             if e.type == pygame.JOYHATMOTION:
                 _x, y = e.value
                 if y == -1:
@@ -3875,12 +4153,16 @@ class UpdaterScreen(BaseScreen):
                 if e.button in (BTN_A,):  # A toggle
                     if not self.loading and self.items:
                         app = self.items[self.idx][0]
-                        if self.items[self.idx][2]:
+                        needs_update = self.items[self.idx][2]
+                        if needs_update:
+                            # Toggle selection for apps that need updates
                             self.selected[app] = not self.selected.get(app, False)
-                if e.button in (BTN_START,):  # Start -> queue
-                    self.queue_updates()
-                if e.button in (BTN_Y,):  # Y -> uninstall
-                    self.uninstall_app()
+                if e.button in (BTN_START,):  # Start -> queue updates
+                    if not self.loading:
+                        self.queue_updates()
+                if e.button in (BTN_Y,):  # Y -> uninstall current app
+                    if not self.loading and self.items:
+                        self.uninstall_app()
 
     def uninstall_app(self):
         """Uninstall the currently selected app inline"""
@@ -3905,7 +4187,8 @@ class UpdaterScreen(BaseScreen):
     def queue_updates(self):
         if self.loading:
             return
-        selected_apps = [app for app in self.selected if self.selected[app]]
+        # Get all apps that are selected (either auto-selected on load or manually toggled)
+        selected_apps = [app for app in self.selected if self.selected.get(app, False)]
         if not selected_apps:
             push_screen(InfoDialog(t("updater"), [t("nothing_selected_update")]))
             return
@@ -3964,7 +4247,9 @@ class UpdaterScreen(BaseScreen):
             return
 
         base_y = 110
-        rows = 10
+        item_pitch = 55
+        avail_h = H - base_y - 40
+        rows = min(len(self.items), get_visible_items(avail_h, item_pitch))
         top = max(0, min(self.idx - rows//2, max(0, len(self.items)-rows)))
         view = self.items[top:top+rows]
 
@@ -4164,10 +4449,18 @@ class SettingsScreen(BaseScreen):
             (t("configure_buttons"), t("configure_buttons_desc")),
             (t("language"), t("language_desc")),
             (t("resolution"), t("resolution_desc")),
+            (t("cards_per_page"), t("cards_per_page_desc")),
         ]
         self.idx = 0
 
     def handle(self, events):
+        # Process analog stick for navigation (arcade cabinet support)
+        analog_v, _analog_h = process_analog_navigation(events)
+        if analog_v == 1:  # Down
+            self.idx = (self.idx + 1) % len(self.items)
+        elif analog_v == -1:  # Up
+            self.idx = (self.idx - 1) % len(self.items)
+
         for e in events:
             if e.type == pygame.QUIT:
                 pygame.quit(); sys.exit(0)
@@ -4204,6 +4497,8 @@ class SettingsScreen(BaseScreen):
             push_screen(LanguageScreen())
         elif name == t("resolution"):
             push_screen(ResolutionScreen())
+        elif name == t("cards_per_page"):
+            push_screen(CardsPerPageScreen())
 
     def draw(self):
         draw_background(screen)
@@ -4248,6 +4543,13 @@ class ControllerLayoutScreen(BaseScreen):
         self.idx = next((i for i, (_n, v) in enumerate(self.options) if v == style), 0)
 
     def handle(self, events):
+        # Process analog stick for navigation (arcade cabinet support)
+        analog_v, _analog_h = process_analog_navigation(events)
+        if analog_v == 1:  # Down
+            self.idx = (self.idx + 1) % len(self.options)
+        elif analog_v == -1:  # Up
+            self.idx = (self.idx - 1) % len(self.options)
+
         for e in events:
             if e.type == pygame.QUIT:
                 pygame.quit(); sys.exit(0)
@@ -4307,6 +4609,15 @@ class LanguageScreen(BaseScreen):
         self.scroll_offset = 0
 
     def handle(self, events):
+        # Process analog stick for navigation (arcade cabinet support)
+        analog_v, _analog_h = process_analog_navigation(events)
+        if analog_v == 1:  # Down
+            self.idx = (self.idx + 1) % len(self.options)
+            self.adjust_scroll()
+        elif analog_v == -1:  # Up
+            self.idx = (self.idx - 1) % len(self.options)
+            self.adjust_scroll()
+
         for e in events:
             if e.type == pygame.QUIT:
                 pygame.quit(); sys.exit(0)
@@ -4338,7 +4649,8 @@ class LanguageScreen(BaseScreen):
     def adjust_scroll(self):
         """Adjust scroll offset to keep selected item visible"""
         item_height = 48
-        visible_items = (H - 180) // item_height  # Approximate visible area
+        list_h = H - 180
+        visible_items = get_visible_items(list_h, item_height)
 
         if self.idx < self.scroll_offset:
             self.scroll_offset = self.idx
@@ -4420,6 +4732,129 @@ class LanguageScreen(BaseScreen):
             screen.blit(text_surf, (rect.x + 14, rect.y + 8))
 
 
+class CardsPerPageScreen(BaseScreen):
+    def __init__(self):
+        # Options for number of cards per page
+        self.options = [
+            ("Auto", "auto"),
+            ("3", "3"),
+            ("4", "4"),
+            ("5", "5"),
+            ("6", "6"),
+            ("7", "7"),
+            ("8", "8"),
+            ("9", "9"),
+            ("10", "10"),
+        ]
+        self.idx = 0
+        self.scroll_offset = 0
+        # Find current setting
+        for i, (label, value) in enumerate(self.options):
+            if value == CARDS_PER_PAGE:
+                self.idx = i
+                break
+
+    def handle(self, events):
+        # Process analog stick for navigation (arcade cabinet support)
+        analog_v, _analog_h = process_analog_navigation(events)
+        if analog_v == 1:  # Down
+            self.idx = (self.idx + 1) % len(self.options)
+        elif analog_v == -1:  # Up
+            self.idx = (self.idx - 1) % len(self.options)
+
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key in (pygame.K_ESCAPE,):
+                    pop_screen(); return
+                if e.key in (pygame.K_DOWN,):
+                    self.idx = (self.idx + 1) % len(self.options)
+                if e.key in (pygame.K_UP,):
+                    self.idx = (self.idx - 1) % len(self.options)
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    self.apply_choice()
+            if e.type == pygame.JOYHATMOTION:
+                _x, y = e.value
+                if y == -1:
+                    self.idx = (self.idx + 1) % len(self.options)
+                elif y == 1:
+                    self.idx = (self.idx - 1) % len(self.options)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_START):
+                    self.apply_choice()
+                if e.button in (BTN_B, BTN_BACK):
+                    pop_screen(); return
+
+    def apply_choice(self):
+        label, value = self.options[self.idx]
+        save_cards_per_page(value)
+        msg = [f"{t('cards_per_page')}: {label}"]
+        push_screen(InfoDialog(t("settings_title"), msg))
+
+    def draw(self):
+        draw_background(screen)
+        draw_text(screen, t("cards_per_page"), FONT_BIG, FG, (40, 30))
+        hint = f"A={t('hint_select')} | B={t('hint_return')} | Back={t('hint_close_settings')}"
+        draw_hints_line(screen, hint, FONT_SMALL, ACCENT, (40, 70))
+
+        base_y = 110
+        card_w = min(W - S(80), S(900))
+        card_x = (W - card_w) // 2
+
+        # Show current setting
+        current_label = CARDS_PER_PAGE
+        for label, value in self.options:
+            if value == CARDS_PER_PAGE:
+                current_label = label
+                break
+
+        status_text = f"{t('current')}: {current_label}"
+        status_img = FONT_SMALL.render(status_text, True, MUTED)
+        screen.blit(status_img, (card_x, base_y))
+
+        # List items with scrolling
+        visible_start_y = base_y + 40
+        visible_end_y = H - 40
+        item_height = 52
+        pad_y = S(10)
+
+        list_h = visible_end_y - visible_start_y
+        visible_items = get_visible_items(list_h, item_height)
+
+        # Auto-scroll to keep selection visible
+        if self.idx < self.scroll_offset:
+            self.scroll_offset = self.idx
+        elif self.idx >= self.scroll_offset + visible_items:
+            self.scroll_offset = self.idx - visible_items + 1
+
+        y = visible_start_y
+        for i in range(self.scroll_offset, min(len(self.options), self.scroll_offset + visible_items)):
+            label, value = self.options[i]
+            is_selected = (i == self.idx)
+            is_current = (value == CARDS_PER_PAGE)
+
+            rect = pygame.Rect(card_x, y, card_w, item_height - 4)
+            pygame.draw.rect(screen, CARD, rect, border_radius=8)
+            if is_selected:
+                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=8)
+
+            text_x = rect.x + S(14)
+            text_y = rect.y + pad_y
+
+            # Draw label
+            label_img = FONT.render(label, True, FG)
+            screen.blit(label_img, (text_x, text_y))
+
+            # Show checkmark for current setting
+            if is_current:
+                check_img = FONT.render("✓", True, ACCENT)
+                check_x = rect.x + card_w - check_img.get_width() - S(14)
+                screen.blit(check_img, (check_x, text_y))
+
+            y += item_height
+
+
 class ResolutionScreen(BaseScreen):
     def __init__(self):
         # Common resolution options (including CRT resolutions)
@@ -4454,6 +4889,13 @@ class ResolutionScreen(BaseScreen):
                 break
 
     def handle(self, events):
+        # Process analog stick for navigation (arcade cabinet support)
+        analog_v, _analog_h = process_analog_navigation(events)
+        if analog_v == 1:  # Down
+            self.idx = (self.idx + 1) % len(self.options)
+        elif analog_v == -1:  # Up
+            self.idx = (self.idx - 1) % len(self.options)
+
         for e in events:
             if e.type == pygame.QUIT:
                 pygame.quit(); sys.exit(0)
@@ -4549,7 +4991,8 @@ class ResolutionScreen(BaseScreen):
         item_height = 52
         visible_start_y = base_y
         visible_end_y = H - 40
-        visible_items = max(1, (visible_end_y - visible_start_y) // item_height)
+        list_h = visible_end_y - visible_start_y
+        visible_items = get_visible_items(list_h, item_height)
 
         # Auto-scroll to keep selection visible
         if self.idx < self.scroll_offset:
@@ -4595,6 +5038,20 @@ def pop_screen():
 
 def main():
     push_screen(MenuScreen(t("main_title"), TOP_LEVEL))
+
+    # Check for controller mapping before showing changelog
+    if not _apply_saved_button_map_if_any():
+        try:
+            _auto = os.environ.get("BUA_AUTOMAP_ON_FIRST_RUN", "1").strip() in ("1","true","yes")
+            if pygame.joystick.get_count() > 0 and _auto:
+                run_manual_button_mapper()
+        except Exception:
+            pass
+
+    # Show changelog if there's new content
+    if should_show_changelog():
+        push_screen(ChangelogDialog())
+
     while True:
         events = pygame.event.get()
         # Handle window resize for windowed mode
@@ -4685,6 +5142,8 @@ def play_splash_and_load():
         try:
             # Load translations
             load_language()
+            # Load cards per page preference
+            load_saved_cards_per_page()
             # Load assets (images, icons)
             init_assets()
         except Exception as e:
@@ -4813,13 +5272,26 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         pass
     finally:
-        # Refresh EmulationStation gamelist once when exiting
-        # (instead of after each individual installation)
+        # Check if killall emulationstation was deferred during installation
+        # If so, run it now instead of just refreshing
         try:
             import subprocess
-            print("[BUA] Refreshing EmulationStation gamelists...")
-            subprocess.run(["curl", "http://127.0.0.1:1234/reloadgames"],
-                         check=False, timeout=10, capture_output=True)
+            import os
+
+            if os.path.exists("/tmp/bua_killall_es_deferred"):
+                print("[BUA] Running deferred killall for EmulationStation...")
+                subprocess.run(["killall", "-9", "emulationstation"],
+                             check=False, timeout=10, capture_output=True)
+                # Clean up the flag file
+                try:
+                    os.remove("/tmp/bua_killall_es_deferred")
+                except:
+                    pass
+            else:
+                # Just refresh EmulationStation gamelist
+                print("[BUA] Refreshing EmulationStation gamelists...")
+                subprocess.run(["curl", "http://127.0.0.1:1234/reloadgames"],
+                             check=False, timeout=10, capture_output=True)
         except Exception as e:
             print(f"[BUA] Could not refresh ES: {e}")
 

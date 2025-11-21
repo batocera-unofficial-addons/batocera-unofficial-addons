@@ -147,23 +147,5 @@ echo "If you don't see the Heroic option after installing games,"
 echo "it's likely it's instead showing up as Commodore 64. Switch to an ES theme to see Heroic properly!"
 echo ""
 sleep 5
-# Show dialog box for reboot confirmation
-dialog --clear --title "Reboot Required" \
-  --yesno "Heroic Games Launcher setup is complete, a reboot is required.\n\nWould you like to reboot now?" 10 60
 
-response=$?
-
-clear
-case $response in
-  0)
-    echo "Rebooting..."
-    sleep 2
-    reboot
-    ;;
-  1)
-    echo "Reboot cancelled. You can reboot manually later."
-    ;;
-  255)
-    echo "No selection made. Skipping reboot."
-    ;;
-esac
+killall -9 emulationstation

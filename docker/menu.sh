@@ -10,7 +10,7 @@ run_container_script() {
 }
 
 while true; do
-    choice=$(dialog --clear --backtitle "Batocera Unofficial Add-ons" \
+    choice=$(dialog --stdout --clear --backtitle "Batocera Unofficial Add-ons" \
                     --title "Docker App Installer" \
                     --menu "Choose a Docker app to install:" 18 65 6 \
                     1 "CasaOS" \
@@ -22,8 +22,7 @@ while true; do
                     7 "Emby" \
                     8 "Arr-In-One" \
                     9 "Arr-In-One Downloaders" \
-                    10 "Exit" \
-                    3>&1 1>&2 2>&3)
+                    10 "Exit")
 
     case $choice in
         1)

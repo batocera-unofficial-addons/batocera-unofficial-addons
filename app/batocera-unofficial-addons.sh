@@ -311,7 +311,7 @@ categories=(
 
 while true; do
     # Show category menu
-    category_choice=$(dialog --menu "Choose a category" 15 70 4 \
+    category_choice=$(dialog --stdout --menu "Choose a category" 15 70 4 \
         "Games" "Install Linux native games" \
         "Windows Freeware" "Install Windows freeware games" \
         "Game Utilities" "Install game related add-ons" \
@@ -319,7 +319,7 @@ while true; do
         "Developer Tools" "Install developer and patching tools" \
         "Docker Menu" "Install Docker containers" \
         "Updater" "Install the latest updates to your add-ons" \
-        "Exit" "Exit the installer" 2>&1 >/dev/tty)
+        "Exit" "Exit the installer")
 
 # Exit if the user selects "Exit" or cancels
 if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
@@ -370,8 +370,8 @@ fi
         done
 
         # Show dialog checklist with descriptions
-        cmd=(dialog --separate-output --checklist "Select applications to install or update:" 22 95 16)
-        choices=$("${cmd[@]}" "${app_list[@]}" 2>&1 >/dev/tty)
+        cmd=(dialog --stdout --separate-output --checklist "Select applications to install or update:" 22 95 16)
+        choices=$("${cmd[@]}" "${app_list[@]}")
 
         # Check if Cancel was pressed
         if [ $? -eq 1 ]; then

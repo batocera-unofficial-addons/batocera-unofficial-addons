@@ -16,7 +16,7 @@ fi
 if ! command -v fusermount3 &> /dev/null; then
     
     # Display a YES/NO dialog
-    dialog --yesno "BUA needs to be updated to the latest version for this app to run. Do you want to continue?" 10 60
+    dialog --stdout --yesno "BUA needs to be updated to the latest version for this app to run. Do you want to continue?" 10 60
     response=$?
     if [ $response -eq 0 ]; then
     clear

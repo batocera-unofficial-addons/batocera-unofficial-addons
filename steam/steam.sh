@@ -16,7 +16,7 @@ fi
 if ! command -v fusermount3 &> /dev/null; then
 
     # Display a YES/NO dialog
-    dialog --yesno "BUA needs to be updated to the latest version for this app to run. Do you want to continue?" 10 60
+    dialog --stdout --yesno "BUA needs to be updated to the latest version for this app to run. Do you want to continue?" 10 60
     response=$?
     if [ $response -eq 0 ]; then
     clear
@@ -63,26 +63,18 @@ PERSISTENT_DESKTOP="/userdata/system/configs/steam/Steam.desktop"
 ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/steam/extra/icon.png"
 INSTALL_DIR="/userdata/system/add-ons/steam"
 
-# Step 3: Create the Steam Launcher Script
-echo "Creating Steam launcher script in Ports..."
-mkdir -p /userdata/roms/ports
-cat << 'EOF' > /userdata/roms/ports/Steam.sh
-#!/bin/bash
-export DISPLAY=:0.0
+echo "Downloading Steam helper scripts..."
+SCRIPTS_BASE_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/steam/extra"
+wget --show-progress -qO "/userdata/system/add-ons/steam/Launcher" "${SCRIPTS_BASE_URL}/Launcher"
+wget --show-progress -qO "/userdata/system/add-ons/steam/create-steam-launchers.sh" "${SCRIPTS_BASE_URL}/create-steam-launchers.sh"
 
-cd /userdata/system/add-ons/steam
-ulimit -H -n 819200 && ulimit -S -n 819200 && sysctl -w fs.inotify.max_user_watches=8192000 vm.max_map_count=2147483642 fs.file-max=8192000 >/dev/null 2>&1 && ./steam -gamepadui
-EOF
-
-cat << 'EOF' > /userdata/system/add-ons/steam/Launcher
-#!/bin/bash
-export DISPLAY=:0.0
-
-ulimit -H -n 819200 && ulimit -S -n 819200 && sysctl -w fs.inotify.max_user_watches=8192000 vm.max_map_count=2147483642 fs.file-max=8192000 >/dev/null 2>&1 && /userdata/system/add-ons/steam/steam
-EOF
-
-chmod +x /userdata/roms/ports/Steam.sh
 chmod +x /userdata/system/add-ons/steam/Launcher
+chmod +x /userdata/system/add-ons/steam/create-steam-launchers.sh
+
+echo "Downloading EmulationStation config..."
+mkdir -p /userdata/system/configs/emulationstation
+wget --show-progress -qO "/userdata/system/configs/emulationstation/es_systems_steam.cfg" "${SCRIPTS_BASE_URL}/es_systems_steam.cfg"
+wget --show-progress -qO "/userdata/system/configs/emulationstation/es_features_steam.cfg" "${SCRIPTS_BASE_URL}/es_features_steam.cfg"
 
 echo "Downloading icon..."
 wget --show-progress -qO "${INSTALL_DIR}/extra/icon.png" "$ICON_URL"
@@ -132,22 +124,35 @@ chmod +x "$custom_startup"
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
+# Create Big Picture Mode launcher in /userdata/roms/steam
+echo "Creating Big Picture Mode launcher..."
+mkdir -p /userdata/roms/steam
+mkdir -p /userdata/roms/steam/images
+
+cat <<'EOF' > /userdata/roms/steam/Steam_Big_Picture.sh
+#!/bin/bash
+/userdata/system/add-ons/steam/Launcher "-gamepadui"
+EOF
+chmod +x /userdata/roms/steam/Steam_Big_Picture.sh
+
 KEYS_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/steam/extra/Steam.sh.keys"
 # Step 5: Download the key mapping file
 echo "Downloading key mapping file..."
-curl -L -o "/userdata/roms/ports/Steam.sh.keys" "$KEYS_URL"
+curl -L -o "/userdata/roms/steam/Steam_Big_Picture.sh.keys" "$KEYS_URL"
 # Download the image
 echo "Downloading Steam logo..."
-curl -L -o /userdata/roms/ports/images/steamlogo.jpg https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/steam/extra/logo.jpg
+curl -L -o /userdata/roms/steam/images/steamlogo.jpg https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/steam/extra/logo.jpg
 
 echo "Adding logo to Steam entry in gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-  -s "/gameList/game[last()]" -t elem -n "path" -v "./Steam.sh" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./Steam_Big_Picture.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "Steam" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/steamlogo.jpg" \
-  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+  /userdata/roms/ports/gamelist.xml > /userdata/roms/steam/gamelist.xml.tmp && mv /userdata/roms/steam/gamelist.xml.tmp /userdata/roms/steam/gamelist.xml
 
 curl http://127.0.0.1:1234/reloadgames
 
 echo
 echo "Installation complete! You can now launch Steam from the F1 Applications menu and Steam Big Picture Mode from the Ports menu."
+# Finish
+killall -9 emulationstation

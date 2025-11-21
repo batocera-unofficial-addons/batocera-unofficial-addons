@@ -48,6 +48,8 @@
   "hint_select": "Sélectionner",
   "hint_close_settings": "Fermer Paramètres",
   "hint_uninstall": "Désinstaller",
+  "hint_cancel": "Annuler",
+  "hint_confirm": "Confirmer",
 
   "installation_queue": "File d'Installation",
   "queue_empty": "La file est vide.",
@@ -131,6 +133,20 @@
   "items_lowercase": "éléments",
   "hold_button_for": "Maintenez le bouton enfoncé pour {label}",
 
+  "btn_desc_a": "Appuyez sur le bouton du bas (A/Croix)",
+  "btn_desc_b": "Appuyez sur le bouton de droite (B/Rond)",
+  "btn_desc_x": "Appuyez sur le bouton de gauche (X/Carré)",
+  "btn_desc_y": "Appuyez sur le bouton du haut (Y/Triangle)",
+  "btn_desc_lb": "Appuyez sur la Gâchette Gauche (L1)",
+  "btn_desc_rb": "Appuyez sur la Gâchette Droite (R1)",
+  "btn_desc_back": "Appuyez sur Retour/Select",
+  "btn_desc_start": "Appuyez sur Start/Options",
+  "btn_desc_l3": "Appuyez sur le Stick Gauche (L3)",
+  "btn_desc_r3": "Appuyez sur le Stick Droit (R3)",
+
   "resolution": "Résolution",
-  "resolution_desc": "Modifier la résolution de l'interface"
+  "resolution_desc": "Modifier la résolution de l'interface",
+
+  "cards_per_page": "Cartes par Page",
+  "cards_per_page_desc": "Définir le nombre de cartes à afficher dans les menus (Auto/3/4/5/6/7/8/10)"
 }

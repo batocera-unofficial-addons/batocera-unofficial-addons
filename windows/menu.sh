@@ -10,7 +10,7 @@ run_game_script() {
 }
 
 while true; do
-    choice=$(dialog --clear --backtitle "Windows Freeware Game Installer" \
+    choice=$(dialog --stdout --clear --backtitle "Windows Freeware Game Installer" \
                     --title "Game Selection" \
                     --menu "Choose a game to install:" 15 50 7 \
                     1 "Maldita Castilla" \
@@ -27,8 +27,7 @@ while true; do
                     12 "Modern Modern Chef" \
                     13 "Sonic Robo Blast 2" \
                     14 "Super Smash Bros CMC+" \
-                    15 "Exit" \
-                    3>&1 1>&2 2>&3)
+                    15 "Exit")
     
     case $choice in
         1)
