@@ -73,6 +73,11 @@ Você irá encontrar a ferramenta dentro da coleção **Ports**
 * **Gerenciamento de prefixos Wine com backup e restauração*
 * **Controle granular sobre DLLs, fontes, configurações e aplicativos Windows*
 
+***Atualização - 18.11.2025***
+
+* **Correção de Bugs*
+* **Implementado limpeza de prefixos obsoletos durante a aplicação das ferramentas Redist*
+
 ---
 # 🎮 Suporte ao Gamepad
 ---
