@@ -452,6 +452,7 @@ APPS: Dict[str, str] = {
     "Disney Plus": bua("disneyplus/disneyplus.sh"),
     "CLI Tools": bua("docker/cli.sh"),
     "Endless Sky": bua("endlesssky/endlesssky.sh"),
+    "EGGNOGG+": bua("eggnoggplus/eggnoggplus.sh"),
     "Everest": bua("everest/everest.sh"),
     "Firefox": bua("firefox/firefox.sh"),
     "Fightcade": bua("fightcade/fightcade.sh"),
@@ -529,11 +530,13 @@ APPS: Dict[str, str] = {
     "Dark Mode": bua("dark/dark.sh"),
     "VClean": bua("vclean/vclean.sh"),
     "RGSX": "curl -L bit.ly/rgsx-install | sh",
+    "Raspberry Pi Imager": bua("rpi/rpi.sh"),
 }
 
 # --- Integrated Windows Freeware installers (previously separate bash menu) ---
 # These run upstream installer scripts directly within the existing runner.
 APPS.update({
+    "AM2R": bua("windows/am2r.sh"),
     "Maldita Castilla": bua("windows/castilla.sh"),
     "Celeste": bua("windows/celeste.sh"),
     "Donkey Kong Advanced": bua("windows/dka.sh"),
@@ -547,6 +550,11 @@ APPS.update({
     "TMNT Rescue Palooza": bua("windows/tmntrp.sh"),
     "Crash Bandicoot - Back In Time": bua("windows/cbbit.sh"),
     "Sonic Triple Trouble 16bit": bua("windows/stt.sh"),
+    "Sonic 3D in 2D": bua("windows/s3d2d.sh"),
+    "SHRUBNAUT": bua("windows/shrubnaut.sh"),
+    "Secret Maryo Chronicles": bua("windows/smc.sh"),
+    "SCP Containment Breach": bua("windows/scpcontainmentbreach.sh"),
+    "Zero-K": bua("windows/zerok.sh"),
     "Modern Modern Chef": bua("windows/mmc.sh"),
     "Sonic Robo Blast 2": bua("windows/srb2.sh"),
     "Sonic Time Twisted": bua("windows/sttw.sh"),
@@ -585,6 +593,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "Stremio": "Stremio video streaming app for Batocera.",
     "Vesktop": "Discord client for Batocera.",
     "Endless Sky": "Space exploration game.",
+    "EGGNOGG+": "Award-winning 2-player sword fighting game.",
     "Chiaki": "PS4/PS5 Remote Play client.",
     "Chrome": "Google Chrome web browser.",
     "Amazon Luna": "Amazon Luna game streaming client.",
@@ -661,10 +670,12 @@ DESCRIPTIONS: Dict[str, str] = {
     "Dark Mode": "Toggle F1 dark mode",
     "VClean": "Service to clean the Batocera version string (removes extra flags)",
     "RGSX": "Retro Game Sets Xtra. A free, user-friendly ROM downloader for Batocera",
+    "Raspberry Pi Imager": "Flash OS images to USB and SD cards.",
 }
 
 # Descriptions for integrated Windows Freeware entries
 DESCRIPTIONS.update({
+    "AM2R": "Another Metroid 2 Remake - Fan remake",
     "Maldita Castilla": "Arcade action platformer",
     "Celeste": "Indie platformer classic",
     "Donkey Kong Advanced": "Fan remake/port",
@@ -678,6 +689,11 @@ DESCRIPTIONS.update({
     "TMNT Rescue Palooza": "Beat 'em up fan game",
     "Crash Bandicoot - Back In Time": "Fan game",
     "Sonic Triple Trouble 16bit": "Fan remake",
+    "Sonic 3D in 2D": "2D demake of Sonic 3D Blast",
+    "SHRUBNAUT": "Space exploration and mining game",
+    "Secret Maryo Chronicles": "Super Mario-inspired platformer",
+    "SCP Containment Breach": "SCP Foundation horror survival game",
+    "Zero-K": "Free multiplayer real-time strategy game",
     "Modern Modern Chef": "Indie title",
     "Sonic Robo Blast 2": "Doom-based Sonic fangame",
     "Sonic Time Twisted": "Time-traveling Sonic fan game",
@@ -700,13 +716,14 @@ DESCRIPTIONS.update({
 
 CATEGORIES: Dict[str, List[str]] = {
     "Games": [
-        "Minecraft", "Armagetron", "Clone Hero", "Endless Sky", "CS Portable",
+        "Minecraft", "Armagetron", "Clone Hero", "Endless Sky", "EGGNOGG+", "CS Portable",
         "Warzone 2100", "Xonotic", "Fightcade", "SuperTuxKart", "OpenRA",
         "Assault Cube", "SuperTux", "Free Droid RPG", "StepMania", "Ambermoon",
         "YARG", "OpenTTD", "Luanti", "Super Mario X", "Celeste 64", "UltraStar",
         "Sandtrix"
     ],
     "Windows Freeware": [
+        "AM2R",
         "Maldita Castilla",
         "Celeste",
         "Donkey Kong Advanced",
@@ -720,6 +737,11 @@ CATEGORIES: Dict[str, List[str]] = {
         "TMNT Rescue Palooza",
         "Crash Bandicoot - Back In Time",
         "Sonic Triple Trouble 16bit",
+        "Sonic 3D in 2D",
+        "SHRUBNAUT",
+        "Secret Maryo Chronicles",
+        "SCP Containment Breach",
+        "Zero-K",
         "Modern Modern Chef",
         "Sonic Robo Blast 2",
         "Sonic Time Twisted",
@@ -750,7 +772,7 @@ CATEGORIES: Dict[str, List[str]] = {
         "OpenRGB", "OBS", "Stremio", "Disney Plus", "Twitch", "7zip", "qBittorrent",
         "GParted", "Custom Wine", "Plex", "HBO Max", "Prime Video", "Crunchyroll",
         "Mubi", "Tidal", "FreeTube", "FileZilla", "PeaZip", "Desktop", "Flathub",
-        "JDownloader"
+        "JDownloader", "Raspberry Pi Imager"
     ],
     "Developer Tools": [
         "NVIDIA Patcher", "Conty", "CLI Tools", "NVIDIA Clocker", "Docker",
@@ -4192,8 +4214,8 @@ class UpdaterScreen(BaseScreen):
                 item = (app, cmd)
                 if item not in INSTALL_QUEUE:
                     INSTALL_QUEUE.append(item)
-        push_screen(QueueScreen())
         pop_screen()  # close updater
+        push_screen(QueueScreen())
 
     def update(self):
         """Check if we need to rescan after returning from uninstall"""
