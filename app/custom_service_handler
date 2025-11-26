@@ -1,0 +1,79 @@
+#!/bin/bash
+# Custom Service Handler
+# Service that migrates custom_service to custom.sh and runs it on every boot
+# Only runs on Batocera v43 or higher
+
+CUSTOM_SERVICE="/userdata/system/services/custom_service"
+CUSTOM_SH="/userdata/system/custom.sh"
+
+case "$1" in
+    start)
+        # Check Batocera version
+        BATOCERA_VERSION=$(batocera-version | grep -oP '^\d+')
+
+        if [ -z "$BATOCERA_VERSION" ] || [ "$BATOCERA_VERSION" -lt 43 ]; then
+            echo "[*] Batocera version is less than 43, skipping custom.sh execution."
+            exit 0
+        fi
+
+        # Check if custom_service exists
+        if [ -f "$CUSTOM_SERVICE" ]; then
+            echo "[+] Custom service detected, migrating to custom.sh..."
+
+            # Backup existing custom.sh if it exists
+            if [ -f "$CUSTOM_SH" ]; then
+                echo "[*] Backing up existing custom.sh..."
+                cp "$CUSTOM_SH" "${CUSTOM_SH}.backup.$(date +%Y%m%d_%H%M%S)"
+            fi
+
+            # Move custom_service to custom.sh
+            echo "[+] Moving custom_service to custom.sh..."
+            mv "$CUSTOM_SERVICE" "$CUSTOM_SH"
+
+            # Make it executable
+            chmod +x "$CUSTOM_SH"
+
+            echo "[✓] Custom service migration complete!"
+        fi
+
+        # Run custom.sh if it exists (whether migrated or already present)
+        if [ -f "$CUSTOM_SH" ]; then
+            echo "[+] Running custom.sh..."
+            if [ -x "$CUSTOM_SH" ]; then
+                "$CUSTOM_SH" &
+            else
+                # Run with bash if not executable
+                bash "$CUSTOM_SH" &
+            fi
+            echo "[✓] Custom.sh started!"
+        else
+            echo "[*] No custom.sh found, nothing to run."
+        fi
+        ;;
+    stop)
+        # Nothing to stop - custom.sh scripts run in background
+        echo "[*] Custom service handler has no stop action."
+        ;;
+    restart)
+        $0 stop
+        $0 start
+        ;;
+    status)
+        if [ -f "$CUSTOM_SH" ]; then
+            echo "[*] Custom.sh exists and will run on boot."
+            exit 0
+        elif [ -f "$CUSTOM_SERVICE" ]; then
+            echo "[*] Custom service detected, will be migrated on next start."
+            exit 0
+        else
+            echo "[*] No custom service or custom.sh found."
+            exit 0
+        fi
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
+
+exit 0

@@ -77,7 +77,7 @@ Version=1.0
 Type=Application
 Name=$APPNAME
 Exec=$ADDONS_DIR/${APPNAME,,}/${APPNAME,,}.AppImage
-Icon=$ADDONS_DIR/${APPNAME,,}/extra/${APPNAME,,}-icon.png
+Icon=$ADDONS_DIR/${APPNAME,,}/extra/icon.png
 Terminal=false
 Categories=Game;batocera.linux;
 EOF

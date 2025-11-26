@@ -21,17 +21,17 @@ if [ -f "/tmp/sysctl.conf" ]; then
     echo "Removing file: /tmp/sysctl.conf"
     rm -f "/tmp/sysctl.conf"
 fi
-if [ -f "/userdata/add-ons/tailscale/systemd" ]; then
-    echo "Removing file: /userdata/add-ons/tailscale/systemd"
-    rm -f "/userdata/add-ons/tailscale/systemd"
+if [ -f "/userdata/system/add-ons/tailscale/systemd" ]; then
+    echo "Removing file: /userdata/system/add-ons/tailscale/systemd"
+    rm -f "/userdata/system/add-ons/tailscale/systemd"
 fi
-if [ -f "/userdata/add-ons/tailscale/tailscale" ]; then
-    echo "Removing file: /userdata/add-ons/tailscale/tailscale"
-    rm -f "/userdata/add-ons/tailscale/tailscale"
+if [ -f "/userdata/system/add-ons/tailscale/tailscale" ]; then
+    echo "Removing file: /userdata/system/add-ons/tailscale/tailscale"
+    rm -f "/userdata/system/add-ons/tailscale/tailscale"
 fi
-if [ -f "/userdata/add-ons/tailscale/tailscaled" ]; then
-    echo "Removing file: /userdata/add-ons/tailscale/tailscaled"
-    rm -f "/userdata/add-ons/tailscale/tailscaled"
+if [ -f "/userdata/system/add-ons/tailscale/tailscaled" ]; then
+    echo "Removing file: /userdata/system/add-ons/tailscale/tailscaled"
+    rm -f "/userdata/system/add-ons/tailscale/tailscaled"
 fi
 if [ -f "/userdata/system/services/tailscale" ]; then
     echo "Removing file: /userdata/system/services/tailscale"
@@ -39,9 +39,9 @@ if [ -f "/userdata/system/services/tailscale" ]; then
 fi
 
 # Remove created directories (deepest first)
-if [ -d "/userdata/add-ons/tailscale" ]; then
-    echo "Removing directory: /userdata/add-ons/tailscale"
-    rm -rf "/userdata/add-ons/tailscale"
+if [ -d "/userdata/system/add-ons/tailscale" ]; then
+    echo "Removing directory: /userdata/system/add-ons/tailscale"
+    rm -rf "/userdata/system/add-ons/tailscale"
 fi
 if [ -d "/dev/net" ]; then
     echo "Removing directory: /dev/net"

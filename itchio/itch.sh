@@ -12,6 +12,7 @@ IMAGES_DIR="${PORTS_DIR}/images"
 GAMELIST_PATH="${PORTS_DIR}/gamelist.xml"
 BACKUP_PATH="${PORTS_DIR}/gamelist.xml.DRL"
 BIN_DIR="${PORTS_DIR}"
+FLATPAK_GAMELIST="/userdata/roms/flatpak/gamelist.xml"
 
 # URLs
 MARQUEE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/itchio/extra/itchio-marquee.png"
@@ -38,34 +39,6 @@ PORT_SCRIPT_CONTENT="#!/bin/bash
 flatpak run $APP_ID --no-sandbox
 "
 
-GAMELIST_ENTRY_CONTENT="	<game>
-		<path>./${PORT_SCRIPT_NAME}</path>
-		<name>${APP_NAME}</name>
-		<desc>=========================================
-Discord: discord.gg/KnV6hNzrqT
-YouTube: youtube.com/@kevsbatocerabuilds
-Developer: KevoBatoYT
-=========================================</desc>
-		<image>./images/${APP_EXEC}-thumb.png</image>
-		<marquee>./images/${APP_EXEC}-marquee.png</marquee>
-		<thumbnail>./images/${APP_EXEC}-thumb.png</thumbnail>
-		<fanart>./images/${APP_EXEC}-thumb.png</fanart>
-		<titleshot>./images/${APP_EXEC}-thumb.png</titleshot>
-		<cartridge>./images/${APP_EXEC}-thumb.png</cartridge>
-		<boxart>./images/${APP_EXEC}-marquee.png</boxart>
-		<boxback>./images/${APP_EXEC}-thumb.png</boxback>
-		<wheel>./images/${APP_EXEC}-thumb.png</wheel>
-		<mix>./images/${APP_EXEC}-thumb.png</mix>
-		<rating>1</rating>
-		<developer>KevoBatoYT</developer>
-		<publisher>KevoBatoYT</publisher>
-		<players>1</players>
-		<favorite>true</favorite>
-		<lang>en</lang>
-		<sortname>1 =- ${APP_NAME}</sortname>
-		<genreid>0</genreid>
-		<screenshot>./images/${APP_EXEC}-thumb.png</screenshot>
-	</game>"
 
 # --- Functions ---
 
@@ -87,66 +60,74 @@ download_file() {
     echo "Download complete."
 }
 
-# Function to create backup
-create_backup() {
-    if [ -f "$GAMELIST_PATH" ]; then
-        cp -rf "$GAMELIST_PATH" "$BACKUP_PATH"
-        echo "gamelist.xml backup created at: $BACKUP_PATH"
+# Add Itch.io entry to Ports gamelist.xml
+add_itchio_to_ports_gamelist() {
+    echo "Adding ${APP_NAME} entry to ports gamelist.xml..."
+    mkdir -p "$(dirname "${THUMB_IMG}")"
+
+    if [ ! -f "${GAMELIST_PATH}" ]; then
+        echo "<gameList />" > "${GAMELIST_PATH}"
     fi
-}
 
-# Function to create new gamelist.xml
-create_new_gamelist() {
-    echo "Creating new gamelist.xml file..."
-    cat > "$GAMELIST_PATH" << EOF
-<?xml version="1.0"?>
-<gameList>
-${GAMELIST_ENTRY_CONTENT}
-</gameList>
-EOF
-    echo "gamelist.xml file created successfully!"
-}
-
-# Function to check if the entry already exists
-check_entry() {
-    if [ -f "$GAMELIST_PATH" ]; then
-        grep -q "<path>./${PORT_SCRIPT_NAME}</path>" "$GAMELIST_PATH"
-        return $?
-    else
-        return 1
+    # Ensure xmlstarlet is installed
+    if ! command -v xmlstarlet &> /dev/null; then
+        echo "xmlstarlet is not installed. Please install xmlstarlet before running this script."
+        exit 1
     fi
+
+    xmlstarlet ed --inplace \
+        -s "/gameList" -t elem -n game \
+        -s "/gameList/game[last()]" -t elem -n path -v "./${PORT_SCRIPT_NAME}" \
+        -s "/gameList/game[last()]" -t elem -n name -v "${APP_NAME}" \
+        -s "/gameList/game[last()]" -t elem -n desc -v "=========================================
+Discord: discord.gg/KnV6hNzrqT
+YouTube: youtube.com/@kevsbatocerabuilds
+Developer: KevoBatoYT
+=========================================" \
+        -s "/gameList/game[last()]" -t elem -n image -v "./images/${APP_EXEC}-thumb.png" \
+        -s "/gameList/game[last()]" -t elem -n marquee -v "./images/${APP_EXEC}-marquee.png" \
+        -s "/gameList/game[last()]" -t elem -n thumbnail -v "./images/${APP_EXEC}-thumb.png" \
+        -s "/gameList/game[last()]" -t elem -n fanart -v "./images/${APP_EXEC}-thumb.png" \
+        -s "/gameList/game[last()]" -t elem -n titleshot -v "./images/${APP_EXEC}-thumb.png" \
+        -s "/gameList/game[last()]" -t elem -n cartridge -v "./images/${APP_EXEC}-thumb.png" \
+        -s "/gameList/game[last()]" -t elem -n boxart -v "./images/${APP_EXEC}-marquee.png" \
+        -s "/gameList/game[last()]" -t elem -n boxback -v "./images/${APP_EXEC}-thumb.png" \
+        -s "/gameList/game[last()]" -t elem -n wheel -v "./images/${APP_EXEC}-thumb.png" \
+        -s "/gameList/game[last()]" -t elem -n mix -v "./images/${APP_EXEC}-thumb.png" \
+        -s "/gameList/game[last()]" -t elem -n rating -v "1" \
+        -s "/gameList/game[last()]" -t elem -n developer -v "KevoBatoYT" \
+        -s "/gameList/game[last()]" -t elem -n publisher -v "KevoBatoYT" \
+        -s "/gameList/game[last()]" -t elem -n players -v "1" \
+        -s "/gameList/game[last()]" -t elem -n favorite -v "true" \
+        -s "/gameList/game[last()]" -t elem -n lang -v "en" \
+        -s "/gameList/game[last()]" -t elem -n sortname -v "1 =- ${APP_NAME}" \
+        -s "/gameList/game[last()]" -t elem -n genreid -v "0" \
+        -s "/gameList/game[last()]" -t elem -n screenshot -v "./images/${APP_EXEC}-thumb.png" \
+        "${GAMELIST_PATH}"
+    echo "${APP_NAME} entry added to ports gamelist.xml."
 }
 
-# Function to remove the existing entry (using awk)
-remove_entry() {
-    echo "Removing existing entry..."
-    TEMP_FILE=$(mktemp)
-    awk -v script_name="${PORT_SCRIPT_NAME}" '
-        BEGIN { game_block = ""; in_game = 0; is_target = 0; }
-        /<game>/ { in_game = 1; game_block = $0; is_target = 0; }
-        in_game && ! /<game>/ { game_block = game_block "\n" $0 }
-        in_game && $0 ~ "<path>./" script_name "</path>" { is_target = 1 }
-        /<\/game>/ {
-            if (!is_target) { print game_block }
-            in_game = 0; game_block = "";
-            next
-        }
-        !in_game { print }
-    ' "$GAMELIST_PATH" > "$TEMP_FILE"
-    mv "$TEMP_FILE" "$GAMELIST_PATH"
-    echo "Existing entry removed."
-}
+# Overwrite the flatpak gamelist.xml with Itch.io entry
+update_flatpak_gamelist() {
+    echo "Updating flatpak gamelist.xml with Itch.io entry..."
 
-# Function to add the entry (using awk)
-add_entry() {
-    echo "Adding new entry..."
-    TEMP_FILE=$(mktemp)
-    awk -v entry="${GAMELIST_ENTRY_CONTENT}" '
-        /<\/gameList>/ { print entry }
-        { print }
-    ' "$GAMELIST_PATH" > "$TEMP_FILE"
-    mv "$TEMP_FILE" "$GAMELIST_PATH"
-    echo "New entry added."
+    if [ ! -f "${FLATPAK_GAMELIST}" ]; then
+        echo "<gameList />" > "${FLATPAK_GAMELIST}"
+    fi
+
+    xmlstarlet ed --inplace \
+        -d "/gameList/game[path='./itch.io.flatpak']" \
+        -s "/gameList" -t elem -n game \
+        -s "/gameList/game[last()]" -t elem -n path -v "./itch.io.flatpak" \
+        -s "/gameList/game[last()]" -t elem -n name -v "itch.io" \
+        -s "/gameList/game[last()]" -t elem -n image -v "./images/itch.io.png" \
+        -s "/gameList/game[last()]" -t elem -n rating -v "" \
+        -s "/gameList/game[last()]" -t elem -n releasedate -v "" \
+        -s "/gameList/game[last()]" -t elem -n hidden -v "true" \
+        -s "/gameList/game[last()]" -t elem -n lang -v "en" \
+        "${FLATPAK_GAMELIST}"
+
+    echo "Flatpak gamelist.xml updated with Itch.io entry."
 }
 
 
@@ -174,6 +155,12 @@ flatpak install --user -y flathub "$APP_ID"
 echo "Setting permissions to allow full filesystem access..."
 flatpak override --user "$APP_ID" --filesystem=host
 
+echo "Updating Batocera Flatpaks..."
+batocera-flatpak-update &> /dev/null
+
+# Update flatpak gamelist to hide the default entry
+update_flatpak_gamelist
+
 # ----------------------------------
 clear
 
@@ -181,7 +168,6 @@ clear
 echo "Creating necessary directories..."
 mkdir -p "$DESKTOP_DIR" || error_exit "Failed to create $DESKTOP_DIR"
 mkdir -p "$IMAGES_DIR" || error_exit "Failed to create $IMAGES_DIR"
-chmod 777 "$GAMELIST_PATH"
 echo "Directories created."
 
 # 3. .desktop File Creation
@@ -193,7 +179,7 @@ echo ".desktop file created at $DESKTOP_FILE and $PATH_DESKTOP"
 # 4. Image Download
 download_file "$MARQUEE_URL" "$MARQUEE_IMG"
 download_file "$THUMB_URL" "$THUMB_IMG"
- 
+
 # 5. Ports Script Creation
 echo "Creating ports script..."
 echo "$PORT_SCRIPT_CONTENT" > "$PORT_SCRIPT_PATH" || error_exit "Failed to create $PORT_SCRIPT_PATH"
@@ -201,17 +187,7 @@ chmod 777 "$PORT_SCRIPT_PATH" || error_exit "Failed to make $PORT_SCRIPT_PATH ex
 echo "Ports script created."
 
 # 6. gamelist.xml Update
-echo "Updating gamelist.xml..."
-if [ ! -f "$GAMELIST_PATH" ] || [ ! -s "$GAMELIST_PATH" ]; then
-    create_new_gamelist
-else
-    create_backup
-    if check_entry; then
-        remove_entry
-    fi
-    add_entry
-fi
-echo "Gamelist.xml updated."
+add_itchio_to_ports_gamelist
 clear
 
 # 7. Final Message

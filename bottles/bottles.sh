@@ -61,55 +61,27 @@ install_bottles() {
     echo "Bottles installation completed successfully."
 }
 
-# Ensure Bottles is listed in flatpak gamelist.xml and set it as hidden
-hide_bottles_in_flatpak() {
-    echo "Ensuring Bottles entry in flatpak gamelist.xml and setting it as hidden..."
+# Overwrite the flatpak gamelist.xml with Bottles entry
+update_flatpak_gamelist() {
+    echo "Updating flatpak gamelist.xml with Bottles entry..."
 
     if [ ! -f "${FLATPAK_GAMELIST}" ]; then
-        echo "Flatpak gamelist.xml not found. Creating a new one."
         echo "<gameList />" > "${FLATPAK_GAMELIST}"
     fi
 
-    if ! xmlstarlet sel -t -c "//game[path='./The Bottles Contributors.flatpak']" "${FLATPAK_GAMELIST}" &>/dev/null; then
-        echo "Bottles entry not found. Creating a new entry."
-        xmlstarlet ed --inplace \
-            -s "/gameList" -t elem -n game \
-            -s "/gameList/game[last()]" -t elem -n path -v "./The Bottles Contributors.flatpak" \
-            -s "/gameList/game[last()]" -t elem -n name -v "The Bottles Contributors" \
-            -s "/gameList/game[last()]" -t elem -n image -v "./images/Bottles.png" \
-            -s "/gameList/game[last()]" -t elem -n rating -v "0" \
-            -s "/gameList/game[last()]" -t elem -n releasedate -v "19700101T010000" \
-            -s "/gameList/game[last()]" -t elem -n hidden -v "true" \
-            -s "/gameList/game[last()]" -t elem -n lang -v "en" \
-            "${FLATPAK_GAMELIST}"
-        echo "Bottles entry created and set as hidden."
-    else
-        echo "Bottles entry found. Ensuring hidden tag and updating all details."
+    xmlstarlet ed --inplace \
+        -d "/gameList/game[path='./The Bottles Contributors.flatpak']" \
+        -s "/gameList" -t elem -n game \
+        -s "/gameList/game[last()]" -t elem -n path -v "./The Bottles Contributors.flatpak" \
+        -s "/gameList/game[last()]" -t elem -n name -v "The Bottles Contributors" \
+        -s "/gameList/game[last()]" -t elem -n image -v "./images/Bottles.png" \
+        -s "/gameList/game[last()]" -t elem -n rating -v "" \
+        -s "/gameList/game[last()]" -t elem -n releasedate -v "" \
+        -s "/gameList/game[last()]" -t elem -n hidden -v "true" \
+        -s "/gameList/game[last()]" -t elem -n lang -v "en" \
+        "${FLATPAK_GAMELIST}"
 
-        # Add <hidden> if it doesn't exist
-        if ! xmlstarlet sel -t -c "//game[path='./The Bottles Contributors.flatpak']/hidden" "${FLATPAK_GAMELIST}" &>/dev/null; then
-            xmlstarlet ed --inplace \
-                -s "//game[path='./The Bottles Contributors.flatpak']" -t elem -n hidden -v "true" \
-                "${FLATPAK_GAMELIST}"
-            echo "Added missing hidden tag to Bottles entry."
-        else
-            # Update <hidden> value
-            xmlstarlet ed --inplace \
-                -u "//game[path='./The Bottles Contributors.flatpak']/hidden" -v "true" \
-                "${FLATPAK_GAMELIST}"
-            echo "Updated hidden tag for Bottles entry."
-        fi
-
-        # Update other details
-        xmlstarlet ed --inplace \
-            -u "//game[path='./The Bottles Contributors.flatpak']/name" -v "Bottles" \
-            -u "//game[path='./The Bottles Contributors.flatpak']/image" -v "./images/Bottles.png" \
-            -u "//game[path='./The Bottles Contributors.flatpak']/rating" -v "0" \
-            -u "//game[path='./The Bottles Contributors.flatpak']/releasedate" -v "19700101T010000" \
-            -u "//game[path='./The Bottles Contributors.flatpak']/lang" -v "en" \
-            "${FLATPAK_GAMELIST}"
-        echo "Updated details for Bottles entry."
-    fi
+    echo "Flatpak gamelist.xml updated with Bottles entry."
 }
 
 # Create launcher for Bottles
@@ -150,7 +122,7 @@ fi
 
 # Run all steps
 install_bottles
-hide_bottles_in_flatpak
+update_flatpak_gamelist
 create_launcher
 
 echo "✅ ${APPNAME} setup complete with desktop entry."

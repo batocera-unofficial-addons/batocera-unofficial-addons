@@ -9,7 +9,8 @@ LAUNCHERS_SCRIPT_URL="https://github.com/batocera-unofficial-addons/batocera-uno
 MONITOR_SCRIPT_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/heroic/monitor_heroic.sh"
 WRAPPER_SCRIPT="${INSTALL_DIR}/launch_heroic.sh"
 ROM_DIR="/userdata/roms/heroic"
-ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/heroic/2/icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/heroic/extra/icon.png"
+UMU_TAR_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/heroic/extra/umu.tar.gz"
 
 [ -d "/userdata/system/add-ons/heroic" ] && rm -rf "/userdata/system/add-ons/heroic"
 
@@ -19,18 +20,40 @@ mkdir -p "/userdata/system/add-ons/heroic/extra"
 
 # Fetch the latest version of Heroic from GitHub API
 echo "Fetching the latest version of Heroic Games Launcher..."
-HEROIC_URL=$(wget -qO- https://api.github.com/repos/Heroic-Games-Launcher/HeroicGamesLauncher/releases/latest | grep "browser_download_url" | grep ".AppImage" | cut -d '"' -f 4)
+
+# First attempt: Try GitHub API
+API_RESPONSE=$(wget -qO- https://api.github.com/repos/Heroic-Games-Launcher/HeroicGamesLauncher/releases/latest 2>&1)
+
+# Check if we hit rate limit or other error
+if echo "$API_RESPONSE" | grep -q "rate limit"; then
+    echo "GitHub API rate limit reached. Fetching from releases page directly..."
+    # Fallback: Scrape the releases page HTML
+    HEROIC_URL=$(wget -qO- https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/releases/latest 2>&1 | grep -o 'https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/releases/download/v[0-9.]*/Heroic-[0-9.]*-linux-x86_64\.AppImage' | head -n 1)
+else
+    # Parse API response normally
+    HEROIC_URL=$(echo "$API_RESPONSE" | grep "browser_download_url" | grep "linux-x86_64\.AppImage\"" | grep -v ".AppImage.zsync" | head -n 1 | cut -d '"' -f 4)
+fi
+
 HEROIC_VERSION=$(basename "$HEROIC_URL" | sed -E 's/Heroic-([^-]+).*/\1/')
 
 if [ -z "$HEROIC_URL" ]; then
     echo "Failed to fetch the latest Heroic version. Please check your internet connection or the GitHub API."
+    echo "You may have hit GitHub's rate limit. Please try again later."
     exit 1
 fi
+
+echo "Found Heroic version: $HEROIC_VERSION"
+echo "Download URL: $HEROIC_URL"
 
 # Download Heroic
 echo "Downloading Heroic Games Launcher version $HEROIC_VERSION..."
 mkdir -p "$INSTALL_DIR"
-wget --show-progress -qO "${INSTALL_DIR}/heroic.AppImage" "$HEROIC_URL"
+wget --show-progress -O "${INSTALL_DIR}/heroic.AppImage" "$HEROIC_URL"
+
+if [ $? -ne 0 ] || [ ! -f "${INSTALL_DIR}/heroic.AppImage" ]; then
+    echo "Failed to download Heroic AppImage from $HEROIC_URL"
+    exit 1
+fi
 
 # Download supporting scripts
 echo "Downloading create_game_launchers.sh..."
@@ -42,30 +65,88 @@ wget --show-progress -qO "${INSTALL_DIR}/monitor_heroic.sh" "$MONITOR_SCRIPT_URL
 echo "Downloading icon..."
 wget --show-progress -qO "${INSTALL_DIR}/extra/icon.png" "$ICON_URL"
 
+# Download umu runtime
+echo "Downloading umu runtime..."
+wget --show-progress -O "${INSTALL_DIR}/extra/umu.tar.gz" "$UMU_TAR_URL"
+
+# Extract umu runtime
+echo "Extracting umu runtime..."
+tar -xzf "${INSTALL_DIR}/extra/umu.tar.gz" -C "${INSTALL_DIR}/extra"
+
 # Make scripts executable
 chmod +x "${INSTALL_DIR}/heroic.AppImage"
 chmod +x "${INSTALL_DIR}/create_game_launchers.sh"
 chmod +x "${INSTALL_DIR}/monitor_heroic.sh"
 
-LAUNCHER="/userdata/system/add-ons/heroic/Launcher"
-cat <<EOL > "$LAUNCHER"
+# Create umu symlink setup script
+SETUP_UMU_SCRIPT="${INSTALL_DIR}/setup_umu_symlink.sh"
+cat <<'EOL' > "$SETUP_UMU_SCRIPT"
 #!/bin/bash
+
+# Handle umu symlink
+umu_target="/userdata/system/.config/heroic/tools/runtimes/umu"
+umu_source="/userdata/system/add-ons/heroic/extra/umu"
+
+# Create tools/runtimes directory if needed
+mkdir -p "/userdata/system/.config/heroic/tools/runtimes" 2>/dev/null
+
+# Wait until umu_target exists and is fully installed by checking for current_version file
+while [[ ! -f "$umu_target/current_version" ]]; do
+  sleep 1
+done
+
+# Check if umu was already replaced with our copy
+if [[ -f "$umu_target/.replaced_by_heroic_installer" ]]; then
+  # Already replaced, delete this script and exit
+  rm -f "$0"
+  exit 0
+fi
+
+# Replace Heroic's umu with our pre-downloaded version
+rm -rf "$umu_target"
+cp -r "$umu_source" "$umu_target"
+
+# Mark that we've replaced it
+touch "$umu_target/.replaced_by_heroic_installer"
+
+# Delete this script when done
+rm -f "$0"
+EOL
+chmod +x "$SETUP_UMU_SCRIPT"
+
+LAUNCHER="/userdata/system/add-ons/heroic/Launcher"
+cat <<'EOL' > "$LAUNCHER"
+#!/bin/bash
+
+# Run umu symlink setup script if it exists
+SETUP_SCRIPT="/userdata/system/add-ons/heroic/setup_umu_symlink.sh"
+if [[ -f "$SETUP_SCRIPT" ]]; then
+  "$SETUP_SCRIPT" &
+fi
+
 /userdata/system/add-ons/heroic/monitor_heroic.sh &
 unclutter-remote -s
-DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic.AppImage --no-sandbox "\$@"
+DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic.AppImage --no-sandbox "$@"
 EOL
 chmod a+x "$LAUNCHER"
 
 # Create launch script
 echo "Creating launching script for Heroic..."
 SYSTEM_LAUNCHER="/userdata/system/add-ons/heroic/SystemLauncher"
-cat <<EOL > "$SYSTEM_LAUNCHER"
+cat <<'EOL' > "$SYSTEM_LAUNCHER"
 #!/bin/bash
+
+# Run umu symlink setup script if it exists
+SETUP_SCRIPT="/userdata/system/add-ons/heroic/setup_umu_symlink.sh"
+if [[ -f "$SETUP_SCRIPT" ]]; then
+  "$SETUP_SCRIPT" &
+fi
+
 # Process input file
-ID=\$(cat "\$1" | head -n 1)
+ID=$(cat "$1" | head -n 1)
 # Execute application
 unclutter-remote -s
-DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic.AppImage --no-sandbox --no-gui --disable-gpu "heroic://launch/\$ID"
+DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic.AppImage --no-sandbox --no-gui --disable-gpu "heroic://launch/$ID"
 EOL
 chmod a+x "$SYSTEM_LAUNCHER"
 

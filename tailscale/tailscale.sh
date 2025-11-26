@@ -34,11 +34,11 @@ DIR="${FILE%.tgz}"
 cd "$DIR" || exit 1
 
 
-mkdir -p /userdata/add-ons/tailscale
+mkdir -p /userdata/system/add-ons/tailscale
 
-mv systemd /userdata/add-ons/tailscale/systemd
-mv tailscale /userdata/add-ons/tailscale/tailscale
-mv tailscaled /userdata/add-ons/tailscale/tailscaled
+mv systemd /userdata/system/add-ons/tailscale/systemd
+mv tailscale /userdata/system/add-ons/tailscale/tailscale
+mv tailscaled /userdata/system/add-ons/tailscale/tailscaled
 
 # Cleanup temporary files
 cd /userdata || exit 1
@@ -80,10 +80,10 @@ mv "$temp_sysctl_config" "$sysctl_config"
 sysctl -p "$sysctl_config"
 
 # Start Tailscale daemon
-/userdata/add-ons/tailscale/tailscaled -state /userdata/add-ons/tailscale/state > /userdata/add-ons/tailscale/tailscaled.log 2>&1 &
+/userdata/system/add-ons/tailscale/tailscaled -state /userdata/system/add-ons/tailscale/state > /userdata/system/add-ons/tailscale/tailscaled.log 2>&1 &
 
 # Bring up Tailscale with specific options
-/userdata/add-ons/tailscale/tailscale up --advertise-routes=192.168.1.0/24 --snat-subnet-routes=false --accept-routes
+/userdata/system/add-ons/tailscale/tailscale up --advertise-routes=192.168.1.0/24 --snat-subnet-routes=false --accept-routes
 EOF
 
 chmod +x /userdata/system/services/tailscale

@@ -25,14 +25,40 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
-- Steam has had a big update!
-    Now supports ES launchers with auto scraping.
-    Kill switch wired in to all launchers and Big Picture Mode with hotkey + start
-    Steam removed from ports and added to Steam ES category. Please reinstall and delete the ports launcher!
-    A known issue is that occasionally a webpage will open instead of Big Picture Mode, this is due to Steam changes and is being worked on. Hotkey + start to kill Steam and relaunch Big Picture Mode.
-    
-- Removed L3 and R3 from controller mappings due to issues with Steam Deck users.
+- Fixed Heroic
+Applied patch to fix latest Umu release not launching games correctly.
 """.strip()
+
+# ------------------------------
+# Live Update Block
+# ------------------------------
+# This code runs on EVERY launch before the main app loads.
+# Use this for one-time setup tasks, migrations, or live fixes.
+# Keep it lightweight - heavy operations will slow down app startup.
+
+def live_update_block():
+    """
+    Code block that runs on every app launch.
+
+    Use cases:
+    - Install/update system services (like custom_service_handler)
+    - Perform migrations or one-time fixes
+    - Update configuration files
+    - Check/install dependencies
+
+    IMPORTANT: Keep this fast! It runs on EVERY launch.
+    """
+    try:
+        # Example: Setup custom_service_handler
+        setup_custom_service_handler()
+
+        # Add more live update tasks here as needed
+        # Example:
+        # fix_legacy_configs()
+        # update_system_files()
+
+    except Exception as e:
+        print(f"[BUA] Live update block error: {e}")
 
 # ------------------------------
 # Translation System
@@ -636,7 +662,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "Ambermoon": "Ambermoon.net, a port of the classic",
     "Custom Wine": "Download Wine/Proton versions",
     "GParted": "Linux partition manager",
-    "JDownloader": "NEEDS DESKTOP MODE ADDON TO WORK",
+    "JDownloader": "Download manager with background service",
     "YARG": "Yet Another Rhythm Game",
     "Plex": "Plex Media Player",
     "OpenTTD": "Open source clone of Transport Tycoon Deluxe",
@@ -3617,26 +3643,48 @@ class RunListScreen(BaseScreen):
             "export -f xdialog; "
         )
 
-        # Wrap dangerous system commands that installers shouldn't call
-        # Prevents killing critical processes or switching to desktop mode
-        system_wrap = (
-            "function killall(){ "
-            "local target=\"$1\"; "
-            "if [[ \"$target\" == \"emulationstation\" ]] || [[ \"$target\" == \"pcmanfm\" ]]; then "
-            "echo '[BUA] Blocked killall for critical process:' \"$target\"; "
-            "if [[ \"$target\" == \"emulationstation\" ]]; then "
-            "touch /tmp/bua_killall_es_deferred; "
-            "fi; "
-            "return 0; "
-            "else "
-            "command killall \"$@\"; "
-            "fi; }; "
-            "export -f killall; "
-            "function desktop(){ "
-            "echo '[BUA] Blocked desktop mode switch during installation'; "
-            "return 0; }; "
-            "export -f desktop; "
-        )
+        # Wrap dangerous system commands that installers shouldn't call.
+        # This shell snippet is injected before running installer scripts.
+        system_wrap = r"""\
+# Create a temporary shim dir and small killall/pkill wrappers
+REAL_KILLALL=$(command -v killall || echo /usr/bin/killall)
+REAL_PKILL=$(command -v pkill || echo /usr/bin/pkill)
+BUA_TMPBIN=$(mktemp -d /tmp/bua_bin.XXXX)
+
+printf '%s\n' '#!/bin/sh' "REAL=$REAL_KILLALL" \
+  'echo "$(date --iso-8601=seconds) [BUA-SHIM] killall $$ $PPID: \"$@\" PATH=\"$PATH\"" >> /tmp/bua_killall.log' \
+  'for arg in "$@"; do' \
+  '  if [ "$arg" = "emulationstation" ] || [ "$arg" = "pcmanfm" ]; then' \
+  '   echo "[BUA] Blocked killall for critical process: \"$arg\""' \
+  '    if [ "$arg" = "emulationstation" ]; then touch /tmp/bua_killall_es_deferred; fi' \
+  '    exit 0' \
+  '  fi' \
+  'done' \
+  'exec "$REAL" "$@"' > "$BUA_TMPBIN/killall"
+
+printf '%s\n' '#!/bin/sh' "REAL=$REAL_PKILL" \
+  'echo "$(date --iso-8601=seconds) [BUA-SHIM] pkill $$ $PPID: \"$@\" PATH=\"$PATH\"" >> /tmp/bua_killall.log' \
+  'for arg in "$@"; do' \
+  '  if [ "$arg" = "emulationstation" ] || [ "$arg" = "pcmanfm" ]; then' \
+  '    echo "[BUA] Blocked pkill for critical process: \"$arg\""' \
+  '    if [ "$arg" = "emulationstation" ]; then touch /tmp/bua_killall_es_deferred; fi' \
+  '    exit 0' \
+  '  fi' \
+  'done' \
+  'exec "$REAL" "$@"' > "$BUA_TMPBIN/pkill"
+
+chmod +x "$BUA_TMPBIN/killall" "$BUA_TMPBIN/pkill"
+
+# Ensure we remove the temporary shim dir when the injected subshell exits
+trap 'rm -rf "$BUA_TMPBIN"' EXIT
+
+# Prepend our shim to PATH so child processes resolve it first
+export PATH="$BUA_TMPBIN:$PATH"
+
+# Also provide a harmless desktop function for sourced scripts
+desktop() { echo "[BUA] Blocked desktop mode switch during installation"; return 0; }
+export -f desktop
+"""
 
         # Add debug markers to track execution
         debug_start = f"echo '[BUA] Starting installation: {name}'; "
@@ -5281,8 +5329,53 @@ def play_splash_and_load():
 
     print("[BUA] Ready!")
 
+def setup_custom_service_handler():
+    """Check if custom_service_handler exists, download if missing, and enable it."""
+    SERVICE_FILE = "/userdata/system/services/custom_service_handler"
+    SERVICE_URL = "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/custom_service_handler"
+
+    try:
+        # Check if service file already exists
+        if os.path.exists(SERVICE_FILE):
+            print("[BUA] custom_service_handler already exists")
+            return
+
+        print("[BUA] Downloading custom_service_handler...")
+
+        # Ensure services directory exists
+        os.makedirs("/userdata/system/services", exist_ok=True)
+
+        # Download the service file
+        req = urllib.request.Request(SERVICE_URL, headers={"User-Agent": "BUA-Installer"})
+        with urllib.request.urlopen(req, timeout=10) as response:
+            service_content = response.read()
+
+        # Write service file
+        with open(SERVICE_FILE, 'wb') as f:
+            f.write(service_content)
+
+        # Make it executable
+        os.chmod(SERVICE_FILE, 0o755)
+
+        print("[BUA] custom_service_handler downloaded successfully")
+
+        # Enable and start the service
+        subprocess.run(["batocera-services", "enable", "custom_service_handler"],
+                      check=False, timeout=10, capture_output=True)
+        subprocess.run(["batocera-services", "start", "custom_service_handler"],
+                      check=False, timeout=10, capture_output=True)
+
+        print("[BUA] custom_service_handler enabled and started")
+
+    except Exception as e:
+        print(f"[BUA] Could not setup custom_service_handler: {e}")
+
+
 if __name__ == "__main__":
     try:
+        # Run live update block before anything else
+        live_update_block()
+
         play_splash_and_load()
         main()
     except KeyboardInterrupt:

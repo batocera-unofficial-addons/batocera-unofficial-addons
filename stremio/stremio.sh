@@ -58,55 +58,27 @@ install_stremio() {
     echo "Stremio installation completed successfully."
 }
 
-# Ensure Stremio is listed in flatpak gamelist.xml and set it as hidden
-hide_stremio_in_flatpak() {
-    echo "Ensuring Stremio entry in flatpak gamelist.xml and setting it as hidden..."
+# Overwrite the flatpak gamelist.xml with Stremio entry
+update_flatpak_gamelist() {
+    echo "Updating flatpak gamelist.xml with Stremio entry..."
 
     if [ ! -f "${FLATPAK_GAMELIST}" ]; then
-        echo "Flatpak gamelist.xml not found. Creating a new one."
         echo "<gameList />" > "${FLATPAK_GAMELIST}"
     fi
 
-    if ! xmlstarlet sel -t -c "//game[path='./Stremio.flatpak']" "${FLATPAK_GAMELIST}" &>/dev/null; then
-        echo "Stremio entry not found. Creating a new entry."
-        xmlstarlet ed --inplace \
-            -s "/gameList" -t elem -n game \
-            -s "/gameList/game[last()]" -t elem -n path -v "./Stremio.flatpak" \
-            -s "/gameList/game[last()]" -t elem -n name -v "Stremio" \
-            -s "/gameList/game[last()]" -t elem -n image -v "./images/Stremio.png" \
-            -s "/gameList/game[last()]" -t elem -n rating -v "0" \
-            -s "/gameList/game[last()]" -t elem -n releasedate -v "19700101T010000" \
-            -s "/gameList/game[last()]" -t elem -n hidden -v "true" \
-            -s "/gameList/game[last()]" -t elem -n lang -v "en" \
-            "${FLATPAK_GAMELIST}"
-        echo "Stremio entry created and set as hidden."
-    else
-        echo "Stremio entry found. Ensuring hidden tag and updating all details."
+    xmlstarlet ed --inplace \
+        -d "/gameList/game[path='./Stremio.flatpak']" \
+        -s "/gameList" -t elem -n game \
+        -s "/gameList/game[last()]" -t elem -n path -v "./Stremio.flatpak" \
+        -s "/gameList/game[last()]" -t elem -n name -v "Stremio" \
+        -s "/gameList/game[last()]" -t elem -n image -v "./images/Stremio.png" \
+        -s "/gameList/game[last()]" -t elem -n rating -v "" \
+        -s "/gameList/game[last()]" -t elem -n releasedate -v "" \
+        -s "/gameList/game[last()]" -t elem -n hidden -v "true" \
+        -s "/gameList/game[last()]" -t elem -n lang -v "en" \
+        "${FLATPAK_GAMELIST}"
 
-        # Add <hidden> if it doesn't exist
-        if ! xmlstarlet sel -t -c "//game[path='./Stremio.flatpak']/hidden" "${FLATPAK_GAMELIST}" &>/dev/null; then
-            xmlstarlet ed --inplace \
-                -s "//game[path='./Stremio.flatpak']" -t elem -n hidden -v "true" \
-                "${FLATPAK_GAMELIST}"
-            echo "Added missing hidden tag to Stremio entry."
-        else
-            # Update <hidden> value
-            xmlstarlet ed --inplace \
-                -u "//game[path='./Stremio.flatpak']/hidden" -v "true" \
-                "${FLATPAK_GAMELIST}"
-            echo "Updated hidden tag for Stremio entry."
-        fi
-
-        # Update other details
-        xmlstarlet ed --inplace \
-            -u "//game[path='./Stremio.flatpak']/name" -v "Stremio" \
-            -u "//game[path='./Stremio.flatpak']/image" -v "./images/Stremio.png" \
-            -u "//game[path='./Stremio.flatpak']/rating" -v "0" \
-            -u "//game[path='./Stremio.flatpak']/releasedate" -v "19700101T010000" \
-            -u "//game[path='./Stremio.flatpak']/lang" -v "en" \
-            "${FLATPAK_GAMELIST}"
-        echo "Updated details for Stremio entry."
-    fi
+    echo "Flatpak gamelist.xml updated with Stremio entry."
 }
 
 # Create launcher for Stremio
@@ -148,7 +120,7 @@ add_stremio_to_ports_gamelist() {
 
 # Run all steps
 install_stremio
-hide_stremio_in_flatpak
+update_flatpak_gamelist
 create_launcher
 add_stremio_to_ports_gamelist
 

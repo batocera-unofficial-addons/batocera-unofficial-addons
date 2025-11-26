@@ -46,7 +46,7 @@ EOF
 chmod +x "$install_dir/launch_shadps4.sh"
 
 # Setup desktop entry
-icon_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/shadps4/extra/shadps4-icon.png"
+icon_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/shadps4plus/extra/shadps4-icon.png"
 mkdir -p "$install_dir/extra"
 wget -q --show-progress -O "$install_dir/extra/shadps4-icon.png" "$icon_url"
 

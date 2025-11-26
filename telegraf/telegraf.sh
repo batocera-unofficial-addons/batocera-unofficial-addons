@@ -10,7 +10,7 @@ export $(cat /proc/1/environ | tr '\0' '\n')
 # https://github.com/influxdata/telegraf/releases
 SERVICE_NAME="telegraf"
 REPO="influxdata/${SERVICE_NAME}"
-INSTALL_DIR="/userdata/addons/${SERVICE_NAME}"
+INSTALL_DIR="/userdata/system/add-ons/${SERVICE_NAME}"
 
 FILEBase=${FILEBase:-"${SERVICE_NAME}-"}
 FILEVersion=""  # will be set later
@@ -63,8 +63,8 @@ for cmd in wget awk sed grep tee; do
 done
 
 # Check installed version
-if [ -x /userdata/add-ons/telegraf/telegraf ]; then
-    INSTALLED_VERSION=$(/userdata/add-ons/telegraf/telegraf --version | awk '{print $2}')
+if [ -x /userdata/system/add-ons/telegraf/telegraf ]; then
+    INSTALLED_VERSION=$(/userdata/system/add-ons/telegraf/telegraf --version | awk '{print $2}')
     echo "Installed version: $INSTALLED_VERSION"
 else
     INSTALLED_VERSION="none"
@@ -136,15 +136,15 @@ tar -xf "$FILE"
 DIR="${FILEBase}${FILEVersion}"
 cd "$DIR" || exit 1
 
-mkdir -p /userdata/add-ons/telegraf/etc/telegraf/telegraf.d
-mkdir -p /userdata/add-ons/telegraf/log
+mkdir -p /userdata/system/add-ons/telegraf/etc/telegraf/telegraf.d
+mkdir -p /userdata/system/add-ons/telegraf/log
 
-mv -vf usr/lib/telegraf/scripts/telegraf.service /userdata/add-ons/telegraf
-mv -vf usr/bin/telegraf /userdata/add-ons/telegraf/telegraf
-cp -vf etc/telegraf/telegraf.conf /userdata/add-ons/telegraf/etc/telegraf/telegraf.conf.default
+mv -vf usr/lib/telegraf/scripts/telegraf.service /userdata/system/add-ons/telegraf
+mv -vf usr/bin/telegraf /userdata/system/add-ons/telegraf/telegraf
+cp -vf etc/telegraf/telegraf.conf /userdata/system/add-ons/telegraf/etc/telegraf/telegraf.conf.default
 # We don't want to mess with an already setup Telegraf
-if [ ! -f /userdata/add-ons/telegraf/telegraf.conf ]; then
-  mv -v etc/telegraf/telegraf.conf /userdata/add-ons/telegraf/etc/telegraf
+if [ ! -f /userdata/system/add-ons/telegraf/telegraf.conf ]; then
+  mv -v etc/telegraf/telegraf.conf /userdata/system/add-ons/telegraf/etc/telegraf
 fi
 
 # Cleanup temporary files
@@ -164,13 +164,13 @@ set -euo pipefail
 case "$1" in
   start)
     echo "Start Telegraf daemon"
-    /userdata/add-ons/telegraf/telegraf \
-      --config /userdata/add-ons/telegraf/etc/telegraf/telegraf.conf \
-      --config-directory /userdata/add-ons/telegraf/etc/telegraf/telegraf.d \
-        > /userdata/add-ons/telegraf/log/telegraf.log 2>&1 &
+    /userdata/system/add-ons/telegraf/telegraf \
+      --config /userdata/system/add-ons/telegraf/etc/telegraf/telegraf.conf \
+      --config-directory /userdata/system/add-ons/telegraf/etc/telegraf/telegraf.d \
+        > /userdata/system/add-ons/telegraf/log/telegraf.log 2>&1 &
     ;;
   stop)
-    pkill -f "/userdata/addons/telegraf/telegraf"
+    pkill -f "/userdata/system/add-ons/telegraf/telegraf"
     ;;
   restart)
     "$0" stop

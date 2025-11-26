@@ -16,12 +16,35 @@ cleanup() {
 # Trap to clean up in case of exit or error
 trap cleanup EXIT
 
+detect_driver_version() {
+    local version=""
+
+    # Try to parse the driver version from the Nvidia log (covers "Production" and other variants)
+    if [[ -f /userdata/system/logs/nvidia.log ]]; then
+        version=$(
+            sed -n 's/.*Using NVIDIA .*driver - \([0-9][0-9.]*\).*/\1/p' /userdata/system/logs/nvidia.log \
+            | head -n1 \
+            | tr -d '[:space:]'
+        )
+    fi
+
+    # Fallback to nvidia-smi if the log did not yield a version
+    if [[ -z "$version" ]] && command -v nvidia-smi >/dev/null 2>&1; then
+        version=$(
+            nvidia-smi --query-gpu=driver_version --format=csv,noheader 2>/dev/null \
+            | head -n1 \
+            | tr -d '[:space:]' || true
+        )
+    fi
+
+    echo "$version"
+}
+
 # Detect Nvidia GPU and apply patches
 if lspci | grep -i "nvidia" > /dev/null; then
     echo "Nvidia GPU detected. Applying patches..."
     
-    # Extract the Nvidia driver version from the log
-    driver_version=$(grep "Using NVIDIA Production driver" /userdata/system/logs/nvidia.log | awk -F " - " '{print $2}' | tr -d '[:space:]')
+    driver_version=$(detect_driver_version)
     
     # Check if driver version was found
     if [[ -z "$driver_version" ]]; then
