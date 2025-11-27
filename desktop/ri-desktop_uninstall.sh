@@ -6,7 +6,7 @@ set -euo pipefail
 ###############################################################################
 
 DEST_BASE="/userdata/system/add-ons/ri-desktop"
-PORT_SCRIPT="/userdata/roms/ports/RunImage Desktop.sh"
+PORT_SCRIPT="/userdata/roms/ports/RunImageDesktop.sh"
 
 echo "==================================================================="
 echo "RunImage Desktop Uninstaller"
