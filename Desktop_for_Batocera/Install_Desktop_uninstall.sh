@@ -47,6 +47,10 @@ if [ -d "/userdata/tmp/Desktop_for_Batocera" ]; then
 fi
 
 # Update desktop database
+if [ -d "/userdata/system/configs/bat-drl/Remover_Desktop.sh" ]; then
+    echo "Running the official uninstaller: /userdata/system/configs/bat-drl/Remover_Desktop.sh"
+    /userdata/system/configs/bat-drl/Remover_Desktop.sh
+fi
 
 echo ""
 echo "========================================="
