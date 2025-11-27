@@ -71,6 +71,8 @@ LANGUAGE_FILE = "/userdata/system/add-ons/bua_language.txt"
 RESOLUTION_FILE = "/userdata/system/add-ons/bua_resolution.txt"
 CARDS_PER_PAGE_FILE = "/userdata/system/add-ons/bua_cards_per_page.txt"
 CHANGELOG_HASH_FILE = "/userdata/system/add-ons/bua_changelog_hash.txt"
+TRANSLATION_CACHE_FILE = "/userdata/system/add-ons/bua_translation_cache.json"
+SPLASH_CACHE_FILE = "/userdata/system/add-ons/bua_splash.mp4"
 
 # Default and current cards per page setting
 DEFAULT_CARDS_PER_PAGE = "auto"  # "auto" or a number like "3", "5", "7", etc.
@@ -93,20 +95,101 @@ TRANSLATION_DIRS = [
 # GitHub URL for translations
 TRANSLATION_BASE_URL = "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/translation"
 
+def fetch_url_with_retry(url: str, headers: dict, timeout: int = 5, retries: int = 2) -> bytes:
+    """
+    Fetch URL with exponential backoff retry logic.
+    Returns the response bytes or raises an exception after all retries fail.
+    Set retries=0 for a single attempt with no error logging (useful for silent fallbacks).
+    """
+    import time
+    import urllib.error
+    last_error = None
+    silent_mode = (retries == 0)  # Silent mode when no retries requested
+
+    for attempt in range(retries + 1):
+        try:
+            if attempt > 0:
+                wait_time = (2 ** attempt)  # Exponential backoff: 2s, 4s
+                print(f"[BUA] Retry {attempt}/{retries} after {wait_time}s...")
+                time.sleep(wait_time)
+
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=timeout) as response:
+                return response.read()
+        except urllib.error.HTTPError as e:
+            last_error = e
+            if attempt < retries and not silent_mode:
+                print(f"[BUA] HTTP Error {e.code}: {e.reason} - {url}")
+            continue
+        except urllib.error.URLError as e:
+            last_error = e
+            if attempt < retries and not silent_mode:
+                print(f"[BUA] Network error: {e.reason} - {url}")
+            continue
+        except Exception as e:
+            last_error = e
+            if attempt < retries and not silent_mode:
+                print(f"[BUA] Error: {e} - {url}")
+            continue
+
+    # All retries failed
+    if not silent_mode:
+        print(f"[BUA] Failed to fetch after {retries + 1} attempts: {url}")
+    raise last_error
+
+def load_translation_cache() -> Dict[str, Dict[str, str]]:
+    """Load all cached translations from disk"""
+    try:
+        if os.path.exists(TRANSLATION_CACHE_FILE):
+            with open(TRANSLATION_CACHE_FILE, 'r', encoding='utf-8') as f:
+                cache = json.load(f)
+                print(f"[BUA] Loaded translation cache with {len(cache)} languages")
+                return cache
+    except Exception as e:
+        print(f"[BUA] Could not load translation cache: {e}")
+    return {}
+
+def save_translation_cache(cache: Dict[str, Dict[str, str]]):
+    """Save all translations to disk cache"""
+    try:
+        os.makedirs(os.path.dirname(TRANSLATION_CACHE_FILE), exist_ok=True)
+        with open(TRANSLATION_CACHE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(cache, f, ensure_ascii=False)
+        print(f"[BUA] Saved translation cache with {len(cache)} languages")
+    except Exception as e:
+        print(f"[BUA] Could not save translation cache: {e}")
+
 def load_translation_file(lang_code: str) -> Dict[str, str]:
-    """Load a translation JSON file from GitHub only"""
+    """Load a translation JSON file from cache or GitHub with retry logic"""
+    # First, check disk cache
+    cache = load_translation_cache()
+    if lang_code in cache:
+        print(f"[BUA] Using cached translation for {lang_code} ({len(cache[lang_code])} keys)")
+        return cache[lang_code]
+
+    # Not in cache, try downloading from GitHub
     try:
         github_url = f"{TRANSLATION_BASE_URL}/{lang_code}.json"
-        print(f"Attempting to load translation from: {github_url}")
-        import urllib.request
-        req = urllib.request.Request(github_url, headers={"User-Agent": "BUA-Installer"})
-        with urllib.request.urlopen(req, timeout=10) as response:
-            data = json.loads(response.read().decode('utf-8'))
-            print(f"Successfully loaded translation {lang_code} from GitHub ({len(data)} keys)")
-            return data
+        print(f"[BUA] Downloading translation from: {github_url}")
+
+        data_bytes = fetch_url_with_retry(
+            github_url,
+            headers={"User-Agent": "BUA-Installer"},
+            timeout=5,
+            retries=2
+        )
+
+        data = json.loads(data_bytes.decode('utf-8'))
+        print(f"[BUA] Successfully downloaded translation {lang_code} ({len(data)} keys)")
+
+        # Save to cache
+        cache[lang_code] = data
+        save_translation_cache(cache)
+
+        return data
     except Exception as e:
-        print(f"ERROR: Could not load translation {lang_code} from GitHub: {e}")
-        print(f"URL attempted: {github_url}")
+        print(f"[BUA] ERROR: Could not load translation {lang_code} after retries: {e}")
+        print(f"[BUA] Continuing with empty translation (English fallback)")
         return {}
 
 def get_batocera_language() -> str:
@@ -467,14 +550,16 @@ APPS: Dict[str, str] = {
     "Chiaki": bua("chiaki/chiaki.sh"),
     "Conty": bua("conty/conty.sh"),
     "Dark Mode": bua("dark/dark.sh"),
-    "Desktop": bua("desktop/desktop.sh"),
+    "Desktop (Docker)": bua("desktop/desktop.sh"),
     "Docker": bua("docker/docker.sh"),
+    "RunImage Desktop": bua("desktop/ri-desktop.sh"),
     "F1": bua("f1/f1.sh"),
     "Firefox": bua("firefox/firefox-arm64.sh"),
     "FreeTube": bua("freetube/freetube.sh"),
     "Greenlight": bua("greenlight/greenlight_arm64.sh"),
     "IPTV Nator": bua("iptvnator/iptvnator.sh"),
     "Minecraft": bua("minecraft/bedrock.sh"),
+    "Nazi Zombies Portable": bua("nzp/nzp.sh"),
     "PortMaster": bua("portmaster/portmaster.sh"),
     "Raspberry Pi Imager": bua("rpi/rpi.sh"),
     "RGSX": "curl -L bit.ly/rgsx-install | sh",
@@ -507,14 +592,16 @@ DESCRIPTIONS: Dict[str, str] = {
     "Chiaki": "PS4/PS5 Remote Play client.",
     "Conty": "Standalone Linux distro container.",
     "Dark Mode": "Toggle F1 dark mode",
-    "Desktop": "Desktop mode (Ports)",
+    "Desktop (Docker)": "Desktop mode, requires Docker",
     "Docker": "Docker/Podman/Portainer AIO.",
+    "RunImage Desktop": "RunImage-based desktop with overlay support",
     "F1": "Ports shortcut to file manager",
     "Firefox": "Mozilla Firefox browser.",
     "FreeTube": "Privacy-minded YouTube client",
     "Greenlight": "Client for xCloud and Xbox streaming.",
     "IPTV Nator": "IPTV client for watching live TV.",
     "Minecraft": "Minecraft: Bedrock Edition.",
+    "Nazi Zombies Portable": "Classic Nazi Zombies on modern platforms",
     "PortMaster": "Download and manage games on handhelds.",
     "Raspberry Pi Imager": "Flash OS images to USB and SD cards.",
     "RGSX": "Retro Game Sets Xtra. A free, user-friendly ROM downloader for Batocera",
@@ -540,14 +627,14 @@ DESCRIPTIONS: Dict[str, str] = {
 
 CATEGORIES: Dict[str, List[str]] = {
     "Games": [
-        "Minecraft", "Super Mario X", "SuperTuxKart", "Celeste 64"
+        "Minecraft", "Super Mario X", "SuperTuxKart", "Celeste 64", "Nazi Zombies Portable"
     ],
     "Game Utilities": [
         "PortMaster", "Chiaki", "Greenlight", "Amazon Luna", "RGSX"
     ],
     "System Utilities": [
         "Tailscale", "Telegraf", "Vesktop", "IPTV Nator", "FreeTube",
-        "F1", "Firefox", "Desktop", "Raspberry Pi Imager"
+        "F1", "Firefox", "Desktop (Docker)", "RunImage Desktop", "Raspberry Pi Imager"
     ],
     "Developer Tools": [
         "Conty", "Docker", "Soar", "WayVNC", "WayVNC Headless", "Dark Mode"
@@ -587,29 +674,6 @@ pygame.init()
 pygame.mouse.set_visible(False)
 # Window caption will be set after translations load in play_splash_and_load()
 
-# Resolution save/load functions
-def load_saved_resolution():
-    """Load saved resolution preference"""
-    try:
-        if os.path.exists(RESOLUTION_FILE):
-            with open(RESOLUTION_FILE, 'r') as f:
-                res = f.read().strip()
-                if res and 'x' in res:
-                    parts = res.split('x')
-                    return int(parts[0]), int(parts[1])
-    except Exception:
-        pass
-    return None
-
-def save_resolution(width: int, height: int):
-    """Save resolution preference"""
-    try:
-        os.makedirs(os.path.dirname(RESOLUTION_FILE), exist_ok=True)
-        with open(RESOLUTION_FILE, 'w') as f:
-            f.write(f"{width}x{height}")
-    except Exception:
-        pass
-
 def load_saved_cards_per_page():
     """Load saved cards per page preference"""
     global CARDS_PER_PAGE
@@ -632,6 +696,28 @@ def save_cards_per_page(value: str):
         with open(CARDS_PER_PAGE_FILE, 'w') as f:
             f.write(value)
         CARDS_PER_PAGE = value
+    except Exception:
+        pass
+
+def load_saved_resolution():
+    """Load saved resolution preference"""
+    try:
+        if os.path.exists(RESOLUTION_FILE):
+            with open(RESOLUTION_FILE, 'r') as f:
+                res = f.read().strip()
+                if res and 'x' in res:
+                    parts = res.split('x')
+                    return int(parts[0]), int(parts[1])
+    except Exception:
+        pass
+    return None
+
+def save_resolution(width: int, height: int):
+    """Save resolution preference"""
+    try:
+        os.makedirs(os.path.dirname(RESOLUTION_FILE), exist_ok=True)
+        with open(RESOLUTION_FILE, 'w') as f:
+            f.write(f"{width}x{height}")
     except Exception:
         pass
 
@@ -678,7 +764,7 @@ def mark_changelog_shown():
     except Exception:
         pass
 
-# Native fullscreen/window to avoid blurry scaling
+# Borderless fullscreen window that doesn't change video mode
 def init_display():
     global screen, W, H
     # Try to load saved resolution first
@@ -688,15 +774,13 @@ def init_display():
         # Use saved resolution in fullscreen
         screen = pygame.display.set_mode(saved_res, pygame.FULLSCREEN)
     elif os.environ.get("BUA_WINDOWED"):
+        # Windowed mode for development/testing
         screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
     else:
-        # Use desktop size
-        try:
-            dw, dh = pygame.display.get_desktop_sizes()[0]
-        except Exception:
-            info = pygame.display.Info()
-            dw, dh = info.current_w, info.current_h
-        screen = pygame.display.set_mode((dw, dh), pygame.FULLSCREEN)
+        # Default: Borderless window at current display size (no video mode change)
+        info = pygame.display.Info()
+        screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.NOFRAME)
+
     W, H = screen.get_size()
 
 init_display()
@@ -959,15 +1043,26 @@ def _try_load(path: str):
         return None
 
 
-def _from_url(url: str | None):
+def _from_url(url: str | None, verbose: bool = False):
+    """
+    Download image from URL.
+    Set verbose=True to print error messages (useful for critical resources).
+    By default, errors are silent since this is often used with fallback URLs.
+    """
     if not url:
         return None
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "BUA-Icons"})
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            data = resp.read()
+        data = fetch_url_with_retry(
+            url,
+            headers={"User-Agent": "BUA-Icons"},
+            timeout=5,
+            retries=0  # No retries for icons - fail fast and try next fallback
+        )
+        if verbose:
+            print(f"[BUA] Successfully downloaded: {url}")
         return pygame.image.load(io.BytesIO(data)).convert_alpha()
     except Exception:
+        # Silent failure - this is expected when trying multiple fallback URLs
         return None
 
 def init_assets():
@@ -1205,27 +1300,27 @@ def init_assets():
 
     # Load shoulder button icons (LB/RB) if available
     if "LB" not in BUTTON_ICONS or "RB" not in BUTTON_ICONS:
-        lb_names = ["btn_lb.png", "lb.png"]
-        rb_names = ["btn_rb.png", "rb.png"]
-        def try_load_names(names):
-            for n in names:
-                url = DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/" + n if DEFAULT_BUTTONS_BASE_URL else None
+        def try_load_button(filename: str):
+            # Try remote URL first
+            if DEFAULT_BUTTONS_BASE_URL:
+                url = DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/" + filename
                 surf = _from_url(url)
                 if surf is not None:
                     return surf
-                # local fallbacks
-                for p in [os.path.join("images", n), os.path.join("assets", n), n]:
-                    if os.path.exists(p):
-                        s = _try_load(p)
-                        if s is not None:
-                            return s
+            # Local fallbacks
+            for p in [os.path.join("images", filename), os.path.join("assets", filename), filename]:
+                if os.path.exists(p):
+                    s = _try_load(p)
+                    if s is not None:
+                        return s
             return None
+
         if "LB" not in BUTTON_ICONS:
-            lb_surf = try_load_names(lb_names)
+            lb_surf = try_load_button("btn_lb.png")
             if lb_surf is not None:
                 BUTTON_ICONS["LB"] = lb_surf
         if "RB" not in BUTTON_ICONS:
-            rb_surf = try_load_names(rb_names)
+            rb_surf = try_load_button("btn_rb.png")
             if rb_surf is not None:
                 BUTTON_ICONS["RB"] = rb_surf
 
@@ -4675,6 +4770,7 @@ class ResolutionScreen(BaseScreen):
     def __init__(self):
         # Common resolution options (including CRT resolutions)
         self.options = [
+            ("Native (Borderless)", 0, 0),
             ("640x480", 640, 480),
             ("800x600", 800, 600),
             ("1024x768", 1024, 768),
@@ -4690,14 +4786,13 @@ class ResolutionScreen(BaseScreen):
             ("1920x1080", 1920, 1080),
             ("2560x1440", 2560, 1440),
             ("3840x2160", 3840, 2160),
-            ("Native", 0, 0),
         ]
         self.idx = 0
         self.scroll_offset = 0
         # Find current resolution
         current_w, current_h = W, H
         for i, (label, w, h) in enumerate(self.options):
-            if label == "Native" and not load_saved_resolution():
+            if label == "Native (Borderless)" and not load_saved_resolution():
                 self.idx = i
                 break
             elif w == current_w and h == current_h:
@@ -4741,31 +4836,31 @@ class ResolutionScreen(BaseScreen):
         label, w, h = self.options[self.idx]
 
         try:
-            if label == "Native":
-                # Remove saved resolution file to use auto-detect on next launch
+            if label == "Native (Borderless)":
+                # Remove saved resolution file to use borderless window on next launch
                 try:
                     if os.path.exists(RESOLUTION_FILE):
                         os.remove(RESOLUTION_FILE)
                 except Exception:
                     pass
-                # Use native desktop resolution
-                try:
-                    dw, dh = pygame.display.get_desktop_sizes()[0]
-                except Exception:
-                    info = pygame.display.Info()
-                    dw, dh = info.current_w, info.current_h
-                w, h = dw, dh
+                # Use native display resolution in borderless window
+                info = pygame.display.Info()
+                w, h = info.current_w, info.current_h
+
+                # Quit and reinitialize pygame display
+                pygame.display.quit()
+                pygame.display.init()
+                pygame.display.set_caption(t('main_title'))
+                screen = pygame.display.set_mode((w, h), pygame.NOFRAME)
             else:
-                # Save specific resolution
+                # Save specific resolution and use fullscreen
                 save_resolution(w, h)
 
-            # Quit pygame display to allow resolution change
-            pygame.display.quit()
-
-            # Reinitialize with new resolution
-            pygame.display.init()
-            pygame.display.set_caption(t('main_title'))
-            screen = pygame.display.set_mode((w, h), pygame.FULLSCREEN)
+                # Quit and reinitialize pygame display
+                pygame.display.quit()
+                pygame.display.init()
+                pygame.display.set_caption(t('main_title'))
+                screen = pygame.display.set_mode((w, h), pygame.FULLSCREEN)
 
             # Update globals
             W, H = screen.get_size()
@@ -4790,17 +4885,14 @@ class ResolutionScreen(BaseScreen):
         card_w = min(W - S(80), S(900))
         card_x = (W - card_w) // 2
 
-        # Show current resolution (actual W x H, not what's selected)
-        current_label = f"{W}x{H}"
-        # Check if it matches "Native" (native desktop res)
-        try:
-            dw, dh = pygame.display.get_desktop_sizes()[0]
-            if W == dw and H == dh and not load_saved_resolution():
-                current_label = "Native"
-        except Exception:
-            pass
+        # Show current resolution
+        saved_res = load_saved_resolution()
+        if saved_res:
+            current_label = f"{saved_res[0]}x{saved_res[1]}"
+        else:
+            current_label = "Native (Borderless)"
 
-        draw_text(screen, f"{t('current')}: {current_label}", FONT_SMALL, MUTED, (card_x, base_y))
+        draw_text(screen, f"{t('current')}: {current_label} ({W}x{H})", FONT_SMALL, MUTED, (card_x, base_y))
         base_y += 36
 
         # Calculate visible area
@@ -4973,19 +5065,39 @@ def play_splash_and_load():
 
     # Download and play splash video while loading
     splash_url = "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra/splash.mp4"
+    splash_file = None
 
     try:
-        print("[BUA] Downloading splash video...")
-        req = urllib.request.Request(splash_url, headers={"User-Agent": "BUA-Splash"})
-        with urllib.request.urlopen(req, timeout=10) as response:
-            splash_data = response.read()
+        # Check if cached splash exists
+        if os.path.exists(SPLASH_CACHE_FILE):
+            print("[BUA] Using cached splash video")
+            splash_file = SPLASH_CACHE_FILE
+        else:
+            # Download splash with retry logic
+            print("[BUA] Downloading splash video...")
+            splash_data = fetch_url_with_retry(
+                splash_url,
+                headers={"User-Agent": "BUA-Splash"},
+                timeout=5,
+                retries=2
+            )
 
-        # Save to temp file
-        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as f:
-            f.write(splash_data)
-            splash_file = f.name
+            # Save to cache
+            try:
+                os.makedirs(os.path.dirname(SPLASH_CACHE_FILE), exist_ok=True)
+                with open(SPLASH_CACHE_FILE, 'wb') as f:
+                    f.write(splash_data)
+                splash_file = SPLASH_CACHE_FILE
+                print(f"[BUA] Splash video cached to {SPLASH_CACHE_FILE}")
+            except Exception as e:
+                # If caching fails, use temp file
+                print(f"[BUA] Could not cache splash: {e}, using temp file")
+                with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as f:
+                    f.write(splash_data)
+                    splash_file = f.name
 
-        print(f"[BUA] Playing splash video...")
+        if splash_file:
+            print(f"[BUA] Playing splash video...")
 
         # Play video in the pygame window using cv2
         try:
@@ -5058,14 +5170,27 @@ def play_splash_and_load():
 
             loading_complete.wait()
 
-        # Clean up
-        try:
-            os.unlink(splash_file)
-        except:
-            pass
+        # Clean up temp file only (not cached file)
+        if splash_file and splash_file != SPLASH_CACHE_FILE:
+            try:
+                os.unlink(splash_file)
+            except:
+                pass
 
     except Exception as e:
-        print(f"[BUA] Could not play splash video: {e}")
+        print(f"[BUA] Could not download/play splash video: {e}")
+        print(f"[BUA] Showing loading screen fallback")
+        # Show a simple loading screen as fallback
+        try:
+            splash_screen = screen
+            splash_screen.fill((20, 24, 31))
+            font = pygame.font.Font(None, 72)
+            text = font.render("Loading...", True, (235, 242, 247))
+            text_rect = text.get_rect(center=(splash_screen.get_width() // 2, splash_screen.get_height() // 2))
+            splash_screen.blit(text, text_rect)
+            pygame.display.flip()
+        except:
+            pass
         # Just wait for loading without video
         loading_complete.wait()
 

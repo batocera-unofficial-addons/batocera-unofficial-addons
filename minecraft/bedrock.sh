@@ -17,10 +17,10 @@ app_dir="/userdata/system/add-ons/minecraft/minecraftbedrock"
 # Step 2: Set the download URL based on system architecture
 if [ "$arch" == "x86_64" ]; then
     echo "Bedrock Edition selected for x86_64."
-    appimage_url="https://github.com/minecraft-linux/mcpelauncher-manifest/releases/download/nightly/Minecraft_Bedrock_Launcher-bookworm-x86_64-v1.0.0.590.AppImage"
+    appimage_url="https://github.com/minecraft-linux/appimage-builder/releases/download/v1.1.1-802/Minecraft_Bedrock_Launcher-x86_64-v1.1.1.802.AppImage"
 elif [ "$arch" == "aarch64" ]; then
     echo "Bedrock Edition selected for arm64."
-    appimage_url="https://github.com/minecraft-linux/mcpelauncher-manifest/releases/download/nightly/Minecraft_Bedrock_Launcher-arm64-v1.0.0.590.AppImage"
+    appimage_url="https://github.com/minecraft-linux/appimage-builder/releases/download/v1.1.1-802/Minecraft_Bedrock_Launcher-arm64-v1.1.1.802.AppImage"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1

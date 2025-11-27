@@ -20,6 +20,8 @@
   "developer_tools_desc": "Outils de développement et correctifs",
   "docker_menu": "Menu Docker",
   "docker_menu_desc": "Installer des conteneurs Docker",
+  "custom_wine": "Wine Personnalisé",
+  "custom_wine_desc": "Télécharger des versions Wine/Proton",
   "updater": "Mise à Jour",
   "updater_desc": "Mettre à jour/Désinstaller les modules installés",
   "settings": "Paramètres",

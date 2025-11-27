@@ -20,6 +20,8 @@
   "developer_tools_desc": "Инструменты для разработки и установки патчей",
   "docker_menu": "Меню Docker",
   "docker_menu_desc": "Установить контейнеры Docker",
+  "custom_wine": "Пользовательский Wine",
+  "custom_wine_desc": "Скачать версии Wine/Proton",
   "updater": "Обновление и удаление дополнений",
   "updater_desc": "Обновить или удалить установленные дополнения",
   "settings": "Настройки",

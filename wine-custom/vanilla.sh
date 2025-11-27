@@ -17,27 +17,76 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
-# Build options for dialog menu (limit to first 20 for usability)
-menu_args=()
-i=0
-while IFS= read -r line && [ $i -lt 20 ]; do
-    name=$(echo "$line" | jq -r '.name')
-    tag=$(echo "$line" | jq -r '.tag_name')
-    description="${name} - ${tag}"
-    menu_args+=("$tag" "$description")
-    ((i++))
-done < <(echo "$release_data" | jq -c '.[]')
+# Check if version is provided via environment variable (from GUI)
+if [ -n "$WINE_VERSION" ]; then
+    # Version pre-selected from GUI
+    version="$WINE_VERSION"
+    echo "Installing pre-selected version: $version"
+else
+    # Build full list of available versions for interactive selection
+    all_releases=()
+    while IFS= read -r line; do
+        tag=$(echo "$line" | jq -r '.tag_name')
+        name=$(echo "$line" | jq -r '.name')
+        description="${name} - ${tag}"
+        all_releases+=("$tag" "$description")
+    done < <(echo "$release_data" | jq -c '.[]')
 
-# Show dialog menu for version selection
-choice=$(dialog --stdout --title "Select Wine/Proton Version" --menu "Choose which Wine/Proton version to install:" 20 80 12 "${menu_args[@]}")
+    total_items=$((${#all_releases[@]} / 2))
+    items_per_page=100
+    current_page=0
+    choice=""
 
-if [ -z "$choice" ]; then
-    echo "Installation cancelled."
-    exit 1
+    # Pagination loop - allow scrolling through pages
+    while true; do
+        # Calculate page boundaries
+        start_idx=$((current_page * items_per_page))
+        end_idx=$(((current_page + 1) * items_per_page))
+
+        # Build menu for current page
+        menu_args=()
+        for ((i = start_idx; i < end_idx && i < total_items; i++)); do
+            menu_args+=("${all_releases[$((i*2))]}" "${all_releases[$((i*2+1))]}")
+        done
+
+        # Add navigation options if there are more pages
+        has_next=$((end_idx < total_items ? 1 : 0))
+        has_prev=$((current_page > 0 ? 1 : 0))
+
+        page_info="Page $((current_page + 1)) of $(((total_items + items_per_page - 1) / items_per_page))"
+
+        # Add navigation items at bottom
+        if [ $has_next -eq 1 ]; then
+            menu_args+=("__NEXT__" ">>> Next Page")
+        fi
+        if [ $has_prev -eq 1 ]; then
+            menu_args+=("__PREV__" "<<< Previous Page")
+        fi
+
+        # Show dialog menu for version selection
+        choice=$(dialog --stdout --title "Select Wine/Proton Version" --menu "Choose Wine/Proton version ($page_info):" 25 90 20 "${menu_args[@]}")
+
+        if [ -z "$choice" ]; then
+            echo "Installation cancelled."
+            exit 1
+        fi
+
+        # Handle navigation
+        if [ "$choice" = "__NEXT__" ]; then
+            ((current_page++))
+            continue
+        elif [ "$choice" = "__PREV__" ]; then
+            ((current_page--))
+            continue
+        else
+            # Valid selection made
+            break
+        fi
+    done
+
+    # Process the selected version
+    version="$choice"
 fi
-
-# Process the selected version
-version="$choice"
 url=$(echo "$release_data" | jq -r ".[] | select(.tag_name == \"$version\") | .assets[] | select(.name | endswith(\"amd64.tar.xz\")).browser_download_url" | head -n1)
 
 if [[ -z "$url" ]]; then

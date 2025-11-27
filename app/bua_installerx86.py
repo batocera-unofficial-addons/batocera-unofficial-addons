@@ -71,6 +71,8 @@ LANGUAGE_FILE = "/userdata/system/add-ons/bua_language.txt"
 RESOLUTION_FILE = "/userdata/system/add-ons/bua_resolution.txt"
 CARDS_PER_PAGE_FILE = "/userdata/system/add-ons/bua_cards_per_page.txt"
 CHANGELOG_HASH_FILE = "/userdata/system/add-ons/bua_changelog_hash.txt"
+TRANSLATION_CACHE_FILE = "/userdata/system/add-ons/bua_translation_cache.json"
+SPLASH_CACHE_FILE = "/userdata/system/add-ons/bua_splash.mp4"
 
 # Default and current cards per page setting
 DEFAULT_CARDS_PER_PAGE = "auto"  # "auto" or a number like "3", "5", "7", etc.
@@ -93,20 +95,101 @@ TRANSLATION_DIRS = [
 # GitHub URL for translations
 TRANSLATION_BASE_URL = "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/translation"
 
+def fetch_url_with_retry(url: str, headers: dict, timeout: int = 5, retries: int = 2) -> bytes:
+    """
+    Fetch URL with exponential backoff retry logic.
+    Returns the response bytes or raises an exception after all retries fail.
+    Set retries=0 for a single attempt with no error logging (useful for silent fallbacks).
+    """
+    import time
+    import urllib.error
+    last_error = None
+    silent_mode = (retries == 0)  # Silent mode when no retries requested
+
+    for attempt in range(retries + 1):
+        try:
+            if attempt > 0:
+                wait_time = (2 ** attempt)  # Exponential backoff: 2s, 4s
+                print(f"[BUA] Retry {attempt}/{retries} after {wait_time}s...")
+                time.sleep(wait_time)
+
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=timeout) as response:
+                return response.read()
+        except urllib.error.HTTPError as e:
+            last_error = e
+            if attempt < retries and not silent_mode:
+                print(f"[BUA] HTTP Error {e.code}: {e.reason} - {url}")
+            continue
+        except urllib.error.URLError as e:
+            last_error = e
+            if attempt < retries and not silent_mode:
+                print(f"[BUA] Network error: {e.reason} - {url}")
+            continue
+        except Exception as e:
+            last_error = e
+            if attempt < retries and not silent_mode:
+                print(f"[BUA] Error: {e} - {url}")
+            continue
+
+    # All retries failed
+    if not silent_mode:
+        print(f"[BUA] Failed to fetch after {retries + 1} attempts: {url}")
+    raise last_error
+
+def load_translation_cache() -> Dict[str, Dict[str, str]]:
+    """Load all cached translations from disk"""
+    try:
+        if os.path.exists(TRANSLATION_CACHE_FILE):
+            with open(TRANSLATION_CACHE_FILE, 'r', encoding='utf-8') as f:
+                cache = json.load(f)
+                print(f"[BUA] Loaded translation cache with {len(cache)} languages")
+                return cache
+    except Exception as e:
+        print(f"[BUA] Could not load translation cache: {e}")
+    return {}
+
+def save_translation_cache(cache: Dict[str, Dict[str, str]]):
+    """Save all translations to disk cache"""
+    try:
+        os.makedirs(os.path.dirname(TRANSLATION_CACHE_FILE), exist_ok=True)
+        with open(TRANSLATION_CACHE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(cache, f, ensure_ascii=False)
+        print(f"[BUA] Saved translation cache with {len(cache)} languages")
+    except Exception as e:
+        print(f"[BUA] Could not save translation cache: {e}")
+
 def load_translation_file(lang_code: str) -> Dict[str, str]:
-    """Load a translation JSON file from GitHub only"""
+    """Load a translation JSON file from cache or GitHub with retry logic"""
+    # First, check disk cache
+    cache = load_translation_cache()
+    if lang_code in cache:
+        print(f"[BUA] Using cached translation for {lang_code} ({len(cache[lang_code])} keys)")
+        return cache[lang_code]
+
+    # Not in cache, try downloading from GitHub
     try:
         github_url = f"{TRANSLATION_BASE_URL}/{lang_code}.json"
-        print(f"Attempting to load translation from: {github_url}")
-        import urllib.request
-        req = urllib.request.Request(github_url, headers={"User-Agent": "BUA-Installer"})
-        with urllib.request.urlopen(req, timeout=10) as response:
-            data = json.loads(response.read().decode('utf-8'))
-            print(f"Successfully loaded translation {lang_code} from GitHub ({len(data)} keys)")
-            return data
+        print(f"[BUA] Downloading translation from: {github_url}")
+
+        data_bytes = fetch_url_with_retry(
+            github_url,
+            headers={"User-Agent": "BUA-Installer"},
+            timeout=5,
+            retries=2
+        )
+
+        data = json.loads(data_bytes.decode('utf-8'))
+        print(f"[BUA] Successfully downloaded translation {lang_code} ({len(data)} keys)")
+
+        # Save to cache
+        cache[lang_code] = data
+        save_translation_cache(cache)
+
+        return data
     except Exception as e:
-        print(f"ERROR: Could not load translation {lang_code} from GitHub: {e}")
-        print(f"URL attempted: {github_url}")
+        print(f"[BUA] ERROR: Could not load translation {lang_code} after retries: {e}")
+        print(f"[BUA] Continuing with empty translation (English fallback)")
         return {}
 
 def get_batocera_language() -> str:
@@ -432,13 +515,24 @@ def mark_uninstalled(app_name: str):
         del history[app_name]
         save_history(history)
 
-def get_uninstall_command(install_cmd: str) -> str:
+# Custom uninstall commands for apps that don't follow the standard pattern
+CUSTOM_UNINSTALL: Dict[str, str] = {
+    "Desktop For Batocera": "/userdata/system/configs/bat-drl/Remover_Desktop.sh",
+}
+
+def get_uninstall_command(install_cmd: str, app_name: str = None) -> str:
     """Convert an installation command to an uninstall command.
-    Replaces .sh with _uninstall.sh in the URL.
+
+    First checks CUSTOM_UNINSTALL dictionary for app-specific uninstall scripts.
+    Otherwise, replaces .sh with _uninstall.sh in the URL.
 
     Example:
     https://.../ 7zip/7zip.sh -> https://.../7zip/7zip_uninstall.sh
     """
+    # Check for custom uninstall command first
+    if app_name and app_name in CUSTOM_UNINSTALL:
+        return CUSTOM_UNINSTALL[app_name]
+
     import re
     # Find the .sh URL in the curl command
     match = re.search(r'(https://[^\s]+)\.sh', install_cmd)
@@ -498,6 +592,7 @@ APPS: Dict[str, str] = {
     "Moonlight": bua("moonlight/moonlight.sh"),
     "Netflix": bua("netflix/netflix.sh"),
     "NVIDIA Patcher": bua("nvidiapatch/nvidiapatch.sh"),
+    "Nazi Zombies Portable": bua("nzp/nzp.sh"),
     "OBS": bua("obs/obs.sh"),
     "OpenRA": bua("openra/openra.sh"),
     "OpenRGB": bua("openrgb/openrgb.sh"),
@@ -667,6 +762,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "Plex": "Plex Media Player",
     "OpenTTD": "Open source clone of Transport Tycoon Deluxe",
     "Luanti": "Voxel sandbox (Minecraft-like)",
+    "Nazi Zombies Portable": "Classic Nazi Zombies on modern platforms",
     "Parsec": "Remote desktop & game streaming",
     "HBO Max": "HBO Max streaming app",
     "Prime Video": "Amazon Prime Video streaming app",
@@ -769,6 +865,7 @@ CATEGORIES: Dict[str, List[str]] = {
         "SCP Containment Breach",
         "Zero-K",
         "Modern Modern Chef",
+        "Nazi Zombies Portable",
         "Sonic Robo Blast 2",
         "Sonic Time Twisted",
         "Super Smash Bros CMC+",
@@ -796,7 +893,7 @@ CATEGORIES: Dict[str, List[str]] = {
         "Telegraf", "Wine Manager", "Vesktop", "Chrome", "YouTube", "Netflix",
         "Input Leap", "IPTV Nator", "Firefox", "Spotify", "Arcade Manager", "Brave",
         "OpenRGB", "OBS", "Stremio", "Disney Plus", "Twitch", "7zip", "qBittorrent",
-        "GParted", "Custom Wine", "Plex", "HBO Max", "Prime Video", "Crunchyroll",
+        "GParted", "Plex", "HBO Max", "Prime Video", "Crunchyroll",
         "Mubi", "Tidal", "FreeTube", "FileZilla", "PeaZip", "Desktop", "Flathub",
         "JDownloader", "Raspberry Pi Imager"
     ],
@@ -815,6 +912,7 @@ def get_top_level() -> List[Tuple[str, str]]:
         (t("system_utilities"), t("system_utilities_desc")),
         (t("developer_tools"), t("developer_tools_desc")),
         (t("docker_menu"), t("docker_menu_desc")),
+        (t("custom_wine"), t("custom_wine_desc")),
         (t("updater"), t("updater_desc")),
         (t("settings"), t("settings_desc")),
         (t("exit"), t("exit_desc")),
@@ -834,29 +932,6 @@ SPECIAL_TOPLEVEL_RUN: Dict[str, str] = {
 pygame.init()
 pygame.mouse.set_visible(False)
 # Window caption will be set after translations load in play_splash_and_load()
-
-# Resolution save/load functions
-def load_saved_resolution():
-    """Load saved resolution preference"""
-    try:
-        if os.path.exists(RESOLUTION_FILE):
-            with open(RESOLUTION_FILE, 'r') as f:
-                res = f.read().strip()
-                if res and 'x' in res:
-                    parts = res.split('x')
-                    return int(parts[0]), int(parts[1])
-    except Exception:
-        pass
-    return None
-
-def save_resolution(width: int, height: int):
-    """Save resolution preference"""
-    try:
-        os.makedirs(os.path.dirname(RESOLUTION_FILE), exist_ok=True)
-        with open(RESOLUTION_FILE, 'w') as f:
-            f.write(f"{width}x{height}")
-    except Exception:
-        pass
 
 def load_saved_cards_per_page():
     """Load saved cards per page preference"""
@@ -880,6 +955,28 @@ def save_cards_per_page(value: str):
         with open(CARDS_PER_PAGE_FILE, 'w') as f:
             f.write(value)
         CARDS_PER_PAGE = value
+    except Exception:
+        pass
+
+def load_saved_resolution():
+    """Load saved resolution preference"""
+    try:
+        if os.path.exists(RESOLUTION_FILE):
+            with open(RESOLUTION_FILE, 'r') as f:
+                res = f.read().strip()
+                if res and 'x' in res:
+                    parts = res.split('x')
+                    return int(parts[0]), int(parts[1])
+    except Exception:
+        pass
+    return None
+
+def save_resolution(width: int, height: int):
+    """Save resolution preference"""
+    try:
+        os.makedirs(os.path.dirname(RESOLUTION_FILE), exist_ok=True)
+        with open(RESOLUTION_FILE, 'w') as f:
+            f.write(f"{width}x{height}")
     except Exception:
         pass
 
@@ -926,7 +1023,7 @@ def mark_changelog_shown():
     except Exception:
         pass
 
-# Native fullscreen/window to avoid blurry scaling
+# Borderless fullscreen window that doesn't change video mode
 def init_display():
     global screen, W, H
     # Try to load saved resolution first
@@ -936,15 +1033,13 @@ def init_display():
         # Use saved resolution in fullscreen
         screen = pygame.display.set_mode(saved_res, pygame.FULLSCREEN)
     elif os.environ.get("BUA_WINDOWED"):
+        # Windowed mode for development/testing
         screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
     else:
-        # Use desktop size
-        try:
-            dw, dh = pygame.display.get_desktop_sizes()[0]
-        except Exception:
-            info = pygame.display.Info()
-            dw, dh = info.current_w, info.current_h
-        screen = pygame.display.set_mode((dw, dh), pygame.FULLSCREEN)
+        # Default: Borderless window at current display size (no video mode change)
+        info = pygame.display.Info()
+        screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.NOFRAME)
+
     W, H = screen.get_size()
 
 init_display()
@@ -1207,15 +1302,26 @@ def _try_load(path: str):
         return None
 
 
-def _from_url(url: str | None):
+def _from_url(url: str | None, verbose: bool = False):
+    """
+    Download image from URL.
+    Set verbose=True to print error messages (useful for critical resources).
+    By default, errors are silent since this is often used with fallback URLs.
+    """
     if not url:
         return None
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "BUA-Icons"})
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            data = resp.read()
+        data = fetch_url_with_retry(
+            url,
+            headers={"User-Agent": "BUA-Icons"},
+            timeout=5,
+            retries=0  # No retries for icons - fail fast and try next fallback
+        )
+        if verbose:
+            print(f"[BUA] Successfully downloaded: {url}")
         return pygame.image.load(io.BytesIO(data)).convert_alpha()
     except Exception:
+        # Silent failure - this is expected when trying multiple fallback URLs
         return None
 
 def init_assets():
@@ -1453,27 +1559,27 @@ def init_assets():
 
     # Load shoulder button icons (LB/RB) if available
     if "LB" not in BUTTON_ICONS or "RB" not in BUTTON_ICONS:
-        lb_names = ["btn_lb.png", "lb.png"]
-        rb_names = ["btn_rb.png", "rb.png"]
-        def try_load_names(names):
-            for n in names:
-                url = DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/" + n if DEFAULT_BUTTONS_BASE_URL else None
+        def try_load_button(filename: str):
+            # Try remote URL first
+            if DEFAULT_BUTTONS_BASE_URL:
+                url = DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/" + filename
                 surf = _from_url(url)
                 if surf is not None:
                     return surf
-                # local fallbacks
-                for p in [os.path.join("images", n), os.path.join("assets", n), n]:
-                    if os.path.exists(p):
-                        s = _try_load(p)
-                        if s is not None:
-                            return s
+            # Local fallbacks
+            for p in [os.path.join("images", filename), os.path.join("assets", filename), filename]:
+                if os.path.exists(p):
+                    s = _try_load(p)
+                    if s is not None:
+                        return s
             return None
+
         if "LB" not in BUTTON_ICONS:
-            lb_surf = try_load_names(lb_names)
+            lb_surf = try_load_button("btn_lb.png")
             if lb_surf is not None:
                 BUTTON_ICONS["LB"] = lb_surf
         if "RB" not in BUTTON_ICONS:
-            rb_surf = try_load_names(rb_names)
+            rb_surf = try_load_button("btn_rb.png")
             if rb_surf is not None:
                 BUTTON_ICONS["RB"] = rb_surf
 
@@ -2226,6 +2332,9 @@ class MenuScreen(BaseScreen):
             cmd = SPECIAL_TOPLEVEL_RUN[name]
             push_screen(RunListScreen([(name, cmd)], title=name))
             return
+        if name == t("custom_wine"):
+            push_screen(WineTypeMenu())
+            return
         if name == t("settings"):
             push_screen(SettingsScreen())
             return
@@ -2897,6 +3006,301 @@ class MenuSelectionDialog(BaseScreen):
             draw_text(screen, label, FONT, FG, (opt_rect.x + S(15), opt_rect.y + S(12)))
 
 
+class WineTypeMenu(BaseScreen):
+    """Menu for selecting Wine/Proton variant type"""
+    def __init__(self):
+        self.options = [
+            ('vanilla', 'Wine & Proton (Vanilla)'),
+            ('tkg', 'Wine-TKG-Staging'),
+            ('wine-ge', 'Wine-GE Custom'),
+            ('ge-proton', 'Proton-GE Custom'),
+        ]
+        self.idx = 0
+        self.scroll_offset = 0
+    
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    pop_screen(); return
+                if e.key in (pygame.K_DOWN,):
+                    self.idx = (self.idx + 1) % len(self.options)
+                if e.key in (pygame.K_UP,):
+                    self.idx = (self.idx - 1) % len(self.options)
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    self.select()
+            if e.type == pygame.JOYHATMOTION:
+                _x, y = e.value
+                if y == -1:
+                    self.idx = (self.idx + 1) % len(self.options)
+                elif y == 1:
+                    self.idx = (self.idx - 1) % len(self.options)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_START):
+                    self.select()
+                if e.button in (BTN_B, BTN_BACK):
+                    pop_screen(); return
+    
+    def select(self):
+        wine_type, _label = self.options[self.idx]
+        push_screen(WineSelectionScreen(wine_type))
+    
+    def draw(self):
+        draw_background(screen)
+        
+        draw_text(screen, "Select Wine/Proton Version", FONT_BIG, FG, (40, 30))
+        draw_hints_line(screen, f"A={t('hint_select')} | B={t('hint_return')}", FONT_SMALL, ACCENT, (40, 70))
+        
+        # List of wine types
+        base_y = 110
+        item_h = 60
+        list_h = H - base_y - 40
+        visible_items = get_visible_items(list_h, item_h)
+        
+        # Auto-scroll to keep selection visible
+        if self.idx < self.scroll_offset:
+            self.scroll_offset = self.idx
+        elif self.idx >= self.scroll_offset + visible_items:
+            self.scroll_offset = self.idx - visible_items + 1
+        
+        max_scroll = max(0, len(self.options) - visible_items)
+        self.scroll_offset = max(0, min(self.scroll_offset, max_scroll))
+        
+        # Draw wine type options
+        for i in range(self.scroll_offset, min(len(self.options), self.scroll_offset + visible_items)):
+            _wine_type, label = self.options[i]
+            display_idx = i - self.scroll_offset
+            y = base_y + display_idx * item_h
+            
+            rect = pygame.Rect(40, y, W - 80, item_h - 5)
+            pygame.draw.rect(screen, CARD, rect, border_radius=10)
+            
+            if i == self.idx:
+                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=10)
+            
+            draw_text(screen, label, FONT, FG, (rect.x + 14, rect.y + 18))
+
+
+class WineSelectionScreen(BaseScreen):
+    """Screen for selecting Wine/Proton versions from GitHub releases"""
+    def __init__(self, wine_type: str):
+        """
+        wine_type: 'vanilla', 'tkg', 'wine-ge', or 'ge-proton'
+        """
+        self.wine_type = wine_type
+        self.title = {
+            'vanilla': 'Wine & Proton (Vanilla)',
+            'tkg': 'Wine-TKG-Staging',
+            'wine-ge': 'Wine-GE Custom',
+            'ge-proton': 'Proton-GE Custom'
+        }.get(wine_type, wine_type)
+        
+        self.versions = []
+        self.idx = 0
+        self.scroll_offset = 0
+        self.loading = True
+        self.error = None
+        self.selected_version = None
+        
+        # Start background fetch
+        threading.Thread(target=self._fetch_versions, daemon=True).start()
+    
+    def _fetch_versions(self):
+        """Fetch available wine versions from GitHub API"""
+        try:
+            import json
+            
+            repos = {
+                'vanilla': ('Kron4ek/Wine-Builds', None),
+                'tkg': ('Kron4ek/Wine-Builds', 'staging-tkg'),
+                'wine-ge': ('GloriousEggroll/wine-ge-custom', None),
+                'ge-proton': ('GloriousEggroll/proton-ge-custom', None)
+            }
+            
+            owner_repo, filter_str = repos.get(self.wine_type, ('Kron4ek/Wine-Builds', None))
+            
+            api_url = f"https://api.github.com/repos/{owner_repo}/releases?per_page=100"
+            req = urllib.request.Request(api_url, headers={"User-Agent": "BUA"})
+            
+            with urllib.request.urlopen(req, timeout=10) as response:
+                releases = json.loads(response.read().decode('utf-8'))
+            
+            # Filter and sort versions
+            for release in releases:
+                tag = release.get('tag_name', '')
+                name = release.get('name', tag)
+                
+                # Apply filter if needed
+                if filter_str and not any(filter_str in asset.get('name', '') for asset in release.get('assets', [])):
+                    continue
+                
+                # Check for valid assets
+                if any(asset.get('name', '').endswith(('.tar.xz', '.tar.gz')) for asset in release.get('assets', [])):
+                    self.versions.append({'tag': tag, 'name': name})
+            
+            if not self.versions:
+                self.error = "No versions found"
+            
+        except Exception as e:
+            self.error = f"Error fetching versions: {str(e)[:100]}"
+        finally:
+            self.loading = False
+    
+    def handle(self, events):
+        if self.loading or not self.versions:
+            for e in events:
+                if e.type == pygame.QUIT:
+                    pygame.quit(); sys.exit(0)
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_ESCAPE:
+                        pop_screen(); return
+                if e.type == pygame.JOYBUTTONDOWN:
+                    if e.button in (BTN_B, BTN_BACK):
+                        pop_screen(); return
+            return
+        
+        for e in events:
+            if e.type == pygame.QUIT:
+                pygame.quit(); sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    pop_screen(); return
+                if e.key in (pygame.K_DOWN,):
+                    self.idx = (self.idx + 1) % len(self.versions)
+                if e.key in (pygame.K_UP,):
+                    self.idx = (self.idx - 1) % len(self.versions)
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    self.select_version()
+            if e.type == pygame.JOYHATMOTION:
+                _x, y = e.value
+                if y == -1:
+                    self.idx = (self.idx + 1) % len(self.versions)
+                elif y == 1:
+                    self.idx = (self.idx - 1) % len(self.versions)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_START):
+                    self.select_version()
+                if e.button in (BTN_B, BTN_BACK):
+                    pop_screen(); return
+    
+    def select_version(self):
+        """Install selected wine version"""
+        version = self.versions[self.idx]
+        tag = version['tag']
+
+        # Build inline installation script based on wine type
+        repos = {
+            'vanilla': ('Kron4ek/Wine-Builds', 'amd64.tar.xz', None),
+            'tkg': ('Kron4ek/Wine-Builds', 'amd64.tar.xz', 'staging-tkg'),
+            'wine-ge': ('GloriousEggroll/wine-ge-custom', 'x86_64.tar.xz', None),
+            'ge-proton': ('GloriousEggroll/proton-ge-custom', 'tar.gz', None)
+        }
+
+        repo, file_ext, filter_str = repos.get(self.wine_type, ('Kron4ek/Wine-Builds', 'amd64.tar.xz', None))
+
+        # Build filter clause for asset selection
+        if filter_str:
+            filter_clause = f'| select(.name | contains("{filter_str}"))'
+        else:
+            filter_clause = ''
+
+        # Create inline installation script
+        # Build the jq filter with proper escaping
+        jq_filter = f'.[] | select(.tag_name == "{tag}") | .assets[] {filter_clause} | select(.name | endswith("{file_ext}")) | .browser_download_url'
+
+        install_script = f'''set -e
+INSTALL_DIR="/userdata/system/wine/custom/"
+VERSION="{tag}"
+REPO="{repo}"
+FILE_EXT="{file_ext}"
+
+echo "Fetching release information for $VERSION..."
+release_data=$(curl -s "https://api.github.com/repos/$REPO/releases?per_page=100")
+
+echo "Finding download URL..."
+url=$(echo "$release_data" | jq -r '{jq_filter}' | head -n1)
+
+if [[ -z "$url" ]]; then
+    echo "No compatible download found for $VERSION"
+    exit 1
+fi
+
+echo "Creating directory..."
+mkdir -p "$INSTALL_DIR/wine-$VERSION"
+cd "$INSTALL_DIR/wine-$VERSION"
+
+echo "Downloading $VERSION from $url..."
+wget -q --tries=10 --no-check-certificate --no-cache --no-cookies --show-progress -O "wine-$VERSION.$FILE_EXT" "$url"
+
+if [ -f "wine-$VERSION.$FILE_EXT" ]; then
+    echo "Unpacking Wine $VERSION..."
+    tar --strip-components=1 -xf "wine-$VERSION.$FILE_EXT"
+    rm "wine-$VERSION.$FILE_EXT"
+    echo "Installation of Wine $VERSION complete!"
+else
+    echo "Failed to download Wine $VERSION"
+    exit 1
+fi'''
+
+        push_screen(RunListScreen([(f"{self.title} - {tag}", install_script)], title=self.title))
+    
+    def draw(self):
+        draw_background(screen)
+        
+        if self.loading:
+            draw_text(screen, f"{self.title} - Loading...", FONT_BIG, FG, (40, 30))
+            draw_text(screen, "Fetching available versions from GitHub...", FONT, MUTED, (40, 100))
+            return
+        
+        if self.error:
+            draw_text(screen, f"{self.title} - Error", FONT_BIG, (255, 120, 120), (40, 30))
+            draw_text(screen, self.error, FONT, MUTED, (40, 100))
+            draw_hints_line(screen, f"B={t('hint_return')}", FONT_SMALL, ACCENT, (40, 70))
+            return
+        
+        draw_text(screen, self.title, FONT_BIG, FG, (40, 30))
+        draw_hints_line(screen, f"A={t('hint_select')} | B={t('hint_return')}", FONT_SMALL, ACCENT, (40, 70))
+        
+        # List of versions
+        base_y = 110
+        item_h = 50
+        list_h = H - base_y - 40
+        visible_items = get_visible_items(list_h, item_h)
+        
+        # Auto-scroll to keep selection visible
+        if self.idx < self.scroll_offset:
+            self.scroll_offset = self.idx
+        elif self.idx >= self.scroll_offset + visible_items:
+            self.scroll_offset = self.idx - visible_items + 1
+        
+        max_scroll = max(0, len(self.versions) - visible_items)
+        self.scroll_offset = max(0, min(self.scroll_offset, max_scroll))
+        
+        # Draw version items
+        for i in range(self.scroll_offset, min(len(self.versions), self.scroll_offset + visible_items)):
+            version = self.versions[i]
+            display_idx = i - self.scroll_offset
+            y = base_y + display_idx * item_h
+            
+            rect = pygame.Rect(40, y, W - 80, item_h - 5)
+            pygame.draw.rect(screen, CARD, rect, border_radius=10)
+            
+            if i == self.idx:
+                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=10)
+            
+            draw_text(screen, f"{version['name']}", FONT, FG, (rect.x + 14, rect.y + 8))
+            draw_text(screen, f"Tag: {version['tag']}", FONT_SMALL, MUTED, (rect.x + 14, rect.y + 28))
+        
+        # Draw scroll indicators
+        if len(self.versions) > visible_items:
+            if self.scroll_offset > 0:
+                draw_text(screen, "▲ More above", FONT_SMALL, MUTED, (40, base_y - 25))
+            if self.scroll_offset + visible_items < len(self.versions):
+                draw_text(screen, "▼ More below", FONT_SMALL, MUTED, (40, H - 30))
+
+
 class ChecklistScreen(BaseScreen):
     def __init__(self, category: str, app_keys: List[str]):
         self.category = category
@@ -2938,9 +3342,9 @@ class ChecklistScreen(BaseScreen):
                 if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
                     if current_time - self.last_action_time > self.action_cooldown:
                         key = self.items[self.idx]
-                        # Special handling for Custom Wine - run directly instead of selecting
+                        # Special handling for Custom Wine - show wine type menu instead
                         if key == "Custom Wine":
-                            push_screen(RunListScreen([(key, APPS[key])], title=key))
+                            push_screen(WineTypeMenu())
                         else:
                             self.selected[key] = not self.selected[key]
                         self.last_action_time = current_time
@@ -2968,9 +3372,9 @@ class ChecklistScreen(BaseScreen):
                 if e.button in (BTN_A,):  # A
                     if current_time - self.last_action_time > self.action_cooldown:
                         key = self.items[self.idx]
-                        # Special handling for Custom Wine - run directly instead of selecting
+                        # Special handling for Custom Wine - show wine type menu instead
                         if key == "Custom Wine":
-                            push_screen(RunListScreen([(key, APPS[key])], title=key))
+                            push_screen(WineTypeMenu())
                         else:
                             self.selected[key] = not self.selected[key]
                         self.last_action_time = current_time
@@ -4238,7 +4642,7 @@ class UpdaterScreen(BaseScreen):
             return
 
         # Generate uninstall command
-        uninstall_cmd = get_uninstall_command(cmd)
+        uninstall_cmd = get_uninstall_command(cmd, app)
         if not uninstall_cmd:
             push_screen(InfoDialog(t("uninstall"), [t("uninstall_error")]))
             return
@@ -4923,6 +5327,7 @@ class ResolutionScreen(BaseScreen):
     def __init__(self):
         # Common resolution options (including CRT resolutions)
         self.options = [
+            ("Native (Borderless)", 0, 0),
             ("640x480", 640, 480),
             ("800x600", 800, 600),
             ("1024x768", 1024, 768),
@@ -4938,14 +5343,13 @@ class ResolutionScreen(BaseScreen):
             ("1920x1080", 1920, 1080),
             ("2560x1440", 2560, 1440),
             ("3840x2160", 3840, 2160),
-            ("Native", 0, 0),
         ]
         self.idx = 0
         self.scroll_offset = 0
         # Find current resolution
         current_w, current_h = W, H
         for i, (label, w, h) in enumerate(self.options):
-            if label == "Native" and not load_saved_resolution():
+            if label == "Native (Borderless)" and not load_saved_resolution():
                 self.idx = i
                 break
             elif w == current_w and h == current_h:
@@ -4989,31 +5393,31 @@ class ResolutionScreen(BaseScreen):
         label, w, h = self.options[self.idx]
 
         try:
-            if label == "Native":
-                # Remove saved resolution file to use auto-detect on next launch
+            if label == "Native (Borderless)":
+                # Remove saved resolution file to use borderless window on next launch
                 try:
                     if os.path.exists(RESOLUTION_FILE):
                         os.remove(RESOLUTION_FILE)
                 except Exception:
                     pass
-                # Use native desktop resolution
-                try:
-                    dw, dh = pygame.display.get_desktop_sizes()[0]
-                except Exception:
-                    info = pygame.display.Info()
-                    dw, dh = info.current_w, info.current_h
-                w, h = dw, dh
+                # Use native display resolution in borderless window
+                info = pygame.display.Info()
+                w, h = info.current_w, info.current_h
+
+                # Quit and reinitialize pygame display
+                pygame.display.quit()
+                pygame.display.init()
+                pygame.display.set_caption(t('main_title'))
+                screen = pygame.display.set_mode((w, h), pygame.NOFRAME)
             else:
-                # Save specific resolution
+                # Save specific resolution and use fullscreen
                 save_resolution(w, h)
 
-            # Quit pygame display to allow resolution change
-            pygame.display.quit()
-
-            # Reinitialize with new resolution
-            pygame.display.init()
-            pygame.display.set_caption(t('main_title'))
-            screen = pygame.display.set_mode((w, h), pygame.FULLSCREEN)
+                # Quit and reinitialize pygame display
+                pygame.display.quit()
+                pygame.display.init()
+                pygame.display.set_caption(t('main_title'))
+                screen = pygame.display.set_mode((w, h), pygame.FULLSCREEN)
 
             # Update globals
             W, H = screen.get_size()
@@ -5038,17 +5442,14 @@ class ResolutionScreen(BaseScreen):
         card_w = min(W - S(80), S(900))
         card_x = (W - card_w) // 2
 
-        # Show current resolution (actual W x H, not what's selected)
-        current_label = f"{W}x{H}"
-        # Check if it matches "Native" (native desktop res)
-        try:
-            dw, dh = pygame.display.get_desktop_sizes()[0]
-            if W == dw and H == dh and not load_saved_resolution():
-                current_label = "Native"
-        except Exception:
-            pass
+        # Show current resolution
+        saved_res = load_saved_resolution()
+        if saved_res:
+            current_label = f"{saved_res[0]}x{saved_res[1]}"
+        else:
+            current_label = "Native (Borderless)"
 
-        draw_text(screen, f"{t('current')}: {current_label}", FONT_SMALL, MUTED, (card_x, base_y))
+        draw_text(screen, f"{t('current')}: {current_label} ({W}x{H})", FONT_SMALL, MUTED, (card_x, base_y))
         base_y += 36
 
         # Calculate visible area
@@ -5221,19 +5622,39 @@ def play_splash_and_load():
 
     # Download and play splash video while loading
     splash_url = "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra/splash.mp4"
+    splash_file = None
 
     try:
-        print("[BUA] Downloading splash video...")
-        req = urllib.request.Request(splash_url, headers={"User-Agent": "BUA-Splash"})
-        with urllib.request.urlopen(req, timeout=10) as response:
-            splash_data = response.read()
+        # Check if cached splash exists
+        if os.path.exists(SPLASH_CACHE_FILE):
+            print("[BUA] Using cached splash video")
+            splash_file = SPLASH_CACHE_FILE
+        else:
+            # Download splash with retry logic
+            print("[BUA] Downloading splash video...")
+            splash_data = fetch_url_with_retry(
+                splash_url,
+                headers={"User-Agent": "BUA-Splash"},
+                timeout=5,
+                retries=2
+            )
 
-        # Save to temp file
-        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as f:
-            f.write(splash_data)
-            splash_file = f.name
+            # Save to cache
+            try:
+                os.makedirs(os.path.dirname(SPLASH_CACHE_FILE), exist_ok=True)
+                with open(SPLASH_CACHE_FILE, 'wb') as f:
+                    f.write(splash_data)
+                splash_file = SPLASH_CACHE_FILE
+                print(f"[BUA] Splash video cached to {SPLASH_CACHE_FILE}")
+            except Exception as e:
+                # If caching fails, use temp file
+                print(f"[BUA] Could not cache splash: {e}, using temp file")
+                with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as f:
+                    f.write(splash_data)
+                    splash_file = f.name
 
-        print(f"[BUA] Playing splash video...")
+        if splash_file:
+            print(f"[BUA] Playing splash video...")
 
         # Play video in the pygame window using cv2
         try:
@@ -5306,14 +5727,27 @@ def play_splash_and_load():
 
             loading_complete.wait()
 
-        # Clean up
-        try:
-            os.unlink(splash_file)
-        except:
-            pass
+        # Clean up temp file only (not cached file)
+        if splash_file and splash_file != SPLASH_CACHE_FILE:
+            try:
+                os.unlink(splash_file)
+            except:
+                pass
 
     except Exception as e:
-        print(f"[BUA] Could not play splash video: {e}")
+        print(f"[BUA] Could not download/play splash video: {e}")
+        print(f"[BUA] Showing loading screen fallback")
+        # Show a simple loading screen as fallback
+        try:
+            splash_screen = screen
+            splash_screen.fill((20, 24, 31))
+            font = pygame.font.Font(None, 72)
+            text = font.render("Loading...", True, (235, 242, 247))
+            text_rect = text.get_rect(center=(splash_screen.get_width() // 2, splash_screen.get_height() // 2))
+            splash_screen.blit(text, text_rect)
+            pygame.display.flip()
+        except:
+            pass
         # Just wait for loading without video
         loading_complete.wait()
 
