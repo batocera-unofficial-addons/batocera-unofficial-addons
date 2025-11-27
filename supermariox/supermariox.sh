@@ -5,9 +5,9 @@ ARCH=$(uname -m)
 
 # Set download URL based on architecture
 if [ "$ARCH" == "x86_64" ]; then
-    URL="https://wohlsoft.ru/projects/TheXTech/_downloads/releases/super-mario-bros-x-thextech-v1.3.7-linux-generic-u24.04-amd64.tar.gz"
+    URL="https://wohlsoft.ru/projects/TheXTech/_downloads/releases/super-mario-bros-x-thextech-v1.3.7.1-linux-generic-u24.04-amd64.tar.gz"
 elif [ "$ARCH" == "aarch64" ]; then
-    URL="https://wohlsoft.ru/projects/TheXTech/_downloads/releases/super-mario-bros-x-thextech-v1.3.7-linux-generic-u20.04-aarch64.tar.gz"
+    URL="https://wohlsoft.ru/projects/TheXTech/_downloads/releases/super-mario-bros-x-thextech-v1.3.7.1-linux-generic-u20.04-aarch64.tar.gz"
 else
     echo "Unsupported architecture: $ARCH"
     exit 1
