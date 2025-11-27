@@ -25,6 +25,21 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
+- Persistent Selection Queue
+App selections now persist across category navigation! You can now select apps from multiple categories and process them all in one queue.
+
+- Resolution Settings
+Runs with no resolution change by default. If a change is needed, this can be done in the resolution settings.
+
+- Improved Update System
+Faster and more reliable update checking.
+
+- Custom Wine Menu Integration
+Custom Wine version selection now integrated into the main menu with improved navigation.
+
+- Expanded Windows Freeware Category
+Added AM2R, Streets of Rage Remake, NZP, and more - now 25+ games total.
+
 - Fixed Heroic
 Applied patch to fix latest Umu release not launching games correctly.
 """.strip()

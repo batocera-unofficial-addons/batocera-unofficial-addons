@@ -25,8 +25,18 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
+- Persistent Selection Queue
+App selections now persist across category navigation! You can now select apps from multiple categories and process them all in one queue.
+
+- Resolution Settings
+Runs with no resolution change by default. If a change is needed, this can be done in the resolution settings.
+- Improved Update System
+Faster and more reliable update checking.
+
+- New Apps
+Added RunImage Desktop, NZP, RGSX, and Raspberry Pi Imager.
+
 - Brought ARM64 menu in line with x86_64 version.
-- Added new apps: RGSX, Raspberry Pi Imager.
 """.strip()
 
 # ------------------------------
