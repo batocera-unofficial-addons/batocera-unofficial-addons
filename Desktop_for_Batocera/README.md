@@ -103,6 +103,14 @@ Para que o processo de instalação tenha efeito, basta reiniciar seu batocera. 
     * **Função de atualização ativada*
     * **Corrigido configurações de atalhos padrão*
 
+* ***Atualização - 27.11.2025 - Versão 8.7.0***
+    * **Correção de Bugs*
+    * **RGSX agora inicia em tela cheia - (Correção solicitada por usuários)*
+    * **Google Chrome atualizado para a versão "stable-142.0.7444.175-1-x86_64"*
+    * **Desativado função do Sublime Text, que ao ser iniciado solicitava atualização constante*
+    * **Corrigido configurações de mimetypes - Aplicativo padrão para a execução de vídeos e músicas*
+    * **Arquivos órfãos do SM Player removido por completo*
+
 ---
 
 ## 🚀 Como utilizar?
