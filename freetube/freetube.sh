@@ -68,7 +68,7 @@ cat << EOF > "$PORT_SCRIPT"
 # Environment setup
 export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
-
+export HOME="$ADDONS_DIR/${APP_NAME,,}"
 # Directories and file paths
 app_dir="$ADDONS_DIR/${APP_NAME,,}"
 app_image="\${app_dir}/${APP_NAME,,}.AppImage"

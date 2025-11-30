@@ -126,7 +126,7 @@
 | `flathub/flathub_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `freedroidrpg/freedroidrpg.sh` | 2025-05-22 17:54:35 +0100 |
 | `freedroidrpg/freedroidrpg_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `freetube/freetube.sh` | 2025-05-22 17:54:55 +0100 |
+| `freetube/freetube.sh` | 2025-11-28 16:44:12 +0000 |
 | `freetube/freetube_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `gamescope/gamescope.sh` | 2025-05-22 17:55:20 +0100 |
 | `gparted/gparted.sh` | 2025-05-22 17:55:38 +0100 |

@@ -30,6 +30,7 @@ App selections now persist across category navigation! You can now select apps f
 
 - Resolution Settings
 Runs with no resolution change by default. If a change is needed, this can be done in the resolution settings.
+
 - Improved Update System
 Faster and more reliable update checking.
 
