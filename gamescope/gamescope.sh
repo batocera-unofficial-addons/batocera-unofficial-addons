@@ -1,33 +1,34 @@
 #!/bin/bash
+#=======================================================================
+# Special thanks to Redemp/Rion and Spirit(RGS) for providing Gamescope
+#=======================================================================
 
-# Define variables
-URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/gamescope/extra/gamescope.tar"
-DEST_DIR="/userdata/system/add-ons"
-ARCHIVE_NAME="gamescope.tar"
+set -e
 
-# Create destination directory if it doesn't exist
+GAMESCOPE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/gamescope/extra/gamescope.tar.gz"
+DEST_DIR="/userdata/system"
+TAR_PATH="${DEST_DIR}/gamescope.tar.gz"
+EXTRACT_DIR="${DEST_DIR}/gamescope"
+
+echo "== Downloading gamescope.tar.gz =="
 mkdir -p "$DEST_DIR"
 
-# Change to the destination directory
-cd "$DEST_DIR" || { echo "❌ Failed to navigate to $DEST_DIR"; exit 1; }
+wget -q --show-progress -c -O "$TAR_PATH" "$GAMESCOPE_URL"
 
-# Download the tar file
-echo "📥 Downloading $ARCHIVE_NAME..."
-wget -O "$ARCHIVE_NAME" "$URL" || { echo "❌ Failed to download $ARCHIVE_NAME"; exit 1; }
+echo "== Removing old extracted directory =="
+rm -rf "$EXTRACT_DIR"
 
-# Extract the archive (it already contains a 'gamescope/' folder)
-echo "📂 Extracting $ARCHIVE_NAME..."
-tar -xf "$ARCHIVE_NAME" || { echo "❌ Failed to extract $ARCHIVE_NAME"; exit 1; }
+echo "== Extracting archive =="
+tar -xzf "$TAR_PATH" -C "$DEST_DIR"
 
-# Verify extraction and remove the tar file
-if [ -d "$DEST_DIR/gamescope" ]; then
-    echo "🗑️ Removing $ARCHIVE_NAME..."
-    rm -f "$ARCHIVE_NAME"
-else
-    echo "⚠️ Extraction failed or folder missing, tar file not removed."
-fi
-echo "Making Gamescope executable"
-chmod +x -R /userdata/system/add-ons/gamescope
+INSTALL_SCRIPT="${EXTRACT_DIR}/install_gamescope_v42.sh"
+UNINSTALL_SCRIPT="${EXTRACT_DIR}/uninstall_gamescope_v42.sh"
 
-echo "✅ Gamescope installed successfully in $DEST_DIR/gamescope!"
+echo "== Setting executable permissions =="
+chmod +x "$INSTALL_SCRIPT"
+chmod +x "$UNINSTALL_SCRIPT"
 
+echo "== Running installer =="
+bash "$INSTALL_SCRIPT"
+
+echo "== Gamescope v42 Installed Successfully =="

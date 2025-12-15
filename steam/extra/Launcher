@@ -21,10 +21,10 @@ ulimit -H -n 819200 && ulimit -S -n 819200 && sysctl -w fs.inotify.max_user_watc
 
 if [[ "$BIG_PICTURE_MODE" == *"gamepadui"* ]] || [[ "$BIG_PICTURE_MODE" == "-gamepadui" ]]; then
   echo "Launching Steam in Big Picture Mode..."
-  /userdata/system/add-ons/steam/steam fim-exec steam -gamepadui &
+  /userdata/system/add-ons/steam/steam -gamepadui &
 else
   echo "Launching Steam in normal mode..."
-  /userdata/system/add-ons/steam/steam fim-exec steam &
+  /userdata/system/add-ons/steam/steam &
 fi
 
 echo "Steam launched. Waiting for window to appear..."

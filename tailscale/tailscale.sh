@@ -1,22 +1,22 @@
 #!/bin/bash
 export $(cat /proc/1/environ | tr '\0' '\n')
 
-# Step 1: Install Tailscale
 echo "Installing Tailscale..."
 mkdir -p /userdata/temp
 cd /userdata/temp || exit 1
 
 ARCH=$(uname -m)
 
+# Map uname -m → JSON arch key
 case "$ARCH" in
   x86_64)
-    FILE="tailscale_1.76.1_amd64.tgz"
+    TS_ARCH_KEY="amd64"
     ;;
-  armv7l)
-    FILE="tailscale_1.76.1_arm.tgz"
+  armv7l|armv6l)
+    TS_ARCH_KEY="arm"
     ;;
   aarch64)
-    FILE="tailscale_1.76.1_arm64.tgz"
+    TS_ARCH_KEY="arm64"
     ;;
   *)
     echo "Unsupported architecture: $ARCH"
@@ -24,15 +24,37 @@ case "$ARCH" in
     ;;
 esac
 
-echo "Detected architecture: $ARCH"
-echo "Downloading $FILE..."
-wget -q "https://pkgs.tailscale.com/stable/${FILE}"
+echo "Detected architecture: $ARCH ($TS_ARCH_KEY)"
+
+META_URL="https://pkgs.tailscale.com/stable/?mode=json"
+echo "Fetching metadata from $META_URL ..."
+
+JSON=$(wget -qO- "$META_URL") || {
+  echo "Failed to download version metadata."
+  exit 1
+}
+
+# Extract the tarball filename
+FILE=$(printf '%s\n' "$JSON" \
+  | grep -o "\"$TS_ARCH_KEY\" *: *\"tailscale_[^\"]*\.tgz\"" \
+  | sed 's/.*": "\(.*\)".*/\1/')
+
+if [ -z "$FILE" ]; then
+  echo "Could not parse Tailscale tarball for arch '$TS_ARCH_KEY'"
+  exit 1
+fi
+
+echo "Latest version tarball: $FILE"
+echo "Downloading..."
+wget -q "https://pkgs.tailscale.com/stable/${FILE}" || {
+  echo "Failed to download Tailscale tarball."
+  exit 1
+}
 
 echo "Extracting..."
 tar -xf "$FILE"
 DIR="${FILE%.tgz}"
 cd "$DIR" || exit 1
-
 
 mkdir -p /userdata/system/add-ons/tailscale
 

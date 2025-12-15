@@ -7,8 +7,8 @@
 | `7zip/7zip.sh` | 2025-05-22 17:09:18 +0100 |
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Android/Install_Android.sh` | 2025-11-13 23:41:52 +0000 |
-| `Desktop_for_Batocera/Install_Desktop.sh` | 2025-11-29 23:42:42 -0300 |
-| `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2025-11-27 19:40:37 -0300 |
+| `Desktop_for_Batocera/Install_Desktop.sh` | 2025-11-29 23:45:44 -0300 |
+| `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2025-11-27 19:42:58 -0300 |
 | `Freej2me/Install_j2me-old .sh` | 2025-03-29 15:06:00 -0300 |
 | `Freej2me/Install_j2me-old _uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Freej2me/Install_j2me.sh` | 2025-06-07 23:57:30 -0300 |
@@ -26,8 +26,8 @@
 | `app/BatoceraUnofficialAddons_ARM64.sh` | 2025-05-22 17:15:31 +0100 |
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2025-11-20 16:56:24 +0000 |
-| `app/bua_installerarm64.py` | 2025-11-27 22:40:36 +0000 |
-| `app/bua_installerx86.py` | 2025-11-27 22:39:15 +0000 |
+| `app/bua_installerarm64.py` | 2025-12-09 22:39:42 +0000 |
+| `app/bua_installerx86.py` | 2025-12-11 02:34:14 +0000 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -35,9 +35,9 @@
 | `app/install_arm64_new.sh` | 2025-11-20 02:19:28 +0000 |
 | `app/install_new.sh` | 2025-11-20 03:09:00 +0000 |
 | `app/install_x86.sh` | 2025-05-22 17:17:37 +0100 |
-| `app/install_x86_new.sh` | 2025-11-20 02:19:28 +0000 |
+| `app/install_x86_new.sh` | 2025-12-11 18:18:53 +0000 |
 | `app/rd.sh` | 2025-04-01 03:36:47 +0100 |
-| `app/symlinks.sh` | 2025-05-22 19:06:40 +0100 |
+| `app/symlinks.sh` | 2025-12-11 02:28:52 +0000 |
 | `app/templates/desktop_template.sh` | 2025-01-06 01:25:01 +0000 |
 | `app/templates/desktopbase.sh` | 2025-02-11 15:38:19 +0000 |
 | `app/templates/flatpak-template.sh` | 2025-11-25 15:20:38 +0000 |
@@ -128,8 +128,8 @@
 | `freedroidrpg/freedroidrpg_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `freetube/freetube.sh` | 2025-11-28 16:44:12 +0000 |
 | `freetube/freetube_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `gamescope/gamescope.sh` | 2025-05-22 17:55:20 +0100 |
-| `gparted/gparted.sh` | 2025-05-22 17:55:38 +0100 |
+| `gamescope/gamescope.sh` | 2025-12-09 23:14:24 +0000 |
+| `gparted/gparted.sh` | 2025-12-11 02:16:04 +0000 |
 | `gparted/gparted_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `greenlight/greenlight.sh` | 2025-11-13 16:16:42 +0000 |
 | `greenlight/greenlight_arm64.sh` | 2025-05-22 17:56:09 +0100 |
@@ -212,13 +212,17 @@
 | `spotify/spotify.sh` | 2025-05-22 18:13:05 +0100 |
 | `spotify/spotify_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `steam/extra/create-steam-launchers.sh` | 2025-11-21 00:52:13 +0000 |
+| `steam/extra/create-steam-launchers2.sh` | 2025-12-04 05:45:10 +0000 |
+| `steam/extra/lbfix.sh` | 2025-12-04 04:48:18 +0000 |
 | `steam/steam.sh` | 2025-11-21 01:31:43 +0000 |
+| `steam/steam2.sh` | 2025-12-05 05:11:34 +0000 |
 | `steam/steam_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `stepmania/stepmania.sh` | 2025-05-22 18:13:47 +0100 |
 | `stepmania/stepmania_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `stremio/stremio-arm64.sh` | 2025-05-22 18:14:23 +0100 |
 | `stremio/stremio-arm64_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `stremio/stremio.sh` | 2025-11-25 15:20:38 +0000 |
+| `sunshine/sunshine-arm64.sh` | 2025-12-03 01:37:34 +0000 |
 | `sunshine/sunshine.sh` | 2025-11-06 20:03:30 +0000 |
 | `sunshine/sunshine_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `supermariox/supermariox.sh` | 2025-11-27 22:20:19 +0000 |
@@ -229,7 +233,7 @@
 | `supertuxkart/supertuxkart_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `switch/switch.sh` | 2025-03-27 18:37:52 +0000 |
 | `switch/switch_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `tailscale/tailscale.sh` | 2025-11-25 23:13:18 +0000 |
+| `tailscale/tailscale.sh` | 2025-12-11 19:39:06 +0000 |
 | `tailscale/tailscale_uninstall.sh` | 2025-11-25 23:13:18 +0000 |
 | `telegraf/telegraf.sh` | 2025-11-25 23:13:18 +0000 |
 | `telegraf/telegraf_uninstall.sh` | 2025-11-25 23:13:18 +0000 |

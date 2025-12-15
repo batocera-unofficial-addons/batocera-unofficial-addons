@@ -2,7 +2,7 @@
 
 # Define variables
 APPNAME="GParted"
-REPO_BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/gparted/extra/"
+REPO_BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/"
 AMD_SUFFIX="gparted.AppImage"
 ARM_SUFFIX=""
 ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/gparted/extra/icon.png"
