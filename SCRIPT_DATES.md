@@ -7,8 +7,8 @@
 | `7zip/7zip.sh` | 2025-05-22 17:09:18 +0100 |
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Android/Install_Android.sh` | 2025-11-13 23:41:52 +0000 |
-| `Desktop_for_Batocera/Install_Desktop.sh` | 2025-11-29 23:45:44 -0300 |
-| `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2025-11-27 19:42:58 -0300 |
+| `Desktop_for_Batocera/Install_Desktop.sh` | 2025-11-29 23:42:42 -0300 |
+| `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2025-11-27 19:40:37 -0300 |
 | `Freej2me/Install_j2me-old .sh` | 2025-03-29 15:06:00 -0300 |
 | `Freej2me/Install_j2me-old _uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Freej2me/Install_j2me.sh` | 2025-06-07 23:57:30 -0300 |
