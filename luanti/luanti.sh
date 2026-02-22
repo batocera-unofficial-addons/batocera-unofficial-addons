@@ -3,8 +3,8 @@
 # Variables to update for different apps
 APP_NAME="Luanti"
 REPO="rollerozxa/luanti-appimage"
-AMD_SUFFIX=".AppImage"
-ARM_SUFFIX=""
+AMD_SUFFIX="-x86_64.AppImage"
+ARM_SUFFIX="-aarch64.AppImage"
 LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/luanti/extra/luanti-logo.jpg"
 
 # -----------------------------------------------------------------------------------------------------------------
