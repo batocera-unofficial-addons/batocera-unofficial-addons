@@ -571,6 +571,7 @@ APPS: Dict[str, str] = {
     "FreeTube": bua("freetube/freetube.sh"),
     "Greenlight": bua("greenlight/greenlight_arm64.sh"),
     "IPTV Nator": bua("iptvnator/iptvnator.sh"),
+    "Luanti": bua("luanti/luanti.sh"),
     "Minecraft": bua("minecraft/bedrock.sh"),
     "Nazi Zombies Portable": bua("nzp/nzp.sh"),
     "PortMaster": bua("portmaster/portmaster.sh"),
@@ -615,6 +616,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "FreeTube": "Privacy-minded YouTube client",
     "Greenlight": "Client for xCloud and Xbox streaming.",
     "IPTV Nator": "IPTV client for watching live TV.",
+    "Luanti": "Voxel sandbox (Minecraft-like)",
     "Minecraft": "Minecraft: Bedrock Edition.",
     "Nazi Zombies Portable": "Classic Nazi Zombies on modern platforms",
     "PortMaster": "Download and manage games on handhelds.",
@@ -642,7 +644,7 @@ DESCRIPTIONS: Dict[str, str] = {
 
 CATEGORIES: Dict[str, List[str]] = {
     "Games": [
-        "Minecraft", "Super Mario X", "SuperTuxKart", "Celeste 64", "Nazi Zombies Portable"
+        "Luanti", "Minecraft", "Super Mario X", "SuperTuxKart", "Celeste 64", "Nazi Zombies Portable"
     ],
     "Game Utilities": [
         "PortMaster", "Chiaki", "Greenlight", "Amazon Luna", "RGSX"
