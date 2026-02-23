@@ -76,6 +76,12 @@ mkdir -p /userdata/system/configs/emulationstation
 wget --show-progress -qO "/userdata/system/configs/emulationstation/es_systems_steam.cfg" "${SCRIPTS_BASE_URL}/es_systems_steam.cfg"
 wget --show-progress -qO "/userdata/system/configs/emulationstation/es_features_steam.cfg" "${SCRIPTS_BASE_URL}/es_features_steam.cfg"
 
+# Use sh emulator so .sh launchers run through configgen (enables videomode, etc.)
+BATOCERA_CONF="/userdata/system/batocera.conf"
+sed -i '/^steam\.emulator=/d; /^steam\.core=/d' "$BATOCERA_CONF" 2>/dev/null || true
+echo "steam.emulator=sh" >> "$BATOCERA_CONF"
+echo "steam.core=sh" >> "$BATOCERA_CONF"
+
 echo "Downloading icon..."
 wget --show-progress -qO "${INSTALL_DIR}/extra/icon.png" "$ICON_URL"
 
