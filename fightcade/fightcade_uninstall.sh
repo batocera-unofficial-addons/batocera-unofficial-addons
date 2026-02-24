@@ -8,6 +8,12 @@ echo "Uninstalling: FIGHTCADE"
 echo "========================================="
 echo ""
 
+# Remove wine symlink if it points to our install
+if [ -L "/usr/bin/wine" ] && [ "$(readlink /usr/bin/wine)" = "/userdata/system/add-ons/fightcade/usr/bin/wine" ]; then
+    echo "Removing wine symlink: /usr/bin/wine"
+    rm -f "/usr/bin/wine"
+fi
+
 # Remove installed files
 if [ -f "/userdata/roms/ports/Fightcade.sh" ]; then
     echo "Removing file: /userdata/roms/ports/Fightcade.sh"

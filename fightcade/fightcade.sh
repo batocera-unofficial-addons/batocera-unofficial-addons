@@ -119,6 +119,19 @@ fi
 # Make sym_wine.sh executable
 chmod +x "$SYM_WINE_SCRIPT"
 
+# Create wine.sh wrapper — the fcade binary invokes this at ../../Resources/wine.sh
+# relative to the emulator directory
+RESOURCES_DIR="$ADDONS_DIR/${APP_NAME,,}/Resources"
+mkdir -p "$RESOURCES_DIR"
+cat > "$RESOURCES_DIR/wine.sh" << WINESH
+#!/bin/sh
+export WINEPREFIX="$ADDONS_DIR/${APP_NAME,,}/.wine"
+export WINEDEBUG=-all
+$ADDONS_DIR/${APP_NAME,,}/usr/bin/wine "\$@"
+WINESH
+chmod +x "$RESOURCES_DIR/wine.sh"
+echo "Created wine.sh wrapper in $RESOURCES_DIR."
+
 # Define the emulator directory
 EMULATOR_DIR="$ADDONS_DIR/${APP_NAME,,}/${APP_NAME}/emulator"
 cd "$EMULATOR_DIR"
@@ -169,7 +182,7 @@ cat << EOF > "$PORT_SCRIPT"
 # Environment setup
 export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
-export HOME=${ADDONS_DIR}/${APP_NAME,,}
+export HOME=$ADDONS_DIR/${APP_NAME,,}
 
 # Directories and file paths
 app_dir="$ADDONS_DIR/${APP_NAME,,}/${APP_NAME}"
@@ -183,12 +196,41 @@ mkdir -p "\${log_dir}"
 exec &> >(tee -a "\$log_file")
 echo "\$(date): Launching $APP_NAME"
 
-${ADDONS_DIR}/${APP_NAME,,}/extra/sym_wine.sh &
+# Batocera lacks xdg-open/xdg-mime — fc2-electron needs xdg-open to dispatch
+# fcade:// URLs for game launch. Create a shim that routes to upstream fcade.sh.
+mkdir -p "\${HOME}/bin"
+cat > "\${HOME}/bin/xdg-open" << 'XDGOPEN'
+#!/bin/bash
+case "\$1" in
+    fcade://*)
+        $ADDONS_DIR/${APP_NAME,,}/${APP_NAME}/emulator/fcade.sh "\$1"
+        ;;
+    *)
+        echo "xdg-open: no handler for: \$1" >&2
+        ;;
+esac
+XDGOPEN
+chmod +x "\${HOME}/bin/xdg-open"
+export PATH="\${HOME}/bin:\${PATH}"
 
-if [ -x "\${app_dir}/Fightcade2.sh" ]; then
+# Initialize Wine prefix before starting sym_wine.sh — wineboot blocks and
+# would otherwise prevent fc2-electron from starting before sym_wine.sh's
+# 10-second monitoring check.
+export WINEPREFIX="\${HOME}/.wine"
+export WINEDEBUG=-all
+if [ ! -d "\${WINEPREFIX}" ]; then
+    echo "Initializing Wine prefix at \${WINEPREFIX}..."
+    $ADDONS_DIR/${APP_NAME,,}/usr/bin/wine wineboot -u 2>/dev/null
+    echo "Wine prefix initialized."
+fi
+
+# Start wine symlink manager (creates /usr/bin/wine, monitors fc2-electron)
+$ADDONS_DIR/${APP_NAME,,}/extra/sym_wine.sh &
+
+if [ -x "\${app_dir}/${APP_NAME}2.sh" ]; then
     cd "\${app_dir}"
-    ./Fightcade2.sh
-    echo "$APP_NAME exited."
+    ./${APP_NAME}2.sh
+    echo "$APP_NAME launched."
 else
     echo "$APP_NAME not found or not executable."
     exit 1
