@@ -2,6 +2,7 @@
 export DISPLAY=:0.0
 export RIM_ALLOW_ROOT=1
 export HOME=/userdata/system/add-ons/steam
+export XAUTHORITY=/var/run/xauth
 
 # Check if Big Picture mode is requested
 BIG_PICTURE_MODE="$1"
@@ -46,7 +47,7 @@ ELAPSED=0
 STEAM_FOUND=0
 
 while [ $ELAPSED -lt $TIMEOUT ]; do
-  if wmctrl -l | grep -qi "Steam"; then
+  if wmctrl -l | grep -qiE "Steam|Big.Picture|Big-Picture"; then
     STEAM_FOUND=1
     break
   fi
@@ -62,7 +63,7 @@ fi
 echo "Steam window detected. Monitoring until it closes..."
 
 # Monitor - wait until Steam window disappears
-while wmctrl -l | grep -qi "Steam"; do
+while wmctrl -l | grep -qiE "Steam|Big.Picture|Big-Picture"; do
   sleep 2
 done
 
