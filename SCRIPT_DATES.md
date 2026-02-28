@@ -213,9 +213,10 @@
 | `spotify/spotify_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `steam/extra/create-steam-launchers.sh` | 2026-02-23 14:58:19 +0100 |
 | `steam/extra/create-steam-launchers2.sh` | 2026-02-23 14:58:19 +0100 |
+| `steam/extra/ensure_steam_batocera_conf.sh` | 2026-02-27 01:55:33 -0700 |
 | `steam/extra/lbfix.sh` | 2025-12-04 04:48:18 +0000 |
-| `steam/steam.sh` | 2026-02-23 08:31:57 -0700 |
-| `steam/steam2.sh` | 2026-02-26 00:00:44 -0700 |
+| `steam/steam.sh` | 2026-02-27 01:55:33 -0700 |
+| `steam/steam2.sh` | 2026-02-27 01:55:33 -0700 |
 | `steam/steam_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `stepmania/stepmania.sh` | 2025-05-22 18:13:47 +0100 |
 | `stepmania/stepmania_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
