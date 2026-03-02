@@ -182,6 +182,7 @@ cat << EOF > "$PORT_SCRIPT"
 # Environment setup
 export \$(cat /proc/1/environ | tr '\0' '\n')
 export DISPLAY=:0.0
+export LD_LIBRARY_PATH="$ADDONS_DIR/.dep:\${LD_LIBRARY_PATH}"
 export HOME=$ADDONS_DIR/${APP_NAME,,}
 
 # Directories and file paths
