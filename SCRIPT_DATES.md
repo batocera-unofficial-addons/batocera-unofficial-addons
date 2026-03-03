@@ -113,7 +113,7 @@
 | `f1/f1-1_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `f1/f1-old1.sh` | 2025-06-21 01:30:01 -0300 |
 | `f1/f1.sh` | 2025-06-21 01:34:47 -0300 |
-| `fightcade/fightcade.sh` | 2026-02-25 11:59:39 -0700 |
+| `fightcade/fightcade.sh` | 2026-03-02 00:29:40 -0700 |
 | `fightcade/fightcade_uninstall.sh` | 2026-02-25 11:59:39 -0700 |
 | `fightcade/sym_wine.sh` | 2025-01-13 02:20:54 +0000 |
 | `filezilla/filezilla.sh` | 2025-05-22 17:53:05 +0100 |
