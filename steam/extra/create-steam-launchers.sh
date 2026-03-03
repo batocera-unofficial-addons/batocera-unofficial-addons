@@ -122,7 +122,7 @@ KEYS
     # Download Steam header image if it doesn't exist
     if [[ ! -f "$img_file" ]]; then
       echo "Downloading image for: $name (AppID: $appid)"
-      if curl -s -f "https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg" -o "$img_file"; then
+      if curl -s -L -f "https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg" -o "$img_file"; then
         echo "  ✓ Image downloaded successfully"
       else
         echo "  ✗ Image not available"

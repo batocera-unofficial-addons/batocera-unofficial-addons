@@ -67,14 +67,22 @@ echo "Downloading Steam helper scripts..."
 SCRIPTS_BASE_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/steam/extra"
 wget --show-progress -qO "/userdata/system/add-ons/steam/Launcher" "${SCRIPTS_BASE_URL}/Launcher"
 wget --show-progress -qO "/userdata/system/add-ons/steam/create-steam-launchers.sh" "${SCRIPTS_BASE_URL}/create-steam-launchers.sh"
+wget --show-progress -qO "/userdata/system/add-ons/steam/extra/ensure_steam_batocera_conf.sh" "${SCRIPTS_BASE_URL}/ensure_steam_batocera_conf.sh"
 
 chmod +x /userdata/system/add-ons/steam/Launcher
 chmod +x /userdata/system/add-ons/steam/create-steam-launchers.sh
+chmod +x /userdata/system/add-ons/steam/extra/ensure_steam_batocera_conf.sh
 
 echo "Downloading EmulationStation config..."
 mkdir -p /userdata/system/configs/emulationstation
 wget --show-progress -qO "/userdata/system/configs/emulationstation/es_systems_steam.cfg" "${SCRIPTS_BASE_URL}/es_systems_steam.cfg"
 wget --show-progress -qO "/userdata/system/configs/emulationstation/es_features_steam.cfg" "${SCRIPTS_BASE_URL}/es_features_steam.cfg"
+
+# Use sh emulator so .sh launchers run through configgen (enables videomode, etc.)
+BATOCERA_CONF="/userdata/system/batocera.conf"
+sed -i '/^steam\.emulator=/d; /^steam\.core=/d' "$BATOCERA_CONF" 2>/dev/null || true
+echo "steam.emulator=sh" >> "$BATOCERA_CONF"
+echo "steam.core=sh" >> "$BATOCERA_CONF"
 
 echo "Downloading icon..."
 wget --show-progress -qO "${INSTALL_DIR}/extra/icon.png" "$ICON_URL"
@@ -115,9 +123,13 @@ chmod +x "/userdata/system/configs/steam/restore_desktop_entry.sh"
 
 # Add to startup script
 custom_startup="/userdata/system/custom.sh"
-if ! grep -q "/userdata/system/configs/steam/restore_desktop_entry.sh" "$custom_startup"; then
+if ! grep -q "/userdata/system/configs/steam/restore_desktop_entry.sh" "$custom_startup" 2>/dev/null; then
     echo "Adding Steam restore script to startup..."
     echo "bash \"/userdata/system/configs/steam/restore_desktop_entry.sh\" &" >> "$custom_startup"
+fi
+if ! grep -q "ensure_steam_batocera_conf.sh" "$custom_startup" 2>/dev/null; then
+    echo "Adding Steam batocera.conf ensure to startup..."
+    echo "bash \"/userdata/system/add-ons/steam/extra/ensure_steam_batocera_conf.sh\" &" >> "$custom_startup"
 fi
 chmod +x "$custom_startup"
 

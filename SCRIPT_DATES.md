@@ -26,7 +26,7 @@
 | `app/BatoceraUnofficialAddons_ARM64.sh` | 2025-05-22 17:15:31 +0100 |
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2025-11-20 16:56:24 +0000 |
-| `app/bua_installerarm64.py` | 2025-12-09 22:39:42 +0000 |
+| `app/bua_installerarm64.py` | 2026-02-23 14:59:57 +0100 |
 | `app/bua_installerx86.py` | 2025-12-11 02:34:14 +0000 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
@@ -158,7 +158,7 @@
 | `jdownloader/jdownloader.sh` | 2025-11-25 16:18:33 +0000 |
 | `jdownloader/jdownloader_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `librewolf/librewolf.sh` | 2025-05-22 17:59:45 +0100 |
-| `luanti/luanti.sh` | 2025-05-22 18:00:14 +0100 |
+| `luanti/luanti.sh` | 2026-02-23 14:59:57 +0100 |
 | `luanti/luanti_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `lutris/lutris.sh` | 2025-11-20 16:56:24 +0000 |
 | `lutris/lutris_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -211,11 +211,12 @@
 | `soar/soar_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `spotify/spotify.sh` | 2025-05-22 18:13:05 +0100 |
 | `spotify/spotify_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `steam/extra/create-steam-launchers.sh` | 2025-11-21 00:52:13 +0000 |
-| `steam/extra/create-steam-launchers2.sh` | 2025-12-04 05:45:10 +0000 |
+| `steam/extra/create-steam-launchers.sh` | 2026-02-23 14:58:19 +0100 |
+| `steam/extra/create-steam-launchers2.sh` | 2026-02-23 14:58:19 +0100 |
+| `steam/extra/ensure_steam_batocera_conf.sh` | 2026-02-27 01:55:33 -0700 |
 | `steam/extra/lbfix.sh` | 2025-12-04 04:48:18 +0000 |
-| `steam/steam.sh` | 2025-11-21 01:31:43 +0000 |
-| `steam/steam2.sh` | 2025-12-05 05:11:34 +0000 |
+| `steam/steam.sh` | 2026-02-27 01:55:33 -0700 |
+| `steam/steam2.sh` | 2026-02-27 01:55:33 -0700 |
 | `steam/steam_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `stepmania/stepmania.sh` | 2025-05-22 18:13:47 +0100 |
 | `stepmania/stepmania_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -229,7 +230,7 @@
 | `supermariox/supermariox_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `supertux/supertux.sh` | 2025-05-22 18:16:20 +0100 |
 | `supertux/supertux_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `supertuxkart/supertuxkart.sh` | 2025-05-22 18:17:01 +0100 |
+| `supertuxkart/supertuxkart.sh` | 2026-02-23 14:58:42 +0100 |
 | `supertuxkart/supertuxkart_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `switch/switch.sh` | 2025-03-27 18:37:52 +0000 |
 | `switch/switch_uninstall.sh` | 2025-11-13 17:23:41 +0000 |

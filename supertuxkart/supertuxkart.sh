@@ -4,8 +4,8 @@
 APP_NAME="SuperTuxKart"
 
 # URLs for different architectures
-ARCH_X86_64="https://github.com/supertuxkart/stk-code/releases/download/1.4/SuperTuxKart-1.4-linux-x86_64.tar.xz"
-ARCH_ARM64="https://github.com/supertuxkart/stk-code/releases/download/1.4/SuperTuxKart-1.4-linux-arm64.tar.xz"
+ARCH_X86_64="https://github.com/supertuxkart/stk-code/releases/download/1.5/SuperTuxKart-1.5-linux-x86_64.tar.gz"
+ARCH_ARM64="https://github.com/supertuxkart/stk-code/releases/download/1.5/SuperTuxKart-1.5-linux-arm64.tar.gz"
 
 LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/supertuxkart/extra/supertuxkart-logo.png"
 
@@ -37,15 +37,15 @@ mkdir -p "$LOGS_DIR"
 
 # Step 2: Download and extract SuperTuxKart
 echo "Downloading $APP_NAME for architecture $ARCH..."
-wget -q --show-progress -O "${TUX_DIR}/SuperTuxKart.tar.xz" "$ARCHIVE_URL"
+wget -q --show-progress -O "${TUX_DIR}/SuperTuxKart.tar.gz" "$ARCHIVE_URL"
 if [ $? -ne 0 ]; then
     echo "Failed to download $APP_NAME. Exiting."
     exit 1
 fi
 
 echo "Extracting $APP_NAME..."
-tar --strip-components=1 -xf "${TUX_DIR}/SuperTuxKart.tar.xz" -C "$TUX_DIR"
-rm "${TUX_DIR}/SuperTuxKart.tar.xz"
+tar --strip-components=1 -xf "${TUX_DIR}/SuperTuxKart.tar.gz" -C "$TUX_DIR"
+rm "${TUX_DIR}/SuperTuxKart.tar.gz"
 chmod -R a+x "$TUX_DIR"
 echo "$APP_NAME extracted to $TUX_DIR."
 
