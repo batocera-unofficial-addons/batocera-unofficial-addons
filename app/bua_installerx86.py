@@ -25,8 +25,10 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
-- New Steam build!
-Brand new Steam build available, auto-migrate from the old build, should work 100x better than the last.
+- Fixed all Steam issues (That I'm aware of).
+Fixed Vulkan on Nvidia GPUs
+Fixed Ryzen iGPU crash
+Fixed laptop dedicated graphics
 """.strip()
 
 # ------------------------------
