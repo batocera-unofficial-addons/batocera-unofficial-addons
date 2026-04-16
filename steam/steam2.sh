@@ -80,10 +80,15 @@ wget --show-progress -qO "/userdata/system/add-ons/steam/create-steam-launchers.
 wget --show-progress -qO "/userdata/system/add-ons/steam/lbfix.sh" "${SCRIPTS_BASE_URL}/lbfix.sh"
 wget --show-progress -qO "/userdata/system/add-ons/steam/extra/ensure_steam_batocera_conf.sh" "${SCRIPTS_BASE_URL}/ensure_steam_batocera_conf.sh"
 
+wget --show-progress -qO "/userdata/system/add-ons/steam/extra/add-non-steam-game.py" "${SCRIPTS_BASE_URL}/add-non-steam-game.py"
+wget --show-progress -qO "/userdata/system/add-ons/steam/extra/force-exit-non-steam-game.sh" "${SCRIPTS_BASE_URL}/force-exit-non-steam-game.sh"
+
 chmod +x /userdata/system/add-ons/steam/Launcher
 chmod +x /userdata/system/add-ons/steam/create-steam-launchers.sh
 chmod +x /userdata/system/add-ons/steam/lbfix.sh
 chmod +x /userdata/system/add-ons/steam/extra/ensure_steam_batocera_conf.sh
+chmod +x /userdata/system/add-ons/steam/extra/add-non-steam-game.py
+chmod +x /userdata/system/add-ons/steam/extra/force-exit-non-steam-game.sh
 
 echo "Downloading EmulationStation config..."
 mkdir -p /userdata/system/configs/emulationstation
@@ -173,6 +178,49 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "Steam Big Picture" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/steamlogo.jpg" \
   /userdata/roms/ports/gamelist.xml > /userdata/roms/steam/gamelist.xml.tmp && mv /userdata/roms/steam/gamelist.xml.tmp /userdata/roms/steam/gamelist.xml
+
+# Create Add Non-Steam Games app in ES > Steam
+echo "Creating Add Non-Steam Games app..."
+cat <<'EOF' > /userdata/roms/steam/Add_Non-Steam_Games.sh
+#!/bin/bash
+# Pygame UI — reads controller directly, no evmapy/focus issues
+export HOME=/root
+export DISPLAY=:0.0
+python3 /userdata/system/add-ons/steam/extra/add-non-steam-game.py
+# Force display restore before script exits (ES running but not visible after Cancel)
+xrandr -display :0.0 --output DP-1 --mode 641x480 2>/dev/null || true
+EOF
+chmod +x /userdata/roms/steam/Add_Non-Steam_Games.sh
+
+# Download Add Non-Steam Games artwork and .keys (evmapy injects Left/Right/Enter for toggle)
+echo "Downloading Add Non-Steam Games artwork..."
+ADD_NON_STEAM_BASE="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/steam/extra"
+curl -sL -o /tmp/Add_Non-Steam_Games.sh.keys "${ADD_NON_STEAM_BASE}/Add_Non-Steam_Games.sh.keys"
+[ -s /tmp/Add_Non-Steam_Games.sh.keys ] && mv /tmp/Add_Non-Steam_Games.sh.keys /userdata/roms/steam/Add_Non-Steam_Games.sh.keys
+rm -f /tmp/Add_Non-Steam_Games.sh.keys
+curl -sL -o /userdata/roms/steam/images/add-non-steam-games.jpg "${ADD_NON_STEAM_BASE}/add-non-steam-games.jpg"
+curl -sL -o /userdata/roms/steam/images/add-non-steam-games-marquee.png "${ADD_NON_STEAM_BASE}/add-non-steam-games-marquee.png"
+curl -sL -o /userdata/roms/steam/images/add-non-steam-games-thumb.png "${ADD_NON_STEAM_BASE}/add-non-steam-games-thumb.png"
+
+# Add gamelist entry for the app
+if ! grep -q "Add_Non-Steam_Games.sh" /userdata/roms/steam/gamelist.xml 2>/dev/null; then
+  sed -i '/<\/gameList>/d' /userdata/roms/steam/gamelist.xml
+  cat >> /userdata/roms/steam/gamelist.xml <<'XMLENTRY'
+  <game>
+    <path>./Add_Non-Steam_Games.sh</path>
+    <name>Add Non-Steam Games</name>
+    <desc>Scan for Windows games and add them to EmulationStation with Proton.</desc>
+    <image>./images/add-non-steam-games.jpg</image>
+    <marquee>./images/add-non-steam-games-marquee.png</marquee>
+    <thumbnail>./images/add-non-steam-games-thumb.png</thumbnail>
+    <genre>Utilities</genre>
+    <lang>en</lang>
+  </game>
+</gameList>
+XMLENTRY
+fi
+
+mkdir -p /userdata/system/add-ons/steam/non-steam-games
 
 curl http://127.0.0.1:1234/reloadgames
 
