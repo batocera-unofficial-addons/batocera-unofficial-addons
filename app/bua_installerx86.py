@@ -31,6 +31,8 @@ Fixed Ryzen iGPU crash
 Fixed laptop dedicated graphics
 
 NOW WITH ADDED NON-STEAM GAME LAUNCHER SUPPORT! If you updated since the above, go ahead and update again :)
+
+Updated again 17 Apr 2026 11:59 UTC - Steam black screen fix.
 """.strip()
 
 # ------------------------------
