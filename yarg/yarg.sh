@@ -47,12 +47,21 @@ mkdir -p "/userdata/system/configs/yarg" "${INSTALL_DIR}/extra"
 echo "Downloading icon..."
 wget -q --show-progress -O "${INSTALL_DIR}/extra/icon.png" "$ICON_URL"
 
+cat > "${INSTALL_DIR}/yarg-launcher.sh" << 'EOF'
+#!/bin/bash
+export DISPLAY=:0.0
+export HOME=/userdata/system/add-ons/yarg
+cd /userdata/system/add-ons/yarg
+./yarg-launcher.AppImage
+EOF
+chmod +x "${INSTALL_DIR}/yarg-launcher.sh"
+
 cat > "$PERSISTENT_DESKTOP" << EOF
 [Desktop Entry]
 Version=1.0
 Type=Application
 Name=YARC Launcher
-Exec=/userdata/system/add-ons/yarg/yarg-launcher.AppImage
+Exec=/userdata/system/add-ons/yarg/yarg-launcher.sh
 Icon=/userdata/system/add-ons/yarg/extra/icon.png
 Terminal=false
 Categories=Game;batocera.linux;
