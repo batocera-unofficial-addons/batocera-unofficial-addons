@@ -29,6 +29,8 @@ CHANGELOG = """
 Fixed Vulkan on Nvidia GPUs
 Fixed Ryzen iGPU crash
 Fixed laptop dedicated graphics
+
+NOW WITH ADDED NON-STEAM GAME LAUNCHER SUPPORT! If you updated since the above, go ahead and update again :)
 """.strip()
 
 # ------------------------------
