@@ -1,6 +1,5 @@
 #!/bin/bash
 export DISPLAY=:0.0
-export XAUTHORITY=/var/run/xauth
 export RIM_ALLOW_ROOT=1
 export HOME=/userdata/system/add-ons/steam
 
