@@ -3,7 +3,7 @@
 # Variables specific to AssaultCube
 APP_NAME="AssaultCube"
 LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/assaultcube/extra/assaultcube-logo.png"
-FILE_URL="https://github.com/assaultcube/AC/releases/download/v1.3.0.2/AssaultCube_v1.3.0.2_LockdownEdition_RC1.tar.bz2"
+FILE_URL=$(curl -s https://api.github.com/repos/assaultcube/AC/releases/latest | grep '"browser_download_url"' | grep '\.tar\.bz2' | cut -d'"' -f4)
 
 ADDONS_DIR="/userdata/system/add-ons"
 PORTS_DIR="/userdata/roms/ports"

@@ -3,7 +3,8 @@
 # Variables specific to Ambermoon
 APP_NAME="Ambermoon"
 LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/ambermoon/extra/ambermoon-logo.png"
-FILE_URL="https://github.com/Pyrdacor/Ambermoon.net/releases/download/v1.10.4/Ambermoon.net-Linux.tar.gz"
+LATEST=$(curl -s https://api.github.com/repos/Pyrdacor/Ambermoon.net/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+FILE_URL="https://github.com/Pyrdacor/Ambermoon.net/releases/download/${LATEST}/Ambermoon.net-Linux.tar.gz"
 
 ADDONS_DIR="/userdata/system/add-ons"
 PORTS_DIR="/userdata/roms/ports"

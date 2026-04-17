@@ -4,8 +4,9 @@
 APP_NAME="SuperTuxKart"
 
 # URLs for different architectures
-ARCH_X86_64="https://github.com/supertuxkart/stk-code/releases/download/1.5/SuperTuxKart-1.5-linux-x86_64.tar.gz"
-ARCH_ARM64="https://github.com/supertuxkart/stk-code/releases/download/1.5/SuperTuxKart-1.5-linux-arm64.tar.gz"
+LATEST=$(curl -s https://api.github.com/repos/supertuxkart/stk-code/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+ARCH_X86_64="https://github.com/supertuxkart/stk-code/releases/download/${LATEST}/SuperTuxKart-${LATEST}-linux-x86_64.tar.gz"
+ARCH_ARM64="https://github.com/supertuxkart/stk-code/releases/download/${LATEST}/SuperTuxKart-${LATEST}-linux-arm64.tar.gz"
 
 LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/supertuxkart/extra/supertuxkart-logo.png"
 

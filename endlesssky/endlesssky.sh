@@ -4,9 +4,10 @@
 echo "Detecting system architecture..."
 arch=$(uname -m)
 
+LATEST=$(curl -s https://api.github.com/repos/endless-sky/endless-sky/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url="https://github.com/endless-sky/endless-sky/releases/download/v0.10.10/Endless_Sky-v0.10.10-x86_64.AppImage"
+    appimage_url="https://github.com/endless-sky/endless-sky/releases/download/${LATEST}/Endless_Sky-${LATEST}-x86_64.AppImage"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
