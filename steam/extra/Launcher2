@@ -77,9 +77,6 @@ if [[ -f "$LIB_FIX" ]]; then
   echo "Lib Fix running with PID: $LIB_PID"
 fi
 
-# Hide EmulationStation while Steam runs
-wmctrl -r EmulationStation -b add,hidden 2>/dev/null || true
-
 # Launch Steam in background
 ulimit -H -n 819200 && ulimit -S -n 819200 && sysctl -w fs.inotify.max_user_watches=8192000 vm.max_map_count=2147483642 fs.file-max=8192000 >/dev/null 2>&1
 
@@ -99,7 +96,7 @@ ELAPSED=0
 STEAM_FOUND=0
 
 while [ $ELAPSED -lt $TIMEOUT ]; do
-  if wmctrl -l | grep -qiE "Steam|Big.Picture|Big-Picture"; then
+  if wmctrl -l | grep -qi "Steam"; then
     STEAM_FOUND=1
     break
   fi
@@ -114,12 +111,8 @@ fi
 
 echo "Steam window detected. Monitoring until it closes..."
 
-# Bring Steam to foreground fullscreen
-wmctrl -r "Big-Picture" -b add,fullscreen 2>/dev/null || true
-wmctrl -a "Big-Picture" 2>/dev/null || true
-
 # Monitor - wait until Steam window disappears
-while wmctrl -l | grep -qiE "Steam|Big.Picture|Big-Picture"; do
+while wmctrl -l | grep -qi "Steam"; do
   sleep 2
 done
 

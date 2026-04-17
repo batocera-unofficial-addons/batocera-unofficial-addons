@@ -162,7 +162,7 @@
 | `luanti/luanti_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `lutris/lutris.sh` | 2025-11-20 16:56:24 +0000 |
 | `lutris/lutris_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `minecraft/bedrock.sh` | 2026-04-17 13:32:27 +0000 |
+| `minecraft/bedrock.sh` | 2026-04-17 14:32:22 +0100 |
 | `minecraft/bedrock_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `minecraft/minecraft.sh` | 2025-11-29 19:30:30 +0000 |
 | `minecraft/minecraft_2.sh` | 2025-05-22 18:02:00 +0100 |
@@ -309,7 +309,7 @@
 | `x11vnc/x11vnc_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `xonotic/xonotic.sh` | 2025-05-22 13:05:59 -0400 |
 | `xonotic/xonotic_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `yarg/yarg.sh` | 2025-05-22 13:04:41 -0400 |
+| `yarg/yarg.sh` | 2026-04-17 14:55:40 +0100 |
 | `yarg/yarg_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `youtubetv/youtubetv.sh` | 2025-05-22 13:04:00 -0400 |
 | `youtubetv/youtubetv_uninstall.sh` | 2025-11-13 20:06:15 +0000 |
