@@ -123,16 +123,6 @@ while wmctrl -l | grep -qiE "Steam|Big.Picture|Big-Picture"; do
   sleep 2
 done
 
-# Grace period: Steam may be restarting after a self-update
-echo "Steam window gone. Waiting 20s in case of self-restart..."
-sleep 20
-if wmctrl -l | grep -qiE "Steam|Big.Picture|Big-Picture"; then
-  echo "Steam window reappeared (self-restart detected). Resuming monitor..."
-  while wmctrl -l | grep -qiE "Steam|Big.Picture|Big-Picture"; do
-    sleep 2
-  done
-fi
-
 echo "Steam window closed."
 
 # Kill the launcher generator first
