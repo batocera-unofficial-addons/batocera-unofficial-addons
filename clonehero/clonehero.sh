@@ -3,7 +3,8 @@
 
 # Define app information
 APPNAME="CloneHero"
-APPLINK="https://github.com/clonehero-game/releases/releases/download/v1.1.0.4261-PTB/clonehero-linux.tar.xz"
+LATEST=$(curl -s https://api.github.com/repos/clonehero-game/releases/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+APPLINK="https://github.com/clonehero-game/releases/releases/download/${LATEST}/clonehero-linux.tar.xz"
 APPDIR="/userdata/system/add-ons/${APPNAME,,}"
 
 # Define launcher command

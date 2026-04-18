@@ -25,8 +25,14 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
-- New Steam build!
-Brand new Steam build available, auto-migrate from the old build, should work 100x better than the last.
+- Fixed all Steam issues (That I'm aware of).
+Fixed Vulkan on Nvidia GPUs
+Fixed Ryzen iGPU crash
+Fixed laptop dedicated graphics
+
+NOW WITH ADDED NON-STEAM GAME LAUNCHER SUPPORT! If you updated since the above, go ahead and update again :)
+
+Updated again 17 Apr 2026 11:59 UTC - Steam black screen fix.
 """.strip()
 
 # ------------------------------

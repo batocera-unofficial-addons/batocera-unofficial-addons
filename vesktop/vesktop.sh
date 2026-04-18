@@ -4,12 +4,13 @@
 echo "Detecting system architecture..."
 arch=$(uname -m)
 
+LATEST=$(curl -s https://api.github.com/repos/Vencord/Vesktop/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url="https://github.com/Vencord/Vesktop/releases/download/v1.5.4/Vesktop-1.5.4.AppImage"
+    appimage_url="https://github.com/Vencord/Vesktop/releases/download/${LATEST}/Vesktop-${LATEST#v}.AppImage"
 elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: arm64 detected."
-    appimage_url="https://github.com/Vencord/Vesktop/releases/download/v1.5.4/Vesktop-1.5.4-arm64.AppImage"
+    appimage_url="https://github.com/Vencord/Vesktop/releases/download/${LATEST}/Vesktop-${LATEST#v}-arm64.AppImage"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1

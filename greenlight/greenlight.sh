@@ -4,9 +4,10 @@
 echo "Detecting system architecture..."
 arch=$(uname -m)
 
+LATEST=$(curl -s https://api.github.com/repos/unknownskl/greenlight/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    app_url="https://github.com/unknownskl/greenlight/releases/download/v2.3.3/Greenlight-2.3.3.AppImage"
+    app_url="https://github.com/unknownskl/greenlight/releases/download/${LATEST}/Greenlight-${LATEST#v}.AppImage"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1

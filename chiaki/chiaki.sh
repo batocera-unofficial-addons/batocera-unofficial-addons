@@ -4,12 +4,13 @@
 echo "Detecting system architecture..."
 arch=$(uname -m)
 
+LATEST=$(curl -s https://api.github.com/repos/streetpea/chiaki-ng/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url="https://github.com/streetpea/chiaki-ng/releases/download/v1.9.3/chiaki-ng.AppImage_x86_64"
+    appimage_url="https://github.com/streetpea/chiaki-ng/releases/download/${LATEST}/chiaki-ng.AppImage_x86_64"
 elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: ARM64 detected."
-    appimage_url="https://github.com/streetpea/chiaki-ng/releases/download/v1.9.3/chiaki-ng.AppImage_arm64"
+    appimage_url="https://github.com/streetpea/chiaki-ng/releases/download/${LATEST}/chiaki-ng.AppImage_arm64"
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1

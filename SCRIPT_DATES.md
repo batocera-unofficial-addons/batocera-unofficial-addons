@@ -18,7 +18,7 @@
 | `amazonluna/amazonluna-arm64.sh` | 2025-05-22 17:11:10 +0100 |
 | `amazonluna/amazonluna.sh` | 2025-05-22 17:10:51 +0100 |
 | `amazonluna/amazonluna_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `ambermoon/ambermoon.sh` | 2025-05-22 17:14:44 +0100 |
+| `ambermoon/ambermoon.sh` | 2026-04-17 14:03:29 +0100 |
 | `ambermoon/ambermoon_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `app/BUA.sh` | 2025-11-20 02:19:28 +0000 |
 | `app/BUA_arm64.sh` | 2025-11-20 02:19:28 +0000 |
@@ -27,7 +27,7 @@
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/bua_installerarm64.py` | 2026-02-23 14:59:57 +0100 |
-| `app/bua_installerx86.py` | 2025-12-11 02:34:14 +0000 |
+| `app/bua_installerx86.py` | 2026-04-17 12:59:48 +0100 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -50,7 +50,7 @@
 | `arcademanager/arcademanager_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `armagetron/armagetron.sh` | 2025-05-22 17:19:36 +0100 |
 | `armagetron/armagetron_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `assaultcube/assaultcube.sh` | 2025-11-11 02:37:55 +0000 |
+| `assaultcube/assaultcube.sh` | 2026-04-17 14:03:29 +0100 |
 | `assaultcube/assaultcube_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `bottles/bottles.sh` | 2025-11-25 15:20:38 +0000 |
 | `bottles/bottles_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -60,11 +60,11 @@
 | `bridge/bridge_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `celeste64/celeste64.sh` | 2025-02-13 17:51:43 +0000 |
 | `celeste64/celeste64_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `chiaki/chiaki.sh` | 2025-05-22 17:23:43 +0100 |
+| `chiaki/chiaki.sh` | 2026-04-17 14:03:29 +0100 |
 | `chiaki/chiaki_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `chrome/chrome.sh` | 2025-05-22 17:24:09 +0100 |
 | `chrome/chrome_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `clonehero/clonehero.sh` | 2025-05-22 17:24:35 +0100 |
+| `clonehero/clonehero.sh` | 2026-04-17 14:03:29 +0100 |
 | `clonehero/clonehero_uninstall.sh` | 2025-11-13 20:06:15 +0000 |
 | `conty/conty.sh` | 2024-12-25 18:14:14 +0000 |
 | `conty/conty_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -103,7 +103,7 @@
 | `docker/umbrelos.sh` | 2025-05-22 17:42:21 +0100 |
 | `docker/umbrelos_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `eggnoggplus/eggnoggplus.sh` | 2025-11-25 02:39:23 +0000 |
-| `endlesssky/endlesssky.sh` | 2025-05-22 17:43:35 +0100 |
+| `endlesssky/endlesssky.sh` | 2026-04-17 14:03:29 +0100 |
 | `endlesssky/endlesssky_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `everest/everest.sh` | 2025-11-25 15:20:38 +0000 |
 | `everest/everest_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -111,8 +111,8 @@
 | `extra/extras_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `f1/f1-1.sh` | 2025-06-21 01:08:51 -0300 |
 | `f1/f1-1_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `f1/f1-old1.sh` | 2025-06-21 01:27:22 -0300 |
-| `f1/f1.sh` | 2025-06-21 01:34:22 -0300 |
+| `f1/f1-old1.sh` | 2025-06-21 01:30:01 -0300 |
+| `f1/f1.sh` | 2025-06-21 01:34:47 -0300 |
 | `fightcade/fightcade.sh` | 2026-03-02 00:29:40 -0700 |
 | `fightcade/fightcade_uninstall.sh` | 2026-02-25 11:59:39 -0700 |
 | `fightcade/sym_wine.sh` | 2025-01-13 02:20:54 +0000 |
@@ -131,7 +131,7 @@
 | `gamescope/gamescope.sh` | 2025-12-09 23:14:24 +0000 |
 | `gparted/gparted.sh` | 2025-12-11 02:16:04 +0000 |
 | `gparted/gparted_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `greenlight/greenlight.sh` | 2025-11-13 16:16:42 +0000 |
+| `greenlight/greenlight.sh` | 2026-04-17 14:03:29 +0100 |
 | `greenlight/greenlight_arm64.sh` | 2025-05-22 17:56:09 +0100 |
 | `greenlight/greenlight_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `hbomax/hbomax.sh` | 2025-05-22 17:56:30 +0100 |
@@ -162,7 +162,7 @@
 | `luanti/luanti_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `lutris/lutris.sh` | 2025-11-20 16:56:24 +0000 |
 | `lutris/lutris_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `minecraft/bedrock.sh` | 2025-11-27 00:07:08 +0000 |
+| `minecraft/bedrock.sh` | 2026-04-17 14:32:22 +0100 |
 | `minecraft/bedrock_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `minecraft/minecraft.sh` | 2025-11-29 19:30:30 +0000 |
 | `minecraft/minecraft_2.sh` | 2025-05-22 18:02:00 +0100 |
@@ -196,7 +196,7 @@
 | `portmaster/portmaster_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `prime/prime.sh` | 2025-05-22 18:08:16 +0100 |
 | `prime/prime_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `qbittorrent/qbittorrent.sh` | 2025-01-08 05:15:02 +0000 |
+| `qbittorrent/qbittorrent.sh` | 2026-04-17 14:03:29 +0100 |
 | `qbittorrent/qbittorrent_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `qga/qemu-ga_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `qga/qga.sh` | 2025-05-22 18:10:40 +0100 |
@@ -212,11 +212,11 @@
 | `spotify/spotify.sh` | 2025-05-22 18:13:05 +0100 |
 | `spotify/spotify_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `steam/extra/create-steam-launchers.sh` | 2026-02-23 14:58:19 +0100 |
-| `steam/extra/create-steam-launchers2.sh` | 2026-02-23 14:58:19 +0100 |
+| `steam/extra/create-steam-launchers2.sh` | 2026-04-17 03:16:03 +0100 |
 | `steam/extra/ensure_steam_batocera_conf.sh` | 2026-02-27 01:55:33 -0700 |
 | `steam/extra/lbfix.sh` | 2025-12-04 04:48:18 +0000 |
 | `steam/steam.sh` | 2026-02-27 01:55:33 -0700 |
-| `steam/steam2.sh` | 2026-02-27 01:55:33 -0700 |
+| `steam/steam2.sh` | 2026-04-17 03:16:54 +0100 |
 | `steam/steam_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `stepmania/stepmania.sh` | 2025-05-22 18:13:47 +0100 |
 | `stepmania/stepmania_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -230,7 +230,7 @@
 | `supermariox/supermariox_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `supertux/supertux.sh` | 2025-05-22 18:16:20 +0100 |
 | `supertux/supertux_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `supertuxkart/supertuxkart.sh` | 2026-02-23 14:58:42 +0100 |
+| `supertuxkart/supertuxkart.sh` | 2026-04-17 14:03:29 +0100 |
 | `supertuxkart/supertuxkart_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `switch/switch.sh` | 2025-03-27 18:37:52 +0000 |
 | `switch/switch_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -247,7 +247,7 @@
 | `v40wine/v40wine.sh` | 2025-05-22 18:19:02 +0100 |
 | `vclean/vclean.sh` | 2025-11-13 21:54:58 +0000 |
 | `vclean/vclean_uninstall.sh` | 2025-11-13 22:29:18 +0000 |
-| `vesktop/vesktop.sh` | 2025-05-22 18:19:23 +0100 |
+| `vesktop/vesktop.sh` | 2026-04-17 14:03:29 +0100 |
 | `vesktop/vesktop_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `vlc/vlc.sh` | 2025-05-22 18:20:34 +0100 |
 | `warzone2100/warzone2100.sh` | 2025-05-22 18:20:52 +0100 |
@@ -309,7 +309,7 @@
 | `x11vnc/x11vnc_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `xonotic/xonotic.sh` | 2025-05-22 13:05:59 -0400 |
 | `xonotic/xonotic_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `yarg/yarg.sh` | 2025-05-22 13:04:41 -0400 |
+| `yarg/yarg.sh` | 2026-04-17 14:55:40 +0100 |
 | `yarg/yarg_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `youtubetv/youtubetv.sh` | 2025-05-22 13:04:00 -0400 |
 | `youtubetv/youtubetv_uninstall.sh` | 2025-11-13 20:06:15 +0000 |

@@ -4,7 +4,8 @@
 
 # App Info
 APPNAME="qBittorrent"
-APPLINK="https://github.com/c0re100/qBittorrent-Enhanced-Edition/releases/download/release-5.0.3.10/qBittorrent-Enhanced-Edition-x86_64.AppImage"
+LATEST=$(curl -s https://api.github.com/repos/c0re100/qBittorrent-Enhanced-Edition/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+APPLINK="https://github.com/c0re100/qBittorrent-Enhanced-Edition/releases/download/${LATEST}/qBittorrent-Enhanced-Edition-x86_64.AppImage"
 APPHOME="c0re100/qBittorrent-Enhanced-Edition"
 APPPATH="/userdata/system/add-ons/qbittorrent/qbittorrent.AppImage"
 ICON="https://e7.pngegg.com/pngimages/380/378/png-clipart-qbittorrent-comparison-of-bittorrent-clients-others-blue-trademark.png"

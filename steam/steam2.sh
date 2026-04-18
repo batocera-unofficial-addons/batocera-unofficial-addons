@@ -176,7 +176,8 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
 
 curl http://127.0.0.1:1234/reloadgames
 
-echo
-echo "Installation complete! You can now launch Steam from the F1 Applications menu and Steam Big Picture Mode from the Ports menu."
+dialog --title "Steam Installed" --msgbox \
+"Steam has been installed!\n\nLaunch Steam from the F1 Applications menu, or Big Picture Mode from the Ports menu.\n\n--- Non-Steam Game Artwork ---\nTo enable automatic name and artwork lookup for non-Steam shortcuts, get a free API key at:\n  steamgriddb.com/profile/preferences/api\n\nThen save it to:\n  /userdata/system/add-ons/steam/steamgriddb.key" \
+18 65
 # Finish
 killall -9 emulationstation
