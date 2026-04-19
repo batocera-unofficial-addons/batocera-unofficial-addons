@@ -64,7 +64,7 @@
 | `chiaki/chiaki_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `chrome/chrome.sh` | 2025-05-22 17:24:09 +0100 |
 | `chrome/chrome_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `clonehero/clonehero.sh` | 2026-04-17 14:03:29 +0100 |
+| `clonehero/clonehero.sh` | 2026-04-19 18:28:53 +0000 |
 | `clonehero/clonehero_uninstall.sh` | 2025-11-13 20:06:15 +0000 |
 | `conty/conty.sh` | 2024-12-25 18:14:14 +0000 |
 | `conty/conty_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
