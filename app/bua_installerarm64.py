@@ -25,19 +25,7 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
-- Persistent Selection Queue
-App selections now persist across category navigation! You can now select apps from multiple categories and process them all in one queue.
-
-- Resolution Settings
-Runs with no resolution change by default. If a change is needed, this can be done in the resolution settings.
-
-- Improved Update System
-Faster and more reliable update checking.
-
-- New Apps
-Added RunImage Desktop, NZP, RGSX, and Raspberry Pi Imager.
-
-- Brought ARM64 menu in line with x86_64 version.
+- Added Jellyfin Player - native media player client with controller support
 """.strip()
 
 # ------------------------------
@@ -569,6 +557,7 @@ APPS: Dict[str, str] = {
     "F1": bua("f1/f1.sh"),
     "Firefox": bua("firefox/firefox-arm64.sh"),
     "FreeTube": bua("freetube/freetube.sh"),
+    "Jellyfin Player": bua("jellyfin-client/jellyfin-client.sh"),
     "Greenlight": bua("greenlight/greenlight_arm64.sh"),
     "IPTV Nator": bua("iptvnator/iptvnator.sh"),
     "Luanti": bua("luanti/luanti.sh"),
@@ -614,6 +603,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "F1": "Ports shortcut to file manager",
     "Firefox": "Mozilla Firefox browser.",
     "FreeTube": "Privacy-minded YouTube client",
+    "Jellyfin Player": "Jellyfin media player client with controller support",
     "Greenlight": "Client for xCloud and Xbox streaming.",
     "IPTV Nator": "IPTV client for watching live TV.",
     "Luanti": "Voxel sandbox (Minecraft-like)",
@@ -651,7 +641,8 @@ CATEGORIES: Dict[str, List[str]] = {
     ],
     "System Utilities": [
         "Tailscale", "Telegraf", "Vesktop", "IPTV Nator", "FreeTube",
-        "F1", "Firefox", "Desktop (Docker)", "RunImage Desktop", "Raspberry Pi Imager"
+        "Jellyfin Player", "F1", "Firefox", "Desktop (Docker)", "RunImage Desktop",
+        "Raspberry Pi Imager"
     ],
     "Developer Tools": [
         "Conty", "Docker", "Soar", "WayVNC", "WayVNC Headless", "Dark Mode", "VClean"

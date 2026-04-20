@@ -26,8 +26,8 @@
 | `app/BatoceraUnofficialAddons_ARM64.sh` | 2025-05-22 17:15:31 +0100 |
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2025-11-20 16:56:24 +0000 |
-| `app/bua_installerarm64.py` | 2026-02-23 14:59:57 +0100 |
-| `app/bua_installerx86.py` | 2026-04-17 12:59:48 +0100 |
+| `app/bua_installerarm64.py` | 2026-04-20 02:12:16 +0000 |
+| `app/bua_installerx86.py` | 2026-04-20 02:12:16 +0000 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -64,7 +64,7 @@
 | `chiaki/chiaki_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `chrome/chrome.sh` | 2025-05-22 17:24:09 +0100 |
 | `chrome/chrome_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `clonehero/clonehero.sh` | 2026-04-19 18:28:53 +0000 |
+| `clonehero/clonehero.sh` | 2026-04-19 19:28:51 +0100 |
 | `clonehero/clonehero_uninstall.sh` | 2025-11-13 20:06:15 +0000 |
 | `conty/conty.sh` | 2024-12-25 18:14:14 +0000 |
 | `conty/conty_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -157,6 +157,8 @@
 | `java/jre_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `jdownloader/jdownloader.sh` | 2025-11-25 16:18:33 +0000 |
 | `jdownloader/jdownloader_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `jellyfin-client/jellyfin-client.sh` | 2026-04-20 02:12:20 +0000 |
+| `jellyfin-client/jellyfin-client_uninstall.sh` | 2026-04-20 02:12:20 +0000 |
 | `librewolf/librewolf.sh` | 2025-05-22 17:59:45 +0100 |
 | `luanti/luanti.sh` | 2026-02-23 14:59:57 +0100 |
 | `luanti/luanti_uninstall.sh` | 2025-11-13 17:23:41 +0000 |

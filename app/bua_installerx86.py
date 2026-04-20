@@ -25,14 +25,8 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
-- Fixed all Steam issues (That I'm aware of).
-Fixed Vulkan on Nvidia GPUs
-Fixed Ryzen iGPU crash
-Fixed laptop dedicated graphics
-
-NOW WITH ADDED NON-STEAM GAME LAUNCHER SUPPORT! If you updated since the above, go ahead and update again :)
-
-Updated again 17 Apr 2026 11:59 UTC - Steam black screen fix.
+- Steam fixes and improvements
+- Added Jellyfin Player - native media player client with controller support
 """.strip()
 
 # ------------------------------
@@ -588,6 +582,7 @@ APPS: Dict[str, str] = {
     "IPTV Nator": bua("iptvnator/iptvnator.sh"),
     "Input Leap": bua("inputleap/inputleap.sh"),
     "Itch.io": bua("itchio/itch.sh"),
+    "Jellyfin Player": bua("jellyfin-client/jellyfin-client.sh"),
     "JDownloader": bua("jdownloader/jdownloader.sh"),
     "Java Runtime": bua("java/java.sh"),
     "Minecraft": bua("minecraft/minecraft.sh"),
@@ -835,6 +830,7 @@ DESCRIPTIONS.update({
     "Ubuntu MATE (Webtop)": "Ubuntu MATE desktop in browser (noVNC)",
     "Alpine XFCE (Webtop)": "Alpine XFCE desktop in browser (noVNC)",
     "Jellyfin": "Open-source media server",
+    "Jellyfin Player": "Jellyfin media player client with controller support",
     "Emby": "Media server and streaming",
     "Arr-In-One": "All-in-one media management stack",
     "Arr-In-One Downloaders": "Downloaders companion stack",
@@ -898,8 +894,8 @@ CATEGORIES: Dict[str, List[str]] = {
         "Input Leap", "IPTV Nator", "Firefox", "Spotify", "Arcade Manager", "Brave",
         "OpenRGB", "OBS", "Stremio", "Disney Plus", "Twitch", "7zip", "qBittorrent",
         "GParted", "Plex", "HBO Max", "Prime Video", "Crunchyroll",
-        "Mubi", "Tidal", "FreeTube", "FileZilla", "PeaZip", "Desktop", "Flathub",
-        "JDownloader", "Raspberry Pi Imager"
+        "Mubi", "Tidal", "FreeTube", "Jellyfin Player", "FileZilla", "PeaZip",
+        "Desktop", "Flathub", "JDownloader", "Raspberry Pi Imager"
     ],
     "Developer Tools": [
         "NVIDIA Patcher", "Conty", "CLI Tools", "NVIDIA Clocker", "Docker",
