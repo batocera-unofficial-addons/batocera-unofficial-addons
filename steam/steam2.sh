@@ -45,16 +45,10 @@ fi
 ########################################
 
 steam_file="/userdata/system/add-ons/steam/steam"
-size_limit=1000000000   # 1GB (adjust as needed)
 
-# Remove only if file exists AND is larger than limit
-if [ -f "$steam_file" ] && [ "$(stat -c '%s' "$steam_file")" -gt "$size_limit" ]; then
-    echo "Existing file too large — deleting"
-    rm -f "$steam_file"
-fi
-
-# Resume or redownload
-wget -q -c --show-progress -O "$steam_file" "$appimage_url/steam.AppImage"
+# Always replace — ensures new version is downloaded cleanly
+rm -f "$steam_file"
+wget -q --show-progress -O "$steam_file" "$appimage_url/steam.AppImage"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download Steam."

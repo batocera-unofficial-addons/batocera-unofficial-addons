@@ -27,6 +27,7 @@ import hashlib
 CHANGELOG = """
 - Steam fixes and improvements
 - Added Jellyfin Player - native media player client with controller support
+- Steam installer now always downloads a fresh copy, fixing stale version issues
 """.strip()
 
 # ------------------------------
