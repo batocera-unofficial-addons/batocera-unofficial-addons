@@ -25,6 +25,7 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
+- Steam: game launchers now auto-detect dedicated GPU and apply Nvidia Vulkan fixes (delete /userdata/roms/steam/*.sh and relaunch Steam to regenerate)
 - Steam fixes and improvements
 - Added Jellyfin Player - native media player client with controller support
 - Steam installer now always downloads a fresh copy, fixing stale version issues
