@@ -27,7 +27,7 @@
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/bua_installerarm64.py` | 2026-04-20 03:12:15 +0100 |
-| `app/bua_installerx86.py` | 2026-04-20 22:33:37 +0000 |
+| `app/bua_installerx86.py` | 2026-04-20 23:33:36 +0100 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -218,7 +218,7 @@
 | `steam/extra/ensure_steam_batocera_conf.sh` | 2026-02-27 01:55:33 -0700 |
 | `steam/extra/lbfix.sh` | 2025-12-04 04:48:18 +0000 |
 | `steam/steam.sh` | 2026-02-27 01:55:33 -0700 |
-| `steam/steam2.sh` | 2026-04-20 22:33:42 +0000 |
+| `steam/steam2.sh` | 2026-04-20 23:33:36 +0100 |
 | `steam/steam_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `stepmania/stepmania.sh` | 2025-05-22 18:13:47 +0100 |
 | `stepmania/stepmania_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
