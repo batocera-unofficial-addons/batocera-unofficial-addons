@@ -27,8 +27,7 @@
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/bua_installerarm64.py` | 2026-04-20 03:12:15 +0100 |
-| `app/bua_installerx86.py` | 2026-04-20 23:33:36 +0100 |
-| `app/bua_installerx86.py` | 2026-04-21 19:04:34 +0000 |
+| `app/bua_installerx86.py` | 2026-04-21 20:04:33 +0100 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -151,7 +150,7 @@
 | `iptvnator/iptvnator_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `itchio/itch-old.sh` | 2025-06-06 18:34:39 -0300 |
 | `itchio/itch-old_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `itchio/itch.sh` | 2025-11-25 15:20:38 +0000 |
+| `itchio/itch.sh` | 2026-04-21 16:00:36 +0200 |
 | `java/java - Copia.sh` | 2025-01-07 22:20:11 -0300 |
 | `java/java-jdk19.sh` | 2025-11-13 23:41:52 +0000 |
 | `java/java.sh` | 2025-05-22 17:58:43 +0100 |
@@ -215,12 +214,11 @@
 | `spotify/spotify.sh` | 2025-05-22 18:13:05 +0100 |
 | `spotify/spotify_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `steam/extra/create-steam-launchers.sh` | 2026-02-23 14:58:19 +0100 |
-| `steam/extra/create-steam-launchers2.sh` | 2026-04-21 19:04:39 +0000 |
+| `steam/extra/create-steam-launchers2.sh` | 2026-04-21 20:04:33 +0100 |
 | `steam/extra/ensure_steam_batocera_conf.sh` | 2026-02-27 01:55:33 -0700 |
 | `steam/extra/lbfix.sh` | 2025-12-04 04:48:18 +0000 |
 | `steam/steam.sh` | 2026-02-27 01:55:33 -0700 |
-| `steam/steam2.sh` | 2026-04-20 23:33:36 +0100 |
-| `steam/steam2.sh` | 2026-04-21 19:04:39 +0000 |
+| `steam/steam2.sh` | 2026-04-21 20:04:33 +0100 |
 | `steam/steam_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `stepmania/stepmania.sh` | 2025-05-22 18:13:47 +0100 |
 | `stepmania/stepmania_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
