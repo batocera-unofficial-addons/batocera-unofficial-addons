@@ -3970,8 +3970,13 @@ class RunListScreen(BaseScreen):
         dialog_wrap = ""
         if not os.environ.get("BUA_DISABLE_DIALOG_WRAP"):
             dialog_wrap = (
+                # Save original stderr to fd9 before any script redirections can change fd2.
+                # This ensures __BUA_DIALOG__ markers always reach BUA's pipe even when
+                # scripts use fd-swapping patterns like '3>&1 1>&2 2>&3' or '2>&1 >/dev/tty'
+                # (as used by foclabroc's newswitch.sh for language/mode selection).
+                "exec 9>&2; "
                 "function dialog(){ "
-                "echo '[BUA] Dialog called with:' \"$@\" >&2; "
+                "echo '[BUA] Dialog called with:' \"$@\" >&9; "
                 "local dtype=\"\" title=\"\" text=\"\" menu_items=\"\"; "
                 "local next_title=0 next_text=0 skip_count=0 skip_backtitle=0; "
                 "for arg in \"$@\"; do "
@@ -3995,20 +4000,20 @@ class RunListScreen(BaseScreen):
                 "  esac; "
                 "done; "
                 "if [ -n \"$dtype\" ]; then "
-                "  echo '[BUA] Detected dtype:' \"$dtype\" 'title:' \"$title\" >&2; "
-                "  echo '[BUA] Menu items:' \"$menu_items\" >&2; "
+                "  echo '[BUA] Detected dtype:' \"$dtype\" 'title:' \"$title\" >&9; "
+                "  echo '[BUA] Menu items:' \"$menu_items\" >&9; "
                 "  local resp_file=\"/tmp/bua_dialog_$$.resp\"; rm -f \"$resp_file\"; "
                 "  if command -v base64 >/dev/null 2>&1; then "
                 "    t_b64=$(printf %s \"$title\" | base64 -w0 2>/dev/null || printf %s \"$title\" | base64); "
                 "    m_b64=$(printf %s \"$text\" | base64 -w0 2>/dev/null || printf %s \"$text\" | base64); "
                 "    i_b64=$(printf %s \"$menu_items\" | base64 -w0 2>/dev/null || printf %s \"$menu_items\" | base64); "
-                "    echo '[BUA] Emitting marker with resp file:' \"$resp_file\" >&2; "
-                "    echo __BUA_DIALOG__ type=$dtype title_b64=$t_b64 text_b64=$m_b64 items_b64=$i_b64 resp=$resp_file >&2; "
+                "    echo '[BUA] Emitting marker with resp file:' \"$resp_file\" >&9; "
+                "    echo __BUA_DIALOG__ type=$dtype title_b64=$t_b64 text_b64=$m_b64 items_b64=$i_b64 resp=$resp_file >&9; "
                 "  else "
-                "    echo __BUA_DIALOG__ type=$dtype title=\"$title\" text=\"$text\" items=\"$menu_items\" resp=$resp_file >&2; "
+                "    echo __BUA_DIALOG__ type=$dtype title=\"$title\" text=\"$text\" items=\"$menu_items\" resp=$resp_file >&9; "
                 "  fi; "
                 "  if [ \"$dtype\" = \"infobox\" ]; then "
-                "    echo '[BUA] Infobox - continuing immediately' >&2; "
+                "    echo '[BUA] Infobox - continuing immediately' >&9; "
                 "    echo 0 > \"$resp_file\"; sleep 0.05; rm -f \"$resp_file\"; return 0; "
                 "  fi; "
                 "  while [ ! -f \"$resp_file\" ]; do sleep 0.1; done; "
@@ -4016,7 +4021,9 @@ class RunListScreen(BaseScreen):
                 "  if [ \"$dtype\" = \"yesno\" ]; then "
                 "    if [ \"$result\" = \"0\" ]; then return 0; else return 1; fi; "
                 "  elif [ \"$dtype\" = \"menu\" ] || [ \"$dtype\" = \"checklist\" ]; then "
-                "    if [ -n \"$result\" ]; then echo \"$result\"; return 0; else return 1; fi; "
+                # Echo result to both fd1 and fd2: fd1 handles normal $() capture,
+                # fd2 handles the swapped 3>&1 1>&2 2>&3 pattern used by foclabroc.
+                "    if [ -n \"$result\" ]; then echo \"$result\"; echo \"$result\" >&2; return 0; else return 1; fi; "
                 "  else "
                 "    return 0; "
                 "  fi; "
