@@ -10,6 +10,9 @@ import json
 import base64
 import io
 import re
+import pty
+import fcntl
+import termios
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 import urllib.request
@@ -2159,14 +2162,27 @@ class Runner:
         # Add 'wait' to ensure all background processes finish
         full_cmd = f"({cmd}); wait"
 
+        # Create a PTY so the subprocess has a controlling terminal.
+        # Scripts like foclabroc's newswitch.sh redirect to /dev/tty, which
+        # requires a controlling terminal — without one bash errors with
+        # "No such device or address".
+        master_fd, slave_fd = pty.openpty()
+
+        def set_controlling_tty():
+            os.setsid()
+            fcntl.ioctl(slave_fd, termios.TIOCSCTTY, 0)
+
         self.proc = subprocess.Popen(
             ["bash", "-c", full_cmd],
-            stdin=subprocess.PIPE,
+            stdin=slave_fd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
+            preexec_fn=set_controlling_tty,
             text=True,
             bufsize=1,
         )
+        os.close(slave_fd)
+        self._pty_master = master_fd  # keep open so slave doesn't get SIGHUP
         def reader():
             assert self.proc and self.proc.stdout
             output_lines = []
@@ -2178,6 +2194,10 @@ class Runner:
             self.returncode = self.proc.returncode
             # Store last 10 lines for error display
             self.error_output = "\n".join(output_lines[-10:])
+            try:
+                os.close(self._pty_master)
+            except Exception:
+                pass
             self.done = True
         t = threading.Thread(target=reader, daemon=True)
         t.start()
