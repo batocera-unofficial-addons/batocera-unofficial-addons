@@ -6,6 +6,7 @@ REPO_BASE_URL="https://web.fightcade.com/download/"
 AMD_SUFFIX="Fightcade-linux-latest.tar.gz"
 ARM_SUFFIX=""
 LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/fightcade/extra/fightcade-logo.png"
+KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/fightcade/extra/Fightcade.sh.keys"
 SYM_WINE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/fightcade/sym_wine.sh"
 # Directories
 ADDONS_DIR="/userdata/system/add-ons"
@@ -239,6 +240,7 @@ fi
 EOF
 
 chmod +x "$PORT_SCRIPT"
+curl -L -o "$PORTS_DIR/Fightcade.sh.keys" "$KEYS_URL"
 
 # Step 4: Refresh the Ports menu
 echo "Refreshing Ports menu..."
