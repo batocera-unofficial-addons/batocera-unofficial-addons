@@ -1,0 +1,73 @@
+{
+    "actions_player1": [
+        {
+            "trigger": "up",
+            "type": "key",
+            "target": "KEY_UP"
+        },
+        {
+            "trigger": "down",
+            "type": "key",
+            "target": "KEY_DOWN"
+        },
+        {
+            "trigger": "left",
+            "type": "key",
+            "target": "KEY_LEFT"
+        },
+        {
+            "trigger": "right",
+            "type": "key",
+            "target": "KEY_RIGHT"
+        },
+        {
+            "trigger": "start",
+            "type": "key",
+            "target": "KEY_1"
+        },
+        {
+            "trigger": "select",
+            "type": "key",
+            "target": "KEY_5"
+        },
+        {
+            "trigger": "a",
+            "type": "key",
+            "target": "KEY_Z"
+        },
+        {
+            "trigger": "b",
+            "type": "key",
+            "target": "KEY_C"
+        },
+        {
+            "trigger": "x",
+            "type": "key",
+            "target": "KEY_A"
+        },
+        {
+            "trigger": "y",
+            "type": "key",
+            "target": "KEY_S"
+        },
+        {
+            "trigger": "pageup",
+            "type": "key",
+            "target": "KEY_X"
+        },
+        {
+            "trigger": "pagedown",
+            "type": "key",
+            "target": "KEY_D"
+        },
+        {
+            "trigger": "joystick2",
+            "type": "mouse"
+        },
+        {
+            "trigger": "r3",
+            "type": "key",
+            "target": "BTN_LEFT"
+        }
+    ]
+}
