@@ -329,6 +329,16 @@ chmod +x /userdata/system/services/desktop
 batocera-services enable desktop
 batocera-services start desktop
 
+# Reapply palette icons after update (service must be running for paths to resolve)
+if [ "$IS_UPDATE" -eq 1 ] && [ -f "$PALETTE_FILE" ]; then
+    PALETTE_NAME=$(cat "$PALETTE_FILE" | tr -d '[:space:]')
+    ICONS_SRC="/usr/share/desktop-palettes/icons/palettes/$PALETTE_NAME"
+    if [ -d "$ICONS_SRC" ]; then
+        echo "Reapplying palette icons ($PALETTE_NAME)..."
+        cp "$ICONS_SRC"/* /usr/share/icons/batocera/ 2>/dev/null || true
+    fi
+fi
+
 echo ""
 if [ "$IS_UPDATE" -eq 1 ]; then
     echo "Update complete."
