@@ -31,6 +31,13 @@ if [ -f "$DRL_REMOVER" ]; then
         function yad() { return 0; }; export -f yad
         bash "$DRL_REMOVER"
         unset -f yad
+
+        echo "Cleaning up DRL remnants..."
+        rm -rf /userdata/system/Desktop
+        rm -rf /userdata/system/configs/bat-drl/Desktop
+        rm -rf /userdata/system/configs/bat-drl/tint2
+        rm -rf /userdata/system/add-ons/desktop_drl
+        rm -f /userdata/system/services/desktop_drl
     else
         echo "Installation cancelled."
         exit 0
