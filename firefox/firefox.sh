@@ -6,7 +6,7 @@ arch=$(uname -m)
 
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url=$(curl -s https://api.github.com/repos/srevinsaju/Firefox-Appimage/releases/latest | jq -r ".assets[] | select(.name | endswith(\"x86_64.AppImage\")) | .browser_download_url")
+    appimage_url=$(curl -s https://api.github.com/repos/srevinsaju/Firefox-AppImage/releases/tags/firefox-nightly | jq -r ".assets[] | select(.name | endswith(\"x86_64.AppImage\")) | .browser_download_url")
 else
     echo "Unsupported architecture: $arch. Exiting."
     exit 1

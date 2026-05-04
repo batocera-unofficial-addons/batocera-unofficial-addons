@@ -38,10 +38,29 @@ if [ -f "$DRL_REMOVER" ]; then
         rm -rf /userdata/system/configs/bat-drl/tint2
         rm -rf /userdata/system/add-ons/desktop_drl
         rm -f /userdata/system/services/desktop_drl
+        rm -f /userdata/system/.config/tint2/tint2rc
+        rm -rf /userdata/system/.config/jgmenu
     else
         echo "Installation cancelled."
         exit 0
     fi
+fi
+
+# Detect existing install — back up customisations before updating
+BACKUP_DIR="$TEMP_DIR/backup"
+IS_UPDATE=0
+if [ -d "$ADDON_DIR/rootfs" ]; then
+    IS_UPDATE=1
+    echo "Existing install detected — backing up customisations..."
+    mkdir -p "$BACKUP_DIR"
+    [ -d /userdata/system/Desktop ]             && cp -r /userdata/system/Desktop             "$BACKUP_DIR/Desktop"
+    [ -f /userdata/system/.config/tint2/tint2rc ] && cp /userdata/system/.config/tint2/tint2rc "$BACKUP_DIR/tint2rc"
+    [ -d /userdata/system/.config/jgmenu ]      && cp -r /userdata/system/.config/jgmenu      "$BACKUP_DIR/jgmenu"
+    PALETTE_FILE="/userdata/system/add-ons/desktop/config/Desktop/theme/current.palette"
+    [ -f "$PALETTE_FILE" ] && cp "$PALETTE_FILE" "$BACKUP_DIR/current.palette"
+
+    echo "Stopping desktop service..."
+    batocera-services stop desktop
 fi
 
 # Create temp directories
@@ -80,6 +99,15 @@ done
 if [ -d "$EXTRACT_DIR/icons" ]; then
     echo "Installing icon packs..."
     cp -r "$EXTRACT_DIR/icons" "$ADDON_DIR/"
+fi
+
+# Restore customisations if updating
+if [ "$IS_UPDATE" -eq 1 ]; then
+    echo "Restoring customisations..."
+    [ -d "$BACKUP_DIR/Desktop" ]       && rm -rf /userdata/system/Desktop && cp -r "$BACKUP_DIR/Desktop" /userdata/system/Desktop
+    [ -f "$BACKUP_DIR/tint2rc" ]       && cp "$BACKUP_DIR/tint2rc" /userdata/system/.config/tint2/tint2rc
+    [ -d "$BACKUP_DIR/jgmenu" ]        && rm -rf /userdata/system/.config/jgmenu && cp -r "$BACKUP_DIR/jgmenu" /userdata/system/.config/jgmenu
+    [ -f "$BACKUP_DIR/current.palette" ] && mkdir -p "$(dirname "$PALETTE_FILE")" && cp "$BACKUP_DIR/current.palette" "$PALETTE_FILE"
 fi
 
 # Cleanup
@@ -298,4 +326,8 @@ batocera-services enable desktop
 batocera-services start desktop
 
 echo ""
-echo "Installation complete. Please restart for changes to take effect."
+if [ "$IS_UPDATE" -eq 1 ]; then
+    echo "Update complete."
+else
+    echo "Installation complete. Please restart for changes to take effect."
+fi

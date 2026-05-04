@@ -7,7 +7,7 @@
 | `7zip/7zip.sh` | 2025-05-22 17:09:18 +0100 |
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Android/Install_Android.sh` | 2026-05-04 21:46:58 +0100 |
-| `Desktop_for_Batocera/Install_Desktop.sh` | 2026-05-04 21:27:03 +0000 |
+| `Desktop_for_Batocera/Install_Desktop.sh` | 2026-05-04 22:50:50 +0000 |
 | `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2026-05-04 21:46:58 +0100 |
 | `Freej2me/Install_j2me-old .sh` | 2025-03-29 15:06:00 -0300 |
 | `Freej2me/Install_j2me-old _uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -120,7 +120,7 @@
 | `filezilla/filezilla_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `firefox/firefox-arm64.sh` | 2025-05-22 17:52:19 +0100 |
 | `firefox/firefox-arm64_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `firefox/firefox.sh` | 2025-05-22 17:52:39 +0100 |
+| `firefox/firefox.sh` | 2026-05-04 22:50:51 +0000 |
 | `flashbox/flashbox.sh` | 2025-05-22 17:54:17 +0100 |
 | `flathub/flathub.sh` | 2025-07-29 17:12:59 -0400 |
 | `flathub/flathub_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
