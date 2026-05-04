@@ -6,13 +6,13 @@
 | `.github/scripts/update_script_dates.py` | 2025-11-27 21:41:34 +0000 |
 | `7zip/7zip.sh` | 2025-05-22 17:09:18 +0100 |
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `Android/Install_Android.sh` | 2025-11-13 23:41:52 +0000 |
-| `Desktop_for_Batocera/Install_Desktop.sh` | 2025-11-29 23:45:44 -0300 |
-| `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2025-11-27 19:42:58 -0300 |
+| `Android/Install_Android.sh` | 2026-05-04 21:46:58 +0100 |
+| `Desktop_for_Batocera/Install_Desktop.sh` | 2026-05-04 21:12:10 +0000 |
+| `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2026-05-04 21:46:58 +0100 |
 | `Freej2me/Install_j2me-old .sh` | 2025-03-29 15:06:00 -0300 |
 | `Freej2me/Install_j2me-old _uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `Freej2me/Install_j2me.sh` | 2025-06-08 00:01:28 -0300 |
-| `Winconfig_Windows_Game_Fix/Install_Winconfig.sh` | 2025-11-21 22:53:16 -0300 |
+| `Freej2me/Install_j2me.sh` | 2026-05-04 21:46:58 +0100 |
+| `Winconfig_Windows_Game_Fix/Install_Winconfig.sh` | 2026-05-04 21:46:58 +0100 |
 | `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config - old.sh` | 2025-05-14 19:17:39 -0300 |
 | `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config.sh` | 2025-05-27 17:37:55 -0300 |
 | `amazonluna/amazonluna-arm64.sh` | 2025-05-22 17:11:10 +0100 |
@@ -26,8 +26,8 @@
 | `app/BatoceraUnofficialAddons_ARM64.sh` | 2025-05-22 17:15:31 +0100 |
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2025-11-20 16:56:24 +0000 |
-| `app/bua_installerarm64.py` | 2026-04-20 03:12:15 +0100 |
-| `app/bua_installerx86.py` | 2026-04-28 03:55:53 +0100 |
+| `app/bua_installerarm64.py` | 2026-05-04 21:46:58 +0100 |
+| `app/bua_installerx86.py` | 2026-05-04 21:46:58 +0100 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -112,7 +112,7 @@
 | `f1/f1-1.sh` | 2025-06-21 01:10:15 -0300 |
 | `f1/f1-1_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `f1/f1-old1.sh` | 2025-06-21 01:30:01 -0300 |
-| `f1/f1.sh` | 2025-06-21 01:34:47 -0300 |
+| `f1/f1.sh` | 2026-05-04 21:46:58 +0100 |
 | `fightcade/fightcade.sh` | 2026-05-01 21:13:04 +0100 |
 | `fightcade/fightcade_uninstall.sh` | 2026-02-25 11:59:39 -0700 |
 | `fightcade/sym_wine.sh` | 2025-01-13 02:20:54 +0000 |
@@ -162,7 +162,10 @@
 | `librewolf/librewolf.sh` | 2025-05-22 17:59:45 +0100 |
 | `luanti/luanti.sh` | 2026-02-23 14:59:57 +0100 |
 | `luanti/luanti_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `lutris/extra/create-lutris-launchers.sh` | 2026-05-04 21:46:58 +0100 |
 | `lutris/lutris.sh` | 2025-11-20 16:56:24 +0000 |
+| `lutris/lutris2.sh` | 2026-05-04 21:46:58 +0100 |
+| `lutris/lutris2_uninstall.sh` | 2026-05-04 21:46:58 +0100 |
 | `lutris/lutris_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `minecraft/bedrock.sh` | 2026-04-17 14:32:22 +0100 |
 | `minecraft/bedrock_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -175,9 +178,10 @@
 | `mubi/mubi_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `netflix/netflix.sh` | 2025-05-22 18:04:11 +0100 |
 | `netflix/netflix_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `nvidiapatch/nvidiapatch-service.sh` | 2026-05-04 21:46:58 +0100 |
 | `nvidiapatch/nvidiapatch.sh` | 2025-11-25 17:42:22 +0000 |
 | `nvidiapatch/nvidiapatch_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `nvidiapatch/patches.sh` | 2025-05-30 23:56:31 +0100 |
+| `nvidiapatch/patches.sh` | 2026-05-04 21:46:58 +0100 |
 | `nzp/nzp.sh` | 2025-11-27 18:53:42 +0000 |
 | `nzp/nzp_uninstall.sh` | 2025-11-27 18:53:42 +0000 |
 | `obs/obs.sh` | 2025-05-22 18:05:21 +0100 |
@@ -188,6 +192,7 @@
 | `openrgb/openrgb_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `openttd/openttd.sh` | 2025-05-22 18:06:33 +0100 |
 | `openttd/openttd_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `overlay-remove/overlay-remove.sh` | 2026-05-04 21:46:58 +0100 |
 | `parsec/parsec.sh` | 2025-04-08 18:16:38 +0100 |
 | `parsec/parsec_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `peazip/peazip.sh` | 2025-05-22 18:07:10 +0100 |
@@ -226,7 +231,7 @@
 | `stremio/stremio-arm64_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `stremio/stremio.sh` | 2025-11-25 15:20:38 +0000 |
 | `sunshine/sunshine-arm64.sh` | 2025-12-03 01:37:34 +0000 |
-| `sunshine/sunshine.sh` | 2025-11-06 20:03:30 +0000 |
+| `sunshine/sunshine.sh` | 2026-05-04 21:46:58 +0100 |
 | `sunshine/sunshine_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `supermariox/supermariox.sh` | 2025-11-27 22:20:19 +0000 |
 | `supermariox/supermariox_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -307,6 +312,8 @@
 | `winemanager/install_redist_dependencies32_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `winemanager/install_redist_dependencies64.sh` | 2025-01-07 21:03:20 -0300 |
 | `winemanager/winemanager.sh` | 2025-01-07 21:03:20 -0300 |
+| `wps-office/wps-office.sh` | 2026-05-04 21:46:58 +0100 |
+| `wps-office/wps-office_uninstall.sh` | 2026-05-04 21:46:58 +0100 |
 | `x11vnc/x11vnc.sh` | 2025-05-22 13:08:04 -0400 |
 | `x11vnc/x11vnc_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `xonotic/xonotic.sh` | 2025-05-22 13:05:59 -0400 |

@@ -10,6 +10,17 @@ ADDON_NAME="desktop"
 ADDON_DIR="/userdata/system/add-ons/${ADDON_NAME}"
 DEST_DIR="${ADDON_DIR}/rootfs"
 DRL_REMOVER="/userdata/system/configs/bat-drl/Remover_Desktop.sh"
+BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages"
+
+ARCH=$(uname -m)
+case "$ARCH" in
+    x86_64)  SFS_URL="$BASE_URL/Desktop_for_batocera_8.8.squashfs" ;;
+    aarch64) SFS_URL="$BASE_URL/Desktop_for_batocera_8.8_arm64.squashfs" ;;
+    *)
+        echo "Unsupported architecture: $ARCH"
+        exit 1
+        ;;
+esac
 
 # Detect existing DRL install
 if [ -f "$DRL_REMOVER" ]; then
@@ -31,7 +42,7 @@ mkdir -p "$TEMP_DIR" "$EXTRACT_DIR" "$DEST_DIR"
 
 # Download squashfs
 echo "Downloading..."
-curl -L -o "$SFS_FILE" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/Desktop_for_batocera_8.8.squashfs"
+curl -L -o "$SFS_FILE" "$SFS_URL"
 
 if [ ! -f "$SFS_FILE" ]; then
     echo "Error: Download failed."
