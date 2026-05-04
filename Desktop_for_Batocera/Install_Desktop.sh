@@ -56,6 +56,8 @@ if [ -d "$ADDON_DIR/rootfs" ]; then
     [ -d /userdata/system/Desktop ]             && cp -r /userdata/system/Desktop             "$BACKUP_DIR/Desktop"
     [ -f /userdata/system/.config/tint2/tint2rc ] && cp /userdata/system/.config/tint2/tint2rc "$BACKUP_DIR/tint2rc"
     [ -d /userdata/system/.config/jgmenu ]      && cp -r /userdata/system/.config/jgmenu      "$BACKUP_DIR/jgmenu"
+    [ -f /userdata/system/.config/pcmanfm/default/desktop-items-0.conf ] && \
+        cp /userdata/system/.config/pcmanfm/default/desktop-items-0.conf "$BACKUP_DIR/desktop-items-0.conf"
     PALETTE_FILE="/userdata/system/add-ons/desktop/config/Desktop/theme/current.palette"
     [ -f "$PALETTE_FILE" ] && cp "$PALETTE_FILE" "$BACKUP_DIR/current.palette"
 
@@ -107,6 +109,8 @@ if [ "$IS_UPDATE" -eq 1 ]; then
     [ -d "$BACKUP_DIR/Desktop" ]       && rm -rf /userdata/system/Desktop && cp -r "$BACKUP_DIR/Desktop" /userdata/system/Desktop
     [ -f "$BACKUP_DIR/tint2rc" ]       && cp "$BACKUP_DIR/tint2rc" /userdata/system/.config/tint2/tint2rc
     [ -d "$BACKUP_DIR/jgmenu" ]        && rm -rf /userdata/system/.config/jgmenu && cp -r "$BACKUP_DIR/jgmenu" /userdata/system/.config/jgmenu
+    [ -f "$BACKUP_DIR/desktop-items-0.conf" ] && \
+        cp "$BACKUP_DIR/desktop-items-0.conf" /userdata/system/.config/pcmanfm/default/desktop-items-0.conf
     [ -f "$BACKUP_DIR/current.palette" ] && mkdir -p "$(dirname "$PALETTE_FILE")" && cp "$BACKUP_DIR/current.palette" "$PALETTE_FILE"
 fi
 
