@@ -10,8 +10,8 @@ GAME_LIST="/userdata/roms/ports/gamelist.xml"
 TEMP_DIR="/userdata/tmp/Antimicrox"
 DRL_FILE="$TEMP_DIR/Antimicrox.DRL"
 EXTRACT_DIR="$TEMP_DIR/extracted"
-DEST_DIR="/"
 PORTS_DIR="/userdata/roms/ports"
+ADDON_BIN="/userdata/system/add-ons/f1/bin"
 
 # Create the temporary directories
 echo "Creating temporary directories..."
@@ -41,9 +41,14 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Copia forçada dos arquivos extraídos para o diretório de destino, com sobrescrita
-echo "Copying files to the system (forced overwrite)..."
-cp -rf "$EXTRACT_DIR"/* "$DEST_DIR"
+# Copy persistent userdata contents (antimicrox binary, joystick profile, etc.)
+echo "Installing addon files..."
+cp -r "$EXTRACT_DIR/userdata/." /userdata/
+
+# Place binary in add-ons bin dir for symlinks.sh to pick up
+mkdir -p "$ADDON_BIN"
+ln -sf /userdata/system/configs/bat-drl/AntiMicroX/antimicrox "$ADDON_BIN/antimicrox"
+chmod +x /userdata/system/configs/bat-drl/AntiMicroX/antimicrox
 
 # Limpeza
 echo "Cleaning up..."
@@ -85,11 +90,8 @@ batocera-mouse hide
 exit 0
 EOF
 
-chmod +x "${APP_NAME}.sh"
+chmod +x "/userdata/roms/ports/${APP_NAME}.sh"
 
-# Salva alterações
-echo "Saving changes..."
-batocera-save-overlay
 clear
 
 # Step 2: Refresh the Ports menu

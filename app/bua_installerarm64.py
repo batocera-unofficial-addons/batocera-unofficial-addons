@@ -552,6 +552,7 @@ APPS: Dict[str, str] = {
     "Dark Mode": bua("dark/dark.sh"),
     "Desktop (Docker)": bua("desktop/desktop.sh"),
     "VClean": bua("vclean/vclean.sh"),
+    "Overlay Remove": bua("overlay-remove/overlay-remove.sh"),
     "Docker": bua("docker/docker.sh"),
     "RunImage Desktop": bua("desktop/ri-desktop.sh"),
     "F1": bua("f1/f1.sh"),
@@ -598,6 +599,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "Dark Mode": "Toggle F1 dark mode",
     "Desktop (Docker)": "Desktop mode, requires Docker",
     "VClean": "Service to clean the Batocera version string (removes extra flags)",
+    "Overlay Remove": "Remove the Batocera boot overlay file from /boot/boot/overlay.",
     "Docker": "Docker/Podman/Portainer AIO.",
     "RunImage Desktop": "RunImage-based desktop with overlay support",
     "F1": "Ports shortcut to file manager",
@@ -645,7 +647,7 @@ CATEGORIES: Dict[str, List[str]] = {
         "Raspberry Pi Imager"
     ],
     "Developer Tools": [
-        "Conty", "Docker", "Soar", "WayVNC", "WayVNC Headless", "Dark Mode", "VClean"
+        "Conty", "Docker", "Soar", "WayVNC", "WayVNC Headless", "Dark Mode", "VClean", "Overlay Remove"
     ],
     "Docker Menu": [
         "CasaOS", "UmbrelOS", "Arch KDE (Webtop)", "Ubuntu MATE (Webtop)",

@@ -97,10 +97,10 @@ echo "Welcome to the automatic installer for the Android 5.6.2 by DRL Edition."
 TEMP_DIR="/userdata/tmp/Android"
 DRL_FILE="$TEMP_DIR/Android.DRL"
 EXTRACT_DIR="$TEMP_DIR/extracted"
-DEST_DIR="/"
+ADDON_DIR="/userdata/system/add-ons/android-bua"
 PORTS_DIR="/userdata/roms/ports"
 GAMELIST_PATH="${PORTS_DIR}/gamelist.xml"
-BACKUP_PATH="${PORTS_DIR}/gamelist.xml.DRL"
+BACKUP_PATH="${PORTS_DIR}/gamelist.xml.bak"
 APP_NAME="Android"
 APP_EXEC="Android"
 PORT_SCRIPT_PATH="${PORTS_DIR}/${APP_EXEC}.sh"
@@ -203,14 +203,13 @@ add_entry() {
 
 # Create the temporary directories
 echo "Creating temporary directories..."
-# batocera-save-overlay 300
-batocera-save-overlay 300
-mkdir -p $TEMP_DIR
-mkdir -p $EXTRACT_DIR
-mkdir -p $PORTS_DIR
+mkdir -p "$TEMP_DIR"
+mkdir -p "$EXTRACT_DIR"
+mkdir -p "$ADDON_DIR/bin"
+mkdir -p "$ADDON_DIR/lib"
+mkdir -p "$PORTS_DIR"
 mkdir -p "/userdata/system/configs/bat-drl/Android"
-mkdir -p "/userdata/tmp"
-chmod 777 "$GAMELIST_PATH"
+mkdir -p "/userdata/system/configs/android/applications"
 clear
 
 # Download the DRL file
@@ -290,8 +289,8 @@ else
 fi
 
 clear
-echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Android_5.6.2.DRL"
+echo "Downloading Android addon..."
+curl -L -o "$DRL_FILE" "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Android_5.6.2.DRL"
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
@@ -300,14 +299,13 @@ if [ ! -f "$DRL_FILE" ]; then
 fi
 
 # Extract the squashfs file
-echo "Extracting the DRL file..."
+echo "Extracting..."
 unsquashfs -f -d "$EXTRACT_DIR" "$DRL_FILE"
-# unsquashfs -f -d "$DEST_DIR" "$DRL_FILE"
 
 # Check if extraction was successful
 if [ $? -ne 0 ]; then
-    echo "Error: Failed to extract the DRL file"
-    rm -rf $TEMP_DIR
+    echo "Error: Failed to extract DRL file"
+    rm -rf "$TEMP_DIR"
     exit 1
 fi
 
@@ -326,18 +324,49 @@ fi
 echo "Gamelist.xml updated."
 clear
 
-# Copia forçada dos arquivos extraídos para o diretório de destino, com sobrescrita
-echo "Copying files to the system (forced overwrite)..."
-cp -rf "$EXTRACT_DIR"/* "$DEST_DIR"
+# Install binaries and libraries — symlinks.sh picks these up automatically
+echo "Installing binaries and libraries..."
+[ -d "$EXTRACT_DIR/usr/bin" ] && cp -r "$EXTRACT_DIR/usr/bin/." "$ADDON_DIR/bin/" || true
+[ -d "$EXTRACT_DIR/usr/lib" ] && cp -r "$EXTRACT_DIR/usr/lib/." "$ADDON_DIR/lib/" || true
 
-# Cria links simbólicos (adicione comandos específicos aqui, se necessário)
+# Desktop entries go to userdata config dir, restored each boot via custom.sh
+echo "Installing desktop entries..."
+[ -d "$EXTRACT_DIR/usr/share/applications" ] && \
+    cp -r "$EXTRACT_DIR/usr/share/applications/." "/userdata/system/configs/android/applications/" || true
+
+# userdata content goes directly to /userdata (already persistent)
+echo "Installing userdata files..."
+[ -d "$EXTRACT_DIR/userdata" ] && cp -r "$EXTRACT_DIR/userdata/." /userdata/ 2>/dev/null || true
 
 # Limpeza
 echo "Cleaning up..."
 rm -rf "$TEMP_DIR"
 
-# Salva alterações
-batocera-save-overlay
+# Write desktop entry restore script
+echo "Installing desktop entry restore script..."
+cat << 'RESTOREEOF' > /userdata/system/configs/android/restore-desktop-entries.sh
+#!/bin/bash
+SRC="/userdata/system/configs/android/applications"
+DEST="/usr/share/applications"
+[ -d "$SRC" ] || exit 0
+for f in "$SRC"/*.desktop; do
+    [ -f "$f" ] || continue
+    cp "$f" "$DEST/"
+done
+RESTOREEOF
+chmod +x /userdata/system/configs/android/restore-desktop-entries.sh
+
+# Hook into custom.sh
+CUSTOM_SH="/userdata/system/custom.sh"
+RESTORE_LINE="bash /userdata/system/configs/android/restore-desktop-entries.sh"
+if ! grep -q "restore-desktop-entries.sh" "$CUSTOM_SH" 2>/dev/null; then
+    echo "$RESTORE_LINE" >> "$CUSTOM_SH"
+    chmod +x "$CUSTOM_SH"
+fi
+
+# Run restore now for current session
+bash /userdata/system/configs/android/restore-desktop-entries.sh
+
 clear
 echo "Installation completed successfully."
 echo "Android 5.6.2 by DRL Edition"

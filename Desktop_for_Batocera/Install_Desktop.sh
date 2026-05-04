@@ -1,156 +1,283 @@
 #!/bin/bash
-# Exibe mensagem inicial 
-echo "Presenting..."
-sleep 2
 
-# Limpa o terminal
-#clear
+echo "Desktop for Batocera — Installer"
+echo "================================="
 
-# Função para exibir data e hora atual
-show_current_time() {
-    echo -e "Current Date and Time (UTC): $(date '+%Y-%m-%d %H:%M:%S')"
-    echo
-}
-
-# Função para animação de digitação
-type_text() {
-    text="$1"
-    for ((i=0; i<${#text}; i++)); do
-        echo -n "${text:$i:1}"
-        sleep 0.05
-    done
-    echo
-}
-
-# Códigos de cores ANSI
-blue="\e[34m"   # cor final: azul
-reset="\e[0m"
-
-# Vetor expandido com 15 cores em degradê
-colors=(
-    "\e[38;5;196m"  # Vermelho vivo
-    "\e[38;5;202m"  # Laranja escuro
-    "\e[38;5;208m"  # Laranja
-    "\e[38;5;214m"  # Laranja claro
-    "\e[38;5;220m"  # Amarelo
-    "\e[38;5;226m"  # Amarelo brilhante
-    "\e[38;5;190m"  # Verde-amarelado
-    "\e[38;5;118m"  # Verde claro
-    "\e[38;5;46m"   # Verde
-    "\e[38;5;48m"   # Verde água
-    "\e[38;5;51m"   # Ciano
-    "\e[38;5;45m"   # Azul claro
-    "\e[38;5;39m"   # Azul
-    "\e[38;5;63m"   # Azul-violeta
-    "\e[38;5;129m"  # Violeta
-)
-
-# Arte ASCII do DRL Edition
-ascii_art=(
-"██████╗ ██████╗  ██╗         ███████╗██████╗ ██╗████████╗██╗ ██████╗ ███╗   ██╗"
-"██╔══██╗██╔══██╗ ██║         ██╔════╝██╔══██╗██║╚══██╔══╝██║██╔═══██╗████╗  ██║"
-"██║  ██║██████╔╝ ██║         █████╗  ██║  ██║██║   ██║   ██║██║   ██║██╔██╗ ██║"
-"██║  ██║██╔══██╗ ██║         ██╔══╝  ██║  ██║██║   ██║   ██║██║   ██║██║╚██╗██║"
-"██████╔╝██║  ██║ ███████╗    ███████╗██████╔╝██║   ██║   ██║╚██████╔╝██║ ╚████║"
-"╚═════╝ ╚═╝  ╚═╝ ╚══════╝    ╚══════╝╚═════╝ ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝"
-)
-
-# Animação da arte ASCII com efeito degradê
-for ((k=0; k<3; k++)); do  # 3 ciclos completos
-    for ((i=0; i<${#colors[@]}; i++)); do
-        clear
-        # Mostra data e hora 
-        show_current_time
-        
-        # Mostra a arte ASCII na cor atual do degradê
-        for line in "${ascii_art[@]}"; do
-            echo -e "${colors[$i]}${line}${reset}"
-        done
-        sleep 0.1
-    done
-done
-
-# Mostra a versão final em azul
-clear
-show_current_time
-for line in "${ascii_art[@]}"; do
-    echo -e "${blue}${line}${reset}"
-done
-
-# Pula uma linha
-echo ""
-
-# Mensagem final com animação de digitação
-echo -ne "${PURPLE}"  # Cor roxa para a mensagem final
-type_text "Thank you for running this script!"  
-type_text "Developed by DRLEdition19"  
-type_text "The installation will start in a few moments. Please wait..."
-sleep 2
-clear
-
-
-# Welcome message
-echo "Welcome to the automatic installer for the Desktop_for_Batocera 8.7.1 by DRL Edition."
-
-# Temporary directory for download
 TEMP_DIR="/userdata/tmp/Desktop_for_Batocera"
-DRL_FILE="$TEMP_DIR/Desktop_for_Batocera.DRL"
+SFS_FILE="$TEMP_DIR/Desktop_for_Batocera.squashfs"
 EXTRACT_DIR="$TEMP_DIR/extracted"
-DEST_DIR="/"
-PORTS_DIR="/userdata/roms/ports"
+ADDON_NAME="desktop"
+ADDON_DIR="/userdata/system/add-ons/${ADDON_NAME}"
+DEST_DIR="${ADDON_DIR}/rootfs"
+DRL_REMOVER="/userdata/system/configs/bat-drl/Remover_Desktop.sh"
 
-# Create the temporary directories
-echo "Creating temporary directories..."
-# batocera-save-overlay 300
-batocera-save-overlay 300
-mkdir -p $TEMP_DIR
-mkdir -p $EXTRACT_DIR
-mkdir -p $PORTS_DIR
-clear
+# Detect existing DRL install
+if [ -f "$DRL_REMOVER" ]; then
+    dialog --title "Existing Desktop Detected" \
+        --yesno "An existing Desktop for Batocera (DRL) installation was detected.\n\nIt must be removed before installing the new version.\n\nRun the uninstaller now?" 12 55
+    if [ $? -eq 0 ]; then
+        echo "Removing old DRL installation..."
+        function yad() { return 0; }; export -f yad
+        bash "$DRL_REMOVER"
+        unset -f yad
+    else
+        echo "Installation cancelled."
+        exit 0
+    fi
+fi
 
-# Download the DRL file
-echo "Downloading the DRL file..."
-curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/releases/download/files/Desktop_for_batocera_8.7.1.DRL"
+# Create temp directories
+mkdir -p "$TEMP_DIR" "$EXTRACT_DIR" "$DEST_DIR"
 
-# Check if download was successful
-if [ ! -f "$DRL_FILE" ]; then
-    echo "Error: Failed to download DRL file"
+# Download squashfs
+echo "Downloading..."
+curl -L -o "$SFS_FILE" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/Desktop_for_batocera_8.8.squashfs"
+
+if [ ! -f "$SFS_FILE" ]; then
+    echo "Error: Download failed."
     exit 1
 fi
 
-# Extract the squashfs file
-echo "Extracting the DRL file..."
-# unsquashfs -f -d "$EXTRACT_DIR" "$DRL_FILE"
-unsquashfs -f -d "$DEST_DIR" "$DRL_FILE"
+# Extract
+echo "Extracting..."
+unsquashfs -f -d "$EXTRACT_DIR" "$SFS_FILE"
 
-# Check if extraction was successful
 if [ $? -ne 0 ]; then
-    echo "Error: Failed to extract the DRL file"
-    rm -rf $TEMP_DIR
+    echo "Error: Extraction failed."
+    rm -rf "$TEMP_DIR"
     exit 1
 fi
 
-# Copia forçada dos arquivos extraídos para o diretório de destino, com sobrescrita
-# echo "Copying files to the system (forced overwrite)..."
-# cp -rf "$EXTRACT_DIR"/* "$DEST_DIR"
+# userdata content goes directly to /userdata (persistent)
+echo "Installing userdata files..."
+cp -r "$EXTRACT_DIR/userdata/." /userdata/ 2>/dev/null || true
 
-# Cria links simbólicos (adicione comandos específicos aqui, se necessário)
+# Root FS content goes into rootfs for the service to symlink on each boot
+echo "Installing root FS files..."
+for dir in usr etc lib; do
+    [ -d "$EXTRACT_DIR/$dir" ] && cp -r "$EXTRACT_DIR/$dir" "$DEST_DIR/" || true
+done
 
-# Limpeza
+# Icon packs
+if [ -d "$EXTRACT_DIR/icons" ]; then
+    echo "Installing icon packs..."
+    cp -r "$EXTRACT_DIR/icons" "$ADDON_DIR/"
+fi
+
+# Cleanup
 echo "Cleaning up..."
 rm -rf "$TEMP_DIR"
 
-# Salva alterações
-echo "Saving changes..."
-rm -f "/userdata/system/Desktop/gparted.desktop"
-rm -f "/userdata/system/Desktop/vlc.desktop"
-rm -f "/userdata/system/Desktop/VLC.desktop"
-rm -f "/userdata/system/Desktop/CoreKeyboard.png"
-cp -rf "/overlay/overlay/usr/share/applications/CoreKeyboard.desktop" "/userdata/system/Desktop/CoreKeyboard.desktop"
-batocera-save-overlay
-clear
-echo "Installation completed successfully."
-echo "For the Desktop to work properly, you will need to restart your machine."
-echo "Desktop_for_Batocera 8.7.1 by DRL Edition"
+# Write the desktop service script
+echo "Installing desktop service..."
+mkdir -p /userdata/system/services
+cat << 'SERVICEEOF' > /userdata/system/services/desktop
+#!/bin/bash
 
-exit 0
+ADDON_NAME="desktop"
+ADDON_DIR="/userdata/system/add-ons/${ADDON_NAME}"
+ROOTFS="${ADDON_DIR}/rootfs"
+ICONS_DIR="${ADDON_DIR}/icons"
+LOG="/userdata/system/logs/${ADDON_NAME}.log"
+
+log() { echo "$(date): $*" | tee -a "$LOG"; }
+
+link_file() {
+    local src="$1"
+    local target="${src#${ROOTFS}}"
+    mkdir -p "$(dirname "$target")"
+
+    if [ -L "$target" ]; then
+        local cur; cur="$(readlink "$target")"
+        if [ "$cur" = "$src" ]; then
+            return
+        else
+            log "Conflict: $target -> $cur (expected $src). Skipping."
+            return
+        fi
+    elif [ -e "$target" ]; then
+        log "Backing up: $target -> ${target}.bak"
+        mv "$target" "${target}.bak"
+    fi
+
+    log "Linking: $target -> $src"
+    ln -s "$src" "$target"
+}
+
+unlink_file() {
+    local src="$1"
+    local target="${src#${ROOTFS}}"
+
+    if [ -L "$target" ]; then
+        local cur; cur="$(readlink "$target")"
+        if [ "$cur" = "$src" ]; then
+            log "Removing symlink: $target"
+            rm "$target"
+            [ -e "${target}.bak" ] && { log "Restoring: ${target}.bak"; mv "${target}.bak" "$target"; }
+        else
+            log "Symlink $target -> $cur, not our file. Skipping."
+        fi
+    elif [ -e "${target}.bak" ]; then
+        log "Orphan backup found — restoring: ${target}.bak"
+        mv "${target}.bak" "$target"
+    fi
+}
+
+apply_symlinks() {
+    [ -d "$ROOTFS" ] || { log "ERROR: rootfs missing at $ROOTFS"; exit 1; }
+    find "$ROOTFS" \( -type f -o -type l \) \
+        ! -path "${ROOTFS}/usr/share/themes/*" \
+        ! -path "${ROOTFS}/usr/share/tint2/*/*" \
+        ! -path "${ROOTFS}/usr/share/icons/*" \
+        ! -path "${ROOTFS}/etc/openbox/rc.xml" \
+        | while read -r src; do link_file "$src"; done
+    log "Symlink pass complete."
+}
+
+remove_symlinks() {
+    [ -d "$ROOTFS" ] || { log "rootfs missing, nothing to remove."; return; }
+    find "$ROOTFS" \( -type f -o -type l \) \
+        ! -path "${ROOTFS}/usr/share/themes/*" \
+        ! -path "${ROOTFS}/usr/share/tint2/*/*" \
+        ! -path "${ROOTFS}/usr/share/icons/*" \
+        ! -path "${ROOTFS}/etc/openbox/rc.xml" \
+        | while read -r src; do unlink_file "$src"; done
+    log "Symlink removal complete."
+}
+
+link_dir_packs() {
+    local src_dir="$1" target_parent="$2"
+    [ -d "$src_dir" ] || return
+    local pack target
+    for pack in "$src_dir"/*/; do
+        [ -d "$pack" ] || continue
+        pack="${pack%/}"
+        target="${target_parent}/$(basename "$pack")"
+        if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+            log "Linking: $target -> $pack"
+            ln -s "$pack" "$target"
+        fi
+    done
+}
+
+unlink_dir_packs() {
+    local src_dir="$1" target_parent="$2"
+    [ -d "$src_dir" ] || return
+    local pack target
+    for pack in "$src_dir"/*/; do
+        [ -d "$pack" ] || continue
+        pack="${pack%/}"
+        target="${target_parent}/$(basename "$pack")"
+        if [ -L "$target" ] && [ "$(readlink "$target")" = "$pack" ]; then
+            log "Removing symlink: $target"
+            rm "$target"
+        fi
+    done
+}
+
+link_files_into_dir() {
+    local src_dir="$1" target_dir="$2"
+    [ -d "$src_dir" ] || return
+    mkdir -p "$target_dir"
+    local src target
+    for src in "$src_dir"/*; do
+        [ -e "$src" ] || continue
+        target="${target_dir}/$(basename "$src")"
+        if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+            log "Linking: $target -> $src"
+            ln -s "$src" "$target"
+        fi
+    done
+}
+
+unlink_files_from_dir() {
+    local src_dir="$1" target_dir="$2"
+    [ -d "$src_dir" ] || return
+    local src target
+    for src in "$src_dir"/*; do
+        [ -e "$src" ] || continue
+        target="${target_dir}/$(basename "$src")"
+        if [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ]; then
+            log "Removing symlink: $target"
+            rm "$target"
+        fi
+    done
+}
+
+link_icon_packs() {
+    [ -d "$ICONS_DIR" ] || return
+    local pack target
+    for pack in "$ICONS_DIR"/*/; do
+        [ -d "$pack" ] || continue
+        pack="${pack%/}"
+        target="/usr/share/icons/$(basename "$pack")"
+        if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+            log "Linking icon pack: $target -> $pack"
+            ln -s "$pack" "$target"
+        fi
+    done
+}
+
+unlink_icon_packs() {
+    [ -d "$ICONS_DIR" ] || return
+    local pack target
+    for pack in "$ICONS_DIR"/*/; do
+        [ -d "$pack" ] || continue
+        pack="${pack%/}"
+        target="/usr/share/icons/$(basename "$pack")"
+        if [ -L "$target" ] && [ "$(readlink "$target")" = "$pack" ]; then
+            log "Removing icon pack symlink: $target"
+            rm "$target"
+        fi
+    done
+}
+
+case "$1" in
+    start)
+        mkdir -p /userdata/system/logs
+        log "Starting desktop overlay..."
+        apply_symlinks
+        link_icon_packs
+        link_dir_packs "${ROOTFS}/usr/share/icons" "/usr/share/icons"
+        link_files_into_dir "${ROOTFS}/usr/share/icons/batocera" "/usr/share/icons/batocera"
+        link_dir_packs "${ROOTFS}/usr/share/themes" "/usr/share/themes"
+        link_dir_packs "${ROOTFS}/usr/share/tint2" "/usr/share/tint2"
+        ;;
+    stop)
+        mkdir -p /userdata/system/logs
+        log "Stopping desktop overlay..."
+        remove_symlinks
+        unlink_icon_packs
+        unlink_dir_packs "${ROOTFS}/usr/share/icons" "/usr/share/icons"
+        unlink_files_from_dir "${ROOTFS}/usr/share/icons/batocera" "/usr/share/icons/batocera"
+        unlink_dir_packs "${ROOTFS}/usr/share/themes" "/usr/share/themes"
+        unlink_dir_packs "${ROOTFS}/usr/share/tint2" "/usr/share/tint2"
+        ;;
+    status)
+        if [ ! -d "$ROOTFS" ]; then
+            echo "desktop: not installed (rootfs missing)."
+            exit 1
+        fi
+        missing=0
+        while IFS= read -r src; do
+            target="${src#${ROOTFS}}"
+            [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ] || missing=$((missing+1))
+        done < <(find "$ROOTFS" \( -type f -o -type l \))
+        [ "$missing" -eq 0 ] && echo "desktop: all symlinks active." \
+                              || echo "desktop: ${missing} symlink(s) missing or broken."
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status}"
+        exit 1
+        ;;
+esac
+SERVICEEOF
+
+chmod +x /userdata/system/services/desktop
+
+# Enable and start the service
+batocera-services enable desktop
+batocera-services start desktop
+
+echo ""
+echo "Installation complete. Please restart for changes to take effect."

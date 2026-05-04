@@ -652,6 +652,7 @@ APPS: Dict[str, str] = {
     "Soar": bua("soar/soar.sh"),
     "Dark Mode": bua("dark/dark.sh"),
     "VClean": bua("vclean/vclean.sh"),
+    "Overlay Remove": bua("overlay-remove/overlay-remove.sh"),
     "RGSX": "curl -L bit.ly/rgsx-install | sh",
     "Raspberry Pi Imager": bua("rpi/rpi.sh"),
     "Gamescope": bua("gamescope/gamescope.sh"),
@@ -794,6 +795,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "Soar": "Soar package manager (integrated with BUA)",
     "Dark Mode": "Toggle F1 dark mode",
     "VClean": "Service to clean the Batocera version string (removes extra flags)",
+    "Overlay Remove": "Remove the Batocera boot overlay file from /boot/boot/overlay.",
     "RGSX": "Retro Game Sets Xtra. A free, user-friendly ROM downloader for Batocera",
     "Raspberry Pi Imager": "Flash OS images to USB and SD cards.",
     "Gamescope": "Full-screen gaming compositor with smoother performance, scaling & low-latency control.",
@@ -904,7 +906,7 @@ CATEGORIES: Dict[str, List[str]] = {
     ],
     "Developer Tools": [
         "NVIDIA Patcher", "Conty", "CLI Tools", "NVIDIA Clocker", "Docker",
-        "Extras", "X11VNC", "QEMU GA", "Soar", "Dark Mode", "VClean"
+        "Extras", "X11VNC", "QEMU GA", "Soar", "Dark Mode", "VClean", "Overlay Remove"
     ],
 }
 

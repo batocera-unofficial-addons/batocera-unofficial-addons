@@ -17,7 +17,17 @@ echo
 version="$1"
 patch_status="maybe"
 fbcpatch_status="maybe"
-mkdir -p /opt/nvidia 2>/dev/null 
+NVPATCH_DIR="/userdata/system/add-ons/nvidiapatch"
+NVPATCH_LIB="${NVPATCH_DIR}/rootfs/usr/lib"
+NVPATCH_BIN="${NVPATCH_DIR}/rootfs/usr/bin"
+mkdir -p /opt/nvidia 2>/dev/null
+# Restore persisted keylase backups so the patcher can detect already-patched libs
+if [ -d "${NVPATCH_DIR}/libnvidia-encode-backup" ]; then
+    cp -r "${NVPATCH_DIR}/libnvidia-encode-backup" /opt/nvidia/
+fi
+if [ -d "${NVPATCH_DIR}/libnvidia-fbc-backup" ]; then
+    cp -r "${NVPATCH_DIR}/libnvidia-fbc-backup" /opt/nvidia/
+fi
 cookie=/tmp/patchstatus_ok ; rm $cookie 2>/dev/null
 tmp=/userdata/system/add-ons/sunshine/nvidia/tmp ; rm -rf "$tmp" 2>/dev/null ; mkdir -p "$tmp" 2>/dev/null
 nvdir=/userdata/system/add-ons/sunshine/nvidia/$version ; rm -rf "$nvdir" 2>/dev/null ; mkdir -p "$nvdir" 2>/dev/null 
@@ -44,6 +54,9 @@ cd "$tmp"
 			cp $tmp/$version/libnvidia-fbc* /usr/lib/
 			cp $tmp/$version/nvidia-smi /usr/bin/
 			chmod 777 /usr/bin/nvidia-smi 2>/dev/null
+			mkdir -p "$NVPATCH_BIN"
+			cp $tmp/$version/nvidia-smi "$NVPATCH_BIN/"
+			chmod 777 "$NVPATCH_BIN/nvidia-smi"
 			#
 			# add nvidia-smi and nvidia-settings
 			cp $tmp/$version/nvidia-smi $nvdir/ 2>/dev/null
@@ -115,6 +128,9 @@ cd "$tmp"
 									####
 									bash "$nvpatch_file" 2>/dev/null
 										cp /usr/lib/libnvidia-encode* $nvdir/
+										mkdir -p "$NVPATCH_LIB"
+										cp /usr/lib/libnvidia-encode* "$NVPATCH_LIB/"
+										cp -r /opt/nvidia/libnvidia-encode-backup "${NVPATCH_DIR}/" 2>/dev/null || true
 										patch_status="ok"
 								fi
 							# fbc-patch.sh
@@ -137,18 +153,30 @@ cd "$tmp"
 									####
 									bash "$nvfbcpatch_file" 2>/dev/null
 										cp /usr/lib/libnvidia-fbc* $nvdir/
+										mkdir -p "$NVPATCH_LIB"
+										cp /usr/lib/libnvidia-fbc* "$NVPATCH_LIB/"
+										cp -r /opt/nvidia/libnvidia-fbc-backup "${NVPATCH_DIR}/" 2>/dev/null || true
 										fbcpatch_status="ok"
 								fi
 # Clear rmp 
 rm -rf "$tmp" 2>/dev/null
 # --------------------------------------------------------------------------------------------------------
-if [[ "$patch_status" = "ok" ]] && [[ "$fbcpatch_status" = "ok" ]]; then 
+if [[ "$patch_status" = "ok" ]] && [[ "$fbcpatch_status" = "ok" ]]; then
 	echo
 	echo -e "##   "
 	echo -e "##   OK! :) "
 	echo -e "##   Looks like everything went well, hopefully ;) ... "
 	echo -e "##   "
 	echo
+	# Install and enable the nvidiapatch service so symlinks are re-applied on each boot
+	service_file="/userdata/system/services/nvidiapatch"
+	service_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/nvidiapatch/nvidiapatch-service.sh"
+	curl -LsS "$service_url" -o "$service_file" 2>/dev/null || true
+	if [ -s "$service_file" ]; then
+		chmod 755 "$service_file"
+		batocera-services enable nvidiapatch 2>/dev/null || true
+		batocera-services start nvidiapatch 2>/dev/null || true
+	fi
 	cookie=/tmp/patchstatus_ok ; rm $cookie 2>/dev/null
 	touch $cookie
 	exit 0
