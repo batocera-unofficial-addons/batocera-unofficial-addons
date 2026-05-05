@@ -21,6 +21,51 @@ case "$ARCH" in
         exit 1
         ;;
 esac
+cleanup_drl_rootfs_remnants() {
+    echo "Cleaning up DRL rootfs remnants..."
+
+    rm -f \
+        /usr/bin/antimicrox \
+        /usr/bin/zenity \
+        /usr/lib/libgdk-x11-2.0.so \
+        /usr/lib/libgtk-x11-2.0.so \
+        /usr/lib/libpepflashplayer.so
+
+    rm -f \
+        /usr/lib/libaio.so* \
+        /usr/lib/libbrotlicommon.so* \
+        /usr/lib/libcap.so* \
+        /usr/lib/libcprime-*.so* \
+        /usr/lib/libcroco-0.6.so* \
+        /usr/lib/libexslt.so* \
+        /usr/lib/libfdisk.so* \
+        /usr/lib/libfm-gtk.so* \
+        /usr/lib/libgailutil-3.so* \
+        /usr/lib/libgdk-3.so* \
+        /usr/lib/libgdk-x11-2.0.so.0.2400.32 \
+        /usr/lib/libgtk-3.so* \
+        /usr/lib/libgtk-x11-2.0.so.0.2400.32 \
+        /usr/lib/libImlib2.so* \
+        /usr/lib/liblightspark*.so* \
+        /usr/lib/libQt5DBus.so* \
+        /usr/lib/libQt5X11Extras.so* \
+        /usr/lib/librsvg-2.so* \
+        /usr/lib/libSoundTouch.so* \
+        /usr/lib/libthai.so.0.3* \
+        /usr/lib/libxslt.so* \
+        /usr/lib/libXtst.so* \
+        /usr/lib/libXv.so* \
+        /usr/lib/libyaml-cpp.so*
+
+    rmdir \
+        /etc/xdg/libfm \
+        /etc/xdg/menus \
+        /etc/xdg/pcmanfm/default \
+        /etc/openbox \
+        /etc/X11 \
+        /usr/share/icons/batocera \
+        2>/dev/null || true
+}
 
 # Detect existing DRL install
 if [ -f "$DRL_REMOVER" ]; then
@@ -45,6 +90,7 @@ if [ -f "$DRL_REMOVER" ]; then
         rm -rf /userdata/system/.config/libfm
         rm -rf /userdata/system/.config/pcmanfm
         rm -rf /userdata/system/.config/sublime-text
+        cleanup_drl_rootfs_remnants
     else
         echo "Installation cancelled."
         exit 0
