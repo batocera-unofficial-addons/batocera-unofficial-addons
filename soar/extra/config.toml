@@ -5,7 +5,7 @@ name = "bincache"
 url = "https://meta.pkgforge.dev/bincache/x86_64-Linux.sdb.zstd"
 desktop_integration = false
 pubkey = "https://meta.pkgforge.dev/bincache/minisign.pub"
-signature_verification = true
+signature_verification = false
 sync_interval = "3h"
 
 [[repositories]]
@@ -13,7 +13,23 @@ name = "pkgcache"
 url = "https://meta.pkgforge.dev/pkgcache/x86_64-Linux.sdb.zstd"
 desktop_integration = true
 pubkey = "https://meta.pkgforge.dev/pkgcache/minisign.pub"
-signature_verification = true
+signature_verification = false
+sync_interval = "3h"
+
+[[repositories]]
+name = "ivan-hc-am"
+url = "https://meta.pkgforge.dev/external/am/x86_64-Linux.json.zstd"
+desktop_integration = true
+pubkey = "https://meta.pkgforge.dev/pkgcache/minisign.pub"
+signature_verification = false
+sync_interval = "3h"
+
+[[repositories]]
+name = "appimage-github-io"
+url = "https://meta.pkgforge.dev/external/appimage.github.io/x86_64-Linux.json.zstd"
+desktop_integration = true
+pubkey = "https://meta.pkgforge.dev/pkgcache/minisign.pub"
+signature_verification = false
 sync_interval = "3h"
 
 [profile.default]
