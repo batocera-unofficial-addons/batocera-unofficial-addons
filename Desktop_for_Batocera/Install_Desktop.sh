@@ -36,6 +36,8 @@ if [ -f "$DRL_REMOVER" ]; then
         rm -rf /userdata/system/Desktop
         rm -rf /userdata/system/configs/bat-drl/Desktop
         rm -rf /userdata/system/configs/bat-drl/tint2
+        rm -rf /userdata/system/configs/bat-drl/AntiMicroX
+        rm -f /userdata/system/configs/bat-drl/Nav_Redist2.joystick.amgp
         rm -rf /userdata/system/add-ons/desktop_drl
         rm -f /userdata/system/services/desktop_drl
         rm -f /userdata/system/.config/tint2/tint2rc
