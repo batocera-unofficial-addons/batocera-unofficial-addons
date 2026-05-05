@@ -40,8 +40,11 @@ if [ -f "$DRL_REMOVER" ]; then
         rm -f /userdata/system/configs/bat-drl/Nav_Redist2.joystick.amgp
         rm -rf /userdata/system/add-ons/desktop_drl
         rm -f /userdata/system/services/desktop_drl
-        rm -f /userdata/system/.config/tint2/tint2rc
+        rm -rf /userdata/system/.config/tint2
         rm -rf /userdata/system/.config/jgmenu
+        rm -rf /userdata/system/.config/libfm
+        rm -rf /userdata/system/.config/pcmanfm
+        rm -rf /userdata/system/.config/sublime-text
     else
         echo "Installation cancelled."
         exit 0
