@@ -174,6 +174,20 @@ fi
 
 echo "JSON files downloaded, extracted, moved, and cleaned up successfully in $EMULATOR_DIR."
 
+# Switchres wrapper for fcade:// (TEST GAME and ONLINE MATCH use the same URL path)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+SW_WRAP="${ADDONS_DIR}/${APP_NAME,,}/extra/switchres_fightcade_wrap.sh"
+mkdir -p "${ADDONS_DIR}/${APP_NAME,,}/extra"
+TEMPLATE="$SCRIPT_DIR/switchres_fightcade_wrap.template.sh"
+if [ ! -r "$TEMPLATE" ]; then
+    echo "ERROR: switchres_fightcade_wrap.template.sh not found next to fightcade.sh ($SCRIPT_DIR)" >&2
+    exit 1
+fi
+sed "s|__FIGHTCADE_ADDON__|${ADDONS_DIR}/${APP_NAME,,}|g" "$TEMPLATE" > "$SW_WRAP"
+chmod +x "$SW_WRAP"
+echo "Installed Switchres fcade:// wrapper at $SW_WRAP"
+
+
 # Step 3: Create the app launch script
 echo "Creating $APP_NAME script in Ports..."
 mkdir -p "$PORTS_DIR"
@@ -199,13 +213,13 @@ exec &> >(tee -a "\$log_file")
 echo "\$(date): Launching $APP_NAME"
 
 # Batocera lacks xdg-open/xdg-mime — fc2-electron needs xdg-open to dispatch
-# fcade:// URLs for game launch. Create a shim that routes to upstream fcade.sh.
+# fcade:// URLs. Shim calls Switchres wrapper (CRT) or falls back to fcade.sh.
 mkdir -p "\${HOME}/bin"
 cat > "\${HOME}/bin/xdg-open" << 'XDGOPEN'
 #!/bin/bash
 case "\$1" in
     fcade://*)
-        $ADDONS_DIR/${APP_NAME,,}/${APP_NAME}/emulator/fcade.sh "\$1"
+        $ADDONS_DIR/${APP_NAME,,}/extra/switchres_fightcade_wrap.sh "\$1"
         ;;
     *)
         echo "xdg-open: no handler for: \$1" >&2
