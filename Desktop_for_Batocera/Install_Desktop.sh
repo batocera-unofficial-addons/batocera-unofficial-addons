@@ -92,6 +92,11 @@ cleanup_drl_rootfs_remnants() {
         /overlay/overlay/lib/libthai.so.0.3.1 \
         2>/dev/null || true
 
+    # Remove DRL overlay files that rmdir cannot handle
+    rm -f  /overlay/overlay/etc/openbox/rc.xml 2>/dev/null || true
+    rm -f  /overlay/overlay/etc/xdg/openbox/autostart.bak 2>/dev/null || true
+    rm -rf /overlay/overlay/usr/share/icons/batocera/ 2>/dev/null || true
+
     rmdir \
         /etc/xdg/libfm \
         /etc/xdg/menus \
@@ -102,7 +107,7 @@ cleanup_drl_rootfs_remnants() {
         2>/dev/null || true
 
     batocera-services stop symlink_manager 2>/dev/null || true
-    batocera-services start symlink_manager 2>/dev/null &
+    batocera-services start symlink_manager >/dev/null 2>&1 &
 }
 
 # Detect existing DRL install
@@ -120,7 +125,9 @@ if [ -f "$DRL_REMOVER" ]; then
         rm -rf /userdata/system/configs/bat-drl/Desktop
         rm -rf /userdata/system/configs/bat-drl/tint2
         rm -rf /userdata/system/configs/bat-drl/AntiMicroX
+        rm -rf /userdata/system/configs/bat-drl/FP_Atalho
         rm -f /userdata/system/configs/bat-drl/Nav_Redist2.joystick.amgp
+        rm -rf /userdata/userdata
         rm -rf /userdata/system/add-ons/desktop_drl
         rm -f /userdata/system/services/desktop_drl
         rm -rf /userdata/system/.config/tint2
@@ -129,6 +136,9 @@ if [ -f "$DRL_REMOVER" ]; then
         rm -rf /userdata/system/.config/pcmanfm
         rm -rf /userdata/system/.config/sublime-text
         cleanup_drl_rootfs_remnants
+        for proc in openbox tint2 jgmenu pcmanfm xcompmgr picom; do
+            pkill -x "$proc" 2>/dev/null || true
+        done
     else
         echo "Installation cancelled."
         exit 0
@@ -432,12 +442,18 @@ chmod +x /userdata/system/services/desktop
 batocera-services enable desktop
 batocera-services start desktop
 
-# Reapply palette icons after update (service must be running for paths to resolve)
+# Apply palette icons (service must be running for paths to resolve)
 if [ "$IS_UPDATE" -eq 1 ] && [ -f "$PALETTE_FILE" ]; then
     PALETTE_NAME=$(cat "$PALETTE_FILE" | tr -d '[:space:]')
     ICONS_SRC="/usr/share/desktop-palettes/icons/palettes/$PALETTE_NAME"
     if [ -d "$ICONS_SRC" ]; then
         echo "Reapplying palette icons ($PALETTE_NAME)..."
+        cp "$ICONS_SRC"/* /usr/share/icons/batocera/ 2>/dev/null || true
+    fi
+else
+    ICONS_SRC="/usr/share/desktop-palettes/icons/palettes/blue"
+    if [ -d "$ICONS_SRC" ]; then
+        echo "Applying default palette icons (blue)..."
         cp "$ICONS_SRC"/* /usr/share/icons/batocera/ 2>/dev/null || true
     fi
 fi
