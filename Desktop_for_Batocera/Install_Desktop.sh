@@ -136,7 +136,7 @@ if [ -f "$DRL_REMOVER" ]; then
         rm -rf /userdata/system/.config/pcmanfm
         rm -rf /userdata/system/.config/sublime-text
         cleanup_drl_rootfs_remnants
-        for proc in openbox tint2 jgmenu pcmanfm xcompmgr picom; do
+        for proc in tint2 jgmenu pcmanfm xcompmgr picom; do
             pkill -x "$proc" 2>/dev/null || true
         done
     else
