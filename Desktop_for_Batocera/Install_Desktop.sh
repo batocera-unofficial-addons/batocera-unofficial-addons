@@ -158,7 +158,9 @@ if [ -d "$ADDON_DIR/rootfs" ]; then
     [ -f /userdata/system/.config/pcmanfm/default/desktop-items-0.conf ] && \
         cp /userdata/system/.config/pcmanfm/default/desktop-items-0.conf "$BACKUP_DIR/desktop-items-0.conf"
     PALETTE_FILE="/userdata/system/add-ons/desktop/config/Desktop/theme/current.palette"
-    [ -f "$PALETTE_FILE" ] && cp "$PALETTE_FILE" "$BACKUP_DIR/current.palette"
+    BAR_CONF_FILE="/userdata/system/add-ons/desktop/config/Desktop/theme/bar.conf"
+    [ -f "$PALETTE_FILE" ]  && cp "$PALETTE_FILE"  "$BACKUP_DIR/current.palette"
+    [ -f "$BAR_CONF_FILE" ] && cp "$BAR_CONF_FILE" "$BACKUP_DIR/bar.conf"
 
     echo "Stopping desktop service..."
     batocera-services stop desktop
@@ -221,6 +223,7 @@ if [ "$IS_UPDATE" -eq 1 ]; then
     [ -f "$BACKUP_DIR/desktop-items-0.conf" ] && \
         cp "$BACKUP_DIR/desktop-items-0.conf" /userdata/system/.config/pcmanfm/default/desktop-items-0.conf
     [ -f "$BACKUP_DIR/current.palette" ] && mkdir -p "$(dirname "$PALETTE_FILE")" && cp "$BACKUP_DIR/current.palette" "$PALETTE_FILE"
+    [ -f "$BACKUP_DIR/bar.conf" ]       && cp "$BACKUP_DIR/bar.conf" "$BAR_CONF_FILE"
 
     # Re-apply system Desktop files from squashfs — overwrite any stale versions restored from backup
     echo "Updating system Desktop files..."
