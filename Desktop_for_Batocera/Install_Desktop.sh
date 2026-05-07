@@ -442,6 +442,13 @@ chmod +x /userdata/system/services/desktop
 batocera-services enable desktop
 batocera-services start desktop
 
+# Install our rc.xml as the base openbox config so it's active even outside desktop mode
+RC_DESKTOP="/userdata/system/add-ons/desktop/rc.xml.desktop"
+RC_ES="/userdata/system/add-ons/desktop/rc.xml.es"
+[ -f "$RC_DESKTOP" ] && cp "$RC_DESKTOP" /etc/openbox/rc.xml
+[ -f "$RC_ES" ]      && cp "$RC_ES"      /etc/openbox/rc.xml.es
+openbox --reconfigure >/dev/null 2>&1 || true
+
 # Apply palette icons (service must be running for paths to resolve)
 if [ "$IS_UPDATE" -eq 1 ] && [ -f "$PALETTE_FILE" ]; then
     PALETTE_NAME=$(cat "$PALETTE_FILE" | tr -d '[:space:]')
