@@ -24,38 +24,73 @@ esac
 cleanup_drl_rootfs_remnants() {
     echo "Cleaning up DRL rootfs remnants..."
 
-    rm -f \
-        /usr/bin/antimicrox \
-        /usr/bin/zenity \
-        /usr/lib/libgdk-x11-2.0.so \
-        /usr/lib/libgtk-x11-2.0.so \
-        /usr/lib/libpepflashplayer.so
+    rm -f /usr/bin/antimicrox /usr/bin/zenity
 
+    # Remove DRL overlay lib files by exact name via /overlay/overlay/.
+    # Using wildcards through the merged /usr/lib path would create whiteouts for
+    # Batocera-native libs (e.g. libgtk-3.so.0.2411.32, libnettle.so.8) that have
+    # different version numbers from DRL's copies and are visible alongside them.
+    # A wildcard on /overlay/overlay/ is also unsafe — other system libs (Nvidia etc)
+    # live there too. Exact filenames sourced from the DRL squashfs are the only safe option.
+    OVL=/overlay/overlay/usr/lib
     rm -f \
-        /usr/lib/libaio.so* \
-        /usr/lib/libbrotlicommon.so* \
-        /usr/lib/libcap.so* \
-        /usr/lib/libcprime-*.so* \
-        /usr/lib/libcroco-0.6.so* \
-        /usr/lib/libexslt.so* \
-        /usr/lib/libfdisk.so* \
-        /usr/lib/libfm-gtk.so* \
-        /usr/lib/libgailutil-3.so* \
-        /usr/lib/libgdk-3.so* \
-        /usr/lib/libgdk-x11-2.0.so.0.2400.32 \
-        /usr/lib/libgtk-3.so* \
-        /usr/lib/libgtk-x11-2.0.so.0.2400.32 \
-        /usr/lib/libImlib2.so* \
-        /usr/lib/liblightspark*.so* \
-        /usr/lib/libQt5DBus.so* \
-        /usr/lib/libQt5X11Extras.so* \
-        /usr/lib/librsvg-2.so* \
-        /usr/lib/libSoundTouch.so* \
-        /usr/lib/libthai.so.0.3* \
-        /usr/lib/libxslt.so* \
-        /usr/lib/libXtst.so* \
-        /usr/lib/libXv.so* \
-        /usr/lib/libyaml-cpp.so*
+        "$OVL/libXtst.so"        "$OVL/libXtst.so.6"              "$OVL/libXtst.so.6.1.0" \
+        "$OVL/libXv.so"          "$OVL/libXv.so.1"                "$OVL/libXv.so.1.0.0" \
+        "$OVL/libaio.so"         "$OVL/libaio.so.1.0.1" \
+        "$OVL/libadwaita-1.so.0" \
+        "$OVL/libatk-bridge-2.0.so.0" \
+        "$OVL/libatspi.so.0" \
+        "$OVL/libbrotlicommon.so.1" \
+        "$OVL/libbrotlidec.so.1" \
+        "$OVL/libcanberra.so.0" \
+        "$OVL/libcap.so.2.27" \
+        "$OVL/libcprime-core.so"    "$OVL/libcprime-core.so.4"    "$OVL/libcprime-core.so.4.5.0" \
+        "$OVL/libcprime-gui.so"     "$OVL/libcprime-gui.so.4"     "$OVL/libcprime-gui.so.4.5.0" \
+        "$OVL/libcprime-widgets.so" "$OVL/libcprime-widgets.so.4" "$OVL/libcprime-widgets.so.4.5.0" \
+        "$OVL/libcroco-0.6.so"   "$OVL/libcroco-0.6.so.3"        "$OVL/libcroco-0.6.so.3.0.1" \
+        "$OVL/libcrypt.so.1"     "$OVL/libcrypt.so.2" \
+        "$OVL/libcups.so.2" \
+        "$OVL/libcurl-gnutls.so.4" \
+        "$OVL/libdbus-glib-1.so.2" \
+        "$OVL/libexslt.so"       "$OVL/libexslt.so.0.8.20" \
+        "$OVL/libfdisk.so.1.1.0" \
+        "$OVL/libfm-gtk.so"      "$OVL/libfm-gtk.so.4"           "$OVL/libfm-gtk.so.4.1.2" \
+        "$OVL/libgailutil-3.so"  "$OVL/libgailutil-3.so.0"       "$OVL/libgailutil-3.so.0.0.0" \
+        "$OVL/libgdk-3.so"       "$OVL/libgdk-3.so.0.2404.8" \
+        "$OVL/libgdk-x11-2.0.so" "$OVL/libgdk-x11-2.0.so.0"     "$OVL/libgdk-x11-2.0.so.0.2400.32" \
+        "$OVL/libgtk-3.so"       "$OVL/libgtk-3.so.0.2404.8" \
+        "$OVL/libgtk-4.so.1" \
+        "$OVL/libgtk-x11-2.0.so" "$OVL/libgtk-x11-2.0.so.0"     "$OVL/libgtk-x11-2.0.so.0.2400.32" \
+        "$OVL/libImlib2.so"      "$OVL/libImlib2.so.1"           "$OVL/libImlib2.so.1.5.1" \
+        "$OVL/libidn2.so.0" \
+        "$OVL/libjack.so.0" \
+        "$OVL/libkeyutils.so.1" \
+        "$OVL/liblightspark.so.0.8.5" "$OVL/liblightsparkplugin.so" \
+        "$OVL/libnettle.so.7" \
+        "$OVL/libnsl.so.1" \
+        "$OVL/libpepflashplayer.so" \
+        "$OVL/libQt5DBus.so"     "$OVL/libQt5DBus.so.5"     "$OVL/libQt5DBus.so.5.15"    "$OVL/libQt5DBus.so.5.15.8" \
+        "$OVL/libQt5X11Extras.so" "$OVL/libQt5X11Extras.so.5" "$OVL/libQt5X11Extras.so.5.15" "$OVL/libQt5X11Extras.so.5.15.8" \
+        "$OVL/librsvg-2.so"      "$OVL/librsvg-2.so.2.40.20" \
+        "$OVL/libsecret-1.so.0" \
+        "$OVL/libselinux.so.1" \
+        "$OVL/libSoundTouch.so"  "$OVL/libSoundTouch.so.1"       "$OVL/libSoundTouch.so.1.0.0" \
+        "$OVL/libtdb.so.1" \
+        "$OVL/libthai.so.0"      "$OVL/libthai.so.0.3"           "$OVL/libthai.so.0.3.1" \
+        "$OVL/libunistring.so.2" \
+        "$OVL/libwayland-client.so.0" \
+        "$OVL/libwayland-cursor.so.0" \
+        "$OVL/libwayland-egl.so.1" \
+        "$OVL/libwayland-server.so.0" \
+        "$OVL/libxslt.so"        "$OVL/libxslt.so.1.1.34" \
+        "$OVL/libyaml-cpp.so"    "$OVL/libyaml-cpp.so.0.6"      "$OVL/libyaml-cpp.so.0.6.3" \
+        2>/dev/null || true
+
+    # Top-level /lib/ DRL files (DRL remover handles /overlay/overlay/lib/ but belt-and-suspenders)
+    rm -f \
+        /overlay/overlay/lib/libfdisk.so.1.1.0 \
+        /overlay/overlay/lib/libthai.so.0.3.1 \
+        2>/dev/null || true
 
     rmdir \
         /etc/xdg/libfm \
@@ -65,6 +100,9 @@ cleanup_drl_rootfs_remnants() {
         /etc/X11 \
         /usr/share/icons/batocera \
         2>/dev/null || true
+
+    batocera-services stop symlink_manager 2>/dev/null || true
+    batocera-services start symlink_manager 2>/dev/null &
 }
 
 # Detect existing DRL install
@@ -114,6 +152,16 @@ if [ -d "$ADDON_DIR/rootfs" ]; then
 
     echo "Stopping desktop service..."
     batocera-services stop desktop
+
+    echo "Removing renamed/obsolete files from rootfs..."
+    # Binaries renamed from Portuguese
+    rm -f "$DEST_DIR/usr/bin/flat-atalho"
+    rm -f "$DEST_DIR/usr/bin/linksimb"
+    rm -f "$DEST_DIR/usr/bin/tema"
+    # Desktop files for renamed binaries
+    rm -f "$DEST_DIR/usr/share/applications/linksimb.desktop"
+    # Icon renamed
+    rm -f "$DEST_DIR/usr/share/icons/batocera/tema.png"
 fi
 
 # Create temp directories
@@ -163,6 +211,10 @@ if [ "$IS_UPDATE" -eq 1 ]; then
     [ -f "$BACKUP_DIR/desktop-items-0.conf" ] && \
         cp "$BACKUP_DIR/desktop-items-0.conf" /userdata/system/.config/pcmanfm/default/desktop-items-0.conf
     [ -f "$BACKUP_DIR/current.palette" ] && mkdir -p "$(dirname "$PALETTE_FILE")" && cp "$BACKUP_DIR/current.palette" "$PALETTE_FILE"
+
+    # Re-apply system Desktop files from squashfs — overwrite any stale versions restored from backup
+    echo "Updating system Desktop files..."
+    cp -r "$EXTRACT_DIR/userdata/system/Desktop/." /userdata/system/Desktop/ 2>/dev/null || true
 fi
 
 # Cleanup
