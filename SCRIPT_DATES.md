@@ -178,7 +178,7 @@
 | `mubi/mubi_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `netflix/netflix.sh` | 2025-05-22 18:04:11 +0100 |
 | `netflix/netflix_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `nvidiapatch/nvidiapatch-service.sh` | 2026-05-04 21:46:58 +0100 |
+| `nvidiapatch/nvidiapatch-service.sh` | 2026-05-09 20:25:12 +0000 |
 | `nvidiapatch/nvidiapatch.sh` | 2025-11-25 17:42:22 +0000 |
 | `nvidiapatch/nvidiapatch_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `nvidiapatch/patches.sh` | 2026-05-04 21:46:58 +0100 |

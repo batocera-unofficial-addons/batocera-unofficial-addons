@@ -16,6 +16,25 @@ link_file() {
     local target="${src#${ROOTFS}}"
     mkdir -p "$(dirname "$target")"
 
+    if [ -L "$src" ]; then
+        # Replicate symlinks from rootfs using their original target,
+        # not pointing into the rootfs itself. This preserves the correct
+        # .so / .so.0 → .so.<version> chain on the host without extra hops.
+        local link_target; link_target="$(readlink "$src")"
+        if [ -L "$target" ]; then
+            local cur; cur="$(readlink "$target")"
+            [ "$cur" = "$link_target" ] && return  # already correct
+            log "Replacing symlink: $target -> $cur (now -> $link_target)"
+            rm "$target"
+        elif [ -e "$target" ]; then
+            log "Backing up: $target -> ${target}.bak"
+            mv "$target" "${target}.bak"
+        fi
+        log "Linking (symlink): $target -> $link_target"
+        ln -s "$link_target" "$target"
+        return
+    fi
+
     if [ -L "$target" ]; then
         local cur; cur="$(readlink "$target")"
         if [ "$cur" = "$src" ]; then
@@ -39,7 +58,15 @@ unlink_file() {
 
     if [ -L "$target" ]; then
         local cur; cur="$(readlink "$target")"
-        if [ "$cur" = "$src" ]; then
+        # For replicated symlinks, compare against the rootfs symlink target.
+        # For file symlinks, compare against the rootfs src path.
+        local expected
+        if [ -L "$src" ]; then
+            expected="$(readlink "$src")"
+        else
+            expected="$src"
+        fi
+        if [ "$cur" = "$expected" ]; then
             log "Removing symlink: $target"
             rm "$target"
             [ -e "${target}.bak" ] && { log "Restoring: ${target}.bak"; mv "${target}.bak" "$target"; }
@@ -54,13 +81,13 @@ unlink_file() {
 
 apply_symlinks() {
     [ -d "$ROOTFS" ] || { log "ERROR: rootfs missing at $ROOTFS"; exit 1; }
-    find "$ROOTFS" -type f | while read -r src; do link_file "$src"; done
+    find "$ROOTFS" \( -type f -o -type l \) | while read -r src; do link_file "$src"; done
     log "Symlink pass complete."
 }
 
 remove_symlinks() {
     [ -d "$ROOTFS" ] || { log "rootfs missing, nothing to remove."; return; }
-    find "$ROOTFS" -type f | while read -r src; do unlink_file "$src"; done
+    find "$ROOTFS" \( -type f -o -type l \) | while read -r src; do unlink_file "$src"; done
     log "Symlink removal complete."
 }
 
@@ -83,8 +110,13 @@ case "$1" in
         missing=0
         while IFS= read -r src; do
             target="${src#${ROOTFS}}"
-            [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ] || missing=$((missing+1))
-        done < <(find "$ROOTFS" -type f)
+            if [ -L "$src" ]; then
+                expected="$(readlink "$src")"
+            else
+                expected="$src"
+            fi
+            [ -L "$target" ] && [ "$(readlink "$target")" = "$expected" ] || missing=$((missing+1))
+        done < <(find "$ROOTFS" \( -type f -o -type l \))
         [ "$missing" -eq 0 ] && echo "${ADDON_NAME}: all symlinks active." \
                               || echo "${ADDON_NAME}: ${missing} symlink(s) missing or broken."
         ;;
