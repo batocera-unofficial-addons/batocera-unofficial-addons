@@ -468,6 +468,8 @@ else
     fi
 fi
 
+killall -9 emulationstation
+
 echo ""
 if [ "$IS_UPDATE" -eq 1 ]; then
     echo "Update complete."
