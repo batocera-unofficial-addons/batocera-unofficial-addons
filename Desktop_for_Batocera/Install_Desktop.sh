@@ -295,6 +295,7 @@ apply_symlinks() {
         ! -path "${ROOTFS}/usr/share/themes/*" \
         ! -path "${ROOTFS}/usr/share/tint2/*/*" \
         ! -path "${ROOTFS}/usr/share/icons/*" \
+        ! -path "${ROOTFS}/usr/share/desktop-palettes/*" \
         ! -path "${ROOTFS}/etc/openbox/rc.xml" \
         | while read -r src; do link_file "$src"; done
     log "Symlink pass complete."
@@ -306,6 +307,7 @@ remove_symlinks() {
         ! -path "${ROOTFS}/usr/share/themes/*" \
         ! -path "${ROOTFS}/usr/share/tint2/*/*" \
         ! -path "${ROOTFS}/usr/share/icons/*" \
+        ! -path "${ROOTFS}/usr/share/desktop-palettes/*" \
         ! -path "${ROOTFS}/etc/openbox/rc.xml" \
         | while read -r src; do unlink_file "$src"; done
     log "Symlink removal complete."
@@ -370,6 +372,26 @@ unlink_files_from_dir() {
     done
 }
 
+link_dir() {
+    local src="$1" target="$2"
+    if [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ]; then return; fi
+    if [ -e "$target" ]; then
+        log "Backing up: $target -> ${target}.bak"
+        mv "$target" "${target}.bak"
+    fi
+    log "Linking dir: $target -> $src"
+    ln -s "$src" "$target"
+}
+
+unlink_dir() {
+    local src="$1" target="$2"
+    if [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ]; then
+        log "Removing dir symlink: $target"
+        rm "$target"
+        [ -e "${target}.bak" ] && { log "Restoring: ${target}.bak"; mv "${target}.bak" "$target"; }
+    fi
+}
+
 link_icon_packs() {
     [ -d "$ICONS_DIR" ] || return
     local pack target
@@ -408,6 +430,7 @@ case "$1" in
         link_files_into_dir "${ROOTFS}/usr/share/icons/batocera" "/usr/share/icons/batocera"
         link_dir_packs "${ROOTFS}/usr/share/themes" "/usr/share/themes"
         link_dir_packs "${ROOTFS}/usr/share/tint2" "/usr/share/tint2"
+        link_dir "${ROOTFS}/usr/share/desktop-palettes" "/usr/share/desktop-palettes"
         ;;
     stop)
         mkdir -p /userdata/system/logs
@@ -418,6 +441,7 @@ case "$1" in
         unlink_files_from_dir "${ROOTFS}/usr/share/icons/batocera" "/usr/share/icons/batocera"
         unlink_dir_packs "${ROOTFS}/usr/share/themes" "/usr/share/themes"
         unlink_dir_packs "${ROOTFS}/usr/share/tint2" "/usr/share/tint2"
+        unlink_dir "${ROOTFS}/usr/share/desktop-palettes" "/usr/share/desktop-palettes"
         ;;
     status)
         if [ ! -d "$ROOTFS" ]; then

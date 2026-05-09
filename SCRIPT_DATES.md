@@ -7,7 +7,7 @@
 | `7zip/7zip.sh` | 2025-05-22 17:09:18 +0100 |
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Android/Install_Android.sh` | 2026-05-04 21:46:58 +0100 |
-| `Desktop_for_Batocera/Install_Desktop.sh` | 2026-05-07 21:42:58 +0100 |
+| `Desktop_for_Batocera/Install_Desktop.sh` | 2026-05-09 20:26:19 +0000 |
 | `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2026-05-04 21:46:58 +0100 |
 | `Freej2me/Install_j2me-old .sh` | 2025-03-29 15:06:00 -0300 |
 | `Freej2me/Install_j2me-old _uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -178,7 +178,7 @@
 | `mubi/mubi_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `netflix/netflix.sh` | 2025-05-22 18:04:11 +0100 |
 | `netflix/netflix_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `nvidiapatch/nvidiapatch-service.sh` | 2026-05-09 20:25:12 +0000 |
+| `nvidiapatch/nvidiapatch-service.sh` | 2026-05-09 21:25:10 +0100 |
 | `nvidiapatch/nvidiapatch.sh` | 2025-11-25 17:42:22 +0000 |
 | `nvidiapatch/nvidiapatch_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `nvidiapatch/patches.sh` | 2026-05-04 21:46:58 +0100 |
