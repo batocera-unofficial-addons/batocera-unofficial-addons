@@ -51,10 +51,18 @@ def live_update_block():
         # Example: Setup custom_service_handler
         setup_custom_service_handler()
 
-        # Add more live update tasks here as needed
-        # Example:
-        # fix_legacy_configs()
-        # update_system_files()
+        # Ensure usercustomize.py is present (BUA Python hook for add-on generators)
+        usercustomize_path = "/userdata/system/.local/lib/python3.12/site-packages/usercustomize.py"
+        if not os.path.exists(usercustomize_path):
+            try:
+                os.makedirs(os.path.dirname(usercustomize_path), exist_ok=True)
+                subprocess.run(
+                    ["curl", "-fLs", "-o", usercustomize_path,
+                     "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/usercustomize.py"],
+                    check=False
+                )
+            except Exception as e:
+                print(f"[BUA] Failed to install usercustomize.py: {e}")
 
     except Exception as e:
         print(f"[BUA] Live update block error: {e}")

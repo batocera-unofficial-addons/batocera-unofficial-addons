@@ -28,10 +28,10 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
-- Steam: game launchers now auto-detect dedicated GPU and apply Nvidia Vulkan fixes (delete /userdata/roms/steam/*.sh and relaunch Steam to regenerate)
-- Steam fixes and improvements
-- Added Jellyfin Player - native media player client with controller support
-- Steam installer now always downloads a fresh copy, fixing stale version issues
+- Added AzaharPlus - selectable 3DS emulator option alongside Azahar
+- Desktop: wallpaper and icon layout now preserved on update
+- Desktop: improved DRL migration and palette support
+- NVIDIAPatch: fixed GLX chain on host
 """.strip()
 
 # ------------------------------
@@ -564,6 +564,7 @@ APPS: Dict[str, str] = {
     "Armagetron": bua("armagetron/armagetron.sh"),
     "Arcade Manager": bua("arcademanager/arcademanager.sh"),
     "Assault Cube": bua("assaultcube/assaultcube.sh"),
+    "AzaharPlus": bua("azaharplus/azaharplus.sh"),
     "Brave": bua("brave/brave.sh"),
     "Chiaki": bua("chiaki/chiaki.sh"),
     "Chrome": bua("chrome/chrome.sh"),
@@ -5862,6 +5863,19 @@ def live_update():
         )
     except Exception as e:
         print(f"[BUA] Failed to reinstall BUA from install.batoaddons.app: {e}")
+
+    # Ensure usercustomize.py is present (BUA Python hook for add-on generators)
+    usercustomize_path = "/userdata/system/.local/lib/python3.12/site-packages/usercustomize.py"
+    if not os.path.exists(usercustomize_path):
+        try:
+            os.makedirs(os.path.dirname(usercustomize_path), exist_ok=True)
+            subprocess.run(
+                ["curl", "-fLs", "-o", usercustomize_path,
+                 "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/usercustomize.py"],
+                check=False
+            )
+        except Exception as e:
+            print(f"[BUA] Failed to install usercustomize.py: {e}")
 def check_symlink_manager_and_warn():
     symlink_manager_path = "/userdata/system/services/symlink_manager"
 
