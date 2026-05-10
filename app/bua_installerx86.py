@@ -749,6 +749,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "Fightcade": "*UPDATED* Play classic arcade games online.",
     "SuperTuxKart": "Free and open-source kart racer.",
     "OpenRA": "Modernized RTS for Command & Conquer.",
+    "AzaharPlus": "AzaharPlus 3DS emulator - selectable alongside Azahar in EmulationStation.",
     "Assault Cube": "Multiplayer first-person shooter game.",
     "OBS": "Streaming and video recording software.",
     "SuperTux": "2D platformer starring Tux the Linux mascot.",
@@ -891,7 +892,7 @@ CATEGORIES: Dict[str, List[str]] = {
         "Arr-In-One Downloaders",
     ],
     "Game Utilities": [
-        "Android", "Amazon Luna", "PortMaster", "Greenlight", "ShadPS4",
+        "Android", "Amazon Luna", "AzaharPlus", "PortMaster", "Greenlight", "ShadPS4",
         "Chiaki", "Heroic", "Switch", "Parsec", "Java Runtime", "Freej2me",
         "Steam", "Lutris", "Bottles", "Sunshine", "Moonlight", "Bridge",
         "Itch.io", "Everest", "RGSX"
