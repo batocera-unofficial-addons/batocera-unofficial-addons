@@ -52,7 +52,7 @@ def live_update_block():
         setup_custom_service_handler()
 
         # Ensure usercustomize.py is present (BUA Python hook for add-on generators)
-        usercustomize_path = "/userdata/system/.local/lib/python3.12/site-packages/usercustomize.py"
+        usercustomize_path = f"/userdata/system/.local/lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages/usercustomize.py"
         if not os.path.exists(usercustomize_path):
             try:
                 os.makedirs(os.path.dirname(usercustomize_path), exist_ok=True)
