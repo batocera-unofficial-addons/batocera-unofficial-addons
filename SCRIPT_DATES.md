@@ -210,7 +210,7 @@
 | `portmaster/portmaster_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `prime/prime.sh` | 2025-05-22 18:08:16 +0100 |
 | `prime/prime_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `prismlauncher/prismlauncher.sh` | 2026-05-11 02:46:29 +0000 |
+| `prismlauncher/prismlauncher.sh` | 2026-05-11 03:46:27 +0100 |
 | `prismlauncher/prismlauncher_uninstall.sh` | 2026-05-11 03:41:32 +0100 |
 | `qbittorrent/qbittorrent.sh` | 2026-04-17 14:03:29 +0100 |
 | `qbittorrent/qbittorrent_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
