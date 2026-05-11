@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ADDON_NAME="desktop_drl"
+ADDON_NAME="desktop"
 ADDON_DIR="/userdata/system/add-ons/${ADDON_NAME}"
 SERVICE_PATH="/userdata/system/services/${ADDON_NAME}"
 TEMP_DIR="/userdata/tmp/Desktop_for_Batocera"
