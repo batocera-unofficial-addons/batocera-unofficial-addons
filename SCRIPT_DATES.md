@@ -26,8 +26,8 @@
 | `app/BatoceraUnofficialAddons_ARM64.sh` | 2025-05-22 17:15:31 +0100 |
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2025-11-20 16:56:24 +0000 |
-| `app/bua_installerarm64.py` | 2026-05-11 02:41:32 +0000 |
-| `app/bua_installerx86.py` | 2026-05-11 02:41:32 +0000 |
+| `app/bua_installerarm64.py` | 2026-05-11 03:41:32 +0100 |
+| `app/bua_installerx86.py` | 2026-05-11 03:41:32 +0100 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -210,8 +210,8 @@
 | `portmaster/portmaster_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `prime/prime.sh` | 2025-05-22 18:08:16 +0100 |
 | `prime/prime_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `prismlauncher/prismlauncher.sh` | 2026-05-11 02:41:34 +0000 |
-| `prismlauncher/prismlauncher_uninstall.sh` | 2026-05-11 02:41:34 +0000 |
+| `prismlauncher/prismlauncher.sh` | 2026-05-11 02:46:29 +0000 |
+| `prismlauncher/prismlauncher_uninstall.sh` | 2026-05-11 03:41:32 +0100 |
 | `qbittorrent/qbittorrent.sh` | 2026-04-17 14:03:29 +0100 |
 | `qbittorrent/qbittorrent_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `qga/qemu-ga_uninstall.sh` | 2025-11-13 17:23:41 +0000 |

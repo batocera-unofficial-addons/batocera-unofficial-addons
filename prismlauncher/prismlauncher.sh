@@ -48,25 +48,12 @@ if [ $? -ne 0 ] || [ ! -s "$INSTALL_DIR/prismlauncher.AppImage" ]; then
 fi
 chmod +x "$INSTALL_DIR/prismlauncher.AppImage"
 
-# Extract icon from AppImage
-echo "Extracting icon..."
-mkdir -p /tmp/prism-icon-extract
-cd /tmp/prism-icon-extract
-"$INSTALL_DIR/prismlauncher.AppImage" --appimage-extract \
-    'usr/share/icons/hicolor/128x128/apps/org.prismlauncher.PrismLauncher.png' 2>/dev/null
-ICON_PATH=$(find /tmp/prism-icon-extract/squashfs-root -name "*.png" 2>/dev/null | head -1)
-if [ -n "$ICON_PATH" ]; then
-    cp "$ICON_PATH" "$INSTALL_DIR/extra/icon.png"
-else
-    # Fallback: download from GitHub
-    wget -q -O "$INSTALL_DIR/extra/icon.png" \
-        "https://raw.githubusercontent.com/PrismLauncher/PrismLauncher/develop/program_info/org.prismlauncher.PrismLauncher.png" 2>/dev/null
-fi
-rm -rf /tmp/prism-icon-extract
-cd /
-
-# Copy icon to ports images
-cp "$INSTALL_DIR/extra/icon.png" "/userdata/roms/ports/images/PrismLauncher-logo.png" 2>/dev/null
+# Download icon and logo
+echo "Downloading icons..."
+wget -q -O "$INSTALL_DIR/extra/icon.png" \
+    "https://www.dockhunt.com/_next/image?url=https%3A%2F%2Fdockhunt-images.nyc3.cdn.digitaloceanspaces.com%2F5442e865-9ce3-46b2-b903-903e59bceb52&w=384&q=75"
+wget -q -O "/userdata/roms/ports/images/PrismLauncher-logo.png" \
+    "https://cdn2.steamgriddb.com/grid/3e07c460e84a27fa5b2426b05ad4b479.png"
 
 # Create launch wrapper
 cat <<'LAUNCH' > "$INSTALL_DIR/launch.sh"
