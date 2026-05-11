@@ -28,6 +28,7 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
+- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support
 - Added AzaharPlus - selectable 3DS emulator option alongside Azahar
 - Replaced StepMania with ITGMania - ITG-focused rhythm game with bundled songs
 - Desktop: wallpaper and icon layout now preserved on update
@@ -593,6 +594,7 @@ APPS: Dict[str, str] = {
     "JDownloader": bua("jdownloader/jdownloader.sh"),
     "Java Runtime": bua("java/java.sh"),
     "Minecraft": bua("minecraft/minecraft.sh"),
+    "Prism Launcher": bua("prismlauncher/prismlauncher.sh"),
     "Moonlight": bua("moonlight/moonlight.sh"),
     "Netflix": bua("netflix/netflix.sh"),
     "NVIDIA Patcher": bua("nvidiapatch/nvidiapatch.sh"),
@@ -715,6 +717,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "ShadPS4": "UPDATED 11/11 to ShadPS4Plus | Experimental PS4 streaming client.",
     "Conty": "Standalone Linux distro container.",
     "Minecraft": "Minecraft: Java or Bedrock Edition.",
+    "Prism Launcher": "Open source Minecraft launcher with mod management and multi-instance support.",
     "Armagetron": "Tron-style light cycle game.",
     "Clone Hero": "Guitar Hero clone for Batocera.",
     "Stremio": "Stremio video streaming app for Batocera.",
@@ -848,7 +851,7 @@ DESCRIPTIONS.update({
 
 CATEGORIES: Dict[str, List[str]] = {
     "Games": [
-        "Minecraft", "Armagetron", "Clone Hero", "Endless Sky", "EGGNOGG+", "CS Portable",
+        "Minecraft", "Prism Launcher", "Armagetron", "Clone Hero", "Endless Sky", "EGGNOGG+", "CS Portable",
         "Warzone 2100", "Xonotic", "Fightcade", "SuperTuxKart", "OpenRA",
         "Assault Cube", "SuperTux", "Free Droid RPG", "ITGMania", "Ambermoon",
         "YARG", "OpenTTD", "Luanti", "Super Mario X", "Celeste 64", "UltraStar",

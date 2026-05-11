@@ -25,6 +25,7 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
+- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support
 - Added Jellyfin Player - native media player client with controller support
 """.strip()
 
@@ -571,6 +572,7 @@ APPS: Dict[str, str] = {
     "IPTV Nator": bua("iptvnator/iptvnator.sh"),
     "Luanti": bua("luanti/luanti.sh"),
     "Minecraft": bua("minecraft/bedrock.sh"),
+    "Prism Launcher": bua("prismlauncher/prismlauncher.sh"),
     "Nazi Zombies Portable": bua("nzp/nzp.sh"),
     "PortMaster": bua("portmaster/portmaster.sh"),
     "Raspberry Pi Imager": bua("rpi/rpi.sh"),
@@ -618,6 +620,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "IPTV Nator": "IPTV client for watching live TV.",
     "Luanti": "Voxel sandbox (Minecraft-like)",
     "Minecraft": "Minecraft: Bedrock Edition.",
+    "Prism Launcher": "Open source Minecraft launcher with mod management and multi-instance support.",
     "Nazi Zombies Portable": "Classic Nazi Zombies on modern platforms",
     "PortMaster": "Download and manage games on handhelds.",
     "Raspberry Pi Imager": "Flash OS images to USB and SD cards.",
@@ -644,7 +647,7 @@ DESCRIPTIONS: Dict[str, str] = {
 
 CATEGORIES: Dict[str, List[str]] = {
     "Games": [
-        "Luanti", "Minecraft", "Super Mario X", "SuperTuxKart", "Celeste 64", "Nazi Zombies Portable"
+        "Luanti", "Minecraft", "Prism Launcher", "Super Mario X", "SuperTuxKart", "Celeste 64", "Nazi Zombies Portable"
     ],
     "Game Utilities": [
         "PortMaster", "Chiaki", "Greenlight", "Amazon Luna", "RGSX"
