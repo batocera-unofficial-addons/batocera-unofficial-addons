@@ -29,6 +29,7 @@ import hashlib
 
 CHANGELOG = """
 - Added AzaharPlus - selectable 3DS emulator option alongside Azahar
+- Replaced StepMania with ITGMania - ITG-focused rhythm game with bundled songs
 - Desktop: wallpaper and icon layout now preserved on update
 - Desktop: improved DRL migration and palette support
 - NVIDIAPatch: fixed GLX chain on host
@@ -603,7 +604,7 @@ APPS: Dict[str, str] = {
     "qBittorrent": bua("qbittorrent/qbittorrent.sh"),
     "ShadPS4": bua("shadps4plus/shadps4plus.sh"),
     "Spotify": bua("spotify/spotify.sh"),
-    "StepMania": bua("stepmania/stepmania.sh"),
+    "ITGMania": bua("itgmania/itgmania.sh"),
     "Stremio": bua("stremio/stremio.sh"),
     "Sunshine": bua("sunshine/sunshine.sh"),
     "SuperTux": bua("supertux/supertux.sh"),
@@ -759,7 +760,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "NVIDIA Clocker": "A CLI/Ports program to overclock NVIDIA GPUs",
     "7zip": "A free and open-source file archiver",
     "qBittorrent": "Free and open-source BitTorrent client",
-    "StepMania": "A dancemat compatible rhythm video game and engine",
+    "ITGMania": "In The Groove-focused rhythm game, fork of StepMania with ITG improvements.",
     "Ambermoon": "Ambermoon.net, a port of the classic",
     "Custom Wine": "Download Wine/Proton versions",
     "GParted": "Linux partition manager",
@@ -849,7 +850,7 @@ CATEGORIES: Dict[str, List[str]] = {
     "Games": [
         "Minecraft", "Armagetron", "Clone Hero", "Endless Sky", "EGGNOGG+", "CS Portable",
         "Warzone 2100", "Xonotic", "Fightcade", "SuperTuxKart", "OpenRA",
-        "Assault Cube", "SuperTux", "Free Droid RPG", "StepMania", "Ambermoon",
+        "Assault Cube", "SuperTux", "Free Droid RPG", "ITGMania", "Ambermoon",
         "YARG", "OpenTTD", "Luanti", "Super Mario X", "Celeste 64", "UltraStar",
         "Sandtrix"
     ],

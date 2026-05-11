@@ -26,8 +26,8 @@
 | `app/BatoceraUnofficialAddons_ARM64.sh` | 2025-05-22 17:15:31 +0100 |
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2025-11-20 16:56:24 +0000 |
-| `app/bua_installerarm64.py` | 2026-05-10 22:47:13 +0000 |
-| `app/bua_installerx86.py` | 2026-05-10 22:47:13 +0000 |
+| `app/bua_installerarm64.py` | 2026-05-10 23:47:13 +0100 |
+| `app/bua_installerx86.py` | 2026-05-11 00:20:34 +0000 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -53,7 +53,7 @@
 | `armagetron/armagetron_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `assaultcube/assaultcube.sh` | 2026-04-17 14:03:29 +0100 |
 | `assaultcube/assaultcube_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `azaharplus/azaharplus.sh` | 2026-05-10 22:47:14 +0000 |
+| `azaharplus/azaharplus.sh` | 2026-05-10 23:47:13 +0100 |
 | `azaharplus/azaharplus_uninstall.sh` | 2026-05-10 23:34:28 +0100 |
 | `azaharplus/generator/azaharplus/__init__.py` | 2026-05-10 23:34:28 +0100 |
 | `azaharplus/generator/azaharplus/azaharplusGenerator.py` | 2026-05-10 23:34:28 +0100 |
@@ -156,6 +156,8 @@
 | `itchio/itch-old.sh` | 2025-06-06 18:34:39 -0300 |
 | `itchio/itch-old_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `itchio/itch.sh` | 2026-04-21 16:00:36 +0200 |
+| `itgmania/itgmania.sh` | 2026-05-11 00:20:35 +0000 |
+| `itgmania/itgmania_uninstall.sh` | 2026-05-11 00:20:35 +0000 |
 | `java/java - Copia.sh` | 2025-01-07 22:20:11 -0300 |
 | `java/java-jdk19.sh` | 2025-11-13 23:41:52 +0000 |
 | `java/java.sh` | 2025-05-22 17:58:43 +0100 |
