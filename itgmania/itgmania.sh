@@ -63,4 +63,3 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
 curl -s http://127.0.0.1:1234/reloadgames
 
 echo "ITGMania installation complete."
-killall -9 emulationstation

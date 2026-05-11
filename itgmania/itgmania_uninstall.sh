@@ -34,5 +34,3 @@ echo ""
 echo "========================================="
 echo "Uninstallation complete: ITGMania"
 echo "========================================="
-
-killall -9 emulationstation
