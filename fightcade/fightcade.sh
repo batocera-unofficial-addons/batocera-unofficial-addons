@@ -8,6 +8,7 @@ ARM_SUFFIX=""
 LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/fightcade/extra/fightcade-logo.png"
 KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/fightcade/extra/Fightcade.sh.keys"
 SYM_WINE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/fightcade/sym_wine.sh"
+TEMPLATE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/fightcade/switchres_fightcade_wrap.template.sh"
 # Directories
 ADDONS_DIR="/userdata/system/add-ons"
 PORTS_DIR="/userdata/roms/ports"
@@ -175,16 +176,18 @@ fi
 echo "JSON files downloaded, extracted, moved, and cleaned up successfully in $EMULATOR_DIR."
 
 # Switchres wrapper for fcade:// (TEST GAME and ONLINE MATCH use the same URL path)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 SW_WRAP="${ADDONS_DIR}/${APP_NAME,,}/extra/switchres_fightcade_wrap.sh"
 mkdir -p "${ADDONS_DIR}/${APP_NAME,,}/extra"
-TEMPLATE="$SCRIPT_DIR/switchres_fightcade_wrap.template.sh"
+TEMPLATE="/tmp/switchres_fightcade_wrap.template.sh"
+echo "Downloading Switchres wrapper template..."
+wget -q --show-progress -O "$TEMPLATE" "$TEMPLATE_URL"
 if [ ! -r "$TEMPLATE" ]; then
-    echo "ERROR: switchres_fightcade_wrap.template.sh not found next to fightcade.sh ($SCRIPT_DIR)" >&2
+    echo "ERROR: Failed to download switchres_fightcade_wrap.template.sh" >&2
     exit 1
 fi
 sed "s|__FIGHTCADE_ADDON__|${ADDONS_DIR}/${APP_NAME,,}|g" "$TEMPLATE" > "$SW_WRAP"
 chmod +x "$SW_WRAP"
+rm -f "$TEMPLATE"
 echo "Installed Switchres fcade:// wrapper at $SW_WRAP"
 
 
