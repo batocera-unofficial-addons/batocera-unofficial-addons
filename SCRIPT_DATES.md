@@ -8,7 +8,7 @@
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Android/Install_Android.sh` | 2026-05-04 21:46:58 +0100 |
 | `Desktop_for_Batocera/Install_Desktop.sh` | 2026-05-09 21:26:19 +0100 |
-| `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2026-05-04 21:46:58 +0100 |
+| `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2026-05-11 11:35:15 +0100 |
 | `Freej2me/Install_j2me-old .sh` | 2025-03-29 15:06:00 -0300 |
 | `Freej2me/Install_j2me-old _uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Freej2me/Install_j2me.sh` | 2026-05-04 21:46:58 +0100 |
@@ -118,8 +118,9 @@
 | `f1/f1-1_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `f1/f1-old1.sh` | 2025-06-21 01:30:01 -0300 |
 | `f1/f1.sh` | 2026-05-04 21:46:58 +0100 |
-| `fightcade/fightcade.sh` | 2026-05-01 21:13:04 +0100 |
+| `fightcade/fightcade.sh` | 2026-05-11 08:22:49 -0600 |
 | `fightcade/fightcade_uninstall.sh` | 2026-02-25 11:59:39 -0700 |
+| `fightcade/switchres_fightcade_wrap.template.sh` | 2026-05-11 08:22:49 -0600 |
 | `fightcade/sym_wine.sh` | 2025-01-13 02:20:54 +0000 |
 | `filezilla/filezilla.sh` | 2025-05-22 17:53:05 +0100 |
 | `filezilla/filezilla_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
