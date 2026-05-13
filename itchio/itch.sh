@@ -167,6 +167,7 @@ clear
 # 2. Directory Creation
 echo "Creating necessary directories..."
 mkdir -p "$DESKTOP_DIR" || error_exit "Failed to create $DESKTOP_DIR"
+mkdir -p $(dirname "$PATH_DESKTOP") || error_exit "Failed to create $PATH_DESKTOP directory"
 mkdir -p "$IMAGES_DIR" || error_exit "Failed to create $IMAGES_DIR"
 echo "Directories created."
 

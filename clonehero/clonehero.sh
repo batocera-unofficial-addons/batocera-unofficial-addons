@@ -9,7 +9,7 @@ APPDIR="/userdata/system/add-ons/${APPNAME,,}"
 
 # Define launcher command
 
-COMMAND='sysctl -w vm.max_map_count=2097152; ulimit -H -n 819200; ulimit -S -n 819200; ulimit -S -n 819200 clonehero; ulimit -H -l 61634; ulimit -S -l 61634; ulimit -H -s 61634; ulimit -S -s 61634; mkdir '$APPDIR'/home 2>/dev/null; mkdir '$APPDIR'/config 2>/dev/null; mkdir '$APPDIR'/roms 2>/dev/null; HOME='$APPDIR'/home XDG_CONFIG_HOME='$APPDIR'/config XDG_DATA_HOME='$APPDIR'/home XDG_CURRENT_DESKTOP=XFCE DESKTOP_SESSION=XFCE DISPLAY=:0.0 '$APPDIR'/'${APPNAME,,}' ${@}'
+COMMAND='sysctl -w vm.max_map_count=2097152; ulimit -H -n 819200; ulimit -S -n 819200; ulimit -S -n 819200 clonehero; ulimit -H -l 61634; ulimit -S -l 61634; ulimit -H -s 61634; ulimit -S -s 61634; mkdir '$APPDIR'/home 2>/dev/null; mkdir '$APPDIR'/config 2>/dev/null; mkdir '$APPDIR'/roms 2>/dev/null; HOME='$APPDIR'/home XDG_CONFIG_HOME='$APPDIR'/config XDG_DATA_HOME='$APPDIR'/home XDG_CURRENT_DESKTOP=XFCE DESKTOP_SESSION=XFCE DISPLAY=:0.0 '$APPDIR'/'${APPNAME,,}' ${@} &'
 
 # Prepare installation directories
 mkdir -p "$APPDIR/extra"
@@ -26,9 +26,27 @@ rm -rf "$TEMP_DIR"
 
 # Create launcher script
 LAUNCHER="$APPDIR/Launcher"
-echo "#!/bin/bash" > "$LAUNCHER"
-echo "~/add-ons/.dep/mousemove.sh 2>/dev/null" >> "$LAUNCHER"
+cat > "$LAUNCHER" << 'LAUNCHEREOF'
+#!/bin/bash
+~/add-ons/.dep/mousemove.sh 2>/dev/null
+LAUNCHEREOF
 echo "$COMMAND" >> "$LAUNCHER"
+cat >> "$LAUNCHER" << 'LAUNCHEREOF'
+CLONE_PID=$!
+
+# Wait for Clone Hero window to appear (up to 60s)
+for i in $(seq 1 120); do
+    xdotool search --name "Clone Hero" >/dev/null 2>&1 && break
+    sleep 0.5
+done
+
+# Block until window is gone
+while xdotool search --name "Clone Hero" >/dev/null 2>&1; do
+    sleep 1
+done
+
+wait $CLONE_PID 2>/dev/null
+LAUNCHEREOF
 chmod +x "$LAUNCHER"
 
 # Create application shortcut

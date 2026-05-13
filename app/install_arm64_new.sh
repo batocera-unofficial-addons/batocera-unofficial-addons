@@ -141,5 +141,12 @@ chmod +x "$CUSTOM_STARTUP_SCRIPT"
 
 modprobe fuse
 
+# Install BUA Python hook (enables add-on configgen generators)
+echo "Installing BUA Python hook..."
+USERCUSTOMIZE_DIR="/userdata/system/.local/lib/python3.12/site-packages"
+mkdir -p "$USERCUSTOMIZE_DIR"
+curl -fLs -o "$USERCUSTOMIZE_DIR/usercustomize.py" \
+    "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/usercustomize.py"
+
 echo
 echo "Installation complete! You can now launch Batocera Unofficial Add-Ons from the Ports menu."

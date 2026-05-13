@@ -96,13 +96,12 @@ echo "Welcome to the automatic installer for the Winconfig by DRL Edition."
 TEMP_DIR="/userdata/tmp/Winconfig"
 DRL_FILE="$TEMP_DIR/Winconfig.DRL"
 EXTRACT_DIR="$TEMP_DIR/extracted"
-DEST_DIR="/"
 PORTS_DIR="/userdata/roms/ports"
+ADDON_BIN="/userdata/system/add-ons/winconfig/bin"
 DEPS_INSTALLER="- Windows Game Fix.sh"
 
 # Create the temporary directories
 echo "Creating temporary directories..."
-batocera-save-overlay 300
 mkdir -p $TEMP_DIR
 mkdir -p $EXTRACT_DIR
 mkdir -p $PORTS_DIR
@@ -140,31 +139,14 @@ else
     echo "Warning: Winconfig installer not found in the extracted files"
 fi
 
-# Copy the extracted files to the root directory
-echo "Copying files to the system..."
-cp -rf $EXTRACT_DIR/* $DEST_DIR
+# Copy persistent userdata contents (port launchers, configs, binaries)
+echo "Installing addon files..."
+cp -r "$EXTRACT_DIR/userdata/." /userdata/
 
-# Create symbolic links
-echo "Creating symbolic links..."
-
-# Function to create a symbolic link and remove the target if it already exists
-create_symlink() {
-    local target="$1"
-    local link="$2"
-
-    # Remove existing file or directory
-    if [ -e "$link" ] || [ -L "$link" ]; then
-        echo "Removing existing link or file: $link"
-        rm -rf "$link"
-    fi
-
-    # Create the new symbolic link
-    ln -s "$target" "$link"
-    echo "Created symlink: $link → $target"
-}
-
-# create_symlink "/userdata/system/configs/bat-drl/AntiMicroX" "/opt/AntiMicroX"
-create_symlink "/userdata/system/configs/bat-drl/AntiMicroX/antimicrox" "/usr/bin/antimicrox"
+# Place usr/bin files in add-ons dir for symlinks.sh to pick up
+mkdir -p "$ADDON_BIN"
+cp "$EXTRACT_DIR/usr/bin/"* "$ADDON_BIN/"
+chmod +x "$ADDON_BIN/"*
 
 # Set permissions for specific files
 echo "Setting permissions for specific files..."
@@ -175,9 +157,6 @@ chmod 777 /userdata/system/configs/bat-drl/AntiMicroX/antimicrox.sh
 echo "Cleaning up..."
 rm -rf $TEMP_DIR
 
-# Save changes
-echo "Saving changes..."
-batocera-save-overlay
 echo "Installation completed successfully."
 
 # Gamelist config

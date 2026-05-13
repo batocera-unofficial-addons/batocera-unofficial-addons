@@ -25,19 +25,8 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
-- Persistent Selection Queue
-App selections now persist across category navigation! You can now select apps from multiple categories and process them all in one queue.
-
-- Resolution Settings
-Runs with no resolution change by default. If a change is needed, this can be done in the resolution settings.
-
-- Improved Update System
-Faster and more reliable update checking.
-
-- New Apps
-Added RunImage Desktop, NZP, RGSX, and Raspberry Pi Imager.
-
-- Brought ARM64 menu in line with x86_64 version.
+- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support
+- Added Jellyfin Player - native media player client with controller support
 """.strip()
 
 # ------------------------------
@@ -63,10 +52,18 @@ def live_update_block():
         # Example: Setup custom_service_handler
         setup_custom_service_handler()
 
-        # Add more live update tasks here as needed
-        # Example:
-        # fix_legacy_configs()
-        # update_system_files()
+        # Ensure usercustomize.py is present (BUA Python hook for add-on generators)
+        usercustomize_path = f"/userdata/system/.local/lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages/usercustomize.py"
+        if not os.path.exists(usercustomize_path):
+            try:
+                os.makedirs(os.path.dirname(usercustomize_path), exist_ok=True)
+                subprocess.run(
+                    ["curl", "-fLs", "-o", usercustomize_path,
+                     "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/usercustomize.py"],
+                    check=False
+                )
+            except Exception as e:
+                print(f"[BUA] Failed to install usercustomize.py: {e}")
 
     except Exception as e:
         print(f"[BUA] Live update block error: {e}")
@@ -564,15 +561,18 @@ APPS: Dict[str, str] = {
     "Dark Mode": bua("dark/dark.sh"),
     "Desktop (Docker)": bua("desktop/desktop.sh"),
     "VClean": bua("vclean/vclean.sh"),
+    "Overlay Remove": bua("overlay-remove/overlay-remove.sh"),
     "Docker": bua("docker/docker.sh"),
     "RunImage Desktop": bua("desktop/ri-desktop.sh"),
     "F1": bua("f1/f1.sh"),
     "Firefox": bua("firefox/firefox-arm64.sh"),
     "FreeTube": bua("freetube/freetube.sh"),
+    "Jellyfin Player": bua("jellyfin-client/jellyfin-client.sh"),
     "Greenlight": bua("greenlight/greenlight_arm64.sh"),
     "IPTV Nator": bua("iptvnator/iptvnator.sh"),
     "Luanti": bua("luanti/luanti.sh"),
     "Minecraft": bua("minecraft/bedrock.sh"),
+    "Prism Launcher": bua("prismlauncher/prismlauncher.sh"),
     "Nazi Zombies Portable": bua("nzp/nzp.sh"),
     "PortMaster": bua("portmaster/portmaster.sh"),
     "Raspberry Pi Imager": bua("rpi/rpi.sh"),
@@ -609,15 +609,18 @@ DESCRIPTIONS: Dict[str, str] = {
     "Dark Mode": "Toggle F1 dark mode",
     "Desktop (Docker)": "Desktop mode, requires Docker",
     "VClean": "Service to clean the Batocera version string (removes extra flags)",
+    "Overlay Remove": "Remove the Batocera boot overlay file from /boot/boot/overlay.",
     "Docker": "Docker/Podman/Portainer AIO.",
     "RunImage Desktop": "RunImage-based desktop with overlay support",
     "F1": "Ports shortcut to file manager",
     "Firefox": "Mozilla Firefox browser.",
     "FreeTube": "Privacy-minded YouTube client",
+    "Jellyfin Player": "Jellyfin media player client with controller support",
     "Greenlight": "Client for xCloud and Xbox streaming.",
     "IPTV Nator": "IPTV client for watching live TV.",
     "Luanti": "Voxel sandbox (Minecraft-like)",
     "Minecraft": "Minecraft: Bedrock Edition.",
+    "Prism Launcher": "Open source Minecraft launcher with mod management and multi-instance support.",
     "Nazi Zombies Portable": "Classic Nazi Zombies on modern platforms",
     "PortMaster": "Download and manage games on handhelds.",
     "Raspberry Pi Imager": "Flash OS images to USB and SD cards.",
@@ -644,17 +647,18 @@ DESCRIPTIONS: Dict[str, str] = {
 
 CATEGORIES: Dict[str, List[str]] = {
     "Games": [
-        "Luanti", "Minecraft", "Super Mario X", "SuperTuxKart", "Celeste 64", "Nazi Zombies Portable"
+        "Luanti", "Minecraft", "Prism Launcher", "Super Mario X", "SuperTuxKart", "Celeste 64", "Nazi Zombies Portable"
     ],
     "Game Utilities": [
         "PortMaster", "Chiaki", "Greenlight", "Amazon Luna", "RGSX"
     ],
     "System Utilities": [
         "Tailscale", "Telegraf", "Vesktop", "IPTV Nator", "FreeTube",
-        "F1", "Firefox", "Desktop (Docker)", "RunImage Desktop", "Raspberry Pi Imager"
+        "Jellyfin Player", "F1", "Firefox", "Desktop (Docker)", "RunImage Desktop",
+        "Raspberry Pi Imager"
     ],
     "Developer Tools": [
-        "Conty", "Docker", "Soar", "WayVNC", "WayVNC Headless", "Dark Mode", "VClean"
+        "Conty", "Docker", "Soar", "WayVNC", "WayVNC Headless", "Dark Mode", "VClean", "Overlay Remove"
     ],
     "Docker Menu": [
         "CasaOS", "UmbrelOS", "Arch KDE (Webtop)", "Ubuntu MATE (Webtop)",

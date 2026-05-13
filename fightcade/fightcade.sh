@@ -6,7 +6,9 @@ REPO_BASE_URL="https://web.fightcade.com/download/"
 AMD_SUFFIX="Fightcade-linux-latest.tar.gz"
 ARM_SUFFIX=""
 LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/fightcade/extra/fightcade-logo.png"
+KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/fightcade/extra/Fightcade.sh.keys"
 SYM_WINE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/fightcade/sym_wine.sh"
+TEMPLATE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/fightcade/switchres_fightcade_wrap.template.sh"
 # Directories
 ADDONS_DIR="/userdata/system/add-ons"
 PORTS_DIR="/userdata/roms/ports"
@@ -173,6 +175,22 @@ fi
 
 echo "JSON files downloaded, extracted, moved, and cleaned up successfully in $EMULATOR_DIR."
 
+# Switchres wrapper for fcade:// (TEST GAME and ONLINE MATCH use the same URL path)
+SW_WRAP="${ADDONS_DIR}/${APP_NAME,,}/extra/switchres_fightcade_wrap.sh"
+mkdir -p "${ADDONS_DIR}/${APP_NAME,,}/extra"
+TEMPLATE="/tmp/switchres_fightcade_wrap.template.sh"
+echo "Downloading Switchres wrapper template..."
+wget -q --show-progress -O "$TEMPLATE" "$TEMPLATE_URL"
+if [ ! -r "$TEMPLATE" ]; then
+    echo "ERROR: Failed to download switchres_fightcade_wrap.template.sh" >&2
+    exit 1
+fi
+sed "s|__FIGHTCADE_ADDON__|${ADDONS_DIR}/${APP_NAME,,}|g" "$TEMPLATE" > "$SW_WRAP"
+chmod +x "$SW_WRAP"
+rm -f "$TEMPLATE"
+echo "Installed Switchres fcade:// wrapper at $SW_WRAP"
+
+
 # Step 3: Create the app launch script
 echo "Creating $APP_NAME script in Ports..."
 mkdir -p "$PORTS_DIR"
@@ -198,13 +216,13 @@ exec &> >(tee -a "\$log_file")
 echo "\$(date): Launching $APP_NAME"
 
 # Batocera lacks xdg-open/xdg-mime — fc2-electron needs xdg-open to dispatch
-# fcade:// URLs for game launch. Create a shim that routes to upstream fcade.sh.
+# fcade:// URLs. Shim calls Switchres wrapper (CRT) or falls back to fcade.sh.
 mkdir -p "\${HOME}/bin"
 cat > "\${HOME}/bin/xdg-open" << 'XDGOPEN'
 #!/bin/bash
 case "\$1" in
     fcade://*)
-        $ADDONS_DIR/${APP_NAME,,}/${APP_NAME}/emulator/fcade.sh "\$1"
+        $ADDONS_DIR/${APP_NAME,,}/extra/switchres_fightcade_wrap.sh "\$1"
         ;;
     *)
         echo "xdg-open: no handler for: \$1" >&2
@@ -239,6 +257,7 @@ fi
 EOF
 
 chmod +x "$PORT_SCRIPT"
+curl -L -o "$PORTS_DIR/Fightcade.sh.keys" "$KEYS_URL"
 
 # Step 4: Refresh the Ports menu
 echo "Refreshing Ports menu..."

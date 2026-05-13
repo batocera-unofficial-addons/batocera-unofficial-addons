@@ -99,12 +99,13 @@ type_text "Java j2me game emulator tested and working on Batocera v.42"
 TEMP_DIR="/userdata/tmp/Freej2me"
 DRL_FILE="$TEMP_DIR/Freej2me.DRL"
 EXTRACT_DIR="$TEMP_DIR/extracted"
-DEST_DIR="/"
+DEST_DIR="/userdata/system/add-ons/freej2me/rootfs"
 
 # Create the temporary directories
 echo "Creating temporary directories..."
 mkdir -p $TEMP_DIR
 mkdir -p $EXTRACT_DIR
+mkdir -p $DEST_DIR
 
 # Download the DRL file
 echo "Downloading the Freej2me.DRL file..."
@@ -127,39 +128,141 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Copy the extracted files to the root directory
+# Copy the extracted files to the addon rootfs directory
 echo "Copying files to the system..."
-cp -r $EXTRACT_DIR/* $DEST_DIR
+cp -r $EXTRACT_DIR/userdata/. /userdata/ 2>/dev/null || true
+cp -r $EXTRACT_DIR/usr $DEST_DIR/ 2>/dev/null || true
+cp -r $EXTRACT_DIR/etc $DEST_DIR/ 2>/dev/null || true
 
-# Set the file path
-FILE="/usr/share/batocera/configgen/configgen-defaults.yml"
 FILE2="/userdata/system/batocera.conf"
-
-# Check if the information is already in the file
-if ! grep -q "j2me:" "$FILE"; then
-    # Add the desired content to the file
-    echo -e "\nj2me:\n  emulator: libretro\n  core:     freej2me" >> "$FILE"
-    echo "Information added to the file."
-else
-    echo "The information already exists in the file. No changes were made."
-fi
 
 # Check if the information is already in the file batocera.conf
 if ! grep -q "j2me" "$FILE2"; then
     # Add the desired content to the file
     echo -e "\nj2me.core=freej2me\nj2me.emulator=libretro" >> "$FILE2"
-    echo "Information added to the file."
+    echo "Information added to batocera.conf."
 else
-    echo "The information already exists in the file. No changes were made."
+    echo "batocera.conf entry already exists. No changes made."
 fi
 
 # Clean up
 echo "Cleaning up..."
 rm -rf $TEMP_DIR
 
-# Save changes
-echo "Saving changes..."
-batocera-save-overlay
+# Write the freej2me service script
+echo "Installing freej2me service..."
+mkdir -p /userdata/system/services
+cat << 'SERVICEEOF' > /userdata/system/services/freej2me
+#!/bin/bash
+
+ADDON_NAME="freej2me"
+ADDON_DIR="/userdata/system/add-ons/${ADDON_NAME}"
+ROOTFS="${ADDON_DIR}/rootfs"
+LOG="/userdata/system/logs/${ADDON_NAME}.log"
+CONFIGGEN="/usr/share/batocera/configgen/configgen-defaults.yml"
+
+log() { echo "$(date): $*" | tee -a "$LOG"; }
+
+link_file() {
+    local src="$1"
+    local target="${src#${ROOTFS}}"
+    mkdir -p "$(dirname "$target")"
+
+    if [ -L "$target" ]; then
+        local cur; cur="$(readlink "$target")"
+        if [ "$cur" = "$src" ]; then
+            return
+        else
+            log "Conflict: $target -> $cur (expected $src). Skipping."
+            return
+        fi
+    elif [ -e "$target" ]; then
+        log "Backing up: $target -> ${target}.bak"
+        mv "$target" "${target}.bak"
+    fi
+
+    log "Linking: $target -> $src"
+    ln -s "$src" "$target"
+}
+
+unlink_file() {
+    local src="$1"
+    local target="${src#${ROOTFS}}"
+
+    if [ -L "$target" ]; then
+        local cur; cur="$(readlink "$target")"
+        if [ "$cur" = "$src" ]; then
+            log "Removing symlink: $target"
+            rm "$target"
+            [ -e "${target}.bak" ] && { log "Restoring: ${target}.bak"; mv "${target}.bak" "$target"; }
+        else
+            log "Symlink $target -> $cur, not our file. Skipping."
+        fi
+    elif [ -e "${target}.bak" ]; then
+        log "Orphan backup found — restoring: ${target}.bak"
+        mv "${target}.bak" "$target"
+    fi
+}
+
+apply_symlinks() {
+    [ -d "$ROOTFS" ] || { log "ERROR: rootfs missing at $ROOTFS"; exit 1; }
+    find "$ROOTFS" -type f | while read -r src; do link_file "$src"; done
+    log "Symlink pass complete."
+}
+
+remove_symlinks() {
+    [ -d "$ROOTFS" ] || { log "rootfs missing, nothing to remove."; return; }
+    find "$ROOTFS" -type f | while read -r src; do unlink_file "$src"; done
+    log "Symlink removal complete."
+}
+
+patch_configgen() {
+    if [ -f "$CONFIGGEN" ] && ! grep -q "j2me:" "$CONFIGGEN"; then
+        echo -e "\nj2me:\n  emulator: libretro\n  core:     freej2me" >> "$CONFIGGEN"
+        log "Patched configgen-defaults.yml"
+    fi
+}
+
+case "$1" in
+    start)
+        mkdir -p /userdata/system/logs
+        log "Starting freej2me overlay..."
+        apply_symlinks
+        patch_configgen
+        ;;
+    stop)
+        mkdir -p /userdata/system/logs
+        log "Stopping freej2me overlay..."
+        remove_symlinks
+        ;;
+    status)
+        if [ ! -d "$ROOTFS" ]; then
+            echo "freej2me: not installed (rootfs missing)."
+            exit 1
+        fi
+        missing=0
+        while IFS= read -r src; do
+            target="${src#${ROOTFS}}"
+            [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ] || missing=$((missing+1))
+        done < <(find "$ROOTFS" -type f)
+        [ "$missing" -eq 0 ] && echo "freej2me: all symlinks active." \
+                              || echo "freej2me: ${missing} symlink(s) missing or broken."
+        grep -q "j2me:" "$CONFIGGEN" 2>/dev/null \
+            && echo "freej2me: configgen entry present." \
+            || echo "freej2me: configgen entry missing."
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status}"
+        exit 1
+        ;;
+esac
+SERVICEEOF
+
+chmod +x /userdata/system/services/freej2me
+
+# Enable and start the service
+batocera-services enable freej2me
+batocera-services start freej2me
 clear
 
 type_text "Installation completed successfully."

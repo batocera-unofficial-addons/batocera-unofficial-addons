@@ -10,6 +10,9 @@ import json
 import base64
 import io
 import re
+import pty
+import fcntl
+import termios
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 import urllib.request
@@ -25,14 +28,12 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
-- Fixed all Steam issues (That I'm aware of).
-Fixed Vulkan on Nvidia GPUs
-Fixed Ryzen iGPU crash
-Fixed laptop dedicated graphics
-
-NOW WITH ADDED NON-STEAM GAME LAUNCHER SUPPORT! If you updated since the above, go ahead and update again :)
-
-Updated again 17 Apr 2026 11:59 UTC - Steam black screen fix.
+- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support
+- Added AzaharPlus - selectable 3DS emulator option alongside Azahar
+- Replaced StepMania with ITGMania - ITG-focused rhythm game with bundled songs
+- Desktop: wallpaper and icon layout now preserved on update
+- Desktop: improved DRL migration and palette support
+- NVIDIAPatch: fixed GLX chain on host
 """.strip()
 
 # ------------------------------
@@ -565,6 +566,7 @@ APPS: Dict[str, str] = {
     "Armagetron": bua("armagetron/armagetron.sh"),
     "Arcade Manager": bua("arcademanager/arcademanager.sh"),
     "Assault Cube": bua("assaultcube/assaultcube.sh"),
+    "AzaharPlus": bua("azaharplus/azaharplus.sh"),
     "Brave": bua("brave/brave.sh"),
     "Chiaki": bua("chiaki/chiaki.sh"),
     "Chrome": bua("chrome/chrome.sh"),
@@ -588,9 +590,11 @@ APPS: Dict[str, str] = {
     "IPTV Nator": bua("iptvnator/iptvnator.sh"),
     "Input Leap": bua("inputleap/inputleap.sh"),
     "Itch.io": bua("itchio/itch.sh"),
+    "Jellyfin Player": bua("jellyfin-client/jellyfin-client.sh"),
     "JDownloader": bua("jdownloader/jdownloader.sh"),
     "Java Runtime": bua("java/java.sh"),
     "Minecraft": bua("minecraft/minecraft.sh"),
+    "Prism Launcher": bua("prismlauncher/prismlauncher.sh"),
     "Moonlight": bua("moonlight/moonlight.sh"),
     "Netflix": bua("netflix/netflix.sh"),
     "NVIDIA Patcher": bua("nvidiapatch/nvidiapatch.sh"),
@@ -602,7 +606,7 @@ APPS: Dict[str, str] = {
     "qBittorrent": bua("qbittorrent/qbittorrent.sh"),
     "ShadPS4": bua("shadps4plus/shadps4plus.sh"),
     "Spotify": bua("spotify/spotify.sh"),
-    "StepMania": bua("stepmania/stepmania.sh"),
+    "ITGMania": bua("itgmania/itgmania.sh"),
     "Stremio": bua("stremio/stremio.sh"),
     "Sunshine": bua("sunshine/sunshine.sh"),
     "SuperTux": bua("supertux/supertux.sh"),
@@ -652,6 +656,7 @@ APPS: Dict[str, str] = {
     "Soar": bua("soar/soar.sh"),
     "Dark Mode": bua("dark/dark.sh"),
     "VClean": bua("vclean/vclean.sh"),
+    "Overlay Remove": bua("overlay-remove/overlay-remove.sh"),
     "RGSX": "curl -L bit.ly/rgsx-install | sh",
     "Raspberry Pi Imager": bua("rpi/rpi.sh"),
     "Gamescope": bua("gamescope/gamescope.sh"),
@@ -712,6 +717,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "ShadPS4": "UPDATED 11/11 to ShadPS4Plus | Experimental PS4 streaming client.",
     "Conty": "Standalone Linux distro container.",
     "Minecraft": "Minecraft: Java or Bedrock Edition.",
+    "Prism Launcher": "Open source Minecraft launcher with mod management and multi-instance support.",
     "Armagetron": "Tron-style light cycle game.",
     "Clone Hero": "Guitar Hero clone for Batocera.",
     "Stremio": "Stremio video streaming app for Batocera.",
@@ -747,6 +753,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "Fightcade": "*UPDATED* Play classic arcade games online.",
     "SuperTuxKart": "Free and open-source kart racer.",
     "OpenRA": "Modernized RTS for Command & Conquer.",
+    "AzaharPlus": "AzaharPlus 3DS emulator - selectable alongside Azahar in EmulationStation.",
     "Assault Cube": "Multiplayer first-person shooter game.",
     "OBS": "Streaming and video recording software.",
     "SuperTux": "2D platformer starring Tux the Linux mascot.",
@@ -756,7 +763,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "NVIDIA Clocker": "A CLI/Ports program to overclock NVIDIA GPUs",
     "7zip": "A free and open-source file archiver",
     "qBittorrent": "Free and open-source BitTorrent client",
-    "StepMania": "A dancemat compatible rhythm video game and engine",
+    "ITGMania": "In The Groove-focused rhythm game, fork of StepMania with ITG improvements.",
     "Ambermoon": "Ambermoon.net, a port of the classic",
     "Custom Wine": "Download Wine/Proton versions",
     "GParted": "Linux partition manager",
@@ -794,6 +801,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "Soar": "Soar package manager (integrated with BUA)",
     "Dark Mode": "Toggle F1 dark mode",
     "VClean": "Service to clean the Batocera version string (removes extra flags)",
+    "Overlay Remove": "Remove the Batocera boot overlay file from /boot/boot/overlay.",
     "RGSX": "Retro Game Sets Xtra. A free, user-friendly ROM downloader for Batocera",
     "Raspberry Pi Imager": "Flash OS images to USB and SD cards.",
     "Gamescope": "Full-screen gaming compositor with smoother performance, scaling & low-latency control.",
@@ -835,6 +843,7 @@ DESCRIPTIONS.update({
     "Ubuntu MATE (Webtop)": "Ubuntu MATE desktop in browser (noVNC)",
     "Alpine XFCE (Webtop)": "Alpine XFCE desktop in browser (noVNC)",
     "Jellyfin": "Open-source media server",
+    "Jellyfin Player": "Jellyfin media player client with controller support",
     "Emby": "Media server and streaming",
     "Arr-In-One": "All-in-one media management stack",
     "Arr-In-One Downloaders": "Downloaders companion stack",
@@ -842,9 +851,9 @@ DESCRIPTIONS.update({
 
 CATEGORIES: Dict[str, List[str]] = {
     "Games": [
-        "Minecraft", "Armagetron", "Clone Hero", "Endless Sky", "EGGNOGG+", "CS Portable",
+        "Minecraft", "Prism Launcher", "Armagetron", "Clone Hero", "Endless Sky", "EGGNOGG+", "CS Portable",
         "Warzone 2100", "Xonotic", "Fightcade", "SuperTuxKart", "OpenRA",
-        "Assault Cube", "SuperTux", "Free Droid RPG", "StepMania", "Ambermoon",
+        "Assault Cube", "SuperTux", "Free Droid RPG", "ITGMania", "Ambermoon",
         "YARG", "OpenTTD", "Luanti", "Super Mario X", "Celeste 64", "UltraStar",
         "Sandtrix"
     ],
@@ -887,7 +896,7 @@ CATEGORIES: Dict[str, List[str]] = {
         "Arr-In-One Downloaders",
     ],
     "Game Utilities": [
-        "Android", "Amazon Luna", "PortMaster", "Greenlight", "ShadPS4",
+        "Android", "Amazon Luna", "AzaharPlus", "PortMaster", "Greenlight", "ShadPS4",
         "Chiaki", "Heroic", "Switch", "Parsec", "Java Runtime", "Freej2me",
         "Steam", "Lutris", "Bottles", "Sunshine", "Moonlight", "Bridge",
         "Itch.io", "Everest", "RGSX"
@@ -898,12 +907,12 @@ CATEGORIES: Dict[str, List[str]] = {
         "Input Leap", "IPTV Nator", "Firefox", "Spotify", "Arcade Manager", "Brave",
         "OpenRGB", "OBS", "Stremio", "Disney Plus", "Twitch", "7zip", "qBittorrent",
         "GParted", "Plex", "HBO Max", "Prime Video", "Crunchyroll",
-        "Mubi", "Tidal", "FreeTube", "FileZilla", "PeaZip", "Desktop", "Flathub",
-        "JDownloader", "Raspberry Pi Imager"
+        "Mubi", "Tidal", "FreeTube", "Jellyfin Player", "FileZilla", "PeaZip",
+        "Desktop", "Flathub", "JDownloader", "Raspberry Pi Imager"
     ],
     "Developer Tools": [
         "NVIDIA Patcher", "Conty", "CLI Tools", "NVIDIA Clocker", "Docker",
-        "Extras", "X11VNC", "QEMU GA", "Soar", "Dark Mode", "VClean"
+        "Extras", "X11VNC", "QEMU GA", "Soar", "Dark Mode", "VClean", "Overlay Remove"
     ],
 }
 
@@ -2161,14 +2170,27 @@ class Runner:
         # Add 'wait' to ensure all background processes finish
         full_cmd = f"({cmd}); wait"
 
+        # Create a PTY so the subprocess has a controlling terminal.
+        # Scripts like foclabroc's newswitch.sh redirect to /dev/tty, which
+        # requires a controlling terminal — without one bash errors with
+        # "No such device or address".
+        master_fd, slave_fd = pty.openpty()
+
+        def set_controlling_tty():
+            os.setsid()
+            fcntl.ioctl(slave_fd, termios.TIOCSCTTY, 0)
+
         self.proc = subprocess.Popen(
             ["bash", "-c", full_cmd],
-            stdin=subprocess.PIPE,
+            stdin=slave_fd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
+            preexec_fn=set_controlling_tty,
             text=True,
             bufsize=1,
         )
+        os.close(slave_fd)
+        self._pty_master = master_fd  # keep open so slave doesn't get SIGHUP
         def reader():
             assert self.proc and self.proc.stdout
             output_lines = []
@@ -2180,6 +2202,10 @@ class Runner:
             self.returncode = self.proc.returncode
             # Store last 10 lines for error display
             self.error_output = "\n".join(output_lines[-10:])
+            try:
+                os.close(self._pty_master)
+            except Exception:
+                pass
             self.done = True
         t = threading.Thread(target=reader, daemon=True)
         t.start()
@@ -3972,8 +3998,13 @@ class RunListScreen(BaseScreen):
         dialog_wrap = ""
         if not os.environ.get("BUA_DISABLE_DIALOG_WRAP"):
             dialog_wrap = (
+                # Save original stderr to fd9 before any script redirections can change fd2.
+                # This ensures __BUA_DIALOG__ markers always reach BUA's pipe even when
+                # scripts use fd-swapping patterns like '3>&1 1>&2 2>&3' or '2>&1 >/dev/tty'
+                # (as used by foclabroc's newswitch.sh for language/mode selection).
+                "exec 9>&2; "
                 "function dialog(){ "
-                "echo '[BUA] Dialog called with:' \"$@\" >&2; "
+                "echo '[BUA] Dialog called with:' \"$@\" >&9; "
                 "local dtype=\"\" title=\"\" text=\"\" menu_items=\"\"; "
                 "local next_title=0 next_text=0 skip_count=0 skip_backtitle=0; "
                 "for arg in \"$@\"; do "
@@ -3997,20 +4028,20 @@ class RunListScreen(BaseScreen):
                 "  esac; "
                 "done; "
                 "if [ -n \"$dtype\" ]; then "
-                "  echo '[BUA] Detected dtype:' \"$dtype\" 'title:' \"$title\" >&2; "
-                "  echo '[BUA] Menu items:' \"$menu_items\" >&2; "
+                "  echo '[BUA] Detected dtype:' \"$dtype\" 'title:' \"$title\" >&9; "
+                "  echo '[BUA] Menu items:' \"$menu_items\" >&9; "
                 "  local resp_file=\"/tmp/bua_dialog_$$.resp\"; rm -f \"$resp_file\"; "
                 "  if command -v base64 >/dev/null 2>&1; then "
                 "    t_b64=$(printf %s \"$title\" | base64 -w0 2>/dev/null || printf %s \"$title\" | base64); "
                 "    m_b64=$(printf %s \"$text\" | base64 -w0 2>/dev/null || printf %s \"$text\" | base64); "
                 "    i_b64=$(printf %s \"$menu_items\" | base64 -w0 2>/dev/null || printf %s \"$menu_items\" | base64); "
-                "    echo '[BUA] Emitting marker with resp file:' \"$resp_file\" >&2; "
-                "    echo __BUA_DIALOG__ type=$dtype title_b64=$t_b64 text_b64=$m_b64 items_b64=$i_b64 resp=$resp_file >&2; "
+                "    echo '[BUA] Emitting marker with resp file:' \"$resp_file\" >&9; "
+                "    echo __BUA_DIALOG__ type=$dtype title_b64=$t_b64 text_b64=$m_b64 items_b64=$i_b64 resp=$resp_file >&9; "
                 "  else "
-                "    echo __BUA_DIALOG__ type=$dtype title=\"$title\" text=\"$text\" items=\"$menu_items\" resp=$resp_file >&2; "
+                "    echo __BUA_DIALOG__ type=$dtype title=\"$title\" text=\"$text\" items=\"$menu_items\" resp=$resp_file >&9; "
                 "  fi; "
                 "  if [ \"$dtype\" = \"infobox\" ]; then "
-                "    echo '[BUA] Infobox - continuing immediately' >&2; "
+                "    echo '[BUA] Infobox - continuing immediately' >&9; "
                 "    echo 0 > \"$resp_file\"; sleep 0.05; rm -f \"$resp_file\"; return 0; "
                 "  fi; "
                 "  while [ ! -f \"$resp_file\" ]; do sleep 0.1; done; "
@@ -4018,7 +4049,9 @@ class RunListScreen(BaseScreen):
                 "  if [ \"$dtype\" = \"yesno\" ]; then "
                 "    if [ \"$result\" = \"0\" ]; then return 0; else return 1; fi; "
                 "  elif [ \"$dtype\" = \"menu\" ] || [ \"$dtype\" = \"checklist\" ]; then "
-                "    if [ -n \"$result\" ]; then echo \"$result\"; return 0; else return 1; fi; "
+                # Echo result to both fd1 and fd2: fd1 handles normal $() capture,
+                # fd2 handles the swapped 3>&1 1>&2 2>&3 pattern used by foclabroc.
+                "    if [ -n \"$result\" ]; then echo \"$result\"; echo \"$result\" >&2; return 0; else return 1; fi; "
                 "  else "
                 "    return 0; "
                 "  fi; "
@@ -5835,6 +5868,19 @@ def live_update():
         )
     except Exception as e:
         print(f"[BUA] Failed to reinstall BUA from install.batoaddons.app: {e}")
+
+    # Ensure usercustomize.py is present (BUA Python hook for add-on generators)
+    usercustomize_path = f"/userdata/system/.local/lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages/usercustomize.py"
+    if not os.path.exists(usercustomize_path):
+        try:
+            os.makedirs(os.path.dirname(usercustomize_path), exist_ok=True)
+            subprocess.run(
+                ["curl", "-fLs", "-o", usercustomize_path,
+                 "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/usercustomize.py"],
+                check=False
+            )
+        except Exception as e:
+            print(f"[BUA] Failed to install usercustomize.py: {e}")
 def check_symlink_manager_and_warn():
     symlink_manager_path = "/userdata/system/services/symlink_manager"
 

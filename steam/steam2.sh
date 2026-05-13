@@ -45,16 +45,10 @@ fi
 ########################################
 
 steam_file="/userdata/system/add-ons/steam/steam"
-size_limit=1000000000   # 1GB (adjust as needed)
 
-# Remove only if file exists AND is larger than limit
-if [ -f "$steam_file" ] && [ "$(stat -c '%s' "$steam_file")" -gt "$size_limit" ]; then
-    echo "Existing file too large — deleting"
-    rm -f "$steam_file"
-fi
-
-# Resume or redownload
-wget -q -c --show-progress -O "$steam_file" "$appimage_url/steam.AppImage"
+# Always replace — ensures new version is downloaded cleanly
+rm -f "$steam_file"
+wget -q --show-progress -O "$steam_file" "$appimage_url/steam.AppImage"
 
 if [ $? -ne 0 ]; then
     echo "Failed to download Steam."
@@ -177,7 +171,7 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
 curl http://127.0.0.1:1234/reloadgames
 
 dialog --title "Steam Installed" --msgbox \
-"Steam has been installed!\n\nLaunch Steam from the F1 Applications menu, or Big Picture Mode from the Ports menu.\n\n--- Non-Steam Game Artwork ---\nTo enable automatic name and artwork lookup for non-Steam shortcuts, get a free API key at:\n  steamgriddb.com/profile/preferences/api\n\nThen save it to:\n  /userdata/system/add-ons/steam/steamgriddb.key" \
-18 65
+"Steam has been installed!\n\nLaunch Steam from the F1 Applications menu, or Big Picture Mode from the Ports menu.\n\n--- Multi-GPU & Nvidia Vulkan ---\nGame launchers now auto-detect the dedicated GPU and apply Nvidia Vulkan fixes on each launch.\n\nIf upgrading from a previous install, delete existing launchers in:\n  /userdata/roms/steam/\nthen re-launch Steam to regenerate them.\n\n--- Non-Steam Game Artwork ---\nTo enable automatic name and artwork lookup for non-Steam shortcuts, get a free API key at:\n  steamgriddb.com/profile/preferences/api\n\nThen save it to:\n  /userdata/system/add-ons/steam/steamgriddb.key" \
+24 68
 # Finish
 killall -9 emulationstation

@@ -83,8 +83,51 @@ for manifest in "$STEAM_APPS"/appmanifest_*.acf; do
     # Write launcher script
     cat > "$sh_file" <<LAUNCHER
 #!/bin/bash
+export DISPLAY=:0.0
 export RIM_ALLOW_ROOT=1
 export HOME=/userdata/system/add-ons/steam
+
+# Auto-detect dedicated GPU on multi-GPU systems (no-op on single-GPU)
+GPU_COUNT=\$(ls -d /sys/class/drm/card[0-9]* 2>/dev/null | wc -l)
+if [ "\$GPU_COUNT" -gt 1 ]; then
+  boot_vram=0
+  for card in /sys/class/drm/card[0-9]*/; do
+    if [ "\$(cat "\${card}device/boot_vga" 2>/dev/null)" = "1" ]; then
+      boot_vram=\$(cat "\${card}device/mem_info_vram_total" 2>/dev/null || echo 0)
+      break
+    fi
+  done
+  for card in /sys/class/drm/card[0-9]*/; do
+    if [ "\$(cat "\${card}device/boot_vga" 2>/dev/null)" = "0" ]; then
+      card_vram=\$(cat "\${card}device/mem_info_vram_total" 2>/dev/null || echo 0)
+      if [ "\$card_vram" -gt "\$boot_vram" ]; then
+        pci_raw=\$(grep PCI_SLOT_NAME "\${card}device/uevent" 2>/dev/null | cut -d= -f2)
+        if [ -n "\$pci_raw" ]; then
+          export DRI_PRIME="pci-\$(echo "\$pci_raw" | tr ':.' '__')"
+          break
+        fi
+      fi
+    fi
+  done
+fi
+
+# Nvidia Vulkan ICD fix
+_NV_ICD_SRC="/usr/share/vulkan/icd.d/nvidia_icd.x86_64.json"
+_NV_LAYERS_SRC="/usr/share/vulkan/implicit_layer.d/nvidia_production_layers.json"
+_NV_EGL_SRC="/usr/share/glvnd/egl_vendor.d/10_nvidia_production.json"
+_NV_DRV_DIR="\${HOME}/.local/share/runimage_nvidia"
+if [ -f "\$_NV_ICD_SRC" ]; then
+    cp -f "\$_NV_ICD_SRC" /etc/nvidia_icd.json 2>/dev/null || true
+    [ -f "\$_NV_LAYERS_SRC" ] && cp -f "\$_NV_LAYERS_SRC" /etc/nvidia_layers.json 2>/dev/null || true
+    [ -f "\$_NV_EGL_SRC" ] && cp -f "\$_NV_EGL_SRC" /etc/10_nvidia.json 2>/dev/null || true
+    _NV_ICD_FLAG="\$_NV_DRV_DIR/.nvidia_icd_fixed_v2"
+    if [ ! -f "\$_NV_ICD_FLAG" ]; then
+        rm -f "\$_NV_DRV_DIR"/*.nv.drv "\$_NV_DRV_DIR"/.nvidia_icd_fixed 2>/dev/null
+        mkdir -p "\$_NV_DRV_DIR" && touch "\$_NV_ICD_FLAG"
+    fi
+fi
+unset _NV_ICD_SRC _NV_LAYERS_SRC _NV_EGL_SRC _NV_DRV_DIR _NV_ICD_FLAG
+
 ulimit -H -n 819200 && ulimit -S -n 819200
 #------------------------------------------------
 # Steam Game Launcher
@@ -314,6 +357,48 @@ while IFS='|' read -r appid appname search_term exe_path start_dir; do
 export DISPLAY=:0.0
 export RIM_ALLOW_ROOT=1
 export HOME=/userdata/system/add-ons/steam
+
+# Auto-detect dedicated GPU on multi-GPU systems (no-op on single-GPU)
+GPU_COUNT=\$(ls -d /sys/class/drm/card[0-9]* 2>/dev/null | wc -l)
+if [ "\$GPU_COUNT" -gt 1 ]; then
+  boot_vram=0
+  for card in /sys/class/drm/card[0-9]*/; do
+    if [ "\$(cat "\${card}device/boot_vga" 2>/dev/null)" = "1" ]; then
+      boot_vram=\$(cat "\${card}device/mem_info_vram_total" 2>/dev/null || echo 0)
+      break
+    fi
+  done
+  for card in /sys/class/drm/card[0-9]*/; do
+    if [ "\$(cat "\${card}device/boot_vga" 2>/dev/null)" = "0" ]; then
+      card_vram=\$(cat "\${card}device/mem_info_vram_total" 2>/dev/null || echo 0)
+      if [ "\$card_vram" -gt "\$boot_vram" ]; then
+        pci_raw=\$(grep PCI_SLOT_NAME "\${card}device/uevent" 2>/dev/null | cut -d= -f2)
+        if [ -n "\$pci_raw" ]; then
+          export DRI_PRIME="pci-\$(echo "\$pci_raw" | tr ':.' '__')"
+          break
+        fi
+      fi
+    fi
+  done
+fi
+
+# Nvidia Vulkan ICD fix
+_NV_ICD_SRC="/usr/share/vulkan/icd.d/nvidia_icd.x86_64.json"
+_NV_LAYERS_SRC="/usr/share/vulkan/implicit_layer.d/nvidia_production_layers.json"
+_NV_EGL_SRC="/usr/share/glvnd/egl_vendor.d/10_nvidia_production.json"
+_NV_DRV_DIR="\${HOME}/.local/share/runimage_nvidia"
+if [ -f "\$_NV_ICD_SRC" ]; then
+    cp -f "\$_NV_ICD_SRC" /etc/nvidia_icd.json 2>/dev/null || true
+    [ -f "\$_NV_LAYERS_SRC" ] && cp -f "\$_NV_LAYERS_SRC" /etc/nvidia_layers.json 2>/dev/null || true
+    [ -f "\$_NV_EGL_SRC" ] && cp -f "\$_NV_EGL_SRC" /etc/10_nvidia.json 2>/dev/null || true
+    _NV_ICD_FLAG="\$_NV_DRV_DIR/.nvidia_icd_fixed_v2"
+    if [ ! -f "\$_NV_ICD_FLAG" ]; then
+        rm -f "\$_NV_DRV_DIR"/*.nv.drv "\$_NV_DRV_DIR"/.nvidia_icd_fixed 2>/dev/null
+        mkdir -p "\$_NV_DRV_DIR" && touch "\$_NV_ICD_FLAG"
+    fi
+fi
+unset _NV_ICD_SRC _NV_LAYERS_SRC _NV_EGL_SRC _NV_DRV_DIR _NV_ICD_FLAG
+
 ulimit -H -n 819200 && ulimit -S -n 819200
 #------------------------------------------------
 # Non-Steam Game Launcher (Proton Direct)

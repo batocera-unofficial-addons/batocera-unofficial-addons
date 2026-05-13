@@ -104,8 +104,6 @@ echo "Applying Nvidia patches for a smoother experience..."
 # Apply Nvidia patches if necessary
 curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/nvidiapatch/nvidiapatch.sh | bash
 
-batocera-save-overlay
-
 # Enable and start the Sunshine service
 batocera-services enable sunshine
 batocera-services start sunshine
