@@ -118,7 +118,7 @@
 | `f1/f1-1_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `f1/f1-old1.sh` | 2025-06-21 01:30:01 -0300 |
 | `f1/f1.sh` | 2026-05-04 21:46:58 +0100 |
-| `fightcade/fightcade.sh` | 2026-05-11 08:22:49 -0600 |
+| `fightcade/fightcade.sh` | 2026-05-12 00:20:13 -0600 |
 | `fightcade/fightcade_uninstall.sh` | 2026-02-25 11:59:39 -0700 |
 | `fightcade/switchres_fightcade_wrap.template.sh` | 2026-05-11 08:22:49 -0600 |
 | `fightcade/sym_wine.sh` | 2025-01-13 02:20:54 +0000 |
