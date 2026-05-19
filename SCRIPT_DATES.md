@@ -222,7 +222,7 @@
 | `shadps4plus/create_game_launchers.sh` | 2025-11-11 02:26:59 +0000 |
 | `shadps4plus/es_ps4/es_ps4_install.sh` | 2025-11-11 02:26:59 +0000 |
 | `shadps4plus/monitor_shadps4.sh` | 2025-11-11 02:26:59 +0000 |
-| `shadps4plus/shadps4plus.sh` | 2025-11-26 00:02:48 +0000 |
+| `shadps4plus/shadps4plus.sh` | 2026-05-18 17:55:25 +0100 |
 | `shadps4plus/shadps4plus_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `soar/soar.sh` | 2025-05-22 18:12:39 +0100 |
 | `soar/soar_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
