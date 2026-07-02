@@ -201,6 +201,8 @@ apps=(
     ["BRIDGE"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/bridge/bridge.sh | bash"
     ["SOAR"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/soar/soar.sh | bash"
     ["DARK-MODE"]="curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/dark/dark.sh | bash"
+    ["NPSGET"]="curl -fsSL https://npsget.8101987.xyz | sh"
+    ["PS3I"]="curl -fsSL https://ps3i.8101987.xyz/install.sh | sh"
 	#["RGSX"]="curl -L bit.ly/rgsx-install | sh"
 )
 
@@ -296,6 +298,8 @@ descriptions=(
     ["BRIDGE"]-"Chart downloader for CloneHero/YARG"
     ["SOAR"]="Soar package manager integrated with BUA"
     ["DARK-MODE"]="Custom service to enable/disable F1 dark mode"
+    ["NPSGET"]="Helper to download games, DLCs, updates, themes and avatars from NoPayStation"
+    ["PS3I"]="Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation"
 	#["RGSX"]="Retro Game Sets Xtra, A free, user-friendly ROM downloader for Batocera"
 )
 
@@ -304,7 +308,7 @@ descriptions=(
 declare -A categories
 categories=(
     ["Games"]="MINECRAFT ARMAGETRON CLONEHERO ENDLESS-SKY CSPORTABLE WARZONE2100 XONOTIC FIGHTCADE SUPERTUXKART OPENRA ASSAULTCUBE SUPERTUX FREEDROIDRPG STEPMANIA AMBERMOON YARG OPENTTD LUANTI SUPERMARIOX CELESTE64 ULTRASTAR"
-    ["Game Utilities"]="ANDROID AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS BOTTLES SUNSHINE MOONLIGHT BRIDGE ITCHIO EVEREST RGSX"
+    ["Game Utilities"]="ANDROID AMAZON-LUNA PORTMASTER GREENLIGHT SHADPS4 CHIAKI HEROIC SWITCH PARSEC JAVA-RUNTIME FREEJ2ME STEAM LUTRIS BOTTLES SUNSHINE MOONLIGHT BRIDGE ITCHIO EVEREST RGSX NPSGET PS3I"
     ["System Utilities"]="DESKTOP_FOR_BATOCERA WINCONFIG-WINDOWS-GAME-FIX F1 TAILSCALE TELEGRAF WINEMANAGER VESKTOP CHROME YOUTUBE NETFLIX INPUTLEAP IPTVNATOR FIREFOX SPOTIFY ARCADEMANAGER BRAVE OPENRGB OBS STREMIO DISNEYPLUS TWITCH 7ZIP QBITTORRENT GPARTED CUSTOMWINE PLEX HBOMAX PRIMEVIDEO CRUNCHYROLL MUBI TIDAL FREETUBE FILEZILLA PEAZIP DESKTOP FLATHUB JDOWNLOADER"
     ["Developer Tools"]="NVIDIAPATCHER CONTY CLITOOLS NVIDIACLOCKER DOCKER EXTRAS X11VNC QEMU-GA SOAR DARK-MODE"
 )
