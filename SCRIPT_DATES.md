@@ -14,7 +14,7 @@
 | `Freej2me/Install_j2me.sh` | 2026-05-04 21:46:58 +0100 |
 | `Winconfig_Windows_Game_Fix/Install_Winconfig.sh` | 2026-05-04 21:46:58 +0100 |
 | `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config - old.sh` | 2025-05-14 19:17:39 -0300 |
-| `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config.sh` | 2025-05-25 14:24:17 -0300 |
+| `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config.sh` | 2025-05-27 17:37:55 -0300 |
 | `amazonluna/amazonluna-arm64.sh` | 2025-05-22 17:11:10 +0100 |
 | `amazonluna/amazonluna.sh` | 2025-05-22 17:10:51 +0100 |
 | `amazonluna/amazonluna_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -25,9 +25,9 @@
 | `app/BatoceraUnofficialAddOns.sh` | 2025-05-22 17:15:09 +0100 |
 | `app/BatoceraUnofficialAddons_ARM64.sh` | 2025-05-22 17:15:31 +0100 |
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
-| `app/batocera-unofficial-addons.sh` | 2025-11-20 16:56:24 +0000 |
+| `app/batocera-unofficial-addons.sh` | 2026-07-02 16:31:40 -0300 |
 | `app/bua_installerarm64.py` | 2026-05-11 03:41:32 +0100 |
-| `app/bua_installerx86.py` | 2026-05-11 03:41:32 +0100 |
+| `app/bua_installerx86.py` | 2026-07-02 16:31:40 -0300 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -69,7 +69,7 @@
 | `chiaki/chiaki_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `chrome/chrome.sh` | 2025-05-22 17:24:09 +0100 |
 | `chrome/chrome_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `clonehero/clonehero.sh` | 2026-04-19 19:28:51 +0100 |
+| `clonehero/clonehero.sh` | 2026-06-03 17:07:02 +0100 |
 | `clonehero/clonehero_uninstall.sh` | 2025-11-13 20:06:15 +0000 |
 | `conty/conty.sh` | 2024-12-25 18:14:14 +0000 |
 | `conty/conty_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -114,7 +114,7 @@
 | `everest/everest_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `extra/extra.sh` | 2025-05-22 17:48:53 +0100 |
 | `extra/extras_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `f1/f1-1.sh` | 2025-06-21 01:08:51 -0300 |
+| `f1/f1-1.sh` | 2025-06-21 01:10:15 -0300 |
 | `f1/f1-1_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `f1/f1-old1.sh` | 2025-06-21 01:27:22 -0300 |
 | `f1/f1.sh` | 2026-05-04 21:46:58 +0100 |
@@ -154,7 +154,7 @@
 | `inputleap/inputleap_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `iptvnator/iptvnator.sh` | 2025-05-22 17:58:16 +0100 |
 | `iptvnator/iptvnator_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `itchio/itch-old.sh` | 2025-06-06 18:32:27 -0300 |
+| `itchio/itch-old.sh` | 2025-06-06 18:34:39 -0300 |
 | `itchio/itch-old_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `itchio/itch.sh` | 2026-04-21 16:00:36 +0200 |
 | `itgmania/itgmania.sh` | 2026-05-11 01:34:11 +0100 |
@@ -222,7 +222,7 @@
 | `shadps4plus/create_game_launchers.sh` | 2025-11-11 02:26:59 +0000 |
 | `shadps4plus/es_ps4/es_ps4_install.sh` | 2025-11-11 02:26:59 +0000 |
 | `shadps4plus/monitor_shadps4.sh` | 2025-11-11 02:26:59 +0000 |
-| `shadps4plus/shadps4plus.sh` | 2025-11-26 00:02:48 +0000 |
+| `shadps4plus/shadps4plus.sh` | 2026-05-18 17:55:25 +0100 |
 | `shadps4plus/shadps4plus_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `soar/soar.sh` | 2025-05-22 18:12:39 +0100 |
 | `soar/soar_uninstall.sh` | 2025-11-13 17:23:41 +0000 |

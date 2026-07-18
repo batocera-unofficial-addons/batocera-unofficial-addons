@@ -3,26 +3,44 @@
 
 # Define app information
 APPNAME="CloneHero"
-LATEST=$(curl -s https://api.github.com/repos/clonehero-game/releases/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
-APPLINK="https://github.com/clonehero-game/releases/releases/download/${LATEST}/clonehero-linux.tar.xz"
 APPDIR="/userdata/system/add-ons/${APPNAME,,}"
 
-# Define launcher command
+# Find whichever asset name exists in this release
+ASSETS=$(curl -s "https://api.github.com/repos/clonehero-game/releases/releases/latest" | grep '"browser_download_url"' | cut -d'"' -f4)
 
-COMMAND='sysctl -w vm.max_map_count=2097152; ulimit -H -n 819200; ulimit -S -n 819200; ulimit -S -n 819200 clonehero; ulimit -H -l 61634; ulimit -S -l 61634; ulimit -H -s 61634; ulimit -S -s 61634; mkdir '$APPDIR'/home 2>/dev/null; mkdir '$APPDIR'/config 2>/dev/null; mkdir '$APPDIR'/roms 2>/dev/null; HOME='$APPDIR'/home XDG_CONFIG_HOME='$APPDIR'/config XDG_DATA_HOME='$APPDIR'/home XDG_CURRENT_DESKTOP=XFCE DESKTOP_SESSION=XFCE DISPLAY=:0.0 '$APPDIR'/'${APPNAME,,}' ${@} &'
+if echo "$ASSETS" | grep -q "clonehero-linux.tar.xz"; then
+    APPLINK=$(echo "$ASSETS" | grep "clonehero-linux.tar.xz")
+    TARFLAGS="-xJf"
+elif echo "$ASSETS" | grep -q "Linux.x86_64-Standalone.tar"; then
+    APPLINK=$(echo "$ASSETS" | grep "Linux.x86_64-Standalone.tar")
+    TARFLAGS="-xf"
+else
+    echo "No recognised CloneHero Linux release asset found." >&2
+    exit 1
+fi
 
 # Prepare installation directories
 mkdir -p "$APPDIR/extra"
 rm -rf "$APPDIR/*"
 
-# Download and extract Clone Hero
+# Download and extract
 TEMP_DIR="/tmp/${APPNAME,,}_download"
 mkdir -p "$TEMP_DIR"
 cd "$TEMP_DIR"
-wget -q --show-progress -O "clonehero.tar.xz" "$APPLINK"
-tar -xf "clonehero.tar.xz" -C "$APPDIR" --strip-components=1
-chmod +x "$APPDIR/${APPNAME,,}"
+wget -q --show-progress -O "clonehero.tar" "$APPLINK"
+tar $TARFLAGS "clonehero.tar" -C "$APPDIR" --strip-components=1
+chmod +x "$APPDIR/${APPNAME,,}" 2>/dev/null || chmod +x "$APPDIR/CloneHero" 2>/dev/null
 rm -rf "$TEMP_DIR"
+
+# Detect correct binary name
+if [[ -f "$APPDIR/CloneHero" ]]; then
+    BINARY="$APPDIR/CloneHero"
+else
+    BINARY="$APPDIR/${APPNAME,,}"
+fi
+
+# Define launcher command
+COMMAND='sysctl -w vm.max_map_count=2097152; ulimit -H -n 819200; ulimit -S -n 819200; ulimit -H -l 61634; ulimit -S -l 61634; ulimit -H -s 61634; ulimit -S -s 61634; mkdir '$APPDIR'/home 2>/dev/null; mkdir '$APPDIR'/config 2>/dev/null; mkdir '$APPDIR'/roms 2>/dev/null; HOME='$APPDIR'/home XDG_CONFIG_HOME='$APPDIR'/config XDG_DATA_HOME='$APPDIR'/home XDG_CURRENT_DESKTOP=XFCE DESKTOP_SESSION=XFCE DISPLAY=:0.0 '$BINARY' ${@} &'
 
 # Create launcher script
 LAUNCHER="$APPDIR/Launcher"
@@ -86,7 +104,7 @@ curl http://127.0.0.1:1234/reloadgames
 
 # Download Clone Hero logo
 LOGO_PATH="/userdata/roms/ports/images/CloneHero_Logo.png"
-ICON_PATH="/$APPDIR/extra/icon.png"
+ICON_PATH="$APPDIR/extra/icon.png"
 curl -Ls -o "$ICON_PATH" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/clonehero/extra/icon.png"
 curl -Ls -o "$LOGO_PATH" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/clonehero/extra/cloneherologo.png"
 

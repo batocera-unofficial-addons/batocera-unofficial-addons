@@ -4,7 +4,7 @@
 install_dir="/userdata/system/add-ons/shadps4"
 
 # URLs
-shadps4_release_url=$(curl -s https://api.github.com/repos/AzaharPlus/shadPS4Plus/releases/latest | grep "browser_download_url" | grep "linux.*\.zip" | cut -d '"' -f 4)
+shadps4_release_url="https://github.com/AzaharPlus/shadPS4Plus/releases/download/SHAD_PS4_PLUS_0_12_0_A/ShadPs4Plus-0.12.0-A-linux.zip"
 
 # Prepare the installation directory
 echo "Setting up installation directory at $install_dir..."
