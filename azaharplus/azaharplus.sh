@@ -20,33 +20,26 @@ rm -rf "$install_dir"
 mkdir -p "$install_dir/generator/azaharplus"
 mkdir -p "$es_config_dir"
 
-# Get latest AzaharPlus release URL
+# Get latest AzaharPlus AppImage release URL
 echo "Fetching latest AzaharPlus release..."
-azaharplus_url=$(curl -s https://api.github.com/repos/AzaharPlus/AzaharPlus/releases/latest \
-    | grep browser_download_url \
-    | grep "linux.*\.zip" \
+azaharplus_url=$(curl -fsSL https://api.github.com/repos/AzaharPlus/AzaharPlus/releases/latest \
+    | grep '"browser_download_url"' \
+    | grep -i '\.AppImage"' \
     | head -1 \
     | cut -d '"' -f 4)
 
 if [ -z "$azaharplus_url" ]; then
-    echo "Failed to fetch AzaharPlus release URL. Please check your internet connection."
+    echo "Failed to find an AzaharPlus AppImage in the latest release."
     exit 1
 fi
 
-# Download AzaharPlus
-echo "Downloading AzaharPlus..."
-wget -q --show-progress -O "$install_dir/azaharplus.zip" "$azaharplus_url"
-
-if [ $? -ne 0 ]; then
+# Download AppImage directly
+echo "Downloading AzaharPlus AppImage..."
+if ! wget -q --show-progress -O "$install_dir/azahar.AppImage" "$azaharplus_url"; then
     echo "Failed to download AzaharPlus."
     exit 1
 fi
 
-# Extract AppImage
-echo "Extracting AppImage..."
-unzip -q "$install_dir/azaharplus.zip" -d "$install_dir"
-mv "$install_dir"/azaharplus-*/azahar.AppImage "$install_dir/azahar.AppImage"
-rm -rf "$install_dir"/azaharplus-* "$install_dir/azaharplus.zip"
 chmod +x "$install_dir/azahar.AppImage"
 
 # Download generator
@@ -62,6 +55,7 @@ wget -q --show-progress -O "$es_config_dir/es_features_azaharplus.cfg" "$base_ur
 # Extract icon from AppImage
 echo "Extracting icon..."
 mkdir -p "$install_dir/extra"
+rm -rf /tmp/azahar-icon-extract
 mkdir -p /tmp/azahar-icon-extract
 cd /tmp/azahar-icon-extract
 "$install_dir/azahar.AppImage" --appimage-extract 'usr/share/icons/hicolor/scalable/apps/org.azahar_emu.Azahar.svg' 2>/dev/null
