@@ -67,7 +67,7 @@
 | `celeste64/celeste64_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `chiaki/chiaki.sh` | 2026-04-17 14:03:29 +0100 |
 | `chiaki/chiaki_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `chrome/chrome.sh` | 2025-05-22 17:24:09 +0100 |
+| `chrome/chrome.sh` | 2026-08-21 11:40:45 +1000 |
 | `chrome/chrome_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `clonehero/clonehero.sh` | 2026-06-03 17:07:02 +0100 |
 | `clonehero/clonehero_uninstall.sh` | 2025-11-13 20:06:15 +0000 |
@@ -144,7 +144,7 @@
 | `hbomax/hbomax_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `heroic/create_game_launchers.sh` | 2025-01-04 14:59:32 +0000 |
 | `heroic/create_game_launchers_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `heroic/heroic.sh` | 2025-11-26 04:24:01 +0000 |
+| `heroic/heroic.sh` | 2026-08-21 03:40:15 +0200 |
 | `heroic/monitor_heroic.sh` | 2025-01-04 05:18:01 +0000 |
 | `heroic/zenitysym.sh` | 2025-01-04 18:30:39 +0000 |
 | `hydra/extra/aria2-sync.sh` | 2025-01-07 21:38:25 +0000 |
