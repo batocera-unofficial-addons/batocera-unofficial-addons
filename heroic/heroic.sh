@@ -146,7 +146,7 @@ fi
 ID=$(cat "$1" | head -n 1)
 # Execute application
 unclutter-remote -s
-DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic.AppImage --no-sandbox --no-gui --disable-gpu "heroic://launch/$ID"
+DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic.AppImage --no-sandbox --no-gui "heroic://launch/$ID"
 EOL
 chmod a+x "$SYSTEM_LAUNCHER"
 
