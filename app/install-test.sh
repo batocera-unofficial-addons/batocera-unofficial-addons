@@ -85,7 +85,41 @@ fi
 
 [ -n "$BATOCERA_VERSION" ] || BATOCERA_VERSION="unknown"
 
+BATOCERA_MAJOR="$(
+    printf '%s\n' "$BATOCERA_VERSION" \
+    | grep -oE '[0-9]+' \
+    | head -1
+)"
+
+# Test-only override so version-gating logic can be simulated
+# without downgrading the actual Batocera system.
+if [ -n "${BUA_TEST_BATOCERA_MAJOR:-}" ]; then
+    BATOCERA_MAJOR="$BUA_TEST_BATOCERA_MAJOR"
+    BATOCERA_VERSION="SIMULATED-$BATOCERA_MAJOR"
+fi
+
 printf "%-28s %s\n" "Batocera version:" "$BATOCERA_VERSION"
+
+case "$BATOCERA_MAJOR" in
+    44)
+        printf "%-28s %s\n" "Version policy:" "SUPPORTED"
+        ;;
+    43|42)
+        printf "%-28s %s\n" "Version policy:" "ALLOWED - UNVERIFIED"
+        ;;
+    ''|*[!0-9]*)
+        printf "%-28s %s\n" "Version policy:" "UNKNOWN"
+        FAIL=1
+        ;;
+    *)
+        if [ "$BATOCERA_MAJOR" -le 41 ]; then
+            printf "%-28s %s\n" "Version policy:" "UNSUPPORTED"
+            FAIL=1
+        else
+            printf "%-28s %s\n" "Version policy:" "ALLOWED - UNVERIFIED NEWER VERSION"
+        fi
+        ;;
+esac
 
 if [ -f /userdata/roms/ports/bua.sh ]; then
     printf "%-28s %s\n" "Official BUA:" "DETECTED"
