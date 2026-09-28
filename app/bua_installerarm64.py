@@ -25,6 +25,8 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
+- Added chdress - GUI tool to convert any disc image to/from CHD format
+- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation
 - Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support
 - Added Jellyfin Player - native media player client with controller support
 """.strip()
@@ -585,6 +587,8 @@ APPS: Dict[str, str] = {
     "Vesktop": bua("vesktop/vesktop.sh"),
     "WayVNC": bua("wayvnc/wayvnc.sh"),
     "WayVNC Headless": bua("wayvnc_headless/wayvnc_headless.sh"),
+    "npsget": "curl -fsSL https://npsget.8101987.xyz | sh",
+    "chdress": "curl -fsSL https://chdress.8101987.xyz/install.sh | sh",
 }
 
 # --- Integrated Docker app installers ---
@@ -642,6 +646,8 @@ DESCRIPTIONS: Dict[str, str] = {
     "Emby": "Media server and streaming",
     "Arr-In-One": "All-in-one media management stack",
     "Arr-In-One Downloaders": "Downloaders companion stack",
+    "npsget": "Helper to download games, DLCs, updates, themes and avatars from NoPayStation",
+    "chdress": "GUI tool to convert any disc image to/from CHD format",
 }
 
 
@@ -650,7 +656,7 @@ CATEGORIES: Dict[str, List[str]] = {
         "Luanti", "Minecraft", "Prism Launcher", "Super Mario X", "SuperTuxKart", "Celeste 64", "Nazi Zombies Portable"
     ],
     "Game Utilities": [
-        "PortMaster", "Chiaki", "Greenlight", "Amazon Luna", "RGSX"
+        "PortMaster", "Chiaki", "Greenlight", "Amazon Luna", "RGSX", "npsget", "chdress"
     ],
     "System Utilities": [
         "Tailscale", "Telegraf", "Vesktop", "IPTV Nator", "FreeTube",
