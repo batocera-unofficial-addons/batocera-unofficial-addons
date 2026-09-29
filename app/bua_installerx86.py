@@ -3952,6 +3952,123 @@ DESCRIPTIONS.update({
     "Arr-In-One Downloaders": "Downloaders companion stack",
 })
 
+
+def sync_upstream_catalog():
+    """
+    Merge the current upstream BUA catalog into this patched frontend.
+
+    Only catalog metadata is imported:
+      - APPS
+      - DESCRIPTIONS
+      - CATEGORIES
+
+    The rest of this frontend, including the global parent-source updater,
+    remains local and unchanged.
+    """
+    import ast
+    import urllib.request
+
+    url = (
+        "https://raw.githubusercontent.com/"
+        "batocera-unofficial-addons/"
+        "batocera-unofficial-addons/main/app/bua_installerx86.py"
+    )
+
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "BUA-Catalog-Sync"},
+        )
+
+        with urllib.request.urlopen(req, timeout=8) as r:
+            source = r.read().decode("utf-8")
+
+        tree = ast.parse(source)
+
+        upstream_apps = {}
+        upstream_desc = {}
+        upstream_categories = {}
+
+        def eval_value(node):
+            if isinstance(node, ast.Constant):
+                return node.value
+
+            if isinstance(node, ast.List):
+                return [eval_value(x) for x in node.elts]
+
+            if isinstance(node, ast.Tuple):
+                return tuple(eval_value(x) for x in node.elts)
+
+            if isinstance(node, ast.Dict):
+                return {
+                    eval_value(k): eval_value(v)
+                    for k, v in zip(node.keys, node.values)
+                }
+
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "bua"
+                and len(node.args) == 1
+                and isinstance(node.args[0], ast.Constant)
+            ):
+                path = node.args[0].value
+                return f"curl -L {BUA_BASE_URL}/{path} | bash"
+
+            raise ValueError(f"Unsupported catalog node: {type(node).__name__}")
+
+        for node in tree.body:
+            # APPS = {...}, DESCRIPTIONS = {...}, CATEGORIES = {...}
+            if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+                name = node.target.id
+
+                if name == "APPS":
+                    upstream_apps.update(eval_value(node.value))
+                elif name == "DESCRIPTIONS":
+                    upstream_desc.update(eval_value(node.value))
+                elif name == "CATEGORIES":
+                    upstream_categories.update(eval_value(node.value))
+
+            # APPS.update({...}) / DESCRIPTIONS.update({...})
+            elif (
+                isinstance(node, ast.Expr)
+                and isinstance(node.value, ast.Call)
+                and isinstance(node.value.func, ast.Attribute)
+                and isinstance(node.value.func.value, ast.Name)
+                and node.value.func.attr == "update"
+                and len(node.value.args) == 1
+            ):
+                name = node.value.func.value.id
+
+                if name == "APPS":
+                    upstream_apps.update(eval_value(node.value.args[0]))
+                elif name == "DESCRIPTIONS":
+                    upstream_desc.update(eval_value(node.value.args[0]))
+
+        if not upstream_apps:
+            raise RuntimeError("No upstream APPS entries parsed")
+
+        before = len(APPS)
+
+        # Upstream is authoritative for install commands/catalog metadata.
+        APPS.update(upstream_apps)
+        DESCRIPTIONS.update(upstream_desc)
+
+        for category, entries in upstream_categories.items():
+            CATEGORIES[category] = entries
+
+        after = len(APPS)
+
+        print(
+            f"[BUA] Upstream catalog sync OK: "
+            f"{len(upstream_apps)} upstream apps, "
+            f"{before} -> {after} local apps"
+        )
+
+    except Exception as e:
+        print(f"[BUA] Upstream catalog sync skipped: {e}")
+
+
 CATEGORIES: Dict[str, List[str]] = {
     "Games": [
         "Minecraft", "Prism Launcher", "Armagetron", "Clone Hero", "Endless Sky", "EGGNOGG+", "CS Portable",
@@ -4018,6 +4135,8 @@ CATEGORIES: Dict[str, List[str]] = {
         "Extras", "X11VNC", "QEMU GA", "Soar", "Dark Mode", "VClean", "Overlay Remove"
     ],
 }
+
+sync_upstream_catalog()
 
 def get_top_level() -> List[Tuple[str, str]]:
     """Generate top-level menu items with current language translations"""
