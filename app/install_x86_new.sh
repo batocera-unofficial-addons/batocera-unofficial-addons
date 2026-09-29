@@ -2,7 +2,10 @@
 
 # URLs
 SCRIPT_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/app/symlinks.sh"
-BATOCERA_ADDONS_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/app/BUA.sh"
+BATOCERA_ADDONS_URL="https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/BUA.sh"
+UPDATER_SUPPORT_URL="https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/bua-updater-support-x86_64.tar.gz"
+UPDATER_SUPPORT_SHA256="14dd93855f4a0b4a6a6a64f560c2935ffa4bfbd0f9ae842abc344f3e7157a486"
+UPDATER_ROOT="/userdata/system/add-ons/bua/updater"
 BATOCERA_ADDONS_LOGO_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra/batocera-unofficial-addons.png"
 BATOCERA_ADDONS_WHEEL_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra/batocera-unofficial-addons-wheel.png"
 XMLSTARLET_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/xmlstarlet"
@@ -73,6 +76,50 @@ if [ ! -s "$BATOCERA_ADDONS_PATH" ]; then
 fi
 
 chmod +x "$BATOCERA_ADDONS_PATH"
+
+# Install global parent-source updater support.
+echo "Installing BUA global updater support..."
+
+UPDATER_TMP="/tmp/bua-updater-support-x86_64.tar.gz"
+
+rm -f "$UPDATER_TMP"
+
+curl -fLs \
+  -o "$UPDATER_TMP" \
+  "$UPDATER_SUPPORT_URL"
+
+if [ ! -s "$UPDATER_TMP" ]; then
+    echo "Failed to download BUA updater support package. Exiting."
+    exit 1
+fi
+
+DOWNLOADED_UPDATER_SHA256="$(sha256sum "$UPDATER_TMP" | awk '{print $1}')"
+
+if [ "$DOWNLOADED_UPDATER_SHA256" != "$UPDATER_SUPPORT_SHA256" ]; then
+    echo "BUA updater support checksum verification failed."
+    echo "Expected: $UPDATER_SUPPORT_SHA256"
+    echo "Actual:   $DOWNLOADED_UPDATER_SHA256"
+    rm -f "$UPDATER_TMP"
+    exit 1
+fi
+
+echo "BUA updater support checksum verified."
+
+rm -rf "$UPDATER_ROOT"
+mkdir -p "/userdata/system/add-ons/bua"
+
+tar -xzf "$UPDATER_TMP" \
+  -C "/userdata/system/add-ons/bua"
+
+rm -f "$UPDATER_TMP"
+
+if [ ! -f "$UPDATER_ROOT/bua_installerx86.py" ]; then
+    echo "BUA updater support installation failed. Exiting."
+    exit 1
+fi
+
+echo "BUA global updater support installed."
+
 
 # Download xmlstarlet
 echo "Downloading xmlstarlet..."
