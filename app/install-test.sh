@@ -220,8 +220,7 @@ rm -rf "$OLD"
 cat > "$PORTS_LAUNCHER" <<'LAUNCHER'
 #!/bin/bash
 
-export DISPLAY=:0
-export XAUTHORITY=/.Xauthority
+export DISPLAY=:0.0
 
 exec python3 \
   /userdata/system/add-ons/bua-global-updater/bua_installerx86.py
