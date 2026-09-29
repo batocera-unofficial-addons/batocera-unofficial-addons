@@ -2026,9 +2026,78 @@ def get_generic_catalog_registration_snapshot(
         )
         return result
 
-    identity = _http_payload_identity(
-        payload_url
+    declared_checksums = (
+        entry.get("declared_payload_sha256")
+        or {}
     )
+
+    checksum_identity = None
+
+    if isinstance(
+        declared_checksums,
+        dict,
+    ):
+        import platform
+
+        machine = platform.machine().lower()
+
+        if machine in (
+            "x86_64",
+            "amd64",
+        ):
+            checksum_identity = (
+                declared_checksums.get(
+                    "x86_64"
+                )
+                or declared_checksums.get(
+                    "generic"
+                )
+            )
+
+        elif machine in (
+            "aarch64",
+            "arm64",
+        ):
+            checksum_identity = (
+                declared_checksums.get(
+                    "arm64"
+                )
+                or declared_checksums.get(
+                    "generic"
+                )
+            )
+
+        else:
+            checksum_identity = (
+                declared_checksums.get(
+                    "generic"
+                )
+            )
+
+    if checksum_identity:
+        checksum_identity = str(
+            checksum_identity
+        ).lower().strip()
+
+        identity = {
+            "supported": True,
+            "identity":
+                "sha256:"
+                + checksum_identity,
+            "display_version":
+                "sha256@"
+                + checksum_identity[:12],
+            "etag": None,
+            "last_modified": None,
+            "size": None,
+            "filename": None,
+            "error": None,
+        }
+
+    else:
+        identity = _http_payload_identity(
+            payload_url
+        )
 
     if not identity.get("supported"):
         result["error"] = (
@@ -3480,6 +3549,351 @@ def build_parent_update_command(
 
 
 
+
+def try_adopt_verified_payload_baseline(
+    app_name: str,
+) -> bool:
+    """
+    Safely adopt the CURRENT upstream identity for an already-installed
+    but previously untracked application.
+
+    Adoption happens only when:
+      1. the manifest declares an architecture-specific payload URL,
+      2. the installer declares that payload's SHA-256,
+      3. the downloaded archive matches that SHA-256,
+      4. every regular file in the current upstream payload matches
+         the corresponding installed file byte-for-byte.
+
+    No application files are modified.
+    """
+    import hashlib
+    import os
+    import platform
+    import shutil
+    import tarfile
+    import tempfile
+    import urllib.request
+    import zipfile
+
+    entry = get_global_manifest_entry(
+        app_name
+    )
+
+    if not isinstance(entry, dict):
+        return False
+
+    install_root = str(
+        entry.get("install_root")
+        or ""
+    ).strip()
+
+    payload_urls = (
+        entry.get("payload_urls_by_arch")
+        or {}
+    )
+
+    checksums = (
+        entry.get("declared_payload_sha256")
+        or {}
+    )
+
+    if (
+        not install_root
+        or not isinstance(payload_urls, dict)
+        or not isinstance(checksums, dict)
+    ):
+        return False
+
+    machine = platform.machine().lower()
+
+    if machine in ("x86_64", "amd64"):
+        arch = "x86_64"
+    elif machine in ("aarch64", "arm64"):
+        arch = "arm64"
+    else:
+        return False
+
+    payload_url = str(
+        payload_urls.get(arch)
+        or payload_urls.get("generic")
+        or ""
+    ).strip()
+
+    expected_sha256 = str(
+        checksums.get(arch)
+        or checksums.get("generic")
+        or ""
+    ).strip().lower()
+
+    if (
+        not payload_url
+        or not re.fullmatch(
+            r"[0-9a-f]{64}",
+            expected_sha256,
+        )
+    ):
+        return False
+
+    # Resolve installer-style shell paths such as:
+    #   $HOME/.local/example
+    install_root = os.path.expanduser(
+        os.path.expandvars(
+            install_root
+        )
+    )
+
+    installed_root = Path(
+        install_root
+    )
+
+    if not installed_root.is_dir():
+        return False
+
+    work = Path(
+        tempfile.mkdtemp(
+            prefix="bua-baseline-verify-"
+        )
+    )
+
+    payload_path = work / "payload"
+    extract_root = work / "extract"
+
+    try:
+        req = urllib.request.Request(
+            payload_url,
+            headers={
+                "User-Agent":
+                    "BUA-Verified-Baseline/1",
+                "Cache-Control":
+                    "no-cache",
+            },
+        )
+
+        digest = hashlib.sha256()
+
+        with urllib.request.urlopen(
+            req,
+            timeout=60,
+        ) as response, payload_path.open(
+            "wb"
+        ) as out:
+            while True:
+                chunk = response.read(
+                    1024 * 1024
+                )
+
+                if not chunk:
+                    break
+
+                digest.update(chunk)
+                out.write(chunk)
+
+        actual_sha256 = digest.hexdigest()
+
+        if actual_sha256 != expected_sha256:
+            print(
+                f"[BUA] Baseline verification refused for "
+                f"{app_name}: payload checksum mismatch"
+            )
+            return False
+
+        extract_root.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        lower_url = payload_url.lower().split(
+            "?",
+            1,
+        )[0]
+
+        if lower_url.endswith(".zip"):
+            with zipfile.ZipFile(
+                payload_path
+            ) as archive:
+                archive.extractall(
+                    extract_root
+                )
+
+        else:
+            try:
+                with tarfile.open(
+                    payload_path,
+                    mode="r:*",
+                ) as archive:
+                    # Python 3.12+ safe extraction policy.
+                    try:
+                        archive.extractall(
+                            extract_root,
+                            filter="data",
+                        )
+                    except TypeError:
+                        archive.extractall(
+                            extract_root
+                        )
+
+            except tarfile.TarError:
+                return False
+
+        # Some archives contain the payload directly at archive root.
+        # Others wrap everything in one top-level directory.
+        candidates = [
+            extract_root,
+        ]
+
+        top_entries = list(
+            extract_root.iterdir()
+        )
+
+        if (
+            len(top_entries) == 1
+            and top_entries[0].is_dir()
+        ):
+            candidates.append(
+                top_entries[0]
+            )
+
+        matched_payload = False
+
+        for payload_root in candidates:
+            payload_files = [
+                path
+                for path in payload_root.rglob("*")
+                if path.is_file()
+                and not path.is_symlink()
+            ]
+
+            if not payload_files:
+                continue
+
+            candidate_matches = True
+
+            for payload_file in payload_files:
+                relative = payload_file.relative_to(
+                    payload_root
+                )
+
+                installed_file = (
+                    installed_root / relative
+                )
+
+                if not installed_file.is_file():
+                    candidate_matches = False
+                    break
+
+                def sha256_file(path):
+                    h = hashlib.sha256()
+
+                    with path.open("rb") as fh:
+                        while True:
+                            block = fh.read(
+                                1024 * 1024
+                            )
+
+                            if not block:
+                                break
+
+                            h.update(block)
+
+                    return h.hexdigest()
+
+                if (
+                    sha256_file(payload_file)
+                    != sha256_file(installed_file)
+                ):
+                    candidate_matches = False
+                    break
+
+            if candidate_matches:
+                matched_payload = True
+                break
+
+        if not matched_payload:
+            print(
+                f"[BUA] Existing {app_name} install does not "
+                f"match the current upstream payload"
+            )
+            return False
+
+        snapshot = get_catalog_registration_snapshot(
+            app_name,
+            use_cache=False,
+        )
+
+        if not snapshot.get("supported"):
+            return False
+
+        registration = (
+            snapshot.get("registration")
+            or {}
+        )
+
+        app_version = str(
+            registration.get("app_version")
+            or ""
+        ).strip()
+
+        update_identity = str(
+            registration.get("update_identity")
+            or app_version
+        ).strip()
+
+        if not app_version or not update_identity:
+            return False
+
+        package_data = {
+            "app_version":
+                app_version,
+            "update_identity":
+                update_identity,
+            "update_method":
+                registration.get(
+                    "update_method"
+                )
+                or "custom",
+            "registration_source":
+                "verified_payload_match",
+            "registration_schema":
+                2,
+            "upstream":
+                registration.get(
+                    "upstream"
+                )
+                or {},
+            "updated_at":
+                datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
+        }
+
+        set_package_state(
+            app_name,
+            package_data,
+        )
+
+        print(
+            f"[BUA] Verified and adopted installed "
+            f"baseline for {app_name}: "
+            f"{app_version}"
+        )
+
+        return True
+
+    except Exception as exc:
+        print(
+            f"[BUA] Baseline verification skipped for "
+            f"{app_name}: {exc}"
+        )
+
+        return False
+
+    finally:
+        shutil.rmtree(
+            work,
+            ignore_errors=True,
+        )
+
+
 def get_app_version_status(app_name: str) -> Dict:
     """
     Compare the installed update identity with the latest identity
@@ -3550,18 +3964,46 @@ def get_app_version_status(app_name: str) -> Dict:
     )
 
     if not installed_version:
-        return {
-            "status": "unknown",
-            "needs_update": False,
-            "installed_version": None,
-            "latest_version": latest_version,
-            "installed_update_identity": installed_identity,
-            "latest_update_identity": latest_identity,
-            "registered_version": registered_version,
-            "probe_version": probe_version,
-            "registration_mismatch": registration_mismatch,
-            "error": "Installed application version is unknown",
-        }
+        adopted = try_adopt_verified_payload_baseline(
+            app_name
+        )
+
+        if adopted:
+            metadata = get_registered_version_metadata(
+                app_name
+            )
+
+            registered_version = metadata.get(
+                "app_version"
+            )
+
+            installed_identity = (
+                metadata.get("update_identity")
+                or registered_version
+            )
+
+            probe_version = read_version_probe(
+                metadata.get("version_probe")
+            )
+
+            installed_version = (
+                probe_version
+                or registered_version
+            )
+
+        if not installed_version:
+            return {
+                "status": "unknown",
+                "needs_update": False,
+                "installed_version": None,
+                "latest_version": latest_version,
+                "installed_update_identity": installed_identity,
+                "latest_update_identity": latest_identity,
+                "registered_version": registered_version,
+                "probe_version": probe_version,
+                "registration_mismatch": registration_mismatch,
+                "error": "Installed application version is unknown",
+            }
 
     if not installed_identity:
         if probe_version and latest_version:
