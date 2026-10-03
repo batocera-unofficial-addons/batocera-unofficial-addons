@@ -10765,10 +10765,49 @@ def check_symlink_manager_and_warn():
         pygame.display.flip()
         clock.tick(60)
 
+
+def repair_optional_integrations():
+    """Reapply optional BUA integration patches without blocking startup."""
+    patchers = [
+        "/userdata/system/add-ons/bua/updater/integrations/apply_switch_nextendo.py",
+    ]
+
+    for patcher in patchers:
+        if not os.path.isfile(patcher):
+            continue
+
+        try:
+            result = subprocess.run(
+                [sys.executable, patcher],
+                check=False,
+                timeout=15,
+                capture_output=True,
+                text=True,
+            )
+
+            if result.returncode == 0:
+                print(f"[BUA] Integration repair OK: {os.path.basename(patcher)}")
+            else:
+                print(
+                    f"[BUA] Integration repair returned "
+                    f"{result.returncode}: {os.path.basename(patcher)}"
+                )
+
+        except Exception as e:
+            print(
+                f"[BUA] Optional integration repair failed "
+                f"for {os.path.basename(patcher)}: {e}"
+            )
+
+
 if __name__ == "__main__":
     try:
         # Run live update block before anything else
         live_update_block()
+
+        # Reapply optional BUA integrations that upstream app updates
+        # or reinstalls may have replaced.
+        repair_optional_integrations()
 
         play_splash_and_load()
         main()
