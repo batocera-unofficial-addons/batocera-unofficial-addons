@@ -4,7 +4,7 @@
 SCRIPT_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/app/symlinks.sh"
 BATOCERA_ADDONS_URL="https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/BUA.sh"
 UPDATER_SUPPORT_URL="https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/bua-updater-support-x86_64.tar.gz"
-UPDATER_SUPPORT_SHA256="23954a69a833f1674ecff464c66c50b14fccc49e75f5be43499507b9cf5d1947"
+UPDATER_SUPPORT_SHA256="0b9ade16a972194606c4c9a0b9e3e4f04bcb4aaf8fb65680358f53d3882273e1"
 UPDATER_ROOT="/userdata/system/add-ons/bua/updater"
 BATOCERA_ADDONS_LOGO_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra/batocera-unofficial-addons.png"
 BATOCERA_ADDONS_WHEEL_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra/batocera-unofficial-addons-wheel.png"
@@ -119,6 +119,15 @@ if [ ! -f "$UPDATER_ROOT/bua_installerx86.py" ]; then
 fi
 
 echo "BUA global updater support installed."
+
+# Apply optional Switch/Citron integration if Switch is installed.
+NEXTENDO_PATCHER="$UPDATER_ROOT/integrations/apply_switch_nextendo.py"
+
+if [ -f "$NEXTENDO_PATCHER" ]; then
+    echo "Checking Switch/Citron NexTendo integration..."
+    python3 "$NEXTENDO_PATCHER" || \
+        echo "Warning: NexTendo integration check failed."
+fi
 
 
 # Download xmlstarlet
