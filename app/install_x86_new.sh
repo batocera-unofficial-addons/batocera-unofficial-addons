@@ -4,7 +4,7 @@
 SCRIPT_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/app/symlinks.sh"
 BATOCERA_ADDONS_URL="https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/BUA.sh"
 UPDATER_SUPPORT_URL="https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/bua-updater-support-x86_64.tar.gz"
-UPDATER_SUPPORT_SHA256="0b9ade16a972194606c4c9a0b9e3e4f04bcb4aaf8fb65680358f53d3882273e1"
+UPDATER_SUPPORT_SHA256="06de753541e4fb4abed7903e034037f0df6f213af8b9c8f3eb672b1ac59df088"
 UPDATER_ROOT="/userdata/system/add-ons/bua/updater"
 BATOCERA_ADDONS_LOGO_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra/batocera-unofficial-addons.png"
 BATOCERA_ADDONS_WHEEL_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra/batocera-unofficial-addons-wheel.png"
