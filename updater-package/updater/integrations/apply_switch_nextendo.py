@@ -28,8 +28,14 @@ def patch_features():
 
     text = FEATURES.read_text(encoding="utf-8")
 
-    addition = """\
+    nextendo_addition = """\
     <feature name="NEXTENDO NETWORK" group="SWITCH OPTIONS" submenu="NETWORK" value="nextendo_network" description="Enable NexTendo network redirection for supported games.">
+      <choice name="Disabled" value="false" />
+      <choice name="Enabled" value="true" />
+    </feature>"""
+
+    internet_addition = """\
+    <feature name="INTERNET ACCESS" group="SWITCH OPTIONS" submenu="NETWORK" value="internet_access" description="Allow the emulator to report an active internet connection to the game.">
       <choice name="Disabled" value="false" />
       <choice name="Enabled" value="true" />
     </feature>"""
@@ -70,10 +76,43 @@ def patch_features():
 
         block = text[start:end]
 
-        if 'value="nextendo_network"' in block:
+        missing_features = []
+
+        if 'value="nextendo_network"' not in block:
+            missing_features.append(nextendo_addition)
+
+        if 'value="internet_access"' not in block:
+            missing_features.append(internet_addition)
+
+        # Keep INTERNET ACCESS directly below NEXTENDO NETWORK.
+        reversed_pair = (
+            internet_addition + "\n" + nextendo_addition
+        )
+
+        correct_pair = (
+            nextendo_addition + "\n" + internet_addition
+        )
+
+        if reversed_pair in block:
+            block = block.replace(
+                reversed_pair,
+                correct_pair,
+                1,
+            )
+
+            text = text[:start] + block + text[end:]
+            changed = True
+
+            print(
+                f"[Nextendo] Reordered {emulator_name} "
+                "Network settings."
+            )
+            continue
+
+        if not missing_features:
             print(
                 f"[Nextendo] {emulator_name} Advanced Game "
-                "Settings feature already present."
+                "Settings features already present."
             )
             continue
 
@@ -84,7 +123,7 @@ def patch_features():
 
         block = block.replace(
             anchor,
-            anchor + "\n" + addition,
+            anchor + "\n" + "\n".join(missing_features),
             1,
         )
 
@@ -124,15 +163,23 @@ def patch_generator():
 
     text = GENERATOR.read_text(encoding="utf-8")
 
-    if "system.isOptSet('nextendo_network')" in text:
-        print("[Nextendo] Citron generator support already present.")
-        return False
+    nextendo_marker = "system.isOptSet('nextendo_network')"
+    internet_marker = "BUA Citron internet-access integration"
 
-    anchor = '''\
+    nextendo_integrated = nextendo_marker in text
+    internet_integrated = internet_marker in text
+
+    changed = False
+
+    if nextendo_integrated:
+        print("[Nextendo] Citron generator support already present.")
+
+    if not nextendo_integrated:
+        anchor = '''\
     # controls section
         if not yuzuConfig.has_section("Controls"):'''
 
-    addition = '''\
+        addition = '''\
     # NexTendo network redirection - Citron only
         if emulator == "citron-emu":
             if not yuzuConfig.has_section("Network"):
@@ -152,23 +199,107 @@ def patch_generator():
 
 '''
 
-    if anchor not in text:
-        raise RuntimeError("Switch generator insertion anchor not found")
+        if anchor not in text:
+            raise RuntimeError("Switch generator insertion anchor not found")
 
-    new_text = text.replace(
-        anchor,
-        addition + anchor,
-        1,
-    )
+        new_text = text.replace(
+            anchor,
+            addition + anchor,
+            1,
+        )
+
+        text = new_text
+        changed = True
+
+    if not internet_integrated:
+        internet_anchor = """            if system.isOptSet('nextendo_network'):
+                yuzuConfig.set(
+                    "Network",
+                    "enable_nextendo",
+                    system.config["nextendo_network"]
+                )
+                yuzuConfig.set(
+                    "Network",
+                    "enable_nextendo\\\\default",
+                    "false"
+                )
+"""
+
+        internet_replacement = """            if system.isOptSet('nextendo_network'):
+                yuzuConfig.set(
+                    "Network",
+                    "enable_nextendo",
+                    system.config["nextendo_network"]
+                )
+                yuzuConfig.set(
+                    "Network",
+                    "enable_nextendo\\\\default",
+                    "false"
+                )
+
+            # BUA Citron internet-access integration
+            if system.isOptSet('internet_access'):
+                internet_enabled = str(
+                    system.config["internet_access"]
+                ).lower() in (
+                    "1",
+                    "true",
+                    "yes",
+                    "on",
+                )
+            else:
+                internet_enabled = (
+                    system.isOptSet('nextendo_network')
+                    and str(
+                        system.config["nextendo_network"]
+                    ).lower() in (
+                        "1",
+                        "true",
+                        "yes",
+                        "on",
+                    )
+                )
+
+            for section in ("Network", "Services"):
+                if not yuzuConfig.has_section(section):
+                    yuzuConfig.add_section(section)
+
+                yuzuConfig.set(
+                    section,
+                    "airplane_mode",
+                    "false" if internet_enabled else "true"
+                )
+                yuzuConfig.set(
+                    section,
+                    "airplane_mode\\\\default",
+                    "false"
+                )
+"""
+
+        if internet_anchor not in text:
+            raise RuntimeError(
+                "Citron internet-access anchor not found"
+            )
+
+        text = text.replace(
+            internet_anchor,
+            internet_replacement,
+            1,
+        )
+
+        changed = True
+
+    if not changed:
+        return False
 
     tmp = GENERATOR.with_suffix(GENERATOR.suffix + ".bua-nextendo.tmp")
-    tmp.write_text(new_text, encoding="utf-8")
+    tmp.write_text(text, encoding="utf-8")
 
     py_compile.compile(str(tmp), doraise=True)
 
     tmp.replace(GENERATOR)
 
-    print("[Nextendo] Added Citron generator support.")
+    print("[Nextendo] Updated Citron generator support.")
     return True
 
 
@@ -188,39 +319,45 @@ def patch_ryujinx_generator():
     source = generator.read_text(encoding="utf-8")
 
     marker = "BUA Ryujinx-Nextendo integration"
+    internet_marker = "BUA Ryujinx internet-access integration"
 
-    if marker in source:
+    already_integrated = marker in source
+    internet_integrated = internet_marker in source
+
+    changed = False
+
+    if already_integrated:
         print(
             "[Nextendo] Ryujinx generator support already present."
         )
-        return False
 
-    if not re.search(r'^import tarfile$', source, re.M):
-        imports = list(
-            re.finditer(r'^import .+$', source, re.M)
-        )
-
-        if not imports:
-            raise RuntimeError(
-                "Ryujinx generator import section not found"
+    if not already_integrated:
+        if not re.search(r'^import tarfile$', source, re.M):
+            imports = list(
+                re.finditer(r'^import .+$', source, re.M)
             )
 
-        pos = imports[-1].end()
+            if not imports:
+                raise RuntimeError(
+                    "Ryujinx generator import section not found"
+                )
 
-        source = (
-            source[:pos]
-            + "\nimport tarfile"
-            + source[pos:]
-        )
+            pos = imports[-1].end()
 
-    old_paths = '''        ryujinx_appimage = "/userdata/system/switch/appimages/ryujinx-emu.AppImage"
+            source = (
+                source[:pos]
+                + "\nimport tarfile"
+                + source[pos:]
+            )
+
+        old_paths = '''        ryujinx_appimage = "/userdata/system/switch/appimages/ryujinx-emu.AppImage"
         ryujinx_extracted = "/userdata/system/switch/appimages/ryujinx-extracted/usr/bin/Ryujinx"
         ryujinx_extracted_dir = "/userdata/system/switch/appimages/ryujinx-extracted"
         ryujinx_wrapper = "/userdata/system/switch/extra/ryu_wrapper"
         ryujinx_libs = "/userdata/system/switch/appimages/ryujinx-extracted/usr/lib"
 '''
 
-    new_paths = '''        # BUA Ryujinx-Nextendo integration
+        new_paths = '''        # BUA Ryujinx-Nextendo integration
         ryujinx_appimage = "/userdata/system/switch/appimages/ryujinx-emu.AppImage"
         ryujinx_nextendo_archive = "/userdata/system/switch/appimages/ryujinx-nextendo.tar.gz"
         ryujinx_extracted_dir = "/userdata/system/switch/appimages/ryujinx-extracted"
@@ -376,21 +513,21 @@ def patch_ryujinx_generator():
                 raise
 '''
 
-    if old_paths not in source:
-        raise RuntimeError(
-            "Ryujinx generator path block not found"
+        if old_paths not in source:
+            raise RuntimeError(
+                "Ryujinx generator path block not found"
+            )
+
+        source = source.replace(
+            old_paths,
+            new_paths,
+            1,
         )
 
-    source = source.replace(
-        old_paths,
-        new_paths,
-        1,
-    )
-
-    old_if = '''        if os.path.exists(ryujinx_appimage):
+        old_if = '''        if os.path.exists(ryujinx_appimage):
 '''
 
-    new_if = '''        if (
+        new_if = '''        if (
             os.path.exists(ryujinx_appimage)
             and not os.path.isfile(
                 os.path.join(
@@ -401,21 +538,21 @@ def patch_ryujinx_generator():
         ):
 '''
 
-    if old_if not in source:
-        raise RuntimeError(
-            "Ryujinx AppImage extraction condition not found"
+        if old_if not in source:
+            raise RuntimeError(
+                "Ryujinx AppImage extraction condition not found"
+            )
+
+        source = source.replace(
+            old_if,
+            new_if,
+            1,
         )
 
-    source = source.replace(
-        old_if,
-        new_if,
-        1,
-    )
-
-    stat_anchor = '''        st = os.stat(ryujinx_extracted)
+        stat_anchor = '''        st = os.stat(ryujinx_extracted)
 '''
 
-    layout_block = '''        nextendo_binary = os.path.join(
+        layout_block = '''        nextendo_binary = os.path.join(
             ryujinx_extracted_dir,
             "Ryujinx",
         )
@@ -441,21 +578,21 @@ def patch_ryujinx_generator():
         st = os.stat(ryujinx_extracted)
 '''
 
-    if stat_anchor not in source:
-        raise RuntimeError(
-            "Ryujinx executable stat anchor not found"
+        if stat_anchor not in source:
+            raise RuntimeError(
+                "Ryujinx executable stat anchor not found"
+            )
+
+        source = source.replace(
+            stat_anchor,
+            layout_block,
+            1,
         )
 
-    source = source.replace(
-        stat_anchor,
-        layout_block,
-        1,
-    )
-
-    old_ld = '''                        "LD_LIBRARY_PATH": "/userdata/system/switch/appimages/ryujinx-extracted/usr/lib",
+        old_ld = '''                        "LD_LIBRARY_PATH": "/userdata/system/switch/appimages/ryujinx-extracted/usr/lib",
 '''
 
-    new_ld = '''                        "LD_LIBRARY_PATH": ryujinx_libs,
+        new_ld = '''                        "LD_LIBRARY_PATH": ryujinx_libs,
                         "PATH": (
                             "/userdata/system/switch/extra/xdgfix:"
                             + os.environ.get("PATH", "")
@@ -468,21 +605,21 @@ def patch_ryujinx_generator():
                         ),
 '''
 
-    if old_ld not in source:
-        raise RuntimeError(
-            "Ryujinx LD_LIBRARY_PATH anchor not found"
+        if old_ld not in source:
+            raise RuntimeError(
+                "Ryujinx LD_LIBRARY_PATH anchor not found"
+            )
+
+        source = source.replace(
+            old_ld,
+            new_ld,
+            1,
         )
 
-    source = source.replace(
-        old_ld,
-        new_ld,
-        1,
-    )
-
-    rom_anchor = '''        rom_nameq = os.path.basename(rom)
+        rom_anchor = '''        rom_nameq = os.path.basename(rom)
 '''
 
-    network_block = '''        nextendo_enabled = (
+        network_block = '''        nextendo_enabled = (
             system.isOptSet('nextendo_network')
             and str(
                 system.config["nextendo_network"]
@@ -504,16 +641,70 @@ def patch_ryujinx_generator():
         rom_nameq = os.path.basename(rom)
 '''
 
-    if rom_anchor not in source:
-        raise RuntimeError(
-            "Ryujinx ROM anchor not found"
+        if rom_anchor not in source:
+            raise RuntimeError(
+                "Ryujinx ROM anchor not found"
+            )
+
+        source = source.replace(
+            rom_anchor,
+            network_block,
+            1,
         )
 
-    source = source.replace(
-        rom_anchor,
-        network_block,
-        1,
-    )
+        changed = True
+
+    if not internet_integrated:
+        config_anchor = """        if system.isOptSet('res_scale'):
+            data['res_scale'] = int(system.config["res_scale"])
+        else:
+            data['res_scale'] = 1
+"""
+
+        config_block = """        if system.isOptSet('res_scale'):
+            data['res_scale'] = int(system.config["res_scale"])
+        else:
+            data['res_scale'] = 1
+
+        # BUA Ryujinx internet-access integration
+        if system.isOptSet('internet_access'):
+            data['enable_internet_access'] = str(
+                system.config["internet_access"]
+            ).lower() in (
+                "1",
+                "true",
+                "yes",
+                "on",
+            )
+        else:
+            data['enable_internet_access'] = (
+                system.isOptSet('nextendo_network')
+                and str(
+                    system.config["nextendo_network"]
+                ).lower() in (
+                    "1",
+                    "true",
+                    "yes",
+                    "on",
+                )
+            )
+"""
+
+        if config_anchor not in source:
+            raise RuntimeError(
+                "Ryujinx internet-access config anchor not found"
+            )
+
+        source = source.replace(
+            config_anchor,
+            config_block,
+            1,
+        )
+
+        changed = True
+
+    if not changed:
+        return False
 
     tmp = generator.with_suffix(
         generator.suffix + ".bua-nextendo.tmp"
@@ -529,7 +720,7 @@ def patch_ryujinx_generator():
     tmp.replace(generator)
 
     print(
-        "[Nextendo] Added Ryujinx-Nextendo generator support."
+        "[Nextendo] Updated Ryujinx-Nextendo generator support."
     )
 
     return True
