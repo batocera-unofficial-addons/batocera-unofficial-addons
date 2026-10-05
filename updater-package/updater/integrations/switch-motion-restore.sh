@@ -51,8 +51,8 @@ changed = False
 desired_marker = "# BUA global DSU/CemuHook motion integration"
 
 desired = '''        # BUA global DSU/CemuHook motion integration
-        # evdevhook2 publishes the physical controller IMU on localhost:26766.
-        for controller in data.get("input_config", []):
+        # Map each emulator player to the matching DSU controller slot.
+        for index, controller in enumerate(data.get("input_config", [])):
             motion = controller.get("motion")
             if isinstance(motion, dict):
                 controller["motion"] = {
@@ -60,8 +60,8 @@ desired = '''        # BUA global DSU/CemuHook motion integration
                     "sensitivity": 100,
                     "gyro_deadzone": 1,
                     "enable_motion": True,
-                    "slot": 0,
-                    "alt_slot": 0,
+                    "slot": index,
+                    "alt_slot": index,
                     "mirror_input": True,
                     "dsu_server_host": "127.0.0.1",
                     "dsu_server_port": 26766
@@ -78,8 +78,8 @@ current = '''        # Universal DSU/CemuHook motion configuration.
                     "sensitivity": 100,
                     "gyro_deadzone": 1,
                     "enable_motion": True,
-                    "slot": 0,
-                    "alt_slot": 0,
+                    "slot": index,
+                    "alt_slot": index,
                     "mirror_input": True,
                     "dsu_server_host": "127.0.0.1",
                     "dsu_server_port": 26766
@@ -158,13 +158,13 @@ new_motion = '''                yuzuConfig.set("Controls", player_nb_str + "_mot
                 yuzuConfig.set(
                     "Controls",
                     player_nb_str + "_motionleft",
-                    '"motion:0,pad:0,port:26766,guid:0000000000000000000000007f000001,engine:cemuhookudp"'
+                    f'"motion:0,pad:{nplayer},port:26766,guid:0000000000000000000000007f000001,engine:cemuhookudp"'
                 )
                 yuzuConfig.set("Controls", player_nb_str + "_motionright\\\\default", "false")
                 yuzuConfig.set(
                     "Controls",
                     player_nb_str + "_motionright",
-                    '"motion:0,pad:0,port:26766,guid:0000000000000000000000007f000001,engine:cemuhookudp"'
+                    f'"motion:0,pad:{nplayer},port:26766,guid:0000000000000000000000007f000001,engine:cemuhookudp"'
                 )
 '''
 
