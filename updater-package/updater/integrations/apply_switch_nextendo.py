@@ -4,6 +4,7 @@ from pathlib import Path
 import os
 import re
 import py_compile
+import subprocess
 import xml.etree.ElementTree as ET
 
 FEATURES = Path(
@@ -950,6 +951,225 @@ def patch_switchlauncher_config():
         "[Nextendo] Added Switch launcher game-option support."
     )
 
+
+def apply_local_ryujinx_persistence():
+    """Reapply locally validated Ryujinx controller/hotkey fixes."""
+    repair = Path(
+        "/userdata/system/restore-ryujinx-nextendo-fixes.sh"
+    )
+
+    if not repair.is_file():
+        print(
+            "[Nextendo] Local Ryujinx persistence script "
+            "not installed; skipping."
+        )
+        return False
+
+    subprocess.run(
+        [str(repair)],
+        check=True,
+    )
+
+    print(
+        "[Nextendo] Reapplied local Ryujinx controller/hotkey fixes."
+    )
+
+    return True
+
+def patch_switch_motion():
+    packaged = Path(__file__).with_name(
+        "switch-motion-restore.sh"
+    )
+
+    target = Path(
+        "/userdata/system/restore-switch-motion.sh"
+    )
+
+    if not packaged.is_file():
+        raise RuntimeError(
+            "Packaged Switch motion restore script is missing"
+        )
+
+    packaged_data = packaged.read_bytes()
+
+    deploy_needed = (
+        not target.is_file()
+        or target.read_bytes() != packaged_data
+    )
+
+    if deploy_needed:
+        tmp = target.with_name(
+            target.name + ".bua-motion.tmp"
+        )
+
+        tmp.write_bytes(packaged_data)
+        os.chmod(tmp, 0o755)
+        tmp.replace(target)
+
+        print(
+            "[Nextendo] Deployed Switch motion persistence script."
+        )
+    else:
+        os.chmod(target, 0o755)
+        print(
+            "[Nextendo] Switch motion persistence script already current."
+        )
+
+    #
+    # Prefer the existing Ryujinx/Nextendo boot persistence path.
+    #
+    restore = Path(
+        "/userdata/system/restore-ryujinx-nextendo-fixes.sh"
+    )
+
+    marker = "# Switch global motion persistence"
+
+    addition = """#
+# Switch global motion persistence
+#
+if [ -x /userdata/system/restore-switch-motion.sh ]; then
+    /userdata/system/restore-switch-motion.sh
+    log "Switch motion persistence verified"
+else
+    log "WARNING: restore-switch-motion.sh missing"
+fi
+
+"""
+
+    hooked = False
+
+    if restore.is_file():
+        restore_text = restore.read_text(
+            encoding="utf-8"
+        )
+
+        if marker in restore_text:
+            hooked = True
+
+        else:
+            anchor = 'log "Persistence check finished"'
+
+            if anchor in restore_text:
+                restore_text = restore_text.replace(
+                    anchor,
+                    addition + anchor,
+                    1,
+                )
+
+                tmp_restore = restore.with_name(
+                    restore.name + ".bua-motion.tmp"
+                )
+
+                tmp_restore.write_text(
+                    restore_text,
+                    encoding="utf-8",
+                )
+
+                os.chmod(tmp_restore, 0o755)
+
+                subprocess.run(
+                    ["bash", "-n", str(tmp_restore)],
+                    check=True,
+                )
+
+                tmp_restore.replace(restore)
+                hooked = True
+
+                print(
+                    "[Nextendo] Added Switch motion to existing "
+                    "boot persistence."
+                )
+
+    #
+    # Fallback for a fresh install where the Ryujinx persistence
+    # mechanism is unavailable.
+    #
+    service = Path(
+        "/userdata/system/services/SwitchMotionPersistence"
+    )
+
+    if hooked:
+        if service.exists():
+            try:
+                subprocess.run(
+                    [
+                        "batocera-services",
+                        "disable",
+                        "SwitchMotionPersistence",
+                    ],
+                    check=False,
+                )
+            except Exception:
+                pass
+
+            service.unlink(missing_ok=True)
+
+    else:
+        service_text = """#!/bin/bash
+
+case "$1" in
+    start)
+        /userdata/system/restore-switch-motion.sh
+        ;;
+
+    stop)
+        ;;
+
+    status)
+        if [ -f /tmp/restore-switch-motion.log ]; then
+            cat /tmp/restore-switch-motion.log
+        else
+            echo "Switch motion persistence has not run since boot."
+        fi
+        ;;
+
+    *)
+        echo "Usage: $0 {start|stop|status}"
+        exit 1
+        ;;
+esac
+
+exit 0
+"""
+
+        service.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        service.write_text(
+            service_text,
+            encoding="utf-8",
+        )
+
+        os.chmod(service, 0o755)
+
+        subprocess.run(
+            [
+                "batocera-services",
+                "enable",
+                "SwitchMotionPersistence",
+            ],
+            check=False,
+        )
+
+        print(
+            "[Nextendo] Installed standalone Switch motion "
+            "boot persistence."
+        )
+
+    subprocess.run(
+        [str(target)],
+        check=True,
+    )
+
+    print(
+        "[Nextendo] Switch DSU/Cemuhook motion integration verified."
+    )
+
+    return True
+
+
 def main():
     print("[Nextendo] Checking Switch/Citron/Ryujinx integration...")
 
@@ -959,6 +1179,8 @@ def main():
         ("Ryujinx generator", patch_ryujinx_generator),
         ("Switch launcher config", patch_switchlauncher_config),
         ("OAuth browser selector", patch_browser_handoff),
+        ("Local Ryujinx persistence", apply_local_ryujinx_persistence),
+        ("Switch motion", patch_switch_motion),
     ]
 
     failures = []
