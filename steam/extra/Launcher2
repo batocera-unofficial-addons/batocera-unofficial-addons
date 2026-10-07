@@ -2,6 +2,7 @@
 export DISPLAY=:0.0
 export RIM_ALLOW_ROOT=1
 export HOME=/userdata/system/add-ons/steam
+export XAUTHORITY=/var/run/xauth
 
 # Auto-detect dedicated GPU on multi-GPU systems (no-op on single-GPU)
 # Only set DRI_PRIME if the non-boot GPU has more VRAM than the boot GPU.
@@ -95,7 +96,7 @@ ELAPSED=0
 STEAM_FOUND=0
 
 while [ $ELAPSED -lt $TIMEOUT ]; do
-  if wmctrl -l | grep -qi "Steam"; then
+  if wmctrl -l | grep -qiE "Steam|Big.Picture|Big-Picture"; then
     STEAM_FOUND=1
     break
   fi
@@ -111,7 +112,7 @@ fi
 echo "Steam window detected. Monitoring until it closes..."
 
 # Monitor - wait until Steam window disappears
-while wmctrl -l | grep -qi "Steam"; do
+while wmctrl -l | grep -qiE "Steam|Big.Picture|Big-Picture"; do
   sleep 2
 done
 
