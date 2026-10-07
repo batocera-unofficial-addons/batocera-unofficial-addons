@@ -600,6 +600,7 @@ APPS: Dict[str, str] = {
     "Prism Launcher": bua("prismlauncher/prismlauncher.sh"),
     "Moonlight": bua("moonlight/moonlight.sh"),
     "Netflix": bua("netflix/netflix.sh"),
+    "NetWatch": bua("netwatch/netwatch.sh"),
     "NVIDIA Patcher": bua("nvidiapatch/nvidiapatch.sh"),
     "Nazi Zombies Portable": bua("nzp/nzp.sh"),
     "OBS": bua("obs/obs.sh"),
@@ -814,6 +815,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "npsget": "Helper to download games, DLCs, updates, themes and avatars from NoPayStation",
     "ps3i": "Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation",
     "chdress": "GUI tool to convert any disc image to/from CHD format",
+    "NetWatch": "Shows which devices connect to Batocera, with on-screen alerts and a web dashboard.",
 }
 
 # Descriptions for integrated Windows Freeware entries
@@ -917,7 +919,7 @@ CATEGORIES: Dict[str, List[str]] = {
         "OpenRGB", "OBS", "Stremio", "Disney Plus", "Twitch", "7zip", "qBittorrent",
         "GParted", "Plex", "HBO Max", "Prime Video", "Crunchyroll",
         "Mubi", "Tidal", "FreeTube", "Jellyfin Player", "FileZilla", "PeaZip",
-        "Desktop", "Flathub", "JDownloader", "Raspberry Pi Imager"
+        "Desktop", "Flathub", "JDownloader", "Raspberry Pi Imager", "NetWatch"
     ],
     "Developer Tools": [
         "NVIDIA Patcher", "Conty", "CLI Tools", "NVIDIA Clocker", "Docker",

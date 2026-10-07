@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>netwatch</title>
+<style>
+  /* Always dark: near-black navy, blue as the working colour, gold only
+     where something deserves attention (a live stream, a notification). */
+  :root {
+    color-scheme: dark;
+    --paper: #090d15;
+    --panel: #0f1522;
+    --panel-2: #131b2b;
+    --ink: #e6ebf3;
+    --muted: #8795ab;
+    --rule: #1c2638;
+    --blue: #4f8ff7;
+    --band: #0e2150;
+    --band-edge: #173a82;
+    --band-ink: #f2f5fa;
+    --band-muted: #9fb2d6;
+    --gold: #d9b25f;
+    --gold-ink: #1a1405;
+
+    --r-direct: #3fb68b;
+    --r-relay: #f08a4b;
+    --r-router: #a78bfa;
+    --r-lan: #60a5fa;
+    --r-gateway: #94a3b8;
+    --r-container: #7c8798;
+    --r-internet: #4b5566;
+    --warn: #f07b6e;
+
+    --serif: Charter, "Bitstream Charter", "Sitka Text", Cambria, "Iowan Old Style", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--paper); color: var(--ink); }
+  body { margin: 0; font: 15px/1.45 var(--sans); font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 20px 20px 48px; }
+
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+           flex-wrap: wrap; margin-bottom: 18px; }
+  h1 { font: 600 30px/1.1 var(--serif); margin: 0; letter-spacing: -0.01em; }
+  h1::after { content: ""; display: block; width: 28px; height: 2px; background: var(--gold); margin-top: 6px; }
+  h1 span { font: 400 17px var(--sans); color: var(--muted); margin-left: 10px; letter-spacing: 0; }
+  .status { color: var(--muted); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--r-direct); }
+  .dot.down { background: var(--warn); }
+  .notice { background: color-mix(in srgb, var(--warn) 14%, var(--panel)); color: var(--ink);
+            border-left: 4px solid var(--warn); padding: 10px 14px; margin: 0 0 16px; }
+  .notice[hidden] { display: none; }
+
+  /* The one loud element: who is streaming right now. */
+  .streams { background: linear-gradient(100deg, var(--band), var(--band-edge)); color: var(--band-ink);
+             border-radius: 6px; margin-bottom: 26px; border-left: 3px solid var(--gold); }
+  .stream { display: grid; grid-template-columns: 1fr auto auto; gap: 8px 32px; align-items: center;
+            padding: 20px 24px; }
+  .stream + .stream { border-top: 1px solid rgba(255,255,255,.12); }
+  .stream-name { font: 600 32px/1.1 var(--serif); overflow-wrap: anywhere; }
+  .stream-sub { color: var(--band-muted); font-size: 14px; margin-top: 4px; }
+  .stream-sub i { font-style: normal; display: inline-block; width: 10px; height: 10px;
+                  border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .metric { text-align: right; }
+  .metric b { display: block; font: 600 26px/1.1 var(--sans); color: var(--gold); }
+  .metric small { color: var(--band-muted); font-size: 13px; }
+  .stream svg { display: block; }
+  .streams.empty { background: transparent; color: var(--muted); border: 1px dashed var(--rule);
+                   border-left: 3px solid var(--rule); }
+  .streams.empty p { margin: 0; padding: 16px 24px; }
+
+  h2 { font: 600 20px/1.2 var(--serif); margin: 0; }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+         flex-wrap: wrap; margin-bottom: 10px; }
+  .tools { display: flex; gap: 14px; align-items: center; color: var(--muted); font-size: 14px; }
+  input[type=search] { font: inherit; color: var(--ink); background: var(--panel-2);
+                       border: 1px solid var(--rule); border-radius: 4px; padding: 6px 10px; width: 220px; }
+  label.chk { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+  input[type=checkbox] { accent-color: var(--gold); }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; background: var(--panel); }
+  th { text-align: left; font-weight: 600; font-size: 13px; color: var(--muted); background: var(--panel-2);
+       padding: 8px 12px; border-bottom: 1px solid var(--rule); }
+  tr.dev:hover > td { background: var(--panel-2); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  tr.dev > td:first-child { border-left: 4px solid var(--route); }
+  tr.dev.idle { opacity: .6; }
+  .who button { all: unset; cursor: pointer; display: block; }
+  .who .nm { font: 600 17px/1.25 var(--serif); overflow-wrap: anywhere; }
+  .who .nm::before { content: "▸"; display: inline-block; width: 1em; color: var(--muted);
+                     font-family: var(--sans); transition: transform .15s; }
+  .who button[aria-expanded=true] .nm::before { transform: rotate(90deg); }
+  .who .meta { color: var(--muted); font-size: 13px; margin-left: 1em; }
+  .route { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+  .route i { width: 10px; height: 10px; border-radius: 2px; background: var(--route); }
+  .since { color: var(--muted); font-size: 13px; display: block; }
+  .rate { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+  .live { display: inline-block; font-size: 12px; font-weight: 600; color: var(--gold-ink);
+          background: var(--gold); border-radius: 3px; padding: 1px 6px; margin-left: 8px;
+          vertical-align: 2px; font-family: var(--sans); }
+
+  tr.detail > td { padding: 0 12px 14px calc(12px + 1em + 4px); background: var(--panel);
+                   border-left: 4px solid var(--route); }
+  .flows { width: 100%; font-size: 13px; background: transparent; }
+  .flows th { font-size: 12px; padding: 6px 8px; background: transparent; }
+  .flows td { padding: 5px 8px; border-bottom: 1px dotted var(--rule); }
+  .dir { color: var(--muted); }
+
+  .lower { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 30px; }
+  .lower h2 { margin-bottom: 10px; }
+  .log { list-style: none; margin: 0; padding: 0; background: var(--panel); max-height: 360px;
+         overflow: auto; border: 1px solid var(--rule); }
+  .log li { display: grid; grid-template-columns: 4.6em 1fr; gap: 10px; padding: 7px 12px;
+            border-bottom: 1px solid var(--rule); font-size: 14px; }
+  .log li:last-child { border-bottom: 0; }
+  .log time { color: var(--muted); }
+  .log .k-start { color: var(--gold); font-weight: 600; }
+  .log .k-warn { color: var(--warn); }
+  .log .k-gone { color: var(--muted); }
+  .empty-row { color: var(--muted); padding: 14px 12px; }
+  footer { margin-top: 28px; color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 760px) {
+    .col-total, .col-route-text, .rate svg, .since { display: none; }
+    td, th { padding-left: 8px; padding-right: 8px; }
+    .stream { grid-template-columns: 1fr; }
+    .metric { text-align: left; }
+    .lower { grid-template-columns: 1fr; }
+    input[type=search] { width: 150px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>netwatch<span id="host"></span></h1>
+    <div class="status" aria-live="polite"><span class="dot" id="dot"></span><span id="status">Connecting…</span></div>
+  </header>
+
+  <p class="notice" id="notice" hidden></p>
+
+  <section class="streams empty" id="streams" aria-label="Active Sunshine streams">
+    <p>Nobody is streaming right now.</p>
+  </section>
+
+  <section aria-labelledby="dev-h">
+    <div class="bar">
+      <h2 id="dev-h">Connected <span id="count"></span></h2>
+      <div class="tools">
+        <input type="search" id="q" placeholder="Filter by name, IP or port" aria-label="Filter devices">
+        <label class="chk"><input type="checkbox" id="inet" checked> Internet hosts</label>
+      </div>
+    </div>
+    <div class="scroll"><table>
+      <thead><tr>
+        <th>Device</th><th class="col-route-text">Route</th><th>Connected</th>
+        <th class="num">Traffic now</th><th class="num col-total">Received</th><th class="num col-total">Sent</th>
+      </tr></thead>
+      <tbody id="devices"><tr><td colspan="6" class="empty-row">Waiting for the first update…</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <div class="lower">
+    <section aria-labelledby="hist-h">
+      <h2 id="hist-h">Recently disconnected</h2>
+      <ul class="log" id="history"><li><span></span><span class="k-gone">Nothing has disconnected yet.</span></li></ul>
+    </section>
+    <section aria-labelledby="act-h">
+      <h2 id="act-h">Activity</h2>
+      <ul class="log" id="events"></ul>
+    </section>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+"use strict";
+const ROUTES = {
+  "tailnet-direct": ["Tailscale, direct", "--r-direct"],
+  "tailnet-relay":  ["Tailscale, relayed", "--r-relay"],
+  "tailnet":        ["Tailscale", "--r-direct"],
+  "subnet-router":  ["Via subnet router", "--r-router"],
+  "lan":            ["Home network", "--r-lan"],
+  "gateway":        ["Router", "--r-gateway"],
+  "container":      ["Container", "--r-container"],
+  "private":        ["Other private network", "--r-container"],
+  "link-local":     ["Link-local", "--r-container"],
+  "internet":       ["Internet", "--r-internet"],
+};
+const ORDER = ["tailnet-direct","tailnet-relay","tailnet","subnet-router","lan","gateway","container","private","link-local","internet"];
+const expanded = new Set();
+const spark = new Map();          // ip -> recent total rates (bytes/s)
+let state = null, clockOffset = 0;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const route = r => ROUTES[r] || [r, "--r-container"];
+const nowSec = () => (Date.now() + clockOffset) / 1000;
+
+function bytes(n) {
+  const u = ["B","KB","MB","GB","TB"]; let i = 0;
+  while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+  return (i ? n.toFixed(n < 10 ? 1 : 0) : Math.round(n)) + " " + u[i];
+}
+function bits(bps) {
+  const b = bps * 8;
+  if (b < 1e3) return Math.round(b) + " b/s";
+  if (b < 1e6) return (b / 1e3).toFixed(b < 1e4 ? 1 : 0) + " kb/s";
+  return (b / 1e6).toFixed(b < 1e7 ? 1 : 0) + " Mb/s";
+}
+function dur(sec) {
+  sec = Math.max(0, Math.floor(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  return h ? `${h}h ${String(m).padStart(2,"0")}m` : m ? `${m}m ${String(s).padStart(2,"0")}s` : `${s}s`;
+}
+const clock = t => new Date(t * 1000).toLocaleTimeString([], {hourCycle: "h23", hour: "2-digit", minute: "2-digit", second: "2-digit"});
+
+function sparkSvg(ip, w, h, color) {
+  const pts = spark.get(ip) || [];
+  if (pts.length < 2) return `<svg width="${w}" height="${h}" aria-hidden="true"></svg>`;
+  const max = Math.max(...pts, 1), step = w / (pts.length - 1);
+  const line = pts.map((v, i) => `${(i * step).toFixed(1)},${(h - 1 - (v / max) * (h - 2)).toFixed(1)}`).join(" ");
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">` +
+         `<polyline points="${line}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+}
+
+function describe(d) {
+  const bits_ = [d.ip];
+  if (d.os) bits_.push(d.os);
+  if (d.mac) bits_.push(d.mac);
+  return bits_.join(", ");
+}
+
+function renderStreams(devs) {
+  const live = devs.filter(d => d.streaming_since);
+  const el = $("streams");
+  if (!live.length) {
+    el.className = "streams empty";
+    el.innerHTML = "<p>Nobody is streaming right now.</p>";
+    return;
+  }
+  el.className = "streams";
+  const gold = getComputedStyle(document.documentElement).getPropertyValue("--gold").trim();
+  el.innerHTML = live.map(d => {
+    const [label, v] = route(d.route);
+    const color = getComputedStyle(document.documentElement).getPropertyValue(v);
+    const warn = d.route === "tailnet-relay"
+      ? " Relayed connections are bandwidth-limited; expect lower quality." : "";
+    return `<div class="stream">
+      <div><div class="stream-name">${esc(d.name)}</div>
+        <div class="stream-sub"><i style="background:${color}"></i>${esc(label)}, ${esc(d.ip)}.${warn}</div></div>
+      <div class="metric"><b data-since="${d.streaming_since}"></b><small>streaming</small></div>
+      <div class="metric"><b>${bits(d.rate_out)}</b><small>${sparkSvg(d.ip, 140, 28, gold)}</small></div>
+    </div>`;
+  }).join("");
+}
+
+function flowTable(d) {
+  if (!d.flows.length) return `<p class="dir">No open connections. It will drop off the list shortly.</p>`;
+  return `<table class="flows"><thead><tr>
+      <th>Service</th><th>Protocol</th><th>Direction</th><th>Port</th><th>Their ports</th>
+      <th>Program</th><th class="num">Connections</th><th class="num">Received</th><th class="num">Sent</th>
+    </tr></thead><tbody>` +
+    d.flows.map(f => `<tr>
+      <td>${esc(f.service || "unlabelled")}</td><td>${esc(f.proto)}</td>
+      <td class="dir">${f.dir === "in" ? "Incoming" : "Outgoing"}</td>
+      <td>${f.side === "local" ? "this box " : "their "}${f.port}</td><td>${esc(f.peers)}</td>
+      <td>${esc(f.proc === "-" ? "unknown" : f.proc)}</td><td class="num">${f.count}</td>
+      <td class="num">${bytes(f.in)}</td><td class="num">${bytes(f.out)}</td></tr>`).join("") +
+    `</tbody></table>`;
+}
+
+function renderDevices(devs) {
+  const q = $("q").value.trim().toLowerCase();
+  const showInet = $("inet").checked;
+  const rows = devs
+    .filter(d => showInet || d.route !== "internet")
+    .filter(d => !q || [d.name, d.ip, d.mac, d.os, ...d.flows.map(f => f.port + " " + f.service + " " + f.proc)]
+                        .some(x => String(x ?? "").toLowerCase().includes(q)))
+    .sort((a, b) => (!!b.streaming_since - !!a.streaming_since) ||
+                    (ORDER.indexOf(a.route) - ORDER.indexOf(b.route)) ||
+                    (a.first_seen - b.first_seen));
+  $("count").textContent = `(${rows.length}${rows.length !== devs.length ? " of " + devs.length : ""})`;
+  if (!rows.length) {
+    $("devices").innerHTML = `<tr><td colspan="6" class="empty-row">${devs.length
+      ? "No devices match this filter." : "No devices are connected. Start a Moonlight stream or open an SSH session and it will appear here."}</td></tr>`;
+    return;
+  }
+  $("devices").innerHTML = rows.map(d => {
+    const [label, v] = route(d.route);
+    const open = expanded.has(d.ip);
+    const color = getComputedStyle(document.documentElement).getPropertyValue(v);
+    const pre = d.exact ? "" : "at least ";
+    return `<tr class="dev${d.idle ? " idle" : ""}" style="--route:var(${v})">
+      <td class="who"><button aria-expanded="${open}" data-ip="${esc(d.ip)}">
+        <div class="nm">${esc(d.name === d.ip ? d.ip : d.name)}${d.streaming_since ? '<span class="live">Streaming</span>' : ""}</div>
+        <div class="meta">${esc(d.name === d.ip ? [d.os, d.mac].filter(Boolean).join(", ") || "No name found" : describe(d))}</div>
+      </button></td>
+      <td class="col-route-text"><span class="route"><i></i>${esc(label)}</span></td>
+      <td><span data-since="${d.first_seen}" data-pre="${pre}"></span>
+          <span class="since">since ${clock(d.first_seen)}${d.exact ? "" : " or earlier"}</span></td>
+      <td class="num"><div class="rate">${sparkSvg(d.ip, 72, 20, color)}<span>${bits(d.rate_in + d.rate_out)}</span></div></td>
+      <td class="num col-total">${bytes(d.bytes_in)}</td><td class="num col-total">${bytes(d.bytes_out)}</td>
+    </tr>` + (open ? `<tr class="detail" style="--route:var(${v})"><td colspan="6">${flowTable(d)}</td></tr>` : "");
+  }).join("");
+}
+
+function kind(text) {
+  const c = text[0];
+  return {">": "k-start", "*": "k-start", "!": "k-warn", "-": "k-gone", "<": "k-gone"}[c] || "";
+}
+function hms(s) {                       // "0:26:00" -> seconds
+  const p = s.split(":").map(Number);
+  return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : NaN;
+}
+const who = (name, ip) => name === ip ? ip : `${name} (${ip})`;
+function tidy(text) {
+  let m;
+  if ((m = text.match(/^\+ (.+) \(([^,]+), ([a-z-]+)\)$/)))
+    return `${who(m[1], m[2])} connected over ${route(m[3])[0].toLowerCase().replace("tailscale", "Tailscale")}`;
+  if ((m = text.match(/^- (.+) \(([^)]+)\) gone after (\S+)$/)))
+    return `${who(m[1], m[2])} disconnected after ${dur(hms(m[3]))}`;
+  if ((m = text.match(/^> Sunshine stream started: (.+) \((.+)\)$/)))
+    return `${m[1]} started streaming`;
+  if ((m = text.match(/^< Sunshine stream ended: (.+) after (\S+)$/)))
+    return `${m[1]} stopped streaming after ${dur(hms(m[2]))}`;
+  if ((m = text.match(/^~ Sunshine stream already active: (.+)$/)))
+    return `${m[1]} was already streaming when netwatch started`;
+  if ((m = text.match(/^\* NOTIFY: (.+)$/)))
+    return `Showed on screen: "${m[1]}"`;
+  return text.replace(/^[>*!+\-<~] /, "");
+}
+
+function renderLower(s) {
+  $("history").innerHTML = s.history.length
+    ? s.history.map(h => `<li><time>${clock(h.t)}</time><span><b>${esc(h.name)}</b>
+        <span class="dir">${esc(route(h.route)[0])}, connected ${dur(h.duration)}, received ${bytes(h.bytes_in)}, sent ${bytes(h.bytes_out)}</span></span></li>`).join("")
+    : `<li><span></span><span class="k-gone">Nothing has disconnected yet.</span></li>`;
+  $("events").innerHTML = s.events.map(e =>
+    `<li><time>${clock(e.t)}</time><span class="${kind(e.text)}">${esc(tidy(e.text))}</span></li>`).join("");
+}
+
+function tickTimers() {
+  const now = nowSec();
+  document.querySelectorAll("[data-since]").forEach(el => {
+    el.textContent = (el.dataset.pre || "") + dur(now - Number(el.dataset.since));
+  });
+  if (state) $("status").textContent = `Live, updated ${clock(state.now)}`;
+}
+
+function render() {
+  if (!state) return;
+  const s = state;
+  $("host").textContent = `${s.host}${s.local_ips.length ? ", " + s.local_ips.filter(ip => !ip.includes(":")).join(", ") : ""}`;
+  const notes = [];
+  if (s.tailscale_error) notes.push(`Tailscale names are unavailable: ${s.tailscale_error}.`);
+  if (!s.counters) notes.push("Traffic counters are off, so byte totals and stream-end detection are limited. Restart netwatch as root to enable them.");
+  $("notice").hidden = !notes.length;
+  $("notice").textContent = notes.join(" ");
+  renderStreams(s.devices);
+  renderDevices(s.devices);
+  renderLower(s);
+  $("foot").textContent = `Sunshine base port ${s.sunshine_base}. Tailscale's own tunnel traffic is hidden.`;
+  tickTimers();
+}
+
+function ingest(s) {
+  clockOffset = s.now * 1000 - Date.now();
+  for (const d of s.devices) {
+    const arr = spark.get(d.ip) || [];
+    arr.push(d.rate_in + d.rate_out);
+    if (arr.length > 60) arr.shift();
+    spark.set(d.ip, arr);
+  }
+  for (const ip of spark.keys()) if (!s.devices.some(d => d.ip === ip)) spark.delete(ip);
+  state = s;
+  render();
+}
+
+function connect() {
+  const es = new EventSource("api/events");
+  es.onmessage = ev => { $("dot").className = "dot"; ingest(JSON.parse(ev.data)); };
+  es.onerror = () => {
+    $("dot").className = "dot down";
+    $("status").textContent = "Lost connection to netwatch. Reconnecting…";
+  };
+}
+
+$("devices").addEventListener("click", ev => {
+  const btn = ev.target.closest("button[data-ip]");
+  if (!btn) return;
+  const ip = btn.dataset.ip;
+  expanded.has(ip) ? expanded.delete(ip) : expanded.add(ip);
+  render();
+  document.querySelector(`button[data-ip="${CSS.escape(ip)}"]`)?.focus();
+});
+$("q").addEventListener("input", render);
+$("inet").addEventListener("change", render);
+setInterval(tickTimers, 1000);
+fetch("api/state").then(r => r.json()).then(s => { if (s.devices) ingest(s); }).catch(() => {});
+connect();
+</script>
+</body>
+</html>
