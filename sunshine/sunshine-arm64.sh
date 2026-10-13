@@ -41,7 +41,7 @@ cat << 'EOF' > /userdata/system/services/sunshine
 #!/bin/bash
 #
 # sunshine service script for Batocera (ARM64)
-# Functional start/stop/restart/status (update)/uninstall
+# Functional start/stop/restart/status/uninstall
 
 set -e
 
@@ -94,8 +94,7 @@ case "$1" in
       echo "Sunshine is running."
       exit 0
     else
-      echo "Sunshine is stopped. Going to update now"
-      curl -L https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/sunshine/sunshine-arm64.sh | bash
+      echo "Sunshine is stopped."
       exit 1
     fi
     ;;
@@ -108,7 +107,7 @@ case "$1" in
     ;;
 
   *)
-    echo "Usage: $0 {start|stop|restart|status(update)|uninstall}"
+    echo "Usage: $0 {start|stop|restart|status|uninstall}"
     exit 1
     ;;
 esac

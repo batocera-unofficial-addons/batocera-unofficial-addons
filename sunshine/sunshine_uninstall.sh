@@ -8,6 +8,13 @@ echo "Uninstalling: SUNSHINE"
 echo "========================================="
 echo ""
 
+# Stop and disable the service before removing its files
+if [ -f "/userdata/system/services/sunshine" ]; then
+    echo "Stopping service: sunshine"
+    batocera-services stop sunshine
+    batocera-services disable sunshine
+fi
+
 # Remove AppImage files
 if [ -f "/userdata/system/add-ons/sunshine/sunshine.AppImage" ]; then
     echo "Removing AppImage: /userdata/system/add-ons/sunshine/sunshine.AppImage"
@@ -28,7 +35,6 @@ fi
 if [ -d "/userdata/system/add-ons/sunshine" ]; then
     echo "Removing directory: /userdata/system/add-ons/sunshine"
     rm -rf "/userdata/system/add-ons/sunshine"
-fi
 fi
 
 echo ""
