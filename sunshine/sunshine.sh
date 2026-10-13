@@ -66,6 +66,7 @@ sunshine_log="${app_dir}/.config/sunshine/sunshine.log"
 log_dir="/userdata/system/logs"
 log_file="${log_dir}/sunshine.log"
 pid_file="/var/run/sunshine-supervisor.pid"
+hevc_marker="${app_dir}/.hevc_fallback_applied"
 
 # Private libraries placed by the installer (libwayland-client)
 export LD_LIBRARY_PATH="${app_dir}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
@@ -81,6 +82,36 @@ mkdir -p "${log_dir}"
 
 supervisor_running() {
     [ -f "${pid_file}" ] && kill -0 "$(cat "${pid_file}")" 2>/dev/null
+}
+
+# On some GPUs Sunshine's HEVC hardware encoder aborts on the first frame of a
+# stream. If Sunshine died within seconds of creating an HEVC encoder for a
+# connected client, turn HEVC off so clients fall back to H.264.
+# This happens at most once per install and never when hevc_mode is already set,
+# so the owner can turn HEVC back on and it will stay on.
+# $1 = number of lines the service log had before this run of Sunshine
+hevc_fallback() {
+    local run_log connect_line encoder_line stamp created
+    [ -e "${hevc_marker}" ] && return 1
+    grep -q '^hevc_mode' "${conf_file}" 2>/dev/null && return 1
+
+    run_log=$(tail -n "+$(( $1 + 1 ))" "${log_file}" 2>/dev/null)
+    connect_line=$(echo "$run_log" | grep -n 'CLIENT CONNECTED' | tail -n 1 | cut -d: -f1)
+    [ -n "$connect_line" ] || return 1
+    encoder_line=$(echo "$run_log" | tail -n "+${connect_line}" | grep 'Creating encoder \[' | tail -n 1)
+    case "$encoder_line" in
+        *'Creating encoder [hevc_'*) ;;
+        *) return 1 ;;
+    esac
+    stamp=$(echo "$encoder_line" | sed -n 's/^\[\([0-9-]* [0-9:]*\)\..*/\1/p')
+    created=$(date -d "$stamp" +%s 2>/dev/null) || return 1
+    [ $(( $(date +%s) - created )) -le 30 ] || return 1
+
+    mkdir -p "$(dirname "${conf_file}")"
+    [ -s "${conf_file}" ] && [ -n "$(tail -c 1 "${conf_file}")" ] && echo >> "${conf_file}"
+    echo "hevc_mode = 1" >> "${conf_file}"
+    touch "${hevc_marker}"
+    echo "$(date): Sunshine crashed right after starting an HEVC stream. HEVC has been turned off (hevc_mode = 1 in ${conf_file}) so clients use H.264. To turn it back on, set HEVC support in the Web UI or remove that line; this will not be changed again."
 }
 
 # Sunshine renames its previous logs to sunshine.log.1 ... sunshine.log.5 on
@@ -172,11 +203,13 @@ case "$1" in
                 crashes=0
                 while true; do
                     started=$(date +%s)
+                    log_lines=$(wc -l < "${log_file}")
                     prune_logs
                     ./sunshine.AppImage
                     rc=$?
                     # A clean exit means Sunshine was asked to quit
                     [ "$rc" -eq 0 ] && break
+                    hevc_fallback "$log_lines"
                     # Only crashes in quick succession count towards giving up
                     [ $(( $(date +%s) - started )) -ge 60 ] && crashes=0
                     crashes=$((crashes + 1))
