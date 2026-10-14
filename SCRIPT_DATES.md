@@ -27,7 +27,7 @@
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2026-07-02 16:31:40 -0300 |
 | `app/bua_installerarm64.py` | 2026-09-28 11:31:37 -0300 |
-| `app/bua_installerx86.py` | 2026-09-28 11:31:37 -0300 |
+| `app/bua_installerx86.py` | 2026-10-13 16:18:44 -0400 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -186,6 +186,11 @@
 | `mubi/mubi_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `netflix/netflix.sh` | 2025-05-22 18:04:11 +0100 |
 | `netflix/netflix_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `netwatch/netwatch-service.sh` | 2026-10-13 16:18:44 -0400 |
+| `netwatch/netwatch.py` | 2026-10-13 16:18:44 -0400 |
+| `netwatch/netwatch.sh` | 2026-10-13 16:18:44 -0400 |
+| `netwatch/netwatch_uninstall.sh` | 2026-10-13 16:18:44 -0400 |
+| `netwatch/overlay.py` | 2026-10-13 16:18:44 -0400 |
 | `nvidiapatch/nvidiapatch-service.sh` | 2026-05-09 21:25:10 +0100 |
 | `nvidiapatch/nvidiapatch.sh` | 2025-11-25 17:42:22 +0000 |
 | `nvidiapatch/nvidiapatch_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -240,9 +245,9 @@
 | `stremio/stremio-arm64.sh` | 2025-05-22 18:14:23 +0100 |
 | `stremio/stremio-arm64_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `stremio/stremio.sh` | 2025-11-25 15:20:38 +0000 |
-| `sunshine/sunshine-arm64.sh` | 2025-12-03 01:37:34 +0000 |
-| `sunshine/sunshine.sh` | 2026-05-04 21:46:58 +0100 |
-| `sunshine/sunshine_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `sunshine/sunshine-arm64.sh` | 2026-10-13 16:19:18 -0400 |
+| `sunshine/sunshine.sh` | 2026-10-13 16:19:18 -0400 |
+| `sunshine/sunshine_uninstall.sh` | 2026-10-13 16:19:18 -0400 |
 | `supermariox/supermariox.sh` | 2025-11-27 22:20:19 +0000 |
 | `supermariox/supermariox_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `supertux/supertux.sh` | 2025-05-22 18:16:20 +0100 |
