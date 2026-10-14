@@ -2179,7 +2179,8 @@ class Runner:
     def run(self, cmd: str):
         # Execute the command and wait for completion
         # Add 'wait' to ensure all background processes finish
-        full_cmd = f"({cmd}); wait"
+        # Keep the job's exit code: 'wait' on its own always returns 0
+        full_cmd = f"({cmd}); bua_rc=$?; wait; exit $bua_rc"
 
         # Create a PTY so the subprocess has a controlling terminal.
         # Scripts like foclabroc's newswitch.sh redirect to /dev/tty, which
@@ -2844,9 +2845,15 @@ class InteractiveDialog(BaseScreen):
         # Title
         draw_text(screen, self.title, FONT_BIG, FG, (dialog_x + S(30), dialog_y + S(30)))
 
-        # Message box area
+        # Message box area: grows with the message (e.g. a warning that lists
+        # apps), leaving room for up to 3 options below it
         msg_y = dialog_y + S(80)
-        msg_h = S(120)
+        text_w = dialog_w - S(80)
+        needed_h = S(20)
+        for raw_line in self.message:
+            needed_h += S(8) if not raw_line else S(22) * len(wrap(raw_line, text_w, FONT))
+        max_msg_h = dialog_h - S(80) - S(50) - S(30) - min(len(self.options), 3) * S(50)
+        msg_h = max(S(120), min(needed_h, max_msg_h))
         msg_rect = pygame.Rect(dialog_x + S(30), msg_y, dialog_w - S(60), msg_h)
         pygame.draw.rect(screen, (30, 34, 44), msg_rect, border_radius=10)
 
@@ -4021,13 +4028,13 @@ class RunListScreen(BaseScreen):
                 "for arg in \"$@\"; do "
                 "  case \"$arg\" in "
                 "    --title) next_title=1 ;; "
-                "    --backtitle) skip_backtitle=1 ;; "
+                "    --backtitle|--timeout|--default-button|--yes-label|--no-label|--ok-label|--cancel-label|--extra-label) skip_backtitle=1 ;; "
                 "    --msgbox) dtype=\"msgbox\"; next_text=1 ;; "
                 "    --infobox) dtype=\"infobox\"; next_text=1 ;; "
                 "    --yesno) dtype=\"yesno\"; next_text=1 ;; "
                 "    --menu) dtype=\"menu\"; next_text=1 ;; "
                 "    --checklist) dtype=\"checklist\"; next_text=1 ;; "
-                "    --stdout|--clear) ;; "
+                "    --stdout|--clear|--defaultno|--extra-button) ;; "
                 "    *) "
                 "      if [ $skip_backtitle -eq 1 ]; then skip_backtitle=0; "
                 "      elif [ $next_title -eq 1 ]; then title=\"$arg\"; next_title=0; "
@@ -4155,6 +4162,9 @@ export -f desktop
         # Add debug markers to track execution
         debug_start = f"echo '[BUA] Starting installation: {name}'; "
         debug_end = "; echo '[BUA] Installation finished'"
+        # Uninstall jobs end with the uninstaller's exit code, so a cancelled
+        # or failed uninstall is shown as failed and stays in the history
+        exit_rc = "; exit $bua_rc" if "(Uninstall)" in name else ""
 
         # Special handling for curl | bash commands - inject wrappers into the piped script
         if "curl" in cmd and "|" in cmd and "bash" in cmd:
@@ -4163,19 +4173,21 @@ export -f desktop
             parts = cmd.split("|", 1)
             if len(parts) == 2:
                 curl_part = parts[0].strip()
+                # Arguments for the script: curl ... | bash -s -- <args>
+                script_args = re.sub(r"^\s*bash(\s+-s)?(\s+--)?", "", parts[1]).strip()
                 wrapper_code = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}"
                 cmd = (
                     f"{debug_start}"
                     f"TMPSCRIPT=$(mktemp); "
                     f"{curl_part} > \"$TMPSCRIPT\"; "
-                    f"( {wrapper_code} source \"$TMPSCRIPT\" ); "
+                    f"( {wrapper_code} source \"$TMPSCRIPT\" {script_args}); bua_rc=$?; "
                     f"rm -f \"$TMPSCRIPT\""
-                    f"{debug_end}"
+                    f"{debug_end}{exit_rc}"
                 )
             else:
-                cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{debug_start}{cmd}{debug_end}"
+                cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{debug_start}{cmd}; bua_rc=$?{debug_end}{exit_rc}"
         else:
-            cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{debug_start}{cmd}{debug_end}"
+            cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{debug_start}{cmd}; bua_rc=$?{debug_end}{exit_rc}"
 
         self.runner.run(cmd)
         self.started = True
@@ -4577,8 +4589,6 @@ class UpdaterScreen(BaseScreen):
         self.loading = True
         self.error: str | None = None
         self.needs_rescan = False
-        self.uninstalling_app: str | None = None  # Track which app is being uninstalled
-        self.runner: Runner | None = None  # Runner for inline uninstall
         threading.Thread(target=self._scan, daemon=True).start()
 
     def _scan(self, use_cache=False):
@@ -4719,10 +4729,19 @@ class UpdaterScreen(BaseScreen):
                 if e.button in (BTN_Y,):  # Y -> uninstall current app
                     if not self.loading and self.items:
                         self.uninstall_app()
+                if e.button in (BTN_LB, BTN_RB):  # LB+RB -> uninstall, ignoring warnings
+                    other = BTN_RB if e.button == BTN_LB else BTN_LB
+                    try:
+                        held = pygame.joystick.Joystick(e.joy).get_button(other)
+                    except Exception:
+                        held = False
+                    if held and not self.loading and self.items:
+                        self.uninstall_app(ignore_warnings=True)
 
-    def uninstall_app(self):
-        """Uninstall the currently selected app inline"""
-        if self.loading or not self.items or self.uninstalling_app:
+    def uninstall_app(self, ignore_warnings: bool = False):
+        """Uninstall the currently selected app. With ignore_warnings the
+        uninstaller gets --ignore-warning and removes it without asking."""
+        if self.loading or not self.items:
             return
         app = self.items[self.idx][0]
         cmd = APPS.get(app)
@@ -4734,11 +4753,16 @@ class UpdaterScreen(BaseScreen):
         if not uninstall_cmd:
             push_screen(InfoDialog(t("uninstall"), [t("uninstall_error")]))
             return
+        # Only the repo's own uninstallers (curl ... | bash) get the option;
+        # ones that don't support it ignore their arguments
+        if ignore_warnings and uninstall_cmd.rstrip().endswith("| bash"):
+            uninstall_cmd = f"{uninstall_cmd} -s -- --ignore-warning"
 
-        # Start inline uninstall
-        self.uninstalling_app = app
-        self.runner = Runner()
-        self.runner.run(uninstall_cmd)
+        # Run it like an install, so questions the uninstaller asks with
+        # dialog are shown in the app. RunListScreen removes the app from
+        # history when an "(Uninstall)" job succeeds.
+        self.needs_rescan = True
+        push_screen(RunListScreen([(f"{app} (Uninstall)", uninstall_cmd)], title=f"{t('uninstall')}: {app}"))
 
     def queue_updates(self):
         if self.loading:
@@ -4763,17 +4787,6 @@ class UpdaterScreen(BaseScreen):
             self.needs_rescan = False
             self.rescan()
 
-        # Check if inline uninstall finished
-        if self.uninstalling_app and self.runner and self.runner.done:
-            success = self.runner.returncode == 0
-            if success:
-                # Remove from history
-                mark_uninstalled(self.uninstalling_app)
-            self.uninstalling_app = None
-            self.runner = None
-            # Trigger rescan to refresh list
-            self.rescan()
-
     def draw(self):
         draw_background(screen)
         draw_text(screen, t("updater_title"), FONT_BIG, FG, (40, 30))
@@ -4787,6 +4800,7 @@ class UpdaterScreen(BaseScreen):
         if current_needs:
             hint_parts.append(f"A={t('hint_toggle')}")
         hint_parts.append(f"Y={t('hint_uninstall')}")
+        hint_parts.append(f"LB+RB={t('hint_uninstall_ignore')}")
         hint_parts.append(f"Start={t('hint_queue')}")
         hint_parts.append(f"B={t('hint_return')}")
         hint_parts.append(f"Back={t('hint_back_settings')}")
@@ -4826,18 +4840,10 @@ class UpdaterScreen(BaseScreen):
             else:
                 name_x = rect.x + 14
             draw_text(screen, app, FONT, FG, (name_x, rect.y + 8))
-            # status + detail - or show uninstall progress if uninstalling
-            if self.uninstalling_app == app and self.runner:
-                # Show uninstall progress
-                if self.runner.done:
-                    status_text = "Uninstall complete" if self.runner.returncode == 0 else "Uninstall failed"
-                else:
-                    status_text = "Uninstalling..."
-                draw_text(screen, status_text, FONT_SMALL, ACCENT, (name_x, rect.y + 30))
-            else:
-                color = ACCENT if needs else MUTED
-                suffix = f" — {detail}" if detail else ""
-                draw_text(screen, status + suffix, FONT_SMALL, color, (name_x, rect.y + 30))
+            # status + detail
+            color = ACCENT if needs else MUTED
+            suffix = f" — {detail}" if detail else ""
+            draw_text(screen, status + suffix, FONT_SMALL, color, (name_x, rect.y + 30))
 
 
 class OnScreenKeyboard:
