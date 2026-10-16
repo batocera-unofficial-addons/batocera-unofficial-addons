@@ -28,6 +28,7 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
+- Added Welkin - local music player with a full-screen audio visualiser
 - Added chdress - GUI tool to convert any disc image to/from CHD format
 - Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation
 - Added ps3i - Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation
@@ -660,6 +661,7 @@ APPS: Dict[str, str] = {
     "Soar": bua("soar/soar.sh"),
     "Dark Mode": bua("dark/dark.sh"),
     "VClean": bua("vclean/vclean.sh"),
+    "Welkin": bua("welkin/welkin.sh"),
     "Overlay Remove": bua("overlay-remove/overlay-remove.sh"),
     "RGSX": "curl -L bit.ly/rgsx-install | sh",
     "Raspberry Pi Imager": bua("rpi/rpi.sh"),
@@ -808,6 +810,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "Soar": "Soar package manager (integrated with BUA)",
     "Dark Mode": "Toggle F1 dark mode",
     "VClean": "Service to clean the Batocera version string (removes extra flags)",
+    "Welkin": "Local music player with a full-screen audio visualiser.",
     "Overlay Remove": "Remove the Batocera boot overlay file from /boot/boot/overlay.",
     "RGSX": "Retro Game Sets Xtra. A free, user-friendly ROM downloader for Batocera",
     "Raspberry Pi Imager": "Flash OS images to USB and SD cards.",
@@ -919,7 +922,7 @@ CATEGORIES: Dict[str, List[str]] = {
         "OpenRGB", "OBS", "Stremio", "Disney Plus", "Twitch", "7zip", "qBittorrent",
         "GParted", "Plex", "HBO Max", "Prime Video", "Crunchyroll",
         "Mubi", "Tidal", "FreeTube", "Jellyfin Player", "FileZilla", "PeaZip",
-        "Desktop", "Flathub", "JDownloader", "Raspberry Pi Imager", "NetWatch"
+        "Desktop", "Flathub", "JDownloader", "Raspberry Pi Imager", "NetWatch", "Welkin"
     ],
     "Developer Tools": [
         "NVIDIA Patcher", "Conty", "CLI Tools", "NVIDIA Clocker", "Docker",
