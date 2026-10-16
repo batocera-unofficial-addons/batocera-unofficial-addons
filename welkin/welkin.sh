@@ -95,7 +95,15 @@ mkdir -p "\$(dirname "\$LOG")"
 echo "\$(date): 启动 Welkin" >> "\$LOG"
 
 cd "$APPDIR" || exit 1
-exec ./${APPNAME}.AppImage --no-sandbox "\$@" >> "\$LOG" 2>&1
+
+# 关键：必须在自己的 session bus 里启动。
+# 实测（Batocera 43.1）：HOME 指向附加组件目录时，如果没有 session bus，
+# WebKit 会渲染成纯白屏；套 dbus-run-session 即恢复正常。
+if command -v dbus-run-session >/dev/null 2>&1; then
+    exec dbus-run-session -- ./${APPNAME}.AppImage --no-sandbox "\$@" >> "\$LOG" 2>&1
+else
+    exec ./${APPNAME}.AppImage --no-sandbox "\$@" >> "\$LOG" 2>&1
+fi
 EOF
 chmod +x "$PORTS_DIR/${APPNAME}.sh"
 
