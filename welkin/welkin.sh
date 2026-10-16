@@ -41,6 +41,15 @@ fi
 echo "== 建立目录 =="
 mkdir -p "$APPDIR/extra" "$PORTS_DIR/images" "$LOGS_DIR" "$CONF_DIR"
 
+echo "== 迁移已有配置（如果之前手动装过，曲库设置不会丢） =="
+for d in ".config/com.atemukesu.welkinplayer" ".local/share/com.atemukesu.welkinplayer"; do
+    if [ -d "/userdata/system/$d" ] && [ ! -e "$APPDIR/$d" ]; then
+        mkdir -p "$(dirname "$APPDIR/$d")"
+        cp -a "/userdata/system/$d" "$APPDIR/$d"
+        echo "   已迁移 $d"
+    fi
+done
+
 echo "== 下载 Welkin 自包含构建 =="
 if ! wget -q --show-progress -O "$APPDIR/${APPNAME}.AppImage" "${REL}/${ASSET}"; then
     echo "下载失败：${REL}/${ASSET}"
