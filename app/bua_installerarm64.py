@@ -25,6 +25,7 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
+- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format
 - Added chdress - GUI tool to convert any disc image to/from CHD format
 - Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation
 - Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support
@@ -589,6 +590,7 @@ APPS: Dict[str, str] = {
     "WayVNC Headless": bua("wayvnc_headless/wayvnc_headless.sh"),
     "npsget": "curl -fsSL https://npsget.8101987.xyz | sh",
     "chdress": "curl -fsSL https://chdress.8101987.xyz/install.sh | sh",
+    "iso2zar": "curl -fsSL https://iso2zar.8101987.xyz | sh",
 }
 
 # --- Integrated Docker app installers ---
@@ -648,6 +650,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "Arr-In-One Downloaders": "Downloaders companion stack",
     "npsget": "Helper to download games, DLCs, updates, themes and avatars from NoPayStation",
     "chdress": "GUI tool to convert any disc image to/from CHD format",
+    "iso2zar": "GUI tool to convert Xbox[360] .iso files directly into .zar format",
 }
 
 
@@ -656,7 +659,7 @@ CATEGORIES: Dict[str, List[str]] = {
         "Luanti", "Minecraft", "Prism Launcher", "Super Mario X", "SuperTuxKart", "Celeste 64", "Nazi Zombies Portable"
     ],
     "Game Utilities": [
-        "PortMaster", "Chiaki", "Greenlight", "Amazon Luna", "RGSX", "npsget", "chdress"
+        "PortMaster", "Chiaki", "Greenlight", "Amazon Luna", "RGSX", "npsget", "chdress", "iso2zar"
     ],
     "System Utilities": [
         "Tailscale", "Telegraf", "Vesktop", "IPTV Nator", "FreeTube",
