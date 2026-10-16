@@ -16,6 +16,9 @@ set -u
 APPNAME="Welkin"
 VER="1.0.2"
 REL="https://github.com/anturong/WelkinPlayer/releases/download/batocera-${VER}-r3"
+# 国内镜像（可选）：填上直链后会【优先】使用，失败或校验不过就自动回退 GitHub。
+# 例：MIRROR_URL="https://你的网盘直链/Welkin_1.0.2_amd64-batocera.AppImage"
+MIRROR_URL=""
 ASSET="Welkin_${VER}_amd64-batocera.AppImage"
 SHA256="beb5c4e0d420f611203be7e10819de87015d448cbc7badc0b0904d7703e4de94"
 REL_BASE="${REL%/*}"   # 同一 release 目录下的其它资产
@@ -51,10 +54,22 @@ for d in ".config/com.atemukesu.welkinplayer" ".local/share/com.atemukesu.welkin
 done
 
 echo "== 下载 Welkin 自包含构建 =="
-if ! wget -q --show-progress -O "$APPDIR/${APPNAME}.AppImage" "${REL}/${ASSET}"; then
-    echo "下载失败：${REL}/${ASSET}"
-    echo "（国内网络不稳时可先用下载工具取回，再放到 ${APPDIR}/${APPNAME}.AppImage）"
-    exit 1
+download_ok=0
+if [ -n "$MIRROR_URL" ]; then
+    echo "   先试国内镜像…"
+    if curl -fL --retry 3 --retry-delay 2 -C - -o "$APPDIR/${APPNAME}.AppImage" "$MIRROR_URL" 2>/dev/null; then
+        download_ok=1
+    else
+        echo "   镜像不可用，回退 GitHub"
+    fi
+fi
+if [ "$download_ok" != 1 ]; then
+    if ! wget -q --show-progress -O "$APPDIR/${APPNAME}.AppImage" "${REL}/${ASSET}"; then
+        echo "下载失败：${REL}/${ASSET}"
+        echo "（国内网络不稳时：可先用下载工具取回，放到 ${APPDIR}/${APPNAME}.AppImage，"'"'"'"
+        echo "  或在脚本顶部把 MIRROR_URL 设成你的直链）"
+        exit 1
+    fi
 fi
 
 echo "== 校验 sha256 =="
