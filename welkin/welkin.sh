@@ -85,8 +85,11 @@ if [ -z "\${XDG_RUNTIME_DIR:-}" ] || [ ! -d "\${XDG_RUNTIME_DIR:-}" ]; then
     export XDG_RUNTIME_DIR=/var/run
 fi
 
-# 有可用 GPU 时让 WebKit 走硬件合成（帧率更高）；没有就自动走软件路径
-if [ -e /dev/dri/renderD128 ]; then
+# 硬件合成默认关闭：包内默认让 WebKit 走软件路径，这是最稳的（无法确认 3D 是否真能用时，
+# 打开硬件合成会直接白屏 —— 例如 VMware 会给出 render node 但没有可用的 3D）。
+# 确认显卡可用后，创建下面这个文件即可开启（帧率更高）：
+#   touch /userdata/system/configs/welkin/use_hw_accel
+if [ -e /userdata/system/configs/welkin/use_hw_accel ]; then
     export WELKIN_GL_ACCEL=1
 fi
 
@@ -191,4 +194,5 @@ echo
 echo "安装完成！在 Ports 菜单里选 «Welkin» 即可启动。"
 echo "  - Escape：退出回 EmulationStation"
 echo "  - 侧栏「可视化」（在「全部曲目」与「歌手」之间）：选效果后进全屏可视化"
+echo "  - 想开硬件合成（帧率更高）：touch /userdata/system/configs/welkin/use_hw_accel"
 echo
