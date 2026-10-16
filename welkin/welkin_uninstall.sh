@@ -21,8 +21,21 @@ rm -f "$DESKTOP_FILE" "${CONF_DIR}/${APPNAME}.desktop" "${CONF_DIR}/restore_desk
 rmdir "$CONF_DIR" 2>/dev/null || true
 
 if [ -f "$GAME_LIST" ]; then
-    xmlstarlet ed -d "/gameList/game[path='./${APPNAME}.sh']" "$GAME_LIST" > "$GAME_LIST.tmp" \
-        && mv "$GAME_LIST.tmp" "$GAME_LIST"
+    if command -v xmlstarlet >/dev/null 2>&1; then
+        xmlstarlet ed -d "/gameList/game[path='./${APPNAME}.sh']" "$GAME_LIST" > "$GAME_LIST.tmp" \
+            && mv "$GAME_LIST.tmp" "$GAME_LIST"
+    else
+        python3 - "$GAME_LIST" "$APPNAME" <<'PYEOF'
+import sys, xml.etree.ElementTree as ET
+path, name = sys.argv[1], sys.argv[2]
+tree = ET.parse(path); root = tree.getroot()
+want = "./%s.sh" % name
+for g in list(root.findall("game")):
+    if (g.findtext("path") or "") == want:
+        root.remove(g)
+tree.write(path, encoding="utf-8", xml_declaration=True)
+PYEOF
+    fi
 fi
 
 if [ -f "$CUSTOM_STARTUP" ]; then

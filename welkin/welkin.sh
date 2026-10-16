@@ -18,6 +18,7 @@ VER="1.0.2"
 REL="https://github.com/anturong/WelkinPlayer/releases/download/batocera-${VER}-r3"
 ASSET="Welkin_${VER}_amd64-batocera.AppImage"
 SHA256="beb5c4e0d420f611203be7e10819de87015d448cbc7badc0b0904d7703e4de94"
+REL_BASE="${REL%/*}"   # 同一 release 目录下的其它资产
 RAW_BASE="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/welkin/extra"
 
 ADDONS_DIR="/userdata/system/add-ons"
@@ -90,8 +91,13 @@ EOF
 chmod +x "$PORTS_DIR/${APPNAME}.sh"
 
 echo "== 取图标 =="
-wget -q -O "$APPDIR/extra/icon.png"        "${RAW_BASE}/icon.png"        || true
-wget -q -O "$PORTS_DIR/images/welkin-logo.png" "${RAW_BASE}/welkin-logo.png" || true
+# 优先用发布资产（一定存在），失败再退回本仓库 welkin/extra/
+get_icon() {   # $1=目标路径  $2=发布资产名  $3=仓库内文件名
+    wget -q -O "$1" "${REL_BASE}/$2" || wget -q -O "$1" "${RAW_BASE}/$3" || rm -f "$1"
+    [ -s "$1" ] || echo "   警告：$3 取不到（不影响使用）"
+}
+get_icon "$APPDIR/extra/icon.png"            addon-icon.png icon.png
+get_icon "$PORTS_DIR/images/welkin-logo.png" addon-logo.png welkin-logo.png
 
 echo "== 写持久化 desktop entry（/usr/share 会被系统更新覆盖，所以留一份并自愈） =="
 cat << EOF > "$PERSISTENT_DESKTOP"
@@ -130,15 +136,36 @@ echo "== 加入 Ports 列表 =="
 if [ ! -f "$GAME_LIST" ]; then
     echo '<?xml version="1.0" encoding="UTF-8"?><gameList></gameList>' > "$GAME_LIST"
 fi
-if grep -q "\./${APPNAME}.sh" "$GAME_LIST"; then
-    echo "   gamelist.xml 里已有条目，跳过（重复运行不会产生重复项）"
-else
-    xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-      -s "/gameList/game[last()]" -t elem -n "path" -v "./${APPNAME}.sh" \
-      -s "/gameList/game[last()]" -t elem -n "name" -v "$APPNAME" \
-      -s "/gameList/game[last()]" -t elem -n "image" -v "./images/welkin-logo.png" \
-      "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
-fi
+# Batocera 不自带 xmlstarlet（BUA 的安装器 app 会装），这里用 python3 兜底
+gamelist_add() {
+    if command -v xmlstarlet >/dev/null 2>&1; then
+        if grep -q "\./${APPNAME}.sh" "$GAME_LIST"; then
+            echo "   gamelist.xml 里已有条目，跳过"; return 0
+        fi
+        xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+          -s "/gameList/game[last()]" -t elem -n "path" -v "./${APPNAME}.sh" \
+          -s "/gameList/game[last()]" -t elem -n "name" -v "$APPNAME" \
+          -s "/gameList/game[last()]" -t elem -n "image" -v "./images/welkin-logo.png" \
+          "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
+    else
+        python3 - "$GAME_LIST" "$APPNAME" <<'PYEOF'
+import sys, xml.etree.ElementTree as ET
+path, name = sys.argv[1], sys.argv[2]
+tree = ET.parse(path); root = tree.getroot()
+want = "./%s.sh" % name
+for g in root.findall("game"):
+    if (g.findtext("path") or "") == want:
+        print("   gamelist.xml 里已有条目，跳过"); raise SystemExit(0)
+g = ET.SubElement(root, "game")
+ET.SubElement(g, "path").text = want
+ET.SubElement(g, "name").text = name
+ET.SubElement(g, "image").text = "./images/welkin-logo.png"
+tree.write(path, encoding="utf-8", xml_declaration=True)
+print("   已用 python3 写入 gamelist.xml")
+PYEOF
+    fi
+}
+gamelist_add
 
 echo "== 刷新 Ports 菜单 =="
 curl -s http://127.0.0.1:1234/reloadgames > /dev/null 2>&1 || true
