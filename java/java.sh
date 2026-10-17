@@ -4,6 +4,7 @@
 APPNAME=java
 APPHOME=azul.com/downloads
 APPPATH=/userdata/system/add-ons/$APPNAME/$APPNAME.AppImage
+REPO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/${APPNAME}"
 
 # Define Launcher Command
 COMMAND='mkdir -p /userdata/system/add-ons/'$APPNAME'/home /userdata/system/add-ons/'$APPNAME'/config /userdata/system/add-ons/'$APPNAME'/roms 2>/dev/null; \
@@ -15,7 +16,7 @@ echo "$COMMAND" > /userdata/system/add-ons/$APPNAME/extra/command
 
 # Download Necessary Files
 curl -s -Lo /userdata/system/add-ons/$APPNAME/extra/icon.png \
-    https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/$APPNAME/extra/icon.png || { echo "Download failed! Exiting..."; exit 1; }
+    "${REPO_URL}/extra/icon.png" || { echo "Download failed! Exiting..."; exit 1; }
 
 # Check System Compatibility
 if ! uname -a | grep -q 'x86_64'; then 
@@ -29,13 +30,26 @@ cd /userdata/system/add-ons/$APPNAME/extra/downloads
 
 for part in java.tar.bz2.partaa java.tar.bz2.partab; do
     curl -s --progress-bar --remote-name --location \
-        https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/$APPNAME/extra/$part || { echo "Download failed! Exiting..."; exit 1; }
+        "${REPO_URL}/extra/${part}" || { echo "Download failed! Exiting..."; exit 1; }
 done
 
 # Merge and Extract Java Files
 cat java.tar.bz2.parta* > java.tar.gz
 mkdir -p /userdata/system/add-ons/java
-tar -xjf java.tar.gz --strip-components=1 -C /userdata/system/add-ons/java
+
+# Older versions of this script extracted Java one level too deep, into java/java.
+# Move an existing install up to where PATH and JAVA_HOME point.
+if [ -d "/userdata/system/add-ons/${APPNAME}/java/bin" ]; then
+    echo "Moving existing Java out of /userdata/system/add-ons/${APPNAME}/java..."
+    for item in "/userdata/system/add-ons/${APPNAME}/java/"*; do
+        [ -e "${item}" ] || continue
+        rm -rf "/userdata/system/add-ons/${APPNAME}/${item##*/}"
+        mv "${item}" "/userdata/system/add-ons/${APPNAME}/"
+    done
+    rmdir "/userdata/system/add-ons/${APPNAME}/java"
+fi
+
+tar -xjf java.tar.gz --strip-components=2 -C /userdata/system/add-ons/java
 
 # Update Profile and Bashrc
 for file in /userdata/system/.profile /userdata/system/.bashrc; do
