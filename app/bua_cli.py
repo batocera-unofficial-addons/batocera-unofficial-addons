@@ -316,14 +316,12 @@ def cmd_uninstall(args) -> int:
     chosen.sort(key=lambda a: a["name"] in REMOVE_LAST)
     failed = [a["name"] for a in chosen if not remove_app(a, True)]
     if failed:
+        # uninstall.sh finds what is left on the device and asks about it.
         print("These apps could not be removed: " + ", ".join(failed))
-        if not confirm("Remove BUA anyway?", args.ignore_warning):
-            print("BUA was not removed.")
-            return 1
 
     print("==> Removing BUA")
-    args_ = ["--ignore-warning"] if args.ignore_warning else []
-    code = run_command(f"curl -L {BUA_UNINSTALL_URL} | bash", args_)
+    script_args = ["--ignore-warning"] if args.ignore_warning else []
+    code = run_command(f"curl -L {BUA_UNINSTALL_URL} | bash", script_args)
     if code is None:
         print("Could not download the BUA uninstall script.")
         return 1
