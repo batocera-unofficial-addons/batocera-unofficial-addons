@@ -28,6 +28,13 @@
   "settings_desc": "Configurar mapeamento do controle e opções",
   "exit": "Sair",
   "exit_desc": "Sair do instalador",
+  "uninstall_bua": "Desinstalar BUA",
+  "uninstall_bua_desc": "Remover todos os complementos e o próprio BUA",
+  "uninstall_bua_info": "Isso remove todos os complementos instalados com o BUA e depois o próprio BUA: seus serviços, arquivos compartilhados, atalho no Ports e configurações.\n\nTodos os avisos são respondidos com sim, e não pode ser desfeito.\n\nNa próxima tela, digite o código Konami em até 10 segundos para começar.\n\nPressione A para continuar.\nPressione B para voltar.",
+  "uninstall_bua_code": "Digite o código Konami para desinstalar o BUA. Não há volta.",
+  "uninstall_bua_time_left": "Tempo restante: {seconds} s",
+  "uninstall_bua_done": "O BUA foi removido. Pressione OK para fechar.",
+  "uninstall_bua_failed": "Não foi possível remover o BUA completamente. Pressione X na próxima tela para ver o log.",
 
   "hint_open": "Abrir",
   "hint_search": "Pesquisar",
