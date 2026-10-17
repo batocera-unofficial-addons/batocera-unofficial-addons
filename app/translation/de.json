@@ -26,6 +26,13 @@
   "settings_desc": "Controller-Layout und Optionen konfigurieren",
   "exit": "Beenden",
   "exit_desc": "Installer beenden",
+  "uninstall_bua": "BUA deinstallieren",
+  "uninstall_bua_desc": "Alle Add-ons und BUA selbst entfernen",
+  "uninstall_bua_info": "Dies entfernt alle mit BUA installierten Add-ons und danach BUA selbst: seine Dienste, gemeinsamen Dateien, den Ports-Starter und die Einstellungen.\n\nAlle Warnungen werden mit Ja beantwortet, und es lässt sich nicht rückgängig machen.\n\nGib auf dem nächsten Bildschirm innerhalb von 10 Sekunden den Konami-Code ein, um zu starten.",
+  "uninstall_bua_code": "Gib den Konami-Code ein, um BUA zu deinstallieren. Es gibt kein Zurück.",
+  "uninstall_bua_time_left": "Verbleibende Zeit: {seconds} s",
+  "uninstall_bua_done": "BUA wurde entfernt. Drücke OK zum Schließen.",
+  "uninstall_bua_failed": "BUA konnte nicht vollständig entfernt werden. Drücke auf dem nächsten Bildschirm X, um das Protokoll zu sehen.",
 
   "hint_open": "Öffnen",
   "hint_search": "Suchen",
