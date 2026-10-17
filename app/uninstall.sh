@@ -45,8 +45,8 @@ CUSTOM_LINES=(
 ignore_warning=false   # set to true by --ignore-warning in main
 
 # Asks a yes/no question in the BUA app, or in the terminal. Returns 0 for
-# Yes, 1 for No, a timeout, or no terminal at all. With --ignore-warning,
-# every question is answered yes without asking.
+# Yes, and non-zero for No, a timeout, or no terminal at all. With
+# --ignore-warning, every question is answered yes without asking.
 ask() {
     local title="$1" text="$2"
     [ "${ignore_warning}" = "true" ] && return 0
@@ -102,7 +102,7 @@ main() {
         esac
     done
 
-    # Every add-on relies on BUA's symlink manager and .dep files.
+    # Add-ons can rely on BUA's symlink manager and .dep files.
     local addons
     addons="$(remaining_addons | sort -fsu)"
     if [ -n "${addons}" ]; then

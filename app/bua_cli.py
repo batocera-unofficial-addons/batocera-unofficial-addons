@@ -2,7 +2,8 @@
 """bua: command-line package manager for Batocera Unofficial Add-ons.
 
 Installed by the BUA installer to /userdata/system/add-ons/bua/bin/bua; the
-symlink_manager service links it into /usr/bin. It runs the same install and
+installer links it into /usr/bin, and the symlink_manager service does again
+at every boot. It runs the same install and
 uninstall scripts as the BUA app and shares its install history, so apps
 installed from either one show up in both.
 
@@ -34,7 +35,7 @@ APPS_JSON = {
     "aarch64": "apps_arm64.json",
 }
 
-# Apps the others depend on are removed last by "remove --all".
+# Apps the others depend on are removed last by "remove --all" and "uninstall".
 REMOVE_LAST = ["Docker"]
 
 # "curl [options] <url> | bash" or "| sh", the form almost every app uses
@@ -161,9 +162,10 @@ def installed_names(apps: list) -> set:
 def run_command(cmd: str, extra_args: list) -> int:
     """Run an install or uninstall command from the app list.
 
-    "curl <url> | bash" commands are downloaded first, so a missing script is
-    reported instead of running nothing, and extra arguments reach the script.
-    Returns the script's exit code, or None when the script doesn't exist.
+    "curl <url> | bash" commands are downloaded first, so a script that can't
+    be downloaded is reported instead of running nothing, and extra arguments
+    reach the script. Returns the script's exit code, or None when the script
+    couldn't be downloaded (missing from the repo, or no network).
     """
     match = CURL_PIPE.match(cmd)
     if not match:
@@ -176,7 +178,7 @@ def run_command(cmd: str, extra_args: list) -> int:
         result = subprocess.run(["curl", "-fsL", "-o", script, url])
         if result.returncode != 0:
             return None
-        # Only bash scripts take --ignore-warning, as in the BUA app.
+        # Only "| bash" commands get --ignore-warning; "| sh" scripts run as they are.
         args = extra_args if shell == "bash" else []
         return subprocess.run([shell, script, *args]).returncode
     finally:
@@ -216,7 +218,7 @@ def remove_app(app: dict, ignore_warning: bool) -> bool:
     args = ["--ignore-warning"] if ignore_warning else []
     code = run_command(app["uninstall"], args)
     if code is None:
-        print(f"{app['name']} has no uninstall script.")
+        print(f"Could not download the uninstall script for {app['name']}.")
         return False
     if code != 0:
         print(f"{app['name']} was not removed (exit code {code}).")
