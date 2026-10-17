@@ -6,11 +6,13 @@
 # the desktop entry, BUA's custom.sh lines, the Python hook, the
 # custom_service_handler service and the BUA app's settings files.
 #
-# It doesn't remove add-ons. "bua uninstall" removes them first; when any are
-# still installed, this script names them and asks before going on.
+# It doesn't remove add-ons. "bua uninstall" (also run by the BUA app's
+# Uninstall BUA) removes them first, then runs this script with
+# --ignore-warning. Run on its own without it, this script names any add-ons
+# still installed and asks before going on.
 #
-#   curl -L <url> | bash
 #   curl -L <url> | bash -s -- --ignore-warning   (yes to every question)
+#   curl -L <url> | bash                           (asks)
 
 ADDONS_DIR="/userdata/system/add-ons"
 DOWNLOAD_DIR="/userdata/system/services"
