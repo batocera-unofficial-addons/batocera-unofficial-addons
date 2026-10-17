@@ -15,6 +15,7 @@ import json
 import os
 import platform
 import re
+import signal
 import subprocess
 import sys
 import tempfile
@@ -328,7 +329,6 @@ def cmd_uninstall(args) -> int:
     if code != 0:
         print(f"The BUA uninstall script failed (exit code {code}).")
         return 1
-    print("BUA has been removed.")
     return 0
 
 
@@ -390,6 +390,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     # Keep our lines in order with the scripts' output when piped to a file.
     sys.stdout.reconfigure(line_buffering=True)
+    # Exit quietly when the output is cut short, as in "bua list | head".
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     parser = build_parser()
     args = parser.parse_args()
     if not args.command:
