@@ -4585,7 +4585,8 @@ BUA_UNINSTALL_RED = (255, 100, 100)
 
 
 class BuaUninstallInfoScreen(InfoDialog):
-    """Says what uninstalling BUA does. A goes on to the code screen, B goes back."""
+    """Says what uninstalling BUA does. A or Start goes on to the code
+    screen, B goes back to Settings."""
     border_color = BUA_UNINSTALL_RED
 
     def __init__(self):
@@ -4614,7 +4615,8 @@ class BuaUninstallInfoScreen(InfoDialog):
 class KonamiCodeScreen(BaseScreen):
     """The last step before uninstalling BUA: the Konami code within
     KONAMI_SECONDS, or it goes back to the info screen. A wrong button
-    starts the code over; the time keeps running."""
+    starts the code over (a wrong Up counts as the first step); the time
+    keeps running."""
     def __init__(self):
         self.progress = 0
         self.started_at = pygame.time.get_ticks()
@@ -4740,8 +4742,9 @@ class KonamiCodeScreen(BaseScreen):
 
 
 class BuaUninstallRunScreen(RunListScreen):
-    """Runs the BUA uninstall. It can't be stopped once it has started; when
-    it's done, BUA closes."""
+    """Runs the BUA uninstall, which can't be stopped or left while it runs.
+    When BUA is gone, BUA closes after OK. When the uninstall failed, it says
+    so; the log is on this screen (X), and B then goes back to Settings."""
     def __init__(self):
         super().__init__([("BUA (Uninstall)", BUA_UNINSTALL_CMD)], title=t("uninstall_bua"))
         self.reported = False
@@ -4749,7 +4752,8 @@ class BuaUninstallRunScreen(RunListScreen):
     def handle(self, events):
         if self.all_finished:
             return super().handle(events)
-        # Only the log view works while it runs; B/Back don't stop it.
+        # Only the log view works while it runs; B does nothing, and Back
+        # doesn't open Settings here (see the main loop).
         for e in events:
             if e.type == pygame.QUIT:
                 clean_exit(0)
@@ -5838,7 +5842,8 @@ def main():
         if open_settings:
             try:
                 top = SCREENS[-1] if SCREENS else None
-                if not isinstance(top, (SettingsScreen, ControllerLayoutScreen)):
+                # Not over Settings itself, or over a running BUA uninstall
+                if not isinstance(top, (SettingsScreen, ControllerLayoutScreen, BuaUninstallRunScreen)):
                     push_screen(SettingsScreen())
                 # Filter out Back button events so Settings doesn't immediately close
                 events = [e for e in events if not (
