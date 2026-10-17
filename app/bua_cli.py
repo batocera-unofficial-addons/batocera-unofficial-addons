@@ -307,6 +307,7 @@ def cmd_update(args) -> int:
 
 
 def cmd_uninstall(args) -> int:
+    # Every app's and BUA's own warnings are answered yes; this is the only question.
     if not confirm("This removes every installed app and BUA itself. Continue?", args.ignore_warning):
         print("Nothing was removed.")
         return 1
@@ -317,12 +318,10 @@ def cmd_uninstall(args) -> int:
     chosen.sort(key=lambda a: a["name"] in REMOVE_LAST)
     failed = [a["name"] for a in chosen if not remove_app(a, True)]
     if failed:
-        # uninstall.sh finds what is left on the device and asks about it.
         print("These apps could not be removed: " + ", ".join(failed))
 
     print("==> Removing BUA")
-    script_args = ["--ignore-warning"] if args.ignore_warning else []
-    code = run_command(f"curl -L {BUA_UNINSTALL_URL} | bash", script_args)
+    code = run_command(f"curl -L {BUA_UNINSTALL_URL} | bash", ["--ignore-warning"])
     if code is None:
         print("Could not download the BUA uninstall script.")
         return 1
@@ -379,9 +378,9 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("update", help="update BUA and show what's new")
     p.set_defaults(func=cmd_update)
 
-    p = sub.add_parser("uninstall", help="remove every app and BUA itself (asks first)")
+    p = sub.add_parser("uninstall", help="remove every app and BUA itself (asks once)")
     p.add_argument("--ignore-warning", action="store_true",
-                   help="don't ask anything")
+                   help="don't ask before starting")
     p.set_defaults(func=cmd_uninstall)
 
     return parser

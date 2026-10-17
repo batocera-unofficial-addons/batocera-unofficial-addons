@@ -30,7 +30,7 @@
   "exit_desc": "Zamknij instalator",
   "uninstall_bua": "Odinstaluj BUA",
   "uninstall_bua_desc": "Usuń wszystkie dodatki i samo BUA",
-  "uninstall_bua_info": "To usuwa wszystkie dodatki zainstalowane przez BUA, a potem samo BUA: jego usługi, wspólne pliki, skrót w Ports i ustawienia.\n\nNa każde ostrzeżenie odpowiadane jest tak i nie można tego cofnąć.\n\nNa następnym ekranie wpisz kod Konami w ciągu 10 sekund, aby rozpocząć.",
+  "uninstall_bua_info": "To usuwa wszystkie dodatki zainstalowane przez BUA, a potem samo BUA: jego usługi, wspólne pliki, skrót w Ports i ustawienia.\n\nNa każde ostrzeżenie odpowiadane jest tak i nie można tego cofnąć.\n\nNa następnym ekranie wpisz kod Konami w ciągu 10 sekund, aby rozpocząć.\n\nNaciśnij A, aby kontynuować.\nNaciśnij B, aby wrócić.",
   "uninstall_bua_code": "Wpisz kod Konami, aby odinstalować BUA. Nie ma odwrotu.",
   "uninstall_bua_time_left": "Pozostały czas: {seconds} s",
   "uninstall_bua_done": "BUA zostało usunięte. Naciśnij OK, aby zamknąć.",

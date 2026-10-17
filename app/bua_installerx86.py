@@ -939,7 +939,6 @@ def get_top_level() -> List[Tuple[str, str]]:
         (t("custom_wine"), t("custom_wine_desc")),
         (t("updater"), t("updater_desc")),
         (t("settings"), t("settings_desc")),
-        (t("uninstall_bua"), t("uninstall_bua_desc")),
         (t("exit"), t("exit_desc")),
     ]
 
@@ -2389,9 +2388,6 @@ class MenuScreen(BaseScreen):
         if name == t("updater"):
             push_screen(UpdaterScreen())
             return
-        if name == t("uninstall_bua"):
-            push_screen(BuaUninstallInfoScreen())
-            return
         # category -> check list screen
         english_name = category_map.get(name, name)
         if english_name in CATEGORIES:
@@ -2594,6 +2590,8 @@ class ConfirmDialog(BaseScreen):
 
 
 class InfoDialog(BaseScreen):
+    border_color = ACCENT  # the dialog's border and OK button
+
     def __init__(self, title: str, message: List[str], on_close=None):
         self.title = title
         self.message = message
@@ -2634,7 +2632,7 @@ class InfoDialog(BaseScreen):
         dialog_y = (H - dialog_h) // 2
         dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h)
         pygame.draw.rect(screen, CARD, dialog_rect, border_radius=15)
-        pygame.draw.rect(screen, ACCENT, dialog_rect, width=3, border_radius=15)
+        pygame.draw.rect(screen, self.border_color, dialog_rect, width=3, border_radius=15)
 
         draw_text(screen, self.title, FONT_BIG, FG, (dialog_x + S(30), dialog_y + S(30)))
 
@@ -2657,7 +2655,7 @@ class InfoDialog(BaseScreen):
         # OK button
         btn_w, btn_h = S(120), S(45)
         btn_rect = pygame.Rect(dialog_x + (dialog_w - btn_w)//2, dialog_y + dialog_h - S(60), btn_w, btn_h)
-        pygame.draw.rect(screen, ACCENT, btn_rect, border_radius=8)
+        pygame.draw.rect(screen, self.border_color, btn_rect, border_radius=8)
         draw_text(screen, t("ok"), FONT, FG, (btn_rect.x + (btn_w - FONT.size(t("ok"))[0])//2, btn_rect.y + S(10)))
 
 
@@ -4583,10 +4581,13 @@ BUA_UNINSTALL_CHECK = ["/userdata/roms/ports/bua.sh", "/userdata/system/services
 KONAMI_CODE = ["UP", "UP", "DOWN", "DOWN", "LEFT", "RIGHT", "LEFT", "RIGHT", "B", "A", "START"]
 KONAMI_SECONDS = 10
 KONAMI_ARROWS = {"UP": "↑", "DOWN": "↓", "LEFT": "←", "RIGHT": "→"}
+BUA_UNINSTALL_RED = (255, 100, 100)
 
 
 class BuaUninstallInfoScreen(InfoDialog):
     """Says what uninstalling BUA does. A goes on to the code screen, B goes back."""
+    border_color = BUA_UNINSTALL_RED
+
     def __init__(self):
         super().__init__(t("uninstall_bua"), t("uninstall_bua_info").split("\n"))
 
@@ -4711,7 +4712,7 @@ class KonamiCodeScreen(BaseScreen):
         dialog_y = (H - dialog_h) // 2
         dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h)
         pygame.draw.rect(screen, CARD, dialog_rect, border_radius=15)
-        pygame.draw.rect(screen, (255, 100, 100), dialog_rect, width=3, border_radius=15)
+        pygame.draw.rect(screen, BUA_UNINSTALL_RED, dialog_rect, width=3, border_radius=15)
 
         draw_text(screen, t("uninstall_bua"), FONT_BIG, FG, (dialog_x + S(30), dialog_y + S(30)))
         y = dialog_y + S(90)
@@ -5206,14 +5207,20 @@ SCREENS: List[BaseScreen] = []
 INSTALL_QUEUE: List[Tuple[str, str]] = []  # Global queue for installs
 SELECTED_APPS: Dict[str, bool] = {}  # Global selections that persist across category navigation
 
+def get_settings_items() -> List[Tuple[str, str]]:
+    """Settings items with current language translations"""
+    return [
+        (t("controller_layout"), t("controller_layout_desc")),
+        (t("configure_buttons"), t("configure_buttons_desc")),
+        (t("language"), t("language_desc")),
+        (t("cards_per_page"), t("cards_per_page_desc")),
+        (t("uninstall_bua"), t("uninstall_bua_desc")),
+    ]
+
+
 class SettingsScreen(BaseScreen):
     def __init__(self):
-        self.items = [
-            (t("controller_layout"), t("controller_layout_desc")),
-            (t("configure_buttons"), t("configure_buttons_desc")),
-            (t("language"), t("language_desc")),
-            (t("cards_per_page"), t("cards_per_page_desc")),
-        ]
+        self.items = get_settings_items()
         self.idx = 0
 
     def handle(self, events):
@@ -5260,6 +5267,8 @@ class SettingsScreen(BaseScreen):
             push_screen(LanguageScreen())
         elif name == t("cards_per_page"):
             push_screen(CardsPerPageScreen())
+        elif name == t("uninstall_bua"):
+            push_screen(BuaUninstallInfoScreen())
 
     def draw(self):
         draw_background(screen)
@@ -5274,14 +5283,15 @@ class SettingsScreen(BaseScreen):
         gap = S(6)
         spacing = S(12)
         for i, (name, desc) in enumerate(self.items):
-            name_img = FONT.render(name, True, FG)
+            danger = name == t("uninstall_bua")
+            name_img = FONT.render(name, True, BUA_UNINSTALL_RED if danger else FG)
             desc_img = FONT_SMALL.render(desc, True, MUTED) if desc else None
             content_h = name_img.get_height() + ((gap + desc_img.get_height()) if desc_img else 0)
             rect_h = max(S(60), content_h + pad_y * 2)
             rect = pygame.Rect(card_x, y, card_w, rect_h)
             pygame.draw.rect(screen, CARD, rect, border_radius=10)
             if i == self.idx:
-                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=10)
+                pygame.draw.rect(screen, BUA_UNINSTALL_RED if danger else SELECT, rect, width=3, border_radius=10)
             nx = rect.x + S(14)
             ny = rect.y + pad_y
             screen.blit(name_img, (nx, ny))
@@ -5442,12 +5452,7 @@ class LanguageScreen(BaseScreen):
                     screen.stats = screen.calculate_stats()
             elif isinstance(screen, SettingsScreen):
                 # Refresh settings items with new translations
-                screen.items = [
-                    (t("controller_layout"), t("controller_layout_desc")),
-                    (t("configure_buttons"), t("configure_buttons_desc")),
-                    (t("language"), t("language_desc")),
-                    (t("resolution"), t("resolution_desc")),
-                ]
+                screen.items = get_settings_items()
 
         msg = [f"{t('language')}: {native}"]
         push_screen(InfoDialog(t("settings_title"), msg))

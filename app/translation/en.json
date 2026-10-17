@@ -30,7 +30,7 @@
   "exit_desc": "Exit the installer",
   "uninstall_bua": "Uninstall BUA",
   "uninstall_bua_desc": "Remove every add-on and BUA itself",
-  "uninstall_bua_info": "This removes every add-on installed with BUA, then BUA itself: its services, shared files, Ports launcher and settings.\n\nEvery warning is answered yes, and it can't be undone.\n\nOn the next screen, enter the Konami code within 10 seconds to start.",
+  "uninstall_bua_info": "This removes every add-on installed with BUA, then BUA itself: its services, shared files, Ports launcher and settings.\n\nEvery warning is answered yes, and it can't be undone.\n\nOn the next screen, enter the Konami code within 10 seconds to start.\n\nPress A to continue.\nPress B to go back.",
   "uninstall_bua_code": "Enter the Konami code to uninstall BUA. There's no going back.",
   "uninstall_bua_time_left": "Time left: {seconds} s",
   "uninstall_bua_done": "BUA has been removed. Press OK to close.",
