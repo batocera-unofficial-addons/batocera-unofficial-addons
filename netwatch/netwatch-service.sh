@@ -30,7 +30,7 @@ running() {
 
 start() {
     if running; then
-        echo "netwatch is already running (pid $(cat "$PIDFILE"))"
+        echo "NetWatch is already running (pid $(cat "$PIDFILE"))"
         return 0
     fi
     if [ ! -f "$NETWATCH_HOME/netwatch.py" ]; then
@@ -44,10 +44,17 @@ start() {
     # .1 once it passes NETWATCH_LOG_MAX_BYTES, so even a crash loop stays bounded.
     # setsid gives the loop its own process group, so stop can end the loop and
     # python together. The loop restarts netwatch if it exits.
+    # The loop first closes every file it inherited above stderr: whoever ran
+    # start may still be reading one of them (the BUA app reads the install's
+    # output through fd 9) and would wait for netwatch to exit before finishing.
     NETWATCH_HOME="$NETWATCH_HOME" DISPLAY="${DISPLAY:-:0}" NETWATCH_ARGS="$NETWATCH_ARGS" \
     NETWATCH_LOG="$NETWATCH_LOG" NETWATCH_LOG_MAX_BYTES="$NETWATCH_LOG_MAX_BYTES" \
     NETWATCH_LOG_KEEP="$NETWATCH_LOG_KEEP" SLOG="$NETWATCH_SERVICE_LOG" \
     setsid bash -c '
+        for fd in "/proc/$$/fd"/*; do
+            fd="${fd##*/}"
+            [ "$fd" -gt 2 ] && eval "exec ${fd}>&-"
+        done
         while true; do
             if [ "$NETWATCH_LOG_MAX_BYTES" -gt 0 ] && [ -f "$SLOG" ] && \
                [ "$(stat -c %s "$SLOG")" -gt "$NETWATCH_LOG_MAX_BYTES" ]; then
@@ -57,21 +64,21 @@ start() {
                 --log-file "$NETWATCH_LOG" --log-max-bytes "$NETWATCH_LOG_MAX_BYTES" \
                 --log-keep "$NETWATCH_LOG_KEEP" $NETWATCH_ARGS >>"$SLOG" 2>&1
             rc=$?
-            echo "$(date "+%F %T") netwatch exited with status $rc; restarting in 5s" >>"$SLOG"
+            echo "$(date "+%F %T") NetWatch exited with status $rc; restarting in 5s" >>"$SLOG"
             sleep 5
         done' >/dev/null 2>&1 < /dev/null &
     echo $! > "$PIDFILE"
-    echo "netwatch started (pid $!), log: $NETWATCH_LOG"
+    echo "NetWatch started (pid $!), log: $NETWATCH_LOG"
 }
 
 stop() {
     if running; then
         kill -TERM -- "-$(cat "$PIDFILE")" 2>/dev/null || kill "$(cat "$PIDFILE")"
         rm -f "$PIDFILE"
-        echo "netwatch stopped"
+        echo "NetWatch stopped"
     else
         rm -f "$PIDFILE"
-        echo "netwatch is not running"
+        echo "NetWatch is not running"
     fi
 }
 
@@ -80,7 +87,7 @@ case "$1" in
     stop)    stop ;;
     restart) stop; sleep 1; start ;;
     status)
-        if running; then echo "netwatch is running (pid $(cat "$PIDFILE")), log: $NETWATCH_LOG"
-        else echo "netwatch is stopped"; exit 1; fi ;;
+        if running; then echo "NetWatch is running (pid $(cat "$PIDFILE")), log: $NETWATCH_LOG"
+        else echo "NetWatch is stopped"; exit 1; fi ;;
     *) echo "Usage: $0 {start|stop|restart|status}"; exit 1 ;;
 esac

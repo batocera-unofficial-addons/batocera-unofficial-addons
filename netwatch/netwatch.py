@@ -896,7 +896,7 @@ class Tracker:
                       key=lambda d: (d.stream_since is None, order.get(env.classify(d.ip), 5),
                                      d.first_seen))
         acct = read_sysctl("nf_conntrack_acct")
-        out = [f"netwatch  {time.strftime('%H:%M:%S')}  devices={len(devs)} "
+        out = [f"NetWatch  {time.strftime('%H:%M:%S')}  devices={len(devs)} "
                f"flows={len(self.flow_dev)}  sunshine-base={env.sun.base}  "
                f"tailscale={'ok' if not env.ts_error else 'ERR ' + env.ts_error}  "
                f"acct={'on' if acct == '1' else 'OFF'}", ""]
@@ -929,7 +929,7 @@ class Tracker:
                                f"in {fmt_bytes(f.ingress_bytes()):>7}  "
                                f"out {fmt_bytes(f.egress_bytes()):>7}")
         if any(not d.exact for d in devs):
-            out += ["", "> = connected before netwatch started (true start unknown)"]
+            out += ["", "> = connected before NetWatch started (true start unknown)"]
         if self.history:
             out += ["", "RECENTLY DISCONNECTED"]
             for t, name, ip, path, dur, bi, bo in list(self.history)[:5]:
@@ -979,7 +979,7 @@ class WebServer:
                 if hmac.compare_digest(self.headers.get("Authorization", ""), web.auth):
                     return True
                 self.send_response(401)
-                self.send_header("WWW-Authenticate", 'Basic realm="netwatch"')
+                self.send_header("WWW-Authenticate", 'Basic realm="NetWatch"')
                 self.end_headers()
                 return False
 
@@ -1144,7 +1144,7 @@ def setup_logging(args):
     def crash(exc_type, exc, tb):
         if issubclass(exc_type, KeyboardInterrupt):
             return sys.__excepthook__(exc_type, exc, tb)
-        LOG.critical("netwatch crashed", exc_info=(exc_type, exc, tb))
+        LOG.critical("NetWatch crashed", exc_info=(exc_type, exc, tb))
 
     sys.excepthook = crash
     threading.excepthook = lambda a: LOG.error(
@@ -1207,7 +1207,7 @@ def main():
     args = parse_args()
     setup_logging(args)
     if os.geteuid() != 0:
-        LOG.critical("netwatch must run as root (conntrack over netlink needs CAP_NET_ADMIN)")
+        LOG.critical("NetWatch must run as root (conntrack over netlink needs CAP_NET_ADMIN)")
         sys.exit(1)
     os.makedirs(NETWATCH_HOME, exist_ok=True)
     prepare_kernel()
