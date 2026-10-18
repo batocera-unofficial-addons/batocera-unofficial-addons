@@ -28,6 +28,7 @@ import hashlib
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
+- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format
 - Added chdress - GUI tool to convert any disc image to/from CHD format
 - Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation
 - Added ps3i - Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation
@@ -667,6 +668,7 @@ APPS: Dict[str, str] = {
     "npsget": "curl -fsSL https://npsget.8101987.xyz | sh",
     "ps3i": "curl -fsSL https://ps3i.8101987.xyz/install.sh | sh",
     "chdress": "curl -fsSL https://chdress.8101987.xyz/install.sh | sh",
+    "iso2zar": "curl -fsSL https://iso2zar.8101987.xyz | sh",
 }
 
 # --- Integrated Windows Freeware installers (previously separate bash menu) ---
@@ -816,6 +818,7 @@ DESCRIPTIONS: Dict[str, str] = {
     "ps3i": "Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation",
     "chdress": "GUI tool to convert any disc image to/from CHD format",
     "NetWatch": "Shows which devices connect to Batocera, with on-screen alerts and a web dashboard.",
+    "iso2zar": "GUI tool to convert Xbox[360] .iso files directly into .zar format",
 }
 
 # Descriptions for integrated Windows Freeware entries
@@ -910,7 +913,7 @@ CATEGORIES: Dict[str, List[str]] = {
         "Android", "Amazon Luna", "AzaharPlus", "PortMaster", "Greenlight", "ShadPS4",
         "Chiaki", "Heroic", "Switch", "Parsec", "Java Runtime", "Freej2me",
         "Steam", "Lutris", "Bottles", "Sunshine", "Moonlight", "Bridge",
-        "Itch.io", "Everest", "RGSX", "npsget", "ps3i", "chdress"
+        "Itch.io", "Everest", "RGSX", "npsget", "ps3i", "chdress", "iso2zar"
     ],
     "System Utilities": [
         "Desktop For Batocera", "Winconfig (Windows Game Fix)", "F1", "Tailscale",
