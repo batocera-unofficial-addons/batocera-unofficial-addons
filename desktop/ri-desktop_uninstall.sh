@@ -3,10 +3,32 @@ set -euo pipefail
 
 ###############################################################################
 # RunImage Desktop Uninstaller for Batocera
+#
+# Asks first when RunImage Desktop is running. To close it and uninstall
+# without asking (in the BUA app: LB+RB on the installed apps screen):
+#   curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/desktop/ri-desktop_uninstall.sh | bash -s -- --ignore-warning
 ###############################################################################
 
 DEST_BASE="/userdata/system/add-ons/ri-desktop"
 PORT_SCRIPT="/userdata/roms/ports/RunImageDesktop.sh"
+PORTS_DIR="/userdata/roms/ports"
+PAD2KEY_PROFILE="${PORTS_DIR}/RunImageDesktop.sh.keys"
+
+ignore_warning=false
+case "${1-}" in
+    "") ;;
+    --ignore-warning) ignore_warning=true ;;
+    *) echo "Usage: ri-desktop_uninstall.sh [--ignore-warning]"; exit 2 ;;
+esac
+
+# Asks a yes/no question in the BUA app, or in the terminal. Returns 0 for
+# Yes, 1 for No, a timeout, or no terminal at all. With --ignore-warning,
+# every question is answered yes without asking.
+ask() {
+    local title="$1" text="$2"
+    [ "${ignore_warning}" = "true" ] && return 0
+    dialog --title "${title}" --clear --timeout 60 --yesno "${text}" 0 0
+}
 
 echo "==================================================================="
 echo "RunImage Desktop Uninstaller"
@@ -22,11 +44,12 @@ if pgrep -f "runimage.*rim-desktop" >/dev/null 2>&1 || \
     pgrep -fa "runimage.*rim-desktop" || true
     pgrep -fa "Xephyr.*rim-desktop" || true
     echo ""
-    read -p "Continue anyway? (y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if ! ask "Uninstall RunImage Desktop" "RunImage Desktop appears to be running.\n\nClose it and uninstall anyway?"; then
         echo "[i] Uninstall cancelled."
-        exit 0
+        exit 1
+    fi
+    if [ "${ignore_warning}" = "true" ]; then
+        echo "[i] Ignoring warnings: closing it and uninstalling anyway."
     fi
 
     echo "[*] Attempting to terminate RunImage Desktop..."
@@ -41,6 +64,10 @@ if [ -f "${PORT_SCRIPT}" ]; then
     rm -f "${PORT_SCRIPT}"
 fi
 
+# Remove pad-to-key profile and images
+echo "[*] Removing pad-to-key profile and images..."
+rm -f "${PAD2KEY_PROFILE}" "${PORTS_DIR}/images/desktop-logo.png" "${PORTS_DIR}/images/desktop-marquee.png"
+
 # Remove installation directory
 if [ -d "${DEST_BASE}" ]; then
     echo "[*] Removing installation directory..."
@@ -51,6 +78,14 @@ if [ -d "${DEST_BASE}" ]; then
     echo "    Size: ${SIZE}"
 
     rm -rf "${DEST_BASE}"
+fi
+
+# Remove gamelist.xml entry
+if [ -f "${PORTS_DIR}/gamelist.xml" ]; then
+    echo "[*] Removing gamelist.xml entry..."
+    xmlstarlet ed -d "/gameList/game[path='./RunImageDesktop.sh']" \
+      "${PORTS_DIR}/gamelist.xml" > "${PORTS_DIR}/gamelist.xml.tmp" && \
+      mv "${PORTS_DIR}/gamelist.xml.tmp" "${PORTS_DIR}/gamelist.xml" || true
 fi
 
 # Refresh EmulationStation game list
