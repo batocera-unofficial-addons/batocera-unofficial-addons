@@ -1,6 +1,6 @@
 {
   "generated_from": "app/bua_installerx86.py",
-  "changelog": "- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added ps3i - Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added AzaharPlus - selectable 3DS emulator option alongside Azahar\n- Replaced StepMania with ITGMania - ITG-focused rhythm game with bundled songs\n- Desktop: wallpaper and icon layout now preserved on update\n- Desktop: improved DRL migration and palette support\n- NVIDIAPatch: fixed GLX chain on host",
+  "changelog": "- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format\n- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added ps3i - Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added AzaharPlus - selectable 3DS emulator option alongside Azahar\n- Replaced StepMania with ITGMania - ITG-focused rhythm game with bundled songs\n- Desktop: wallpaper and icon layout now preserved on update\n- Desktop: improved DRL migration and palette support\n- NVIDIAPatch: fixed GLX chain on host",
   "apps": [
     {
       "name": "7zip",
@@ -492,6 +492,15 @@
       ],
       "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/iptvnator/iptvnator.sh | bash",
       "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/iptvnator/iptvnator_uninstall.sh | bash"
+    },
+    {
+      "name": "iso2zar",
+      "description": "GUI tool to convert Xbox[360] .iso files directly into .zar format",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -fsSL https://iso2zar.8101987.xyz | sh",
+      "uninstall": null
     },
     {
       "name": "Itch.io",

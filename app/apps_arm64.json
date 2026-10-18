@@ -1,6 +1,6 @@
 {
   "generated_from": "app/bua_installerarm64.py",
-  "changelog": "- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added Jellyfin Player - native media player client with controller support",
+  "changelog": "- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format\n- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added Jellyfin Player - native media player client with controller support",
   "apps": [
     {
       "name": "Alpine XFCE (Webtop)",
@@ -172,6 +172,15 @@
       ],
       "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/iptvnator/iptvnator.sh | bash",
       "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/iptvnator/iptvnator_uninstall.sh | bash"
+    },
+    {
+      "name": "iso2zar",
+      "description": "GUI tool to convert Xbox[360] .iso files directly into .zar format",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -fsSL https://iso2zar.8101987.xyz | sh",
+      "uninstall": null
     },
     {
       "name": "Jellyfin",
