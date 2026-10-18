@@ -3,11 +3,31 @@ set -euo pipefail
 
 ###############################################################################
 # Nazi Zombies: Portable Uninstaller for Batocera
+#
+# Asks first when the game is running. To close it and uninstall without
+# asking (in the BUA app: LB+RB on the installed apps screen):
+#   curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/nzp/nzp_uninstall.sh | bash -s -- --ignore-warning
 ###############################################################################
 
 INSTALL_DIR="/userdata/roms/ports/nzp"
 LAUNCHER_SCRIPT="/userdata/roms/ports/Nazi Zombies Portable.sh"
 PORTS_DIR="/userdata/roms/ports"
+
+ignore_warning=false
+case "${1-}" in
+    "") ;;
+    --ignore-warning) ignore_warning=true ;;
+    *) echo "Usage: nzp_uninstall.sh [--ignore-warning]"; exit 2 ;;
+esac
+
+# Asks a yes/no question in the BUA app, or in the terminal. Returns 0 for
+# Yes, 1 for No, a timeout, or no terminal at all. With --ignore-warning,
+# every question is answered yes without asking.
+ask() {
+    local title="$1" text="$2"
+    [ "${ignore_warning}" = "true" ] && return 0
+    dialog --title "${title}" --clear --timeout 60 --yesno "${text}" 0 0
+}
 
 echo "==================================================================="
 echo "Nazi Zombies: Portable Uninstaller"
@@ -21,11 +41,12 @@ if pgrep -f "nzportable" >/dev/null 2>&1; then
     echo "Active processes:"
     pgrep -fa "nzportable" || true
     echo ""
-    read -p "Continue anyway? (y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if ! ask "Uninstall Nazi Zombies: Portable" "Nazi Zombies: Portable appears to be running.\n\nClose it and uninstall anyway?"; then
         echo "[i] Uninstall cancelled."
-        exit 0
+        exit 1
+    fi
+    if [ "${ignore_warning}" = "true" ]; then
+        echo "[i] Ignoring warnings: closing it and uninstalling anyway."
     fi
 
     echo "[*] Attempting to terminate Nazi Zombies: Portable..."
