@@ -15,17 +15,17 @@ main() {
     NETWATCH_LOG="${NETWATCH_LOG:-${INSTALL_DIR}/netwatch.log}"
     NETWATCH_SERVICE_LOG="${NETWATCH_SERVICE_LOG:-$(dirname "${NETWATCH_LOG}")/netwatch-service.log}"
 
-    echo "Stopping netwatch..."
+    echo "Stopping NetWatch..."
     batocera-services stop netwatch 2>/dev/null
     batocera-services disable netwatch 2>/dev/null
     [ -x "${SERVICE}" ] && "${SERVICE}" stop >/dev/null 2>&1   # in case batocera-services didn't
 
-    echo "Removing netwatch..."
+    echo "Removing NetWatch..."
     rm -f "${SERVICE}" /var/run/netwatch.pid
     rm -f "${NETWATCH_LOG}" "${NETWATCH_LOG}".[0-9]* "${NETWATCH_SERVICE_LOG}" "${NETWATCH_SERVICE_LOG}".[0-9]*
     rm -rf "${INSTALL_DIR}"
 
-    echo "netwatch has been removed."
+    echo "NetWatch has been removed."
 }
 
 main "$@"

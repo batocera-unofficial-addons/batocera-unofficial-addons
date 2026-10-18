@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>netwatch</title>
+<title>NetWatch</title>
 <style>
   /* Always dark: near-black navy, blue as the working colour, gold only
      where something deserves attention (a live stream, a notification). */
@@ -138,7 +138,7 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>netwatch<span id="host"></span></h1>
+    <h1>NetWatch<span id="host"></span></h1>
     <div class="status" aria-live="polite"><span class="dot" id="dot"></span><span id="status">Connecting…</span></div>
   </header>
 
@@ -331,7 +331,7 @@ function tidy(text) {
   if ((m = text.match(/^< Sunshine stream ended: (.+) after (\S+)$/)))
     return `${m[1]} stopped streaming after ${dur(hms(m[2]))}`;
   if ((m = text.match(/^~ Sunshine stream already active: (.+)$/)))
-    return `${m[1]} was already streaming when netwatch started`;
+    return `${m[1]} was already streaming when NetWatch started`;
   if ((m = text.match(/^\* NOTIFY: (.+)$/)))
     return `Showed on screen: "${m[1]}"`;
   return text.replace(/^[>*!+\-<~] /, "");
@@ -360,7 +360,7 @@ function render() {
   $("host").textContent = `${s.host}${s.local_ips.length ? ", " + s.local_ips.filter(ip => !ip.includes(":")).join(", ") : ""}`;
   const notes = [];
   if (s.tailscale_error) notes.push(`Tailscale names are unavailable: ${s.tailscale_error}.`);
-  if (!s.counters) notes.push("Traffic counters are off, so byte totals and stream-end detection are limited. Restart netwatch as root to enable them.");
+  if (!s.counters) notes.push("Traffic counters are off, so byte totals and stream-end detection are limited. Restart NetWatch as root to enable them.");
   $("notice").hidden = !notes.length;
   $("notice").textContent = notes.join(" ");
   renderStreams(s.devices);
@@ -388,7 +388,7 @@ function connect() {
   es.onmessage = ev => { $("dot").className = "dot"; ingest(JSON.parse(ev.data)); };
   es.onerror = () => {
     $("dot").className = "dot down";
-    $("status").textContent = "Lost connection to netwatch. Reconnecting…";
+    $("status").textContent = "Lost connection to NetWatch. Reconnecting…";
   };
 }
 
