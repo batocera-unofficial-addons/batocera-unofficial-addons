@@ -57,6 +57,7 @@
   "hint_select": "Seleziona",
   "hint_close_settings": "Chiudi Impostazioni",
   "hint_uninstall": "Disinstalla",
+  "hint_uninstall_ignore": "Disinstalla, ignora avvisi",
   "hint_cancel": "Annulla",
   "hint_confirm": "Conferma",
 
