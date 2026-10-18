@@ -2314,6 +2314,8 @@ class ConfirmDialog(BaseScreen):
 
 
 class InfoDialog(BaseScreen):
+    border_color = ACCENT  # the dialog's border and OK button
+
     def __init__(self, title: str, message: List[str], on_close=None):
         self.title = title
         self.message = message
@@ -2354,7 +2356,7 @@ class InfoDialog(BaseScreen):
         dialog_y = (H - dialog_h) // 2
         dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h)
         pygame.draw.rect(screen, CARD, dialog_rect, border_radius=15)
-        pygame.draw.rect(screen, ACCENT, dialog_rect, width=3, border_radius=15)
+        pygame.draw.rect(screen, self.border_color, dialog_rect, width=3, border_radius=15)
 
         draw_text(screen, self.title, FONT_BIG, FG, (dialog_x + S(30), dialog_y + S(30)))
 
@@ -2377,7 +2379,7 @@ class InfoDialog(BaseScreen):
         # OK button
         btn_w, btn_h = S(120), S(45)
         btn_rect = pygame.Rect(dialog_x + (dialog_w - btn_w)//2, dialog_y + dialog_h - S(60), btn_w, btn_h)
-        pygame.draw.rect(screen, ACCENT, btn_rect, border_radius=8)
+        pygame.draw.rect(screen, self.border_color, btn_rect, border_radius=8)
         draw_text(screen, t("ok"), FONT, FG, (btn_rect.x + (btn_w - FONT.size(t("ok"))[0])//2, btn_rect.y + S(10)))
 
 
@@ -3982,6 +3984,216 @@ def github_latest_commit_date(owner: str, repo: str, branch: str, path: str) -> 
         return None
 
 
+# ------------------------------
+# Uninstall BUA
+# ------------------------------
+
+# Runs "bua uninstall --ignore-warning" with the newest bua command from the
+# repo, so it also works on installs made before the command existed: every
+# installed app's uninstaller, then app/uninstall.sh for BUA itself.
+BUA_UNINSTALL_CMD = (
+    "BUA_CLI=$(mktemp); "
+    f"curl -fsSL -o \"$BUA_CLI\" {BUA_BASE_URL}/app/bua_cli.py "
+    "&& python3 \"$BUA_CLI\" uninstall --ignore-warning; "
+    "rm -f \"$BUA_CLI\""
+)
+# Files app/uninstall.sh removes; if either is left, the uninstall failed.
+BUA_UNINSTALL_CHECK = ["/userdata/roms/ports/bua.sh", "/userdata/system/services/symlink_manager"]
+
+KONAMI_CODE = ["UP", "UP", "DOWN", "DOWN", "LEFT", "RIGHT", "LEFT", "RIGHT", "B", "A", "START"]
+KONAMI_SECONDS = 10
+KONAMI_ARROWS = {"UP": "↑", "DOWN": "↓", "LEFT": "←", "RIGHT": "→"}
+BUA_UNINSTALL_RED = (255, 100, 100)
+
+
+class BuaUninstallInfoScreen(InfoDialog):
+    """Says what uninstalling BUA does. A or Start goes on to the code
+    screen, B goes back to Settings."""
+    border_color = BUA_UNINSTALL_RED
+
+    def __init__(self):
+        super().__init__(t("uninstall_bua"), t("uninstall_bua_info").split("\n"))
+
+    def handle(self, events):
+        for e in events:
+            if e.type == pygame.QUIT:
+                clean_exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    push_screen(KonamiCodeScreen()); return
+                if e.key == pygame.K_ESCAPE:
+                    pop_screen(); return
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_START):
+                    push_screen(KonamiCodeScreen()); return
+                if e.button == BTN_B:
+                    pop_screen(); return
+
+    def draw(self):
+        super().draw()
+        draw_hints_line(screen, f"A={t('hint_confirm')} | B={t('hint_return')}", FONT_SMALL, ACCENT, (40, 30))
+
+
+class KonamiCodeScreen(BaseScreen):
+    """The last step before uninstalling BUA: the Konami code within
+    KONAMI_SECONDS, or it goes back to the info screen. A wrong button
+    starts the code over (a wrong Up counts as the first step); the time
+    keeps running."""
+    def __init__(self):
+        self.progress = 0
+        self.started_at = pygame.time.get_ticks()
+        self.finished = False
+
+    def _presses(self, events) -> List[str]:
+        presses = []
+        analog_v, analog_h = process_analog_navigation(events)
+        if analog_v:
+            presses.append("UP" if analog_v == -1 else "DOWN")
+        if analog_h:
+            presses.append("LEFT" if analog_h == -1 else "RIGHT")
+        keys = {
+            pygame.K_UP: "UP", pygame.K_DOWN: "DOWN", pygame.K_LEFT: "LEFT", pygame.K_RIGHT: "RIGHT",
+            # Keyboard B/A/Start as the app shows them (Esc/Enter/Space), or the letters
+            pygame.K_ESCAPE: "B", pygame.K_b: "B",
+            pygame.K_RETURN: "A", pygame.K_KP_ENTER: "A", pygame.K_a: "A",
+            pygame.K_SPACE: "START",
+        }
+        for e in events:
+            if e.type == pygame.QUIT:
+                clean_exit(0)
+            if e.type == pygame.KEYDOWN:
+                presses.append(keys.get(e.key, "OTHER"))
+            if e.type == pygame.JOYHATMOTION:
+                x, y = e.value
+                if y == 1:
+                    presses.append("UP")
+                elif y == -1:
+                    presses.append("DOWN")
+                elif x == -1:
+                    presses.append("LEFT")
+                elif x == 1:
+                    presses.append("RIGHT")
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button == BTN_A:
+                    presses.append("A")
+                elif e.button == BTN_B:
+                    presses.append("B")
+                elif e.button == BTN_START:
+                    presses.append("START")
+                else:
+                    presses.append("OTHER")
+        return presses
+
+    def handle(self, events):
+        for press in self._presses(events):
+            if press == KONAMI_CODE[self.progress]:
+                self.progress += 1
+                if self.progress == len(KONAMI_CODE):
+                    self.finished = True
+                    pop_screen()  # this screen
+                    pop_screen()  # the info screen
+                    push_screen(BuaUninstallRunScreen())
+                    return
+            else:
+                self.progress = 1 if press == KONAMI_CODE[0] else 0
+
+    def seconds_left(self) -> int:
+        elapsed = pygame.time.get_ticks() - self.started_at
+        return max(0, KONAMI_SECONDS - elapsed // 1000)
+
+    def update(self):
+        if self.finished:
+            return
+        if pygame.time.get_ticks() - self.started_at >= KONAMI_SECONDS * 1000:
+            self.finished = True
+            pop_screen()
+
+    def _step_surface(self, step: str, color) -> pygame.Surface:
+        """An arrow, or the B/A/Start button the way the app draws it for
+        the current controller (icon, keyboard key or text)."""
+        if step in KONAMI_ARROWS:
+            return FONT_BIG.render(KONAMI_ARROWS[step], True, color)
+        if PAD_STYLE == "keyboard":
+            return FONT.render(KEYBOARD_HINT_MAP.get(step, step), True, color)
+        mapped = STYLE_ICON_MAP.get(PAD_STYLE, STYLE_ICON_MAP["generic"]).get(step, step)
+        icon = BUTTON_ICONS.get(mapped) or BUTTON_ICONS.get(step)
+        if icon is not None:
+            h = FONT_BIG.get_height()
+            w = max(1, int(icon.get_width() * (h / (icon.get_height() or 1))))
+            return _scale_and_style_icon(icon, w, h)
+        return FONT.render(step.capitalize(), True, color)
+
+    def draw(self):
+        draw_background(screen)
+        overlay = pygame.Surface((W, H))
+        overlay.set_alpha(180)
+        overlay.fill(BG)
+        screen.blit(overlay, (0, 0))
+
+        dialog_w = min(W - S(120), S(900))
+        dialog_h = min(H - S(120), S(380))
+        dialog_x = (W - dialog_w) // 2
+        dialog_y = (H - dialog_h) // 2
+        dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h)
+        pygame.draw.rect(screen, CARD, dialog_rect, border_radius=15)
+        pygame.draw.rect(screen, BUA_UNINSTALL_RED, dialog_rect, width=3, border_radius=15)
+
+        draw_text(screen, t("uninstall_bua"), FONT_BIG, FG, (dialog_x + S(30), dialog_y + S(30)))
+        y = dialog_y + S(90)
+        for ln in wrap(t("uninstall_bua_code"), dialog_w - S(60), FONT):
+            draw_text(screen, ln, FONT, FG, (dialog_x + S(30), y))
+            y += S(30)
+
+        # The code, with the steps entered so far highlighted
+        steps = [self._step_surface(step, FG if i < self.progress else MUTED)
+                 for i, step in enumerate(KONAMI_CODE)]
+        gap = S(10)
+        row_h = max(s.get_height() for s in steps)
+        cells = [max(s.get_width() + S(12), row_h) for s in steps]
+        x = dialog_x + (dialog_w - sum(cells) - gap * (len(steps) - 1)) // 2
+        y += S(30)
+        for i, (surf, cell_w) in enumerate(zip(steps, cells)):
+            if i < self.progress:
+                box = pygame.Rect(x, y - S(4), cell_w, row_h + S(8))
+                pygame.draw.rect(screen, ACCENT, box, border_radius=6)
+            screen.blit(surf, (x + (cell_w - surf.get_width()) // 2, y + (row_h - surf.get_height()) // 2))
+            x += cell_w + gap
+
+        left = t("uninstall_bua_time_left").format(seconds=self.seconds_left())
+        draw_text(screen, left, FONT, MUTED, (dialog_x + S(30), dialog_y + dialog_h - S(50)))
+
+
+class BuaUninstallRunScreen(RunListScreen):
+    """Runs the BUA uninstall, which can't be stopped or left while it runs.
+    When BUA is gone, BUA closes after OK. When the uninstall failed, it says
+    so; the log is on this screen (X), and B then goes back to Settings."""
+    def __init__(self):
+        super().__init__([("BUA (Uninstall)", BUA_UNINSTALL_CMD)], title=t("uninstall_bua"))
+        self.reported = False
+
+    def handle(self, events):
+        if self.all_finished:
+            return super().handle(events)
+        # Only the log view works while it runs; B does nothing, and Back
+        # doesn't open Settings here (see the main loop).
+        for e in events:
+            if e.type == pygame.QUIT:
+                clean_exit(0)
+            if (e.type == pygame.KEYDOWN and e.key == pygame.K_x) or \
+               (e.type == pygame.JOYBUTTONDOWN and e.button == BTN_X):
+                self.show_log = not self.show_log
+
+    def update(self):
+        super().update()
+        if self.all_finished and not self.reported:
+            self.reported = True
+            if any(os.path.exists(p) for p in BUA_UNINSTALL_CHECK):
+                push_screen(InfoDialog(t("uninstall_bua"), [t("uninstall_bua_failed")]))
+            else:
+                push_screen(InfoDialog(t("uninstall_bua"), [t("uninstall_bua_done")],
+                                       on_close=lambda: clean_exit(0)))
+
+
 # Global GitHub cache that persists across UpdaterScreen instances
 # This prevents "unknown API error" when re-entering the updater
 GITHUB_CACHE: Dict[str, tuple] = {}  # {app: (status, needs_update, detail)}
@@ -4421,14 +4633,20 @@ SCREENS: List[BaseScreen] = []
 INSTALL_QUEUE: List[Tuple[str, str]] = []  # Global queue for installs
 SELECTED_APPS: Dict[str, bool] = {}  # Global selections that persist across category navigation
 
+def get_settings_items() -> List[Tuple[str, str]]:
+    """Settings items with current language translations"""
+    return [
+        (t("controller_layout"), t("controller_layout_desc")),
+        (t("configure_buttons"), t("configure_buttons_desc")),
+        (t("language"), t("language_desc")),
+        (t("cards_per_page"), t("cards_per_page_desc")),
+        (t("uninstall_bua"), t("uninstall_bua_desc")),
+    ]
+
+
 class SettingsScreen(BaseScreen):
     def __init__(self):
-        self.items = [
-            (t("controller_layout"), t("controller_layout_desc")),
-            (t("configure_buttons"), t("configure_buttons_desc")),
-            (t("language"), t("language_desc")),
-            (t("cards_per_page"), t("cards_per_page_desc")),
-        ]
+        self.items = get_settings_items()
         self.idx = 0
 
     def handle(self, events):
@@ -4475,6 +4693,8 @@ class SettingsScreen(BaseScreen):
             push_screen(LanguageScreen())
         elif name == t("cards_per_page"):
             push_screen(CardsPerPageScreen())
+        elif name == t("uninstall_bua"):
+            push_screen(BuaUninstallInfoScreen())
 
     def draw(self):
         draw_background(screen)
@@ -4489,14 +4709,15 @@ class SettingsScreen(BaseScreen):
         gap = S(6)
         spacing = S(12)
         for i, (name, desc) in enumerate(self.items):
-            name_img = FONT.render(name, True, FG)
+            danger = name == t("uninstall_bua")
+            name_img = FONT.render(name, True, BUA_UNINSTALL_RED if danger else FG)
             desc_img = FONT_SMALL.render(desc, True, MUTED) if desc else None
             content_h = name_img.get_height() + ((gap + desc_img.get_height()) if desc_img else 0)
             rect_h = max(S(60), content_h + pad_y * 2)
             rect = pygame.Rect(card_x, y, card_w, rect_h)
             pygame.draw.rect(screen, CARD, rect, border_radius=10)
             if i == self.idx:
-                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=10)
+                pygame.draw.rect(screen, BUA_UNINSTALL_RED if danger else SELECT, rect, width=3, border_radius=10)
             nx = rect.x + S(14)
             ny = rect.y + pad_y
             screen.blit(name_img, (nx, ny))
@@ -4657,12 +4878,7 @@ class LanguageScreen(BaseScreen):
                     screen.stats = screen.calculate_stats()
             elif isinstance(screen, SettingsScreen):
                 # Refresh settings items with new translations
-                screen.items = [
-                    (t("controller_layout"), t("controller_layout_desc")),
-                    (t("configure_buttons"), t("configure_buttons_desc")),
-                    (t("language"), t("language_desc")),
-                    (t("resolution"), t("resolution_desc")),
-                ]
+                screen.items = get_settings_items()
 
         msg = [f"{t('language')}: {native}"]
         push_screen(InfoDialog(t("settings_title"), msg))
@@ -5048,7 +5264,8 @@ def main():
         if open_settings:
             try:
                 top = SCREENS[-1] if SCREENS else None
-                if not isinstance(top, (SettingsScreen, ControllerLayoutScreen)):
+                # Not over Settings itself, or over a running BUA uninstall
+                if not isinstance(top, (SettingsScreen, ControllerLayoutScreen, BuaUninstallRunScreen)):
                     push_screen(SettingsScreen())
                 # Filter out Back button events so Settings doesn't immediately close
                 events = [e for e in events if not (

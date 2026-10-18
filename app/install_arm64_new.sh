@@ -7,6 +7,7 @@ BATOCERA_ADDONS_URL="https://raw.githubusercontent.com/batocera-unofficial-addon
 BATOCERA_ADDONS_LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons.png"
 BATOCERA_ADDONS_WHEEL_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/extra/batocera-unofficial-addons-wheel.png"
 XMLSTARLET_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/app/xmlstarlet-arm64"  # URL for xmlstarlet
+BUA_CLI_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/bua_cli.py"  # URL for the bua command-line tool
 
 
 # Destination path to download the script
@@ -81,6 +82,22 @@ echo "Creating symlink for xmlstarlet in /usr/bin..."
 ln -sf "$XMLSTARLET_DEST" /usr/bin/xmlstarlet
 
 echo "xmlstarlet has been installed and symlinked to /usr/bin."
+
+# Step: Download the bua command-line tool. symlink_manager links it into
+# /usr/bin at boot; link it now so it works straight away.
+BUA_CLI_DEST="/userdata/system/add-ons/bua/bin/bua"
+echo "Downloading the bua command-line tool from ${BUA_CLI_URL}..."
+mkdir -p "$(dirname "${BUA_CLI_DEST}")"
+curl -fLs -o "${BUA_CLI_DEST}" "${BUA_CLI_URL}"
+
+if [ ! -s "${BUA_CLI_DEST}" ]; then
+    echo "Failed to download the bua command-line tool. Exiting."
+    exit 1
+fi
+
+chmod +x "${BUA_CLI_DEST}"
+ln -sf "${BUA_CLI_DEST}" /usr/bin/bua
+
 mkdir -p "/userdata/roms/ports/images"
 # Step 10: Refresh the Ports menu
 echo "Refreshing Ports menu..."

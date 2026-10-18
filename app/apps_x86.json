@@ -1,0 +1,1238 @@
+{
+  "generated_from": "app/bua_installerx86.py",
+  "changelog": "- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added ps3i - Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added AzaharPlus - selectable 3DS emulator option alongside Azahar\n- Replaced StepMania with ITGMania - ITG-focused rhythm game with bundled songs\n- Desktop: wallpaper and icon layout now preserved on update\n- Desktop: improved DRL migration and palette support\n- NVIDIAPatch: fixed GLX chain on host",
+  "apps": [
+    {
+      "name": "7zip",
+      "description": "A free and open-source file archiver",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/7zip/7zip.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/7zip/7zip_uninstall.sh | bash"
+    },
+    {
+      "name": "Alpine XFCE (Webtop)",
+      "description": "Alpine XFCE desktop in browser (noVNC)",
+      "categories": [
+        "Docker Menu"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/alpinexfce.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/alpinexfce_uninstall.sh | bash"
+    },
+    {
+      "name": "AM2R",
+      "description": "Another Metroid 2 Remake - Fan remake",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/am2r.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/am2r_uninstall.sh | bash"
+    },
+    {
+      "name": "Amazon Luna",
+      "description": "Amazon Luna game streaming client.",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/amazonluna/amazonluna.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/amazonluna/amazonluna_uninstall.sh | bash"
+    },
+    {
+      "name": "Ambermoon",
+      "description": "Ambermoon.net, a port of the classic",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/ambermoon/ambermoon.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/ambermoon/ambermoon_uninstall.sh | bash"
+    },
+    {
+      "name": "Android",
+      "description": "Android System for Batocera (EXPERIMENTAL).",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/Android/Install_Android.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/Android/Install_Android_uninstall.sh | bash"
+    },
+    {
+      "name": "Arcade Manager",
+      "description": "Manage arcade ROMs and games.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/arcademanager/arcademanager.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/arcademanager/arcademanager_uninstall.sh | bash"
+    },
+    {
+      "name": "Arch KDE (Webtop)",
+      "description": "Arch Linux desktop in browser (noVNC)",
+      "categories": [
+        "Docker Menu"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/archkde.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/archkde_uninstall.sh | bash"
+    },
+    {
+      "name": "Armagetron",
+      "description": "Tron-style light cycle game.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/armagetron/armagetron.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/armagetron/armagetron_uninstall.sh | bash"
+    },
+    {
+      "name": "Arr-In-One",
+      "description": "All-in-one media management stack",
+      "categories": [
+        "Docker Menu"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/arrinone.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/arrinone_uninstall.sh | bash"
+    },
+    {
+      "name": "Arr-In-One Downloaders",
+      "description": "Downloaders companion stack",
+      "categories": [
+        "Docker Menu"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/arrdownloaders.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/arrdownloaders_uninstall.sh | bash"
+    },
+    {
+      "name": "Assault Cube",
+      "description": "Multiplayer first-person shooter game.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/assaultcube/assaultcube.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/assaultcube/assaultcube_uninstall.sh | bash"
+    },
+    {
+      "name": "AzaharPlus",
+      "description": "AzaharPlus 3DS emulator - selectable alongside Azahar in EmulationStation.",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/azaharplus/azaharplus.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/azaharplus/azaharplus_uninstall.sh | bash"
+    },
+    {
+      "name": "Bottles",
+      "description": "Run Windows software on Linux",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/bottles/bottles.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/bottles/bottles_uninstall.sh | bash"
+    },
+    {
+      "name": "Brave",
+      "description": "Privacy-focused Brave browser.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/brave/brave.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/brave/brave_uninstall.sh | bash"
+    },
+    {
+      "name": "Bridge",
+      "description": "Chart downloader for CloneHero/YARG",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/bridge/bridge.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/bridge/bridge_uninstall.sh | bash"
+    },
+    {
+      "name": "CasaOS",
+      "description": "Simple home server UI and app store",
+      "categories": [
+        "Docker Menu"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/casaos.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/casaos_uninstall.sh | bash"
+    },
+    {
+      "name": "Celeste",
+      "description": "Indie platformer classic",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/celeste.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/celeste_uninstall.sh | bash"
+    },
+    {
+      "name": "Celeste 64",
+      "description": "Free 3D platformer (Celeste)",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/celeste64/celeste64.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/celeste64/celeste64_uninstall.sh | bash"
+    },
+    {
+      "name": "chdress",
+      "description": "GUI tool to convert any disc image to/from CHD format",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -fsSL https://chdress.8101987.xyz/install.sh | sh",
+      "uninstall": "curl -Ls https://chdress.8101987.xyz/install_uninstall.sh | bash"
+    },
+    {
+      "name": "Chiaki",
+      "description": "PS4/PS5 Remote Play client.",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/chiaki/chiaki.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/chiaki/chiaki_uninstall.sh | bash"
+    },
+    {
+      "name": "Chrome",
+      "description": "Google Chrome web browser.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome_uninstall.sh | bash"
+    },
+    {
+      "name": "CLI Tools",
+      "description": ">=V40! Various CLI tools including Docker, ZSH, Git etc.",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/cli.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/cli_uninstall.sh | bash"
+    },
+    {
+      "name": "Clone Hero",
+      "description": "Guitar Hero clone for Batocera.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/clonehero/clonehero.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/clonehero/clonehero_uninstall.sh | bash"
+    },
+    {
+      "name": "Conty",
+      "description": "Standalone Linux distro container.",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/conty/conty.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/conty/conty_uninstall.sh | bash"
+    },
+    {
+      "name": "Crash Bandicoot - Back In Time",
+      "description": "Fan game",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/cbbit.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/cbbit_uninstall.sh | bash"
+    },
+    {
+      "name": "Crunchyroll",
+      "description": "Anime-focused streaming service",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/crunchyroll/crunchyroll.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/crunchyroll/crunchyroll_uninstall.sh | bash"
+    },
+    {
+      "name": "CS Portable",
+      "description": "Fan-made portable Counter-Strike.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/csportable/csportable.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/csportable/csportable_uninstall.sh | bash"
+    },
+    {
+      "name": "Custom Wine",
+      "description": "Download Wine/Proton versions",
+      "categories": [],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/wine-custom/wine.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/wine-custom/wine_uninstall.sh | bash"
+    },
+    {
+      "name": "Dark Mode",
+      "description": "Toggle F1 dark mode",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/dark/dark.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/dark/dark_uninstall.sh | bash"
+    },
+    {
+      "name": "Desktop",
+      "description": "Desktop mode (Ports)",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/desktop/desktop.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/desktop/desktop_uninstall.sh | bash"
+    },
+    {
+      "name": "Desktop For Batocera",
+      "description": "Desktop for batocera. (Native)",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/Desktop_for_Batocera/Install_Desktop.sh | bash",
+      "uninstall": "/userdata/system/configs/bat-drl/Remover_Desktop.sh"
+    },
+    {
+      "name": "Disney Plus",
+      "description": "Disney+ streaming app for Batocera.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/disneyplus/disneyplus.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/disneyplus/disneyplus_uninstall.sh | bash"
+    },
+    {
+      "name": "Docker",
+      "description": "Docker/Podman/Portainer AIO.",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/docker.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/docker_uninstall.sh | bash"
+    },
+    {
+      "name": "Donkey Kong Advanced",
+      "description": "Fan remake/port",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/dka.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/dka_uninstall.sh | bash"
+    },
+    {
+      "name": "EGGNOGG+",
+      "description": "Award-winning 2-player sword fighting game.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/eggnoggplus/eggnoggplus.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/eggnoggplus/eggnoggplus_uninstall.sh | bash"
+    },
+    {
+      "name": "Emby",
+      "description": "Media server and streaming",
+      "categories": [
+        "Docker Menu"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/emby.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/emby_uninstall.sh | bash"
+    },
+    {
+      "name": "Endless Sky",
+      "description": "Space exploration game.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/endlesssky/endlesssky.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/endlesssky/endlesssky_uninstall.sh | bash"
+    },
+    {
+      "name": "Everest",
+      "description": "Celeste Mod Loader",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/everest/everest.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/everest/everest_uninstall.sh | bash"
+    },
+    {
+      "name": "Extras",
+      "description": "Various scripts, incl. motion support.",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/extra/extra.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/extra/extra_uninstall.sh | bash"
+    },
+    {
+      "name": "F1",
+      "description": "Ports shortcut to file manager",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/f1/f1.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/f1/f1_uninstall.sh | bash"
+    },
+    {
+      "name": "Fightcade",
+      "description": "*UPDATED* Play classic arcade games online.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/fightcade/fightcade.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/fightcade/fightcade_uninstall.sh | bash"
+    },
+    {
+      "name": "FileZilla",
+      "description": "Cross-platform FTP client",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/filezilla/filezilla.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/filezilla/filezilla_uninstall.sh | bash"
+    },
+    {
+      "name": "Firefox",
+      "description": "Mozilla Firefox browser.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/firefox/firefox.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/firefox/firefox_uninstall.sh | bash"
+    },
+    {
+      "name": "Flathub",
+      "description": "Browse different Flatpak applications.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/flathub/flathub.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/flathub/flathub_uninstall.sh | bash"
+    },
+    {
+      "name": "Free Droid RPG",
+      "description": "Open-source role-playing game for Batocera.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/freedroidrpg/freedroidrpg.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/freedroidrpg/freedroidrpg_uninstall.sh | bash"
+    },
+    {
+      "name": "Freej2me",
+      "description": "J2ME classic game emulator.",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/Freej2me/Install_j2me.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/Freej2me/Install_j2me_uninstall.sh | bash"
+    },
+    {
+      "name": "FreeTube",
+      "description": "Privacy-minded YouTube client",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/freetube/freetube.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/freetube/freetube_uninstall.sh | bash"
+    },
+    {
+      "name": "Gamescope",
+      "description": "Full-screen gaming compositor with smoother performance, scaling & low-latency control.",
+      "categories": [],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/gamescope/gamescope.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/gamescope/gamescope_uninstall.sh | bash"
+    },
+    {
+      "name": "GParted",
+      "description": "Linux partition manager",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/gparted/gparted.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/gparted/gparted_uninstall.sh | bash"
+    },
+    {
+      "name": "Greenlight",
+      "description": "Client for xCloud and Xbox streaming.",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/greenlight/greenlight.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/greenlight/greenlight_uninstall.sh | bash"
+    },
+    {
+      "name": "HBO Max",
+      "description": "HBO Max streaming app",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/hbomax/hbomax.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/hbomax/hbomax_uninstall.sh | bash"
+    },
+    {
+      "name": "Heroic",
+      "description": "Epic, GOG, and Amazon Games launcher.",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/heroic/heroic.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/heroic/heroic_uninstall.sh | bash"
+    },
+    {
+      "name": "Input Leap",
+      "description": "Share Keyboard and mouse with other OSes.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/inputleap/inputleap.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/inputleap/inputleap_uninstall.sh | bash"
+    },
+    {
+      "name": "IPTV Nator",
+      "description": "IPTV client for watching live TV.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/iptvnator/iptvnator.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/iptvnator/iptvnator_uninstall.sh | bash"
+    },
+    {
+      "name": "Itch.io",
+      "description": "Indy Game Marketplace",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/itchio/itch.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/itchio/itch_uninstall.sh | bash"
+    },
+    {
+      "name": "ITGMania",
+      "description": "In The Groove-focused rhythm game, fork of StepMania with ITG improvements.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/itgmania/itgmania.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/itgmania/itgmania_uninstall.sh | bash"
+    },
+    {
+      "name": "Java Runtime",
+      "description": "Install the Java Runtime on your batocera.",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/java/java.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/java/java_uninstall.sh | bash"
+    },
+    {
+      "name": "JDownloader",
+      "description": "Download manager with background service",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/jdownloader/jdownloader.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/jdownloader/jdownloader_uninstall.sh | bash"
+    },
+    {
+      "name": "Jellyfin",
+      "description": "Open-source media server",
+      "categories": [
+        "Docker Menu"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/jellyfin.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/jellyfin_uninstall.sh | bash"
+    },
+    {
+      "name": "Jellyfin Player",
+      "description": "Jellyfin media player client with controller support",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/jellyfin-client/jellyfin-client.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/jellyfin-client/jellyfin-client_uninstall.sh | bash"
+    },
+    {
+      "name": "Luanti",
+      "description": "Voxel sandbox (Minecraft-like)",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/luanti/luanti.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/luanti/luanti_uninstall.sh | bash"
+    },
+    {
+      "name": "Lutris",
+      "description": "Open source game manager",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/lutris/lutris.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/lutris/lutris_uninstall.sh | bash"
+    },
+    {
+      "name": "Maldita Castilla",
+      "description": "Arcade action platformer",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/castilla.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/castilla_uninstall.sh | bash"
+    },
+    {
+      "name": "Minecraft",
+      "description": "Minecraft: Java or Bedrock Edition.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/minecraft/minecraft.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/minecraft/minecraft_uninstall.sh | bash"
+    },
+    {
+      "name": "Modern Modern Chef",
+      "description": "Indie title",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/mmc.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/mmc_uninstall.sh | bash"
+    },
+    {
+      "name": "Moonlight",
+      "description": "Stream PC games on Batocera.",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/moonlight/moonlight.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/moonlight/moonlight_uninstall.sh | bash"
+    },
+    {
+      "name": "Mubi",
+      "description": "Curated cinema platform",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/mubi/mubi.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/mubi/mubi_uninstall.sh | bash"
+    },
+    {
+      "name": "Nazi Zombies Portable",
+      "description": "Classic Nazi Zombies on modern platforms",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/nzp/nzp.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/nzp/nzp_uninstall.sh | bash"
+    },
+    {
+      "name": "Netflix",
+      "description": "Netflix streaming app for Batocera.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/netflix/netflix.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/netflix/netflix_uninstall.sh | bash"
+    },
+    {
+      "name": "NetWatch",
+      "description": "Shows which devices connect to Batocera, with on-screen alerts and a web dashboard.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/netwatch/netwatch.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/netwatch/netwatch_uninstall.sh | bash"
+    },
+    {
+      "name": "npsget",
+      "description": "Helper to download games, DLCs, updates, themes and avatars from NoPayStation",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -fsSL https://npsget.8101987.xyz | sh",
+      "uninstall": null
+    },
+    {
+      "name": "NVIDIA Clocker",
+      "description": "A CLI/Ports program to overclock NVIDIA GPUs",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -Ls https://raw.githubusercontent.com/nicolai-6/batocera-nvidia-clocker/refs/heads/main/install.sh | bash",
+      "uninstall": "curl -Ls https://raw.githubusercontent.com/nicolai-6/batocera-nvidia-clocker/refs/heads/main/install_uninstall.sh | bash"
+    },
+    {
+      "name": "NVIDIA Patcher",
+      "description": "Enable NVIDIA GPU support on Batocera.",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/nvidiapatch/nvidiapatch.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/nvidiapatch/nvidiapatch_uninstall.sh | bash"
+    },
+    {
+      "name": "OBS",
+      "description": "Streaming and video recording software.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/obs/obs.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/obs/obs_uninstall.sh | bash"
+    },
+    {
+      "name": "OpenRA",
+      "description": "Modernized RTS for Command & Conquer.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/openra/openra.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/openra/openra_uninstall.sh | bash"
+    },
+    {
+      "name": "OpenRGB",
+      "description": "Manage RGB lighting on devices.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/openrgb/openrgb.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/openrgb/openrgb_uninstall.sh | bash"
+    },
+    {
+      "name": "OpenTTD",
+      "description": "Open source clone of Transport Tycoon Deluxe",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/openttd/openttd.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/openttd/openttd_uninstall.sh | bash"
+    },
+    {
+      "name": "Overlay Remove",
+      "description": "Remove the Batocera boot overlay file from /boot/boot/overlay.",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/overlay-remove/overlay-remove.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/overlay-remove/overlay-remove_uninstall.sh | bash"
+    },
+    {
+      "name": "Parsec",
+      "description": "Remote desktop & game streaming",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/parsec/parsec.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/parsec/parsec_uninstall.sh | bash"
+    },
+    {
+      "name": "PeaZip",
+      "description": "Free and open-source file archiver",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/peazip/peazip.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/peazip/peazip_uninstall.sh | bash"
+    },
+    {
+      "name": "Plex",
+      "description": "Plex Media Player",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/plex/plex.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/plex/plex_uninstall.sh | bash"
+    },
+    {
+      "name": "PortMaster",
+      "description": "Download and manage games on handhelds.",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/portmaster/portmaster.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/portmaster/portmaster_uninstall.sh | bash"
+    },
+    {
+      "name": "Prime Video",
+      "description": "Amazon Prime Video streaming app",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/prime/prime.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/prime/prime_uninstall.sh | bash"
+    },
+    {
+      "name": "Prism Launcher",
+      "description": "Open source Minecraft launcher with mod management and multi-instance support.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/prismlauncher/prismlauncher.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/prismlauncher/prismlauncher_uninstall.sh | bash"
+    },
+    {
+      "name": "ps3i",
+      "description": "Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -fsSL https://ps3i.8101987.xyz/install.sh | sh",
+      "uninstall": "curl -Ls https://ps3i.8101987.xyz/install_uninstall.sh | bash"
+    },
+    {
+      "name": "qBittorrent",
+      "description": "Free and open-source BitTorrent client",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/qbittorrent/qbittorrent.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/qbittorrent/qbittorrent_uninstall.sh | bash"
+    },
+    {
+      "name": "QEMU GA",
+      "description": "Guest agent for VMs",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/qga/qga.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/qga/qga_uninstall.sh | bash"
+    },
+    {
+      "name": "Raspberry Pi Imager",
+      "description": "Flash OS images to USB and SD cards.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/rpi/rpi.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/rpi/rpi_uninstall.sh | bash"
+    },
+    {
+      "name": "RGSX",
+      "description": "Retro Game Sets Xtra. A free, user-friendly ROM downloader for Batocera",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L bit.ly/rgsx-install | sh",
+      "uninstall": null
+    },
+    {
+      "name": "Sandtrix",
+      "description": "Falling sand physics puzzle game",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/sandtrix/sandtrix.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/sandtrix/sandtrix_uninstall.sh | bash"
+    },
+    {
+      "name": "SCP Containment Breach",
+      "description": "SCP Foundation horror survival game",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/scpcontainmentbreach.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/scpcontainmentbreach_uninstall.sh | bash"
+    },
+    {
+      "name": "Secret Maryo Chronicles",
+      "description": "Super Mario-inspired platformer",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/smc.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/smc_uninstall.sh | bash"
+    },
+    {
+      "name": "ShadPS4",
+      "description": "UPDATED 11/11 to ShadPS4Plus | Experimental PS4 streaming client.",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/shadps4plus/shadps4plus.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/shadps4plus/shadps4plus_uninstall.sh | bash"
+    },
+    {
+      "name": "SHRUBNAUT",
+      "description": "Space exploration and mining game",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/shrubnaut.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/shrubnaut_uninstall.sh | bash"
+    },
+    {
+      "name": "Soar",
+      "description": "Soar package manager (integrated with BUA)",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/soar/soar.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/soar/soar_uninstall.sh | bash"
+    },
+    {
+      "name": "Sonic 3D in 2D",
+      "description": "2D demake of Sonic 3D Blast",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/s3d2d.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/s3d2d_uninstall.sh | bash"
+    },
+    {
+      "name": "Sonic Robo Blast 2",
+      "description": "Doom-based Sonic fangame",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/srb2.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/srb2_uninstall.sh | bash"
+    },
+    {
+      "name": "Sonic Time Twisted",
+      "description": "Time-traveling Sonic fan game",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/sttw.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/sttw_uninstall.sh | bash"
+    },
+    {
+      "name": "Sonic Triple Trouble 16bit",
+      "description": "Fan remake",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/stt.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/stt_uninstall.sh | bash"
+    },
+    {
+      "name": "Space Quest 3D",
+      "description": "Fan project tribute",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/sq3d.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/sq3d_uninstall.sh | bash"
+    },
+    {
+      "name": "Spelunky",
+      "description": "Rogue-like platformer",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/spelunky.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/spelunky_uninstall.sh | bash"
+    },
+    {
+      "name": "Spotify",
+      "description": "Spotify music streaming client.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/spotify/spotify.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/spotify/spotify_uninstall.sh | bash"
+    },
+    {
+      "name": "Steam",
+      "description": "NEW BUILD DEC 25 - Steam Big Picture / Desktop",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/steam/steam2.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/steam/steam2_uninstall.sh | bash"
+    },
+    {
+      "name": "Streets of Rage Remake",
+      "description": "Enhanced beat 'em up remake",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/sorr.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/sorr_uninstall.sh | bash"
+    },
+    {
+      "name": "Stremio",
+      "description": "Stremio video streaming app for Batocera.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/stremio/stremio.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/stremio/stremio_uninstall.sh | bash"
+    },
+    {
+      "name": "Sunshine",
+      "description": "Self-hosted game streaming server (host for Moonlight).",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/sunshine/sunshine.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/sunshine/sunshine_uninstall.sh | bash"
+    },
+    {
+      "name": "Super Crate Box",
+      "description": "Fast-paced arcade platformer",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/scb.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/scb_uninstall.sh | bash"
+    },
+    {
+      "name": "Super Mario X",
+      "description": "Fan-made Super Mario tribute",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/supermariox/supermariox.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/supermariox/supermariox_uninstall.sh | bash"
+    },
+    {
+      "name": "Super Smash Bros CMC+",
+      "description": "Fan crossover",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/cmc+.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/cmc+_uninstall.sh | bash"
+    },
+    {
+      "name": "Super Smash Flash 2",
+      "description": "Fan fighting game",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/ssf2.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/ssf2_uninstall.sh | bash"
+    },
+    {
+      "name": "SuperTux",
+      "description": "2D platformer starring Tux the Linux mascot.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/supertux/supertux.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/supertux/supertux_uninstall.sh | bash"
+    },
+    {
+      "name": "SuperTuxKart",
+      "description": "Free and open-source kart racer.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/supertuxkart/supertuxkart.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/supertuxkart/supertuxkart_uninstall.sh | bash"
+    },
+    {
+      "name": "Switch",
+      "description": "Nintendo Switch emulator for Batocera.",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/switch/switch.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/switch/switch_uninstall.sh | bash"
+    },
+    {
+      "name": "Tailscale",
+      "description": "VPN service for secure Batocera connections.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/tailscale/tailscale.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/tailscale/tailscale_uninstall.sh | bash"
+    },
+    {
+      "name": "Telegraf",
+      "description": "Server agent for collecting and reporting metrics.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/telegraf/telegraf.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/telegraf/telegraf_uninstall.sh | bash"
+    },
+    {
+      "name": "Tidal",
+      "description": "HiFi music streaming",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/tidal/tidal.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/tidal/tidal_uninstall.sh | bash"
+    },
+    {
+      "name": "TMNT Rescue Palooza",
+      "description": "Beat 'em up fan game",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/tmntrp.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/tmntrp_uninstall.sh | bash"
+    },
+    {
+      "name": "Twitch",
+      "description": "Twitch streaming app for Batocera.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/twitch/twitch.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/twitch/twitch_uninstall.sh | bash"
+    },
+    {
+      "name": "Ubuntu MATE (Webtop)",
+      "description": "Ubuntu MATE desktop in browser (noVNC)",
+      "categories": [
+        "Docker Menu"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/ubuntumate.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/ubuntumate_uninstall.sh | bash"
+    },
+    {
+      "name": "UltraStar",
+      "description": "UltraStar Deluxe karaoke",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/usdeluxe/usdeluxe.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/usdeluxe/usdeluxe_uninstall.sh | bash"
+    },
+    {
+      "name": "UmbrelOS",
+      "description": "Self-hosted OS with app marketplace",
+      "categories": [
+        "Docker Menu"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/umbrelos.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/docker/umbrelos_uninstall.sh | bash"
+    },
+    {
+      "name": "Unreal Tournament",
+      "description": "Classic competitive first-person shooter",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/ut.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/ut_uninstall.sh | bash"
+    },
+    {
+      "name": "VClean",
+      "description": "Service to clean the Batocera version string (removes extra flags)",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/vclean/vclean.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/vclean/vclean_uninstall.sh | bash"
+    },
+    {
+      "name": "Vesktop",
+      "description": "Discord client for Batocera.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/vesktop/vesktop.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/vesktop/vesktop_uninstall.sh | bash"
+    },
+    {
+      "name": "VLC",
+      "description": "VLC media player",
+      "categories": [],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/vlc/vlc.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/vlc/vlc_uninstall.sh | bash"
+    },
+    {
+      "name": "Warzone 2100",
+      "description": "Real-time strategy and tactics game.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/warzone2100/warzone2100.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/warzone2100/warzone2100_uninstall.sh | bash"
+    },
+    {
+      "name": "Winconfig (Windows Game Fix)",
+      "description": "Tool to simplify dependencies/config for Windows games (DRL Edition)",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/Winconfig_Windows_Game_Fix/Install_Winconfig.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/Winconfig_Windows_Game_Fix/Install_Winconfig_uninstall.sh | bash"
+    },
+    {
+      "name": "Wine Dependencies x64",
+      "description": "Install Windows x64 dependencies with Wine on Batocera.",
+      "categories": [],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/winemanager/install_redist_dependencies64.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/winemanager/install_redist_dependencies64_uninstall.sh | bash"
+    },
+    {
+      "name": "Wine Dependencies x86",
+      "description": "Install Windows x86 dependencies with Wine on Batocera.",
+      "categories": [],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/winemanager/install_redist_dependencies32.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/winemanager/install_redist_dependencies32_uninstall.sh | bash"
+    },
+    {
+      "name": "Wine Manager",
+      "description": "Manage Windows games with Wine on Batocera.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/winemanager/winemanager.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/winemanager/winemanager_uninstall.sh | bash"
+    },
+    {
+      "name": "X11VNC",
+      "description": "Remote control over VNC",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/x11vnc/x11vnc.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/x11vnc/x11vnc_uninstall.sh | bash"
+    },
+    {
+      "name": "Xonotic",
+      "description": "Fast-paced open-source arena shooter.",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/xonotic/xonotic.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/xonotic/xonotic_uninstall.sh | bash"
+    },
+    {
+      "name": "YARG",
+      "description": "Yet Another Rhythm Game",
+      "categories": [
+        "Games"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/yarg/yarg.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/yarg/yarg_uninstall.sh | bash"
+    },
+    {
+      "name": "YouTube",
+      "description": "YouTube client for Batocera.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/youtubetv.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/youtubetv_uninstall.sh | bash"
+    },
+    {
+      "name": "Zelda - Dungeons of Infinity",
+      "description": "Zelda-inspired project",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/zeldadoi.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/zeldadoi_uninstall.sh | bash"
+    },
+    {
+      "name": "Zelda 2 PC Remake",
+      "description": "Fan remake of Zelda II",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/zelda2.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/zelda2_uninstall.sh | bash"
+    },
+    {
+      "name": "Zero-K",
+      "description": "Free multiplayer real-time strategy game",
+      "categories": [
+        "Windows Freeware"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/zerok.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/zerok_uninstall.sh | bash"
+    }
+  ]
+}
