@@ -3,6 +3,7 @@
 | File | Last Commit Date |
 |------|------------------|
 | `.dep/mousemove.sh` | 2025-05-22 18:53:29 +0100 |
+| `.github/scripts/generate_apps_json.py` | 2026-10-18 16:05:09 -0400 |
 | `.github/scripts/update_script_dates.py` | 2025-11-27 21:41:34 +0000 |
 | `7zip/7zip.sh` | 2025-05-22 17:09:18 +0100 |
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -12,6 +13,7 @@
 | `Freej2me/Install_j2me-old .sh` | 2025-03-29 15:06:00 -0300 |
 | `Freej2me/Install_j2me-old _uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Freej2me/Install_j2me.sh` | 2026-05-04 21:46:58 +0100 |
+| `Freej2me/Install_j2me_uninstall.sh` | 2026-10-18 16:20:52 -0400 |
 | `Winconfig_Windows_Game_Fix/Install_Winconfig.sh` | 2026-05-04 21:46:58 +0100 |
 | `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config - old.sh` | 2025-05-14 19:17:39 -0300 |
 | `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config.sh` | 2025-05-27 17:37:55 -0300 |
@@ -26,16 +28,17 @@
 | `app/BatoceraUnofficialAddons_ARM64.sh` | 2025-05-22 17:15:31 +0100 |
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2026-07-02 16:31:40 -0300 |
-| `app/bua_installerarm64.py` | 2026-09-28 11:31:37 -0300 |
-| `app/bua_installerx86.py` | 2026-10-13 16:18:44 -0400 |
+| `app/bua_cli.py` | 2026-10-18 16:05:09 -0400 |
+| `app/bua_installerarm64.py` | 2026-10-18 16:10:27 -0400 |
+| `app/bua_installerx86.py` | 2026-10-18 16:10:27 -0400 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
 | `app/install_arm64.sh` | 2025-05-22 17:17:22 +0100 |
-| `app/install_arm64_new.sh` | 2026-05-10 23:34:28 +0100 |
+| `app/install_arm64_new.sh` | 2026-10-18 16:05:09 -0400 |
 | `app/install_new.sh` | 2025-11-20 03:09:00 +0000 |
 | `app/install_x86.sh` | 2025-05-22 17:17:37 +0100 |
-| `app/install_x86_new.sh` | 2026-05-10 23:34:28 +0100 |
+| `app/install_x86_new.sh` | 2026-10-18 16:05:09 -0400 |
 | `app/rd.sh` | 2025-04-01 03:36:47 +0100 |
 | `app/symlinks.sh` | 2025-12-11 02:28:52 +0000 |
 | `app/templates/desktop_template.sh` | 2025-01-06 01:25:01 +0000 |
@@ -45,12 +48,13 @@
 | `app/templates/linux_template.sh` | 2025-11-25 02:39:23 +0000 |
 | `app/templates/local_template.sh` | 2025-01-06 02:39:18 +0000 |
 | `app/templates/template.sh` | 2025-01-06 02:39:00 +0000 |
+| `app/uninstall.sh` | 2026-10-18 16:05:09 -0400 |
 | `app/updater.sh` | 2025-05-22 17:18:32 +0100 |
 | `app/usercustomize.py` | 2026-05-10 23:34:28 +0100 |
 | `arcademanager/arcademanager.sh` | 2025-05-22 17:18:56 +0100 |
 | `arcademanager/arcademanager_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `armagetron/armagetron.sh` | 2025-05-22 17:19:36 +0100 |
-| `armagetron/armagetron_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `armagetron/armagetron_uninstall.sh` | 2026-10-18 16:06:36 -0400 |
 | `assaultcube/assaultcube.sh` | 2026-04-17 14:03:29 +0100 |
 | `assaultcube/assaultcube_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `azaharplus/azaharplus.sh` | 2026-08-18 18:46:22 +0100 |
@@ -82,7 +86,7 @@
 | `desktop/desktop.sh` | 2025-11-14 02:14:03 +0000 |
 | `desktop/desktop_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `desktop/ri-desktop.sh` | 2025-11-27 17:50:34 +0000 |
-| `desktop/ri-desktop_uninstall.sh` | 2025-11-27 17:47:08 +0000 |
+| `desktop/ri-desktop_uninstall.sh` | 2026-10-18 16:27:26 -0400 |
 | `disneyplus/disneyplus.sh` | 2025-05-22 17:26:34 +0100 |
 | `disneyplus/disneyplus_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `docker/alpinexfce.sh` | 2025-05-22 17:29:01 +0100 |
@@ -94,10 +98,11 @@
 | `docker/arrinone.sh` | 2025-05-22 17:30:01 +0100 |
 | `docker/arrinone_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `docker/casaos.sh` | 2025-05-22 17:32:50 +0100 |
-| `docker/casaos_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `docker/casaos_uninstall.sh` | 2026-10-18 16:10:09 -0400 |
 | `docker/cli.sh` | 2025-11-20 16:56:24 +0000 |
 | `docker/cli_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `docker/docker.sh` | 2025-11-14 01:55:36 +0000 |
+| `docker/docker_uninstall.sh` | 2026-10-18 16:10:56 -0400 |
 | `docker/emby.sh` | 2025-05-22 17:28:36 +0100 |
 | `docker/emby_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `docker/jellyfin.sh` | 2025-05-22 17:33:34 +0100 |
@@ -106,14 +111,14 @@
 | `docker/ubuntumate.sh` | 2025-05-22 17:41:07 +0100 |
 | `docker/ubuntumate_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `docker/umbrelos.sh` | 2025-05-22 17:42:21 +0100 |
-| `docker/umbrelos_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `docker/umbrelos_uninstall.sh` | 2026-10-18 16:09:09 -0400 |
 | `eggnoggplus/eggnoggplus.sh` | 2025-11-25 02:39:23 +0000 |
 | `endlesssky/endlesssky.sh` | 2026-04-17 14:03:29 +0100 |
 | `endlesssky/endlesssky_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `everest/everest.sh` | 2025-11-25 15:20:38 +0000 |
 | `everest/everest_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `extra/extra.sh` | 2025-05-22 17:48:53 +0100 |
-| `extra/extras_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `extra/extra_uninstall.sh` | 2026-10-18 16:11:28 -0400 |
 | `f1/f1-1.sh` | 2025-06-21 01:10:15 -0300 |
 | `f1/f1-1_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `f1/f1-old1.sh` | 2025-06-21 01:30:01 -0300 |
@@ -125,8 +130,9 @@
 | `filezilla/filezilla.sh` | 2025-05-22 17:53:05 +0100 |
 | `filezilla/filezilla_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `firefox/firefox-arm64.sh` | 2025-05-22 17:52:19 +0100 |
-| `firefox/firefox-arm64_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `firefox/firefox-arm64_uninstall.sh` | 2026-10-18 16:23:44 -0400 |
 | `firefox/firefox.sh` | 2026-05-04 23:50:50 +0100 |
+| `firefox/firefox_uninstall.sh` | 2026-10-18 16:23:44 -0400 |
 | `flashbox/flashbox.sh` | 2025-05-22 17:54:17 +0100 |
 | `flathub/flathub.sh` | 2025-07-29 17:12:59 -0400 |
 | `flathub/flathub_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -161,8 +167,8 @@
 | `itgmania/itgmania_uninstall.sh` | 2026-05-11 01:34:11 +0100 |
 | `java/java - Copia.sh` | 2025-01-07 22:20:11 -0300 |
 | `java/java-jdk19.sh` | 2025-11-13 23:41:52 +0000 |
-| `java/java.sh` | 2025-05-22 17:58:43 +0100 |
-| `java/jre_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `java/java.sh` | 2026-10-18 16:22:17 -0400 |
+| `java/java_uninstall.sh` | 2026-10-18 16:21:51 -0400 |
 | `jdownloader/jdownloader.sh` | 2025-11-25 16:18:33 +0000 |
 | `jdownloader/jdownloader_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `jellyfin-client/jellyfin-client.sh` | 2026-04-20 03:12:15 +0100 |
@@ -186,17 +192,17 @@
 | `mubi/mubi_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `netflix/netflix.sh` | 2025-05-22 18:04:11 +0100 |
 | `netflix/netflix_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `netwatch/netwatch-service.sh` | 2026-10-13 16:18:44 -0400 |
-| `netwatch/netwatch.py` | 2026-10-13 16:18:44 -0400 |
-| `netwatch/netwatch.sh` | 2026-10-13 16:18:44 -0400 |
-| `netwatch/netwatch_uninstall.sh` | 2026-10-13 16:18:44 -0400 |
+| `netwatch/netwatch-service.sh` | 2026-10-18 16:03:25 -0400 |
+| `netwatch/netwatch.py` | 2026-10-18 16:03:25 -0400 |
+| `netwatch/netwatch.sh` | 2026-10-18 16:03:25 -0400 |
+| `netwatch/netwatch_uninstall.sh` | 2026-10-18 16:03:25 -0400 |
 | `netwatch/overlay.py` | 2026-10-13 16:18:44 -0400 |
 | `nvidiapatch/nvidiapatch-service.sh` | 2026-05-09 21:25:10 +0100 |
 | `nvidiapatch/nvidiapatch.sh` | 2025-11-25 17:42:22 +0000 |
 | `nvidiapatch/nvidiapatch_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `nvidiapatch/patches.sh` | 2026-05-04 21:46:58 +0100 |
 | `nzp/nzp.sh` | 2025-11-27 18:53:42 +0000 |
-| `nzp/nzp_uninstall.sh` | 2025-11-27 18:53:42 +0000 |
+| `nzp/nzp_uninstall.sh` | 2026-10-18 16:08:49 -0400 |
 | `obs/obs.sh` | 2025-05-22 18:05:21 +0100 |
 | `obs/obs_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `openra/openra.sh` | 2025-05-22 18:05:42 +0100 |
@@ -220,8 +226,8 @@
 | `prismlauncher/prismlauncher_uninstall.sh` | 2026-05-11 03:41:32 +0100 |
 | `qbittorrent/qbittorrent.sh` | 2026-04-17 14:03:29 +0100 |
 | `qbittorrent/qbittorrent_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `qga/qemu-ga_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `qga/qga.sh` | 2025-05-22 18:10:40 +0100 |
+| `qga/qga_uninstall.sh` | 2026-10-18 16:29:19 -0400 |
 | `rpi/rpi.sh` | 2025-11-24 21:18:47 +0000 |
 | `sandtrix/sandtrix.sh` | 2025-11-21 02:44:08 +0000 |
 | `shadps4plus/create_game_launchers.sh` | 2025-11-11 02:26:59 +0000 |
@@ -246,7 +252,7 @@
 | `stremio/stremio-arm64_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `stremio/stremio.sh` | 2025-11-25 15:20:38 +0000 |
 | `sunshine/sunshine-arm64.sh` | 2026-10-13 16:19:18 -0400 |
-| `sunshine/sunshine.sh` | 2026-10-13 16:19:18 -0400 |
+| `sunshine/sunshine.sh` | 2026-10-18 16:24:57 -0400 |
 | `sunshine/sunshine_uninstall.sh` | 2026-10-13 16:19:18 -0400 |
 | `supermariox/supermariox.sh` | 2025-11-27 22:20:19 +0000 |
 | `supermariox/supermariox_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -272,6 +278,7 @@
 | `vesktop/vesktop.sh` | 2026-04-17 14:03:29 +0100 |
 | `vesktop/vesktop_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `vlc/vlc.sh` | 2025-05-22 18:20:34 +0100 |
+| `vlc/vlc_uninstall.sh` | 2026-10-18 16:24:04 -0400 |
 | `warzone2100/warzone2100.sh` | 2025-05-22 18:20:52 +0100 |
 | `warzone2100/warzone2100_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `wayvnc/wayvnc.sh` | 2025-05-22 18:21:12 +0100 |
