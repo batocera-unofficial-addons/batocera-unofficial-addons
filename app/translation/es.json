@@ -57,7 +57,7 @@
   "hint_select": "Seleccionar",
   "hint_close_settings": "Cerrar Ajustes",
   "hint_uninstall": "Desinstalar",
-  "hint_uninstall_ignore": "Desinstalar, ignorar advertencias",
+  "hint_uninstall_ignore": "Desinstalar sin advertencias",
   "hint_cancel": "Cancelar",
   "hint_confirm": "Confirmar",
 

@@ -57,7 +57,7 @@
   "hint_select": "Выбрать",
   "hint_close_settings": "Закрыть настройки",
   "hint_uninstall": "Удалить",
-  "hint_uninstall_ignore": "Удалить, игнорируя предупреждения",
+  "hint_uninstall_ignore": "Удалить без предупреждений",
   "hint_cancel": "Отмена",
   "hint_confirm": "Подтвердить",
 

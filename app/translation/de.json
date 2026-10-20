@@ -55,7 +55,7 @@
   "hint_select": "Auswählen",
   "hint_close_settings": "Einstellungen schließen",
   "hint_uninstall": "Deinstallieren",
-  "hint_uninstall_ignore": "Deinstallieren, Warnungen ignorieren",
+  "hint_uninstall_ignore": "Ohne Warnungen deinstallieren",
   "hint_cancel": "Abbrechen",
   "hint_confirm": "Bestätigen",
 
