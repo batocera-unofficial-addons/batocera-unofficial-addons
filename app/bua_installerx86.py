@@ -2206,14 +2206,23 @@ class Runner:
         )
         os.close(slave_fd)
         self._pty_master = master_fd  # keep open so slave doesn't get SIGHUP
+        output_lines = []
         def reader():
             assert self.proc and self.proc.stdout
-            output_lines = []
             for line in self.proc.stdout:
+                if self.done:
+                    # Keep draining so a background process never blocks on a full pipe
+                    continue
                 stripped = line.rstrip("\n")
                 self.append(stripped)
                 output_lines.append(stripped)
+        def waiter():
+            assert self.proc
             self.proc.wait()
+            # The job is over when its shell exits. Background processes it
+            # started (nohup, setsid) inherit the output pipe and keep it open,
+            # so don't wait for EOF: give the reader a moment to catch up.
+            t.join(timeout=2)
             self.returncode = self.proc.returncode
             # Store last 10 lines for error display
             self.error_output = "\n".join(output_lines[-10:])
@@ -2224,6 +2233,7 @@ class Runner:
             self.done = True
         t = threading.Thread(target=reader, daemon=True)
         t.start()
+        threading.Thread(target=waiter, daemon=True).start()
 
     def kill(self):
         if self.proc and self.proc.poll() is None:
