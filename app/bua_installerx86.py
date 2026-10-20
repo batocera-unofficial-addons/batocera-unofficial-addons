@@ -167,14 +167,12 @@ def save_translation_cache(cache: Dict[str, Dict[str, str]]):
         print(f"[BUA] Could not save translation cache: {e}")
 
 def load_translation_file(lang_code: str) -> Dict[str, str]:
-    """Load a translation JSON file from cache or GitHub with retry logic"""
-    # First, check disk cache
+    """Load a translation JSON file from GitHub, falling back to the disk cache"""
     cache = load_translation_cache()
-    if lang_code in cache:
-        print(f"[BUA] Using cached translation for {lang_code} ({len(cache[lang_code])} keys)")
-        return cache[lang_code]
 
-    # Not in cache, try downloading from GitHub
+    # Always try GitHub first, so strings added since the last run show up.
+    # With a cached copy to fall back on, try once, so a slow network
+    # doesn't hold up the start.
     try:
         github_url = f"{TRANSLATION_BASE_URL}/{lang_code}.json"
         print(f"[BUA] Downloading translation from: {github_url}")
@@ -183,18 +181,22 @@ def load_translation_file(lang_code: str) -> Dict[str, str]:
             github_url,
             headers={"User-Agent": "BUA-Installer"},
             timeout=5,
-            retries=2
+            retries=0 if lang_code in cache else 2
         )
 
         data = json.loads(data_bytes.decode('utf-8'))
         print(f"[BUA] Successfully downloaded translation {lang_code} ({len(data)} keys)")
 
         # Save to cache
-        cache[lang_code] = data
-        save_translation_cache(cache)
+        if cache.get(lang_code) != data:
+            cache[lang_code] = data
+            save_translation_cache(cache)
 
         return data
     except Exception as e:
+        if lang_code in cache:
+            print(f"[BUA] Could not download translation {lang_code} ({e}), using cached copy ({len(cache[lang_code])} keys)")
+            return cache[lang_code]
         print(f"[BUA] ERROR: Could not load translation {lang_code} after retries: {e}")
         print(f"[BUA] Continuing with empty translation (English fallback)")
         return {}
