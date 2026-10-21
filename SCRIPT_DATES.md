@@ -29,8 +29,8 @@
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2026-07-02 16:31:40 -0300 |
 | `app/bua_cli.py` | 2026-10-18 16:05:09 -0400 |
-| `app/bua_installerarm64.py` | 2026-10-18 16:10:27 -0400 |
-| `app/bua_installerx86.py` | 2026-10-18 16:10:27 -0400 |
+| `app/bua_installerarm64.py` | 2026-10-20 14:49:47 -0400 |
+| `app/bua_installerx86.py` | 2026-10-20 14:49:47 -0400 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
