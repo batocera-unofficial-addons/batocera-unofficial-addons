@@ -4,9 +4,9 @@
 # line, the ES system override for PS4 (Batocera's own PS4 system comes back
 # after the next ES restart), and what the add-on creates while it runs: the
 # per-game launchers, keys files and gamelist entries in the PS4 roms folder,
-# the box art, the log, and the emulator's settings and saves in
+# the box art, the log, and the emulator's settings in
 # /userdata/system/.local/share/shadPS4. Game folders in /userdata/roms/ps4
-# are kept.
+# and the emulator's saves are kept.
 
 APP_NAME="ShadPS4 Plus"
 
@@ -16,7 +16,8 @@ desktop_file="/usr/share/applications/shadps4.desktop"
 emulationstation_config_dir="/userdata/system/configs/emulationstation"
 output_dir="/userdata/roms/ps4"
 gamelist_path="${output_dir}/gamelist.xml"
-processed_list="/userdata/system/.local/share/shadPS4/processed_games.txt"
+user_dir="/userdata/system/.local/share/shadPS4"
+processed_list="${user_dir}/processed_games.txt"
 log_file="/userdata/system/logs/shadps4_installer.log"
 csv_file="/tmp/PS4_Title_ID_List.csv"
 
@@ -59,7 +60,16 @@ main() {
 
     rm -f "${desktop_file}"
     rm -f "${emulationstation_config_dir}/es_features_ps4.cfg" "${emulationstation_config_dir}/es_systems_ps4.cfg"
-    rm -rf "${install_dir:?}" "/userdata/system/.local/share/shadPS4"
+    rm -rf "${install_dir:?}"
+
+    # Keep the emulator's saves (savedata, its default save folder) and
+    # remove the rest of its folder.
+    if [ -n "$(ls -A "${user_dir}/savedata" 2>/dev/null)" ]; then
+        find "${user_dir}" -mindepth 1 -maxdepth 1 ! -name savedata -exec rm -rf {} +
+        echo "Kept the saves in ${user_dir}/savedata."
+    else
+        rm -rf "${user_dir:?}"
+    fi
     rm -f "${log_file}" "${csv_file}"
 
     curl -s http://127.0.0.1:1234/reloadgames >/dev/null 2>&1
