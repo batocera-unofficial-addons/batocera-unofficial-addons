@@ -1,5 +1,5 @@
-# BUA_SECURITY_EXTRACT_V1: strict staged extraction; links and traversal rejected.
 #!/bin/bash
+# BUA_SECURITY_EXTRACT_V1: strict staged extraction; links and traversal rejected.
 
 # URLs
 SCRIPT_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/app/symlinks.sh"
