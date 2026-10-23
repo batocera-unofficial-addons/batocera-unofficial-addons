@@ -57,7 +57,7 @@
   "hint_select": "Select",
   "hint_close_settings": "Close Settings",
   "hint_uninstall": "Uninstall",
-  "hint_uninstall_ignore": "Uninstall, ignore warnings",
+  "hint_uninstall_ignore": "Uninstall without warnings",
   "hint_cancel": "Cancel",
   "hint_confirm": "Confirm",
 
