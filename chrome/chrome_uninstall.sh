@@ -12,7 +12,6 @@
 
 APPNAME="Chrome"
 APPDIR="/userdata/system/add-ons/google-chrome"
-APPPATH="${APPDIR}/GoogleChrome.AppImage"
 PORTS_DIR="/userdata/roms/ports"
 PORT_SCRIPT="${PORTS_DIR}/GoogleChrome.sh"
 GAMELIST="${PORTS_DIR}/gamelist.xml"
@@ -21,19 +20,41 @@ DESKTOP_FILE="/usr/share/applications/${APPNAME}.desktop"
 RESTORE_SCRIPT="/userdata/system/configs/${APPNAME,,}/restore_desktop_entry.sh"
 CUSTOM_STARTUP="/userdata/system/custom.sh"
 
-# Every Ports launcher except Chrome's own that starts Chrome's AppImage, by
-# its gamelist name (or file name when it has none). Read from the device, so
-# web apps added to the repo later, or made by the user, are found too.
+# What other apps name when they start Chrome's AppImage. Without the
+# /userdata/system/add-ons part, so a launcher that builds the path from a
+# variable (e.g. "${ADDONS}/google-chrome/GoogleChrome.AppImage") matches too.
+CHROME_REF="${APPDIR##*/}/GoogleChrome.AppImage"
+
+# Everything except Chrome's own files that starts Chrome's AppImage: Ports
+# launchers (subfolders too) by their gamelist name or file name, desktop
+# entries by their Name, and custom.sh lines. Read from the device, so web
+# apps added to the repo later, or made by the user, are found too.
 dependents() {
-    local launcher file name
-    for launcher in "${PORTS_DIR}"/*.sh; do
-        [ -f "${launcher}" ] && [ "${launcher}" != "${PORT_SCRIPT}" ] || continue
-        grep -qF "${APPPATH}" "${launcher}" || continue
-        file="${launcher##*/}"
-        name=""
-        [ -f "${GAMELIST}" ] && name="$(xmlstarlet sel -t -v "/gameList/game[path='./${file}']/name" "${GAMELIST}" 2>/dev/null | head -n 1)"
-        echo "${name:-${file}}"
-    done | sort -u
+    local launcher rel name entry line
+    {
+        while IFS= read -r launcher; do
+            [ "${launcher}" = "${PORT_SCRIPT}" ] && continue
+            rel="${launcher#"${PORTS_DIR}"/}"
+            name=""
+            [ -f "${GAMELIST}" ] && name="$(xmlstarlet sel -t -v "/gameList/game[path='./${rel}']/name" "${GAMELIST}" 2>/dev/null | head -n 1)"
+            echo "${name:-${rel}}"
+        done < <(grep -rlF --include='*.sh' "${CHROME_REF}" "${PORTS_DIR}")
+
+        for entry in /userdata/system/configs/*/*.desktop /usr/share/applications/*.desktop; do
+            case "${entry}" in
+                "${DESKTOP_FILE}"|"/userdata/system/configs/${APPNAME,,}/"*) continue ;;
+            esac
+            grep -qF "${CHROME_REF}" "${entry}" || continue
+            name="$(sed -n 's/^Name=//p' "${entry}" | head -n 1)"
+            echo "${name:-${entry##*/}} (desktop entry)"
+        done
+
+        if [ -f "${CUSTOM_STARTUP}" ]; then
+            while IFS= read -r line; do
+                echo "custom.sh: ${line}"
+            done < <(grep -F "${CHROME_REF}" "${CUSTOM_STARTUP}")
+        fi
+    } 2>/dev/null | sort -u
 }
 
 ignore_warning=false   # set to true by --ignore-warning
