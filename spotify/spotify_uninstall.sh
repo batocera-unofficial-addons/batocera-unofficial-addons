@@ -26,12 +26,6 @@ if [ -f "/userdata/system/add-ons/google-chrome/chrome.sh" ]; then
     rm -f "/userdata/system/add-ons/google-chrome/chrome.sh"
 fi
 
-# Remove created directories (deepest first)
-if [ -d "/userdata/system/add-ons/google-chrome" ]; then
-    echo "Removing directory: /userdata/system/add-ons/google-chrome"
-    rm -rf "/userdata/system/add-ons/google-chrome"
-fi
-
 echo ""
 echo "========================================="
 echo "Uninstallation complete: SPOTIFY"
