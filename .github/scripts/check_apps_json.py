@@ -7,6 +7,7 @@ devices. Every app needs an install command, an uninstaller, a description
 and a category; anything missing fails the check.
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -190,8 +191,23 @@ def check(rel: str) -> tuple[list[str], list[str], int]:
     return errors, warnings, len(data["apps"])
 
 
+def summary_section(rel: str, errors: list[str], warnings: list[str], count: int) -> str:
+    """One app list's part of the job summary, in Markdown."""
+    if errors:
+        lines = [f"### ❌ {rel}: {len(errors)} problem(s)", ""]
+        lines += [f"- {e.removeprefix(rel + ': ')}" for e in errors]
+    else:
+        lines = [f"### ✅ {rel}: OK ({count} apps)"]
+    if warnings:
+        lines += ["", f"<details><summary>{len(warnings)} known gap(s)</summary>", ""]
+        lines += [f"- {w.removeprefix(rel + ': ')}" for w in warnings]
+        lines += ["", "</details>"]
+    return "\n".join(lines) + "\n\n"
+
+
 def main() -> int:
     failed = False
+    summary = "## App list check\n\n"
     for rel in APP_LISTS:
         errors, warnings, count = check(rel)
         # ::warning:: and ::error:: lines show up as annotations on GitHub
@@ -203,6 +219,13 @@ def main() -> int:
             failed = True
         else:
             print(f"{rel}: OK ({count} apps)")
+        summary += summary_section(rel, errors, warnings, count)
+
+    # GitHub shows this file on the run's summary page
+    summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary_file:
+        with open(summary_file, "a", encoding="utf-8") as f:
+            f.write(summary)
     return 1 if failed else 0
 
 
