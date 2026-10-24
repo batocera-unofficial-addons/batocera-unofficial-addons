@@ -1,5 +1,4 @@
 {
-  "generated_from": "app/bua_installerarm64.py",
   "changelog": "- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format\n- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added Jellyfin Player - native media player client with controller support",
   "apps": [
     {
@@ -302,7 +301,9 @@
     {
       "name": "Sunshine",
       "description": "Self-hosted game streaming server (host for Moonlight).",
-      "categories": [],
+      "categories": [
+        "Game Utilities"
+      ],
       "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/sunshine/sunshine-arm64.sh | bash",
       "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/sunshine/sunshine-arm64_uninstall.sh | bash"
     },

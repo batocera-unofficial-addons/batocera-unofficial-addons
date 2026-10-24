@@ -7,8 +7,8 @@ at every boot. It runs the same install and
 uninstall scripts as the BUA app and shares its install history, so apps
 installed from either one show up in both.
 
-The app list comes from app/apps_x86.json or app/apps_arm64.json, which a
-GitHub workflow builds from the BUA app's tables.
+The app list comes from app/apps_x86.json or app/apps_arm64.json, the same
+files the BUA app reads.
 """
 import argparse
 import difflib
