@@ -1,0 +1,36 @@
+name: Check apps JSON
+
+on:
+  pull_request:
+    paths:
+      - "app/apps_x86.json"
+      - "app/apps_arm64.json"
+      - ".github/scripts/check_apps_json.py"
+      - ".github/workflows/check-apps-json.yml"
+  push:
+    branches: [main]
+    paths:
+      - "app/apps_x86.json"
+      - "app/apps_arm64.json"
+      - ".github/scripts/check_apps_json.py"
+      - ".github/workflows/check-apps-json.yml"
+  workflow_dispatch: {}  # allow manual runs too
+
+permissions:
+  contents: read
+
+jobs:
+  check-apps-json:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.x"
+
+      - name: Check apps_x86.json and apps_arm64.json
+        run: python .github/scripts/check_apps_json.py

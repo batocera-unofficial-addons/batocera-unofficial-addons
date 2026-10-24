@@ -19,20 +19,6 @@ from typing import Dict, List, Tuple
 import hashlib
 
 # ------------------------------
-# Changelog
-# ------------------------------
-# Edit this section to add changelog entries. Leave empty to disable.
-# This will be shown once to users when they first launch after an update.
-
-CHANGELOG = """
-- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format
-- Added chdress - GUI tool to convert any disc image to/from CHD format
-- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation
-- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support
-- Added Jellyfin Player - native media player client with controller support
-""".strip()
-
-# ------------------------------
 # Live Update Block
 # ------------------------------
 # This code runs on EVERY launch before the main app loads.
@@ -528,155 +514,77 @@ def mark_uninstalled(app_name: str):
         del history[app_name]
         save_history(history)
 
-def get_uninstall_command(install_cmd: str) -> str:
-    """Convert an installation command to an uninstall command.
-    Replaces .sh with _uninstall.sh in the URL.
-
-    Example:
-    https://.../ 7zip/7zip.sh -> https://.../7zip/7zip_uninstall.sh
-    """
-    import re
-    # Find the .sh URL in the curl command
-    match = re.search(r'(https://[^\s]+)\.sh', install_cmd)
-    if match:
-        base_url = match.group(1)
-        # Replace .sh with _uninstall.sh
-        uninstall_url = f"{base_url}_uninstall.sh"
-        # Create the curl command
-        return f"curl -Ls {uninstall_url} | bash"
-    return None
-
 # ------------------------------
 # Apps and Install Commands
 # ------------------------------
+# The app list is app/apps_arm64.json in the repo. Add, change or remove apps
+# (and the changelog shown after an update) there, not here.
 
 # Base URL for BUA repository scripts
 BUA_BASE_URL = "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main"
 
-def bua(path: str) -> str:
-    """Helper to build BUA install command from relative path"""
-    return f"curl -L {BUA_BASE_URL}/{path} | bash"
+APPS_JSON_URL = f"{BUA_BASE_URL}/app/apps_arm64.json"
+# The bua command keeps its copy of the app list in the same place
+APPS_JSON_CACHE = "/userdata/system/add-ons/bua/apps_arm64.json"
 
-APPS: Dict[str, str] = {
-    "Amazon Luna": bua("amazonluna/amazonluna-arm64.sh"),
-    "Celeste 64": bua("celeste64/celeste64.sh"),
-    "Chiaki": bua("chiaki/chiaki.sh"),
-    "Conty": bua("conty/conty.sh"),
-    "Sunshine": bua("sunshine/sunshine-arm64.sh"),
-    "Dark Mode": bua("dark/dark.sh"),
-    "Desktop (Docker)": bua("desktop/desktop.sh"),
-    "VClean": bua("vclean/vclean.sh"),
-    "Overlay Remove": bua("overlay-remove/overlay-remove.sh"),
-    "Docker": bua("docker/docker.sh"),
-    "RunImage Desktop": bua("desktop/ri-desktop.sh"),
-    "F1": bua("f1/f1.sh"),
-    "Firefox": bua("firefox/firefox-arm64.sh"),
-    "FreeTube": bua("freetube/freetube.sh"),
-    "Jellyfin Player": bua("jellyfin-client/jellyfin-client.sh"),
-    "Greenlight": bua("greenlight/greenlight_arm64.sh"),
-    "IPTV Nator": bua("iptvnator/iptvnator.sh"),
-    "Luanti": bua("luanti/luanti.sh"),
-    "Minecraft": bua("minecraft/bedrock.sh"),
-    "Prism Launcher": bua("prismlauncher/prismlauncher.sh"),
-    "Nazi Zombies Portable": bua("nzp/nzp.sh"),
-    "PortMaster": bua("portmaster/portmaster.sh"),
-    "Raspberry Pi Imager": bua("rpi/rpi.sh"),
-    "RGSX": "curl -L bit.ly/rgsx-install | sh",
-    "Soar": bua("soar/soar.sh"),
-    "Super Mario X": bua("supermariox/supermariox.sh"),
-    "SuperTuxKart": bua("supertuxkart/supertuxkart.sh"),
-    "Tailscale": bua("tailscale/tailscale.sh"),
-    "Telegraf": bua("telegraf/telegraf.sh"),
-    "Vesktop": bua("vesktop/vesktop.sh"),
-    "WayVNC": bua("wayvnc/wayvnc.sh"),
-    "WayVNC Headless": bua("wayvnc_headless/wayvnc_headless.sh"),
-    "npsget": "curl -fsSL https://npsget.8101987.xyz | sh",
-    "chdress": "curl -fsSL https://chdress.8101987.xyz/install.sh | sh",
-    "iso2zar": "curl -fsSL https://iso2zar.8101987.xyz | sh",
-}
+def load_app_list() -> dict:
+    """Download the app list. A copy is kept so the menu still has its apps
+    when GitHub can't be reached."""
+    try:
+        print(f"[BUA] Downloading app list from: {APPS_JSON_URL}")
+        data_bytes = fetch_url_with_retry(
+            APPS_JSON_URL,
+            headers={"User-Agent": "BUA-Installer"},
+            timeout=10,
+            retries=0 if os.path.exists(APPS_JSON_CACHE) else 2
+        )
+        data = json.loads(data_bytes.decode('utf-8'))
+        if not isinstance(data, dict) or not isinstance(data.get("apps"), list):
+            raise ValueError("not an app list")
+    except Exception as e:
+        try:
+            with open(APPS_JSON_CACHE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            print(f"[BUA] Could not download the app list ({e}), using cached copy")
+            return data
+        except Exception:
+            print(f"[BUA] ERROR: Could not load the app list: {e}")
+            return {}
 
-# --- Integrated Docker app installers ---
-APPS.update({
-    "CasaOS": bua("docker/casaos.sh"),
-    "UmbrelOS": bua("docker/umbrelos.sh"),
-    "Arch KDE (Webtop)": bua("docker/archkde.sh"),
-    "Ubuntu MATE (Webtop)": bua("docker/ubuntumate.sh"),
-    "Alpine XFCE (Webtop)": bua("docker/alpinexfce.sh"),
-    "Jellyfin": bua("docker/jellyfin.sh"),
-    "Emby": bua("docker/emby.sh"),
-    "Arr-In-One": bua("docker/arrinone.sh"),
-    "Arr-In-One Downloaders": bua("docker/arrdownloaders.sh"),
-})
+    try:
+        os.makedirs(os.path.dirname(APPS_JSON_CACHE), exist_ok=True)
+        tmp = f"{APPS_JSON_CACHE}.{os.getpid()}.tmp"
+        with open(tmp, 'wb') as f:
+            f.write(data_bytes)
+        os.replace(tmp, APPS_JSON_CACHE)
+    except Exception as e:
+        print(f"[BUA] Could not save the app list: {e}")
+    return data
 
-DESCRIPTIONS: Dict[str, str] = {
-    "Amazon Luna": "Amazon Luna game streaming client.",
-    "Celeste 64": "Free 3D platformer (requires OpenGL 3.2)",
-    "Chiaki": "PS4/PS5 Remote Play client.",
-    "Conty": "Standalone Linux distro container.",
-    "Sunshine": "Self-hosted game streaming server (host for Moonlight).",
-    "Dark Mode": "Toggle F1 dark mode",
-    "Desktop (Docker)": "Desktop mode, requires Docker",
-    "VClean": "Service to clean the Batocera version string (removes extra flags)",
-    "Overlay Remove": "Remove the Batocera boot overlay file from /boot/boot/overlay.",
-    "Docker": "Docker/Podman/Portainer AIO.",
-    "RunImage Desktop": "RunImage-based desktop with overlay support",
-    "F1": "Ports shortcut to file manager",
-    "Firefox": "Mozilla Firefox browser.",
-    "FreeTube": "Privacy-minded YouTube client",
-    "Jellyfin Player": "Jellyfin media player client with controller support",
-    "Greenlight": "Client for xCloud and Xbox streaming.",
-    "IPTV Nator": "IPTV client for watching live TV.",
-    "Luanti": "Voxel sandbox (Minecraft-like)",
-    "Minecraft": "Minecraft: Bedrock Edition.",
-    "Prism Launcher": "Open source Minecraft launcher with mod management and multi-instance support.",
-    "Nazi Zombies Portable": "Classic Nazi Zombies on modern platforms",
-    "PortMaster": "Download and manage games on handhelds.",
-    "Raspberry Pi Imager": "Flash OS images to USB and SD cards.",
-    "RGSX": "Retro Game Sets Xtra. A free, user-friendly ROM downloader for Batocera",
-    "Soar": "Soar package manager (integrated with BUA)",
-    "Super Mario X": "Fan-made Super Mario tribute",
-    "SuperTuxKart": "Free and open-source kart racer.",
-    "Tailscale": "VPN service for secure Batocera connections.",
-    "Telegraf": "Server agent for collecting and reporting metrics.",
-    "Vesktop": "Discord client for Batocera.",
-    "WayVNC": "WayVNC for remote access",
-    "WayVNC Headless": "WayVNC for headless systems",
-    "CasaOS": "Simple home server UI and app store",
-    "UmbrelOS": "Self-hosted OS with app marketplace",
-    "Arch KDE (Webtop)": "Arch Linux desktop in browser (noVNC)",
-    "Ubuntu MATE (Webtop)": "Ubuntu MATE desktop in browser (noVNC)",
-    "Alpine XFCE (Webtop)": "Alpine XFCE desktop in browser (noVNC)",
-    "Jellyfin": "Open-source media server",
-    "Emby": "Media server and streaming",
-    "Arr-In-One": "All-in-one media management stack",
-    "Arr-In-One Downloaders": "Downloaders companion stack",
-    "npsget": "Helper to download games, DLCs, updates, themes and avatars from NoPayStation",
-    "chdress": "GUI tool to convert any disc image to/from CHD format",
-    "iso2zar": "GUI tool to convert Xbox[360] .iso files directly into .zar format",
-}
+def build_app_tables(app_list: dict):
+    """Turn the app list into the APPS, DESCRIPTIONS, CATEGORIES and
+    UNINSTALL tables the menu uses. The app name is the key in each."""
+    apps: Dict[str, str] = {}
+    descriptions: Dict[str, str] = {}
+    categories: Dict[str, List[str]] = {}
+    uninstall: Dict[str, str] = {}
+    for entry in app_list.get("apps", []):
+        try:
+            name = entry["name"]
+            apps[name] = entry["install"]
+        except (KeyError, TypeError):
+            continue
+        if entry.get("description"):
+            descriptions[name] = entry["description"]
+        for category in entry.get("categories", []):
+            categories.setdefault(category, []).append(name)
+        if entry.get("uninstall"):
+            uninstall[name] = entry["uninstall"]
+    return apps, descriptions, categories, uninstall
 
-
-CATEGORIES: Dict[str, List[str]] = {
-    "Games": [
-        "Luanti", "Minecraft", "Prism Launcher", "Super Mario X", "SuperTuxKart", "Celeste 64", "Nazi Zombies Portable"
-    ],
-    "Game Utilities": [
-        "PortMaster", "Chiaki", "Greenlight", "Amazon Luna", "RGSX", "npsget", "chdress", "iso2zar"
-    ],
-    "System Utilities": [
-        "Tailscale", "Telegraf", "Vesktop", "IPTV Nator", "FreeTube",
-        "Jellyfin Player", "F1", "Firefox", "Desktop (Docker)", "RunImage Desktop",
-        "Raspberry Pi Imager"
-    ],
-    "Developer Tools": [
-        "Conty", "Docker", "Soar", "WayVNC", "WayVNC Headless", "Dark Mode", "VClean", "Overlay Remove"
-    ],
-    "Docker Menu": [
-        "CasaOS", "UmbrelOS", "Arch KDE (Webtop)", "Ubuntu MATE (Webtop)",
-        "Alpine XFCE (Webtop)", "Jellyfin", "Emby", "Arr-In-One",
-        "Arr-In-One Downloaders"
-    ],
-}
+APP_LIST = load_app_list()
+CHANGELOG = str(APP_LIST.get("changelog", "")).strip()
+APPS, DESCRIPTIONS, CATEGORIES, UNINSTALL = build_app_tables(APP_LIST)
 
 def get_top_level() -> List[Tuple[str, str]]:
     """Generate top-level menu items with current language translations"""
@@ -4397,8 +4305,8 @@ class UpdaterScreen(BaseScreen):
         if not cmd:
             return
 
-        # Generate uninstall command
-        uninstall_cmd = get_uninstall_command(cmd)
+        # The uninstall command comes from the app list
+        uninstall_cmd = UNINSTALL.get(app)
         if not uninstall_cmd:
             push_screen(InfoDialog(t("uninstall"), [t("uninstall_error")]))
             return
