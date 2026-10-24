@@ -524,42 +524,23 @@ def mark_uninstalled(app_name: str):
 BUA_BASE_URL = "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main"
 
 APPS_JSON_URL = f"{BUA_BASE_URL}/app/apps_arm64.json"
-# The bua command keeps its copy of the app list in the same place
-APPS_JSON_CACHE = "/userdata/system/add-ons/bua/apps_arm64.json"
 
 def load_app_list() -> dict:
-    """Download the app list. A copy is kept so the menu still has its apps
-    when GitHub can't be reached."""
+    """Download the app list from the repo."""
     try:
         print(f"[BUA] Downloading app list from: {APPS_JSON_URL}")
         data_bytes = fetch_url_with_retry(
             APPS_JSON_URL,
             headers={"User-Agent": "BUA-Installer"},
-            timeout=10,
-            retries=0 if os.path.exists(APPS_JSON_CACHE) else 2
+            timeout=10
         )
         data = json.loads(data_bytes.decode('utf-8'))
         if not isinstance(data, dict) or not isinstance(data.get("apps"), list):
             raise ValueError("not an app list")
+        return data
     except Exception as e:
-        try:
-            with open(APPS_JSON_CACHE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            print(f"[BUA] Could not download the app list ({e}), using cached copy")
-            return data
-        except Exception:
-            print(f"[BUA] ERROR: Could not load the app list: {e}")
-            return {}
-
-    try:
-        os.makedirs(os.path.dirname(APPS_JSON_CACHE), exist_ok=True)
-        tmp = f"{APPS_JSON_CACHE}.{os.getpid()}.tmp"
-        with open(tmp, 'wb') as f:
-            f.write(data_bytes)
-        os.replace(tmp, APPS_JSON_CACHE)
-    except Exception as e:
-        print(f"[BUA] Could not save the app list: {e}")
-    return data
+        print(f"[BUA] ERROR: Could not load the app list: {e}")
+        return {}
 
 def build_app_tables(app_list: dict):
     """Turn the app list into the APPS, DESCRIPTIONS, CATEGORIES and
