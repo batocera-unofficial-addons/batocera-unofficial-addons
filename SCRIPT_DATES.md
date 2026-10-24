@@ -29,8 +29,8 @@
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2026-07-02 16:31:40 -0300 |
 | `app/bua_cli.py` | 2026-10-18 16:05:09 -0400 |
-| `app/bua_installerarm64.py` | 2026-10-20 14:49:47 -0400 |
-| `app/bua_installerx86.py` | 2026-10-20 14:49:47 -0400 |
+| `app/bua_installerarm64.py` | 2026-10-23 12:35:22 -0400 |
+| `app/bua_installerx86.py` | 2026-10-23 12:35:22 -0400 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -64,11 +64,11 @@
 | `bottles/bottles.sh` | 2025-11-25 15:20:38 +0000 |
 | `bottles/bottles_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `brave/brave.sh` | 2025-05-22 17:22:11 +0100 |
-| `brave/brave_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `brave/brave_uninstall.sh` | 2026-10-23 12:36:20 -0400 |
 | `bridge/bridge.sh` | 2025-04-21 22:55:45 +0100 |
-| `bridge/bridge_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `bridge/bridge_uninstall.sh` | 2026-10-23 12:36:35 -0400 |
 | `celeste64/celeste64.sh` | 2025-02-13 17:51:43 +0000 |
-| `celeste64/celeste64_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `celeste64/celeste64_uninstall.sh` | 2026-10-23 12:36:50 -0400 |
 | `chiaki/chiaki.sh` | 2026-04-17 14:03:29 +0100 |
 | `chiaki/chiaki_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `chrome/chrome.sh` | 2026-08-21 11:40:45 +1000 |
@@ -114,7 +114,7 @@
 | `docker/umbrelos_uninstall.sh` | 2026-10-18 16:09:09 -0400 |
 | `eggnoggplus/eggnoggplus.sh` | 2025-11-25 02:39:23 +0000 |
 | `endlesssky/endlesssky.sh` | 2026-04-17 14:03:29 +0100 |
-| `endlesssky/endlesssky_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `endlesssky/endlesssky_uninstall.sh` | 2026-10-23 12:37:08 -0400 |
 | `everest/everest.sh` | 2025-11-25 15:20:38 +0000 |
 | `everest/everest_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `extra/extra.sh` | 2025-05-22 17:48:53 +0100 |
@@ -137,9 +137,9 @@
 | `flathub/flathub.sh` | 2025-07-29 17:12:59 -0400 |
 | `flathub/flathub_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `freedroidrpg/freedroidrpg.sh` | 2025-05-22 17:54:35 +0100 |
-| `freedroidrpg/freedroidrpg_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `freedroidrpg/freedroidrpg_uninstall.sh` | 2026-10-23 12:37:26 -0400 |
 | `freetube/freetube.sh` | 2025-11-28 16:44:12 +0000 |
-| `freetube/freetube_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `freetube/freetube_uninstall.sh` | 2026-10-23 12:37:46 -0400 |
 | `gamescope/gamescope.sh` | 2025-12-09 23:14:24 +0000 |
 | `gparted/gparted.sh` | 2025-12-11 02:16:04 +0000 |
 | `gparted/gparted_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
