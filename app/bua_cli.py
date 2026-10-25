@@ -7,8 +7,8 @@ at every boot. It runs the same install and
 uninstall scripts as the BUA app and shares its install history, so apps
 installed from either one show up in both.
 
-The app list comes from app/apps_x86.json or app/apps_arm64.json, which a
-GitHub workflow builds from the BUA app's tables.
+The app list comes from app/apps_x86.json or app/apps_arm64.json, the same
+files the BUA app reads.
 """
 import argparse
 import difflib
@@ -27,7 +27,6 @@ INSTALL_CMD = "curl -L install.batoaddons.app | bash"
 BUA_UNINSTALL_URL = f"{REPO_URL}/app/uninstall.sh"
 
 ADDONS_DIR = "/userdata/system/add-ons"
-BUA_DIR = f"{ADDONS_DIR}/bua"
 HISTORY_FILE = f"{ADDONS_DIR}/bua_history.json"
 
 APPS_JSON = {
@@ -51,42 +50,22 @@ class BuaError(Exception):
 # ------------------------------
 
 def load_apps() -> dict:
-    """Fetch the app list for this device's architecture.
-
-    A copy is kept in BUA_DIR so the app list still works offline.
-    """
+    """Fetch the app list for this device's architecture from the repo."""
     arch = platform.machine()
     if arch not in APPS_JSON:
         raise BuaError(f"Unsupported architecture: {arch}")
     json_name = APPS_JSON[arch]
-    cache = f"{BUA_DIR}/{json_name}"
-    os.makedirs(BUA_DIR, exist_ok=True)
 
-    tmp = f"{cache}.tmp"
     result = subprocess.run(
-        ["curl", "-fsSL", "-o", tmp, f"{REPO_URL}/app/{json_name}"],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        ["curl", "-fsSL", f"{REPO_URL}/app/{json_name}"],
+        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
     )
-    downloaded = False
-    if result.returncode == 0:
-        try:
-            with open(tmp, encoding="utf-8") as f:
-                json.load(f)
-            os.replace(tmp, cache)
-            downloaded = True
-        except ValueError:
-            pass
-    if os.path.exists(tmp):
-        os.remove(tmp)
-    if not downloaded and os.path.exists(cache):
-        print("Could not download the app list, using the saved copy.", file=sys.stderr)
-
     try:
-        with open(cache, encoding="utf-8") as f:
-            data = json.load(f)
-    except (OSError, ValueError):
-        raise BuaError("Could not download the app list and no saved copy exists.")
-    return data
+        if result.returncode != 0:
+            raise ValueError
+        return json.loads(result.stdout.decode("utf-8"))
+    except ValueError:
+        raise BuaError("Could not download the app list. Check the internet connection.")
 
 
 def find_app(apps: list, name: str) -> dict:

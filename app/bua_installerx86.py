@@ -22,25 +22,6 @@ from typing import Dict, List, Tuple
 import hashlib
 
 # ------------------------------
-# Changelog
-# ------------------------------
-# Edit this section to add changelog entries. Leave empty to disable.
-# This will be shown once to users when they first launch after an update.
-
-CHANGELOG = """
-- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format
-- Added chdress - GUI tool to convert any disc image to/from CHD format
-- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation
-- Added ps3i - Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation
-- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support
-- Added AzaharPlus - selectable 3DS emulator option alongside Azahar
-- Replaced StepMania with ITGMania - ITG-focused rhythm game with bundled songs
-- Desktop: wallpaper and icon layout now preserved on update
-- Desktop: improved DRL migration and palette support
-- NVIDIAPatch: fixed GLX chain on host
-""".strip()
-
-# ------------------------------
 # Live Update Block
 # ------------------------------
 # This code runs on EVERY launch before the main app loads.
@@ -524,413 +505,58 @@ def mark_uninstalled(app_name: str):
         del history[app_name]
         save_history(history)
 
-# Custom uninstall commands for apps that don't follow the standard pattern
-CUSTOM_UNINSTALL: Dict[str, str] = {
-    "Desktop For Batocera": "/userdata/system/configs/bat-drl/Remover_Desktop.sh",
-}
-
-def get_uninstall_command(install_cmd: str, app_name: str = None) -> str:
-    """Convert an installation command to an uninstall command.
-
-    First checks CUSTOM_UNINSTALL dictionary for app-specific uninstall scripts.
-    Otherwise, replaces .sh with _uninstall.sh in the URL.
-
-    Example:
-    https://.../ 7zip/7zip.sh -> https://.../7zip/7zip_uninstall.sh
-    """
-    # Check for custom uninstall command first
-    if app_name and app_name in CUSTOM_UNINSTALL:
-        return CUSTOM_UNINSTALL[app_name]
-
-    import re
-    # Find the .sh URL in the curl command
-    match = re.search(r'(https://[^\s]+)\.sh', install_cmd)
-    if match:
-        base_url = match.group(1)
-        # Replace .sh with _uninstall.sh
-        uninstall_url = f"{base_url}_uninstall.sh"
-        # Create the curl command
-        return f"curl -Ls {uninstall_url} | bash"
-    return None
-
 # ------------------------------
 # Apps and Install Commands
 # ------------------------------
+# The app list is app/apps_x86.json in the repo. Add, change or remove apps
+# (and the changelog shown after an update) there, not here.
 
 # Base URL for BUA repository scripts
 BUA_BASE_URL = "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main"
 
-def bua(path: str) -> str:
-    """Helper to build BUA install command from relative path"""
-    return f"curl -L {BUA_BASE_URL}/{path} | bash"
+APPS_JSON_URL = f"{BUA_BASE_URL}/app/apps_x86.json"
 
-APPS: Dict[str, str] = {
-    "7zip": bua("7zip/7zip.sh"),
-    "Amazon Luna": bua("amazonluna/amazonluna.sh"),
-    "Ambermoon": bua("ambermoon/ambermoon.sh"),
-    "Android": bua("Android/Install_Android.sh"),
-    "Armagetron": bua("armagetron/armagetron.sh"),
-    "Arcade Manager": bua("arcademanager/arcademanager.sh"),
-    "Assault Cube": bua("assaultcube/assaultcube.sh"),
-    "AzaharPlus": bua("azaharplus/azaharplus.sh"),
-    "Brave": bua("brave/brave.sh"),
-    "Chiaki": bua("chiaki/chiaki.sh"),
-    "Chrome": bua("chrome/chrome.sh"),
-    "Clone Hero": bua("clonehero/clonehero.sh"),
-    "Conty": bua("conty/conty.sh"),
-    "CS Portable": bua("csportable/csportable.sh"),
-    "Disney Plus": bua("disneyplus/disneyplus.sh"),
-    "CLI Tools": bua("docker/cli.sh"),
-    "Endless Sky": bua("endlesssky/endlesssky.sh"),
-    "EGGNOGG+": bua("eggnoggplus/eggnoggplus.sh"),
-    "Everest": bua("everest/everest.sh"),
-    "Firefox": bua("firefox/firefox.sh"),
-    "Fightcade": bua("fightcade/fightcade.sh"),
-    "Flathub": bua("flathub/flathub.sh"),
-    "Freej2me": bua("Freej2me/Install_j2me.sh"),
-    "Winconfig (Windows Game Fix)": bua("Winconfig_Windows_Game_Fix/Install_Winconfig.sh"),
-    "Desktop For Batocera": bua("Desktop_for_Batocera/Install_Desktop.sh"),
-    "Free Droid RPG": bua("freedroidrpg/freedroidrpg.sh"),
-    "Greenlight": bua("greenlight/greenlight.sh"),
-    "Heroic": bua("heroic/heroic.sh"),
-    "IPTV Nator": bua("iptvnator/iptvnator.sh"),
-    "Input Leap": bua("inputleap/inputleap.sh"),
-    "Itch.io": bua("itchio/itch.sh"),
-    "Jellyfin Player": bua("jellyfin-client/jellyfin-client.sh"),
-    "JDownloader": bua("jdownloader/jdownloader.sh"),
-    "Java Runtime": bua("java/java.sh"),
-    "Minecraft": bua("minecraft/minecraft.sh"),
-    "Prism Launcher": bua("prismlauncher/prismlauncher.sh"),
-    "Moonlight": bua("moonlight/moonlight.sh"),
-    "Netflix": bua("netflix/netflix.sh"),
-    "NetWatch": bua("netwatch/netwatch.sh"),
-    "NVIDIA Patcher": bua("nvidiapatch/nvidiapatch.sh"),
-    "Nazi Zombies Portable": bua("nzp/nzp.sh"),
-    "OBS": bua("obs/obs.sh"),
-    "OpenRA": bua("openra/openra.sh"),
-    "OpenRGB": bua("openrgb/openrgb.sh"),
-    "PortMaster": bua("portmaster/portmaster.sh"),
-    "qBittorrent": bua("qbittorrent/qbittorrent.sh"),
-    "ShadPS4": bua("shadps4plus/shadps4plus.sh"),
-    "Spotify": bua("spotify/spotify.sh"),
-    "ITGMania": bua("itgmania/itgmania.sh"),
-    "Stremio": bua("stremio/stremio.sh"),
-    "Sunshine": bua("sunshine/sunshine.sh"),
-    "SuperTux": bua("supertux/supertux.sh"),
-    "SuperTuxKart": bua("supertuxkart/supertuxkart.sh"),
-    "Switch": bua("switch/switch.sh"),
-    "Tailscale": bua("tailscale/tailscale.sh"),
-    "Telegraf": bua("telegraf/telegraf.sh"),
-    "Twitch": bua("twitch/twitch.sh"),
-    "Vesktop": bua("vesktop/vesktop.sh"),
-    "Warzone 2100": bua("warzone2100/warzone2100.sh"),
-    "Wine Dependencies x86": bua("winemanager/install_redist_dependencies32.sh"),
-    "Wine Dependencies x64": bua("winemanager/install_redist_dependencies64.sh"),
-    "Wine Manager": bua("winemanager/winemanager.sh"),
-    "Xonotic": bua("xonotic/xonotic.sh"),
-    "YouTube": bua("youtubetv/youtubetv.sh"),
-    "NVIDIA Clocker": "curl -Ls https://raw.githubusercontent.com/nicolai-6/batocera-nvidia-clocker/refs/heads/main/install.sh | bash",
-    "Custom Wine": bua("wine-custom/wine.sh"),
-    "GParted": bua("gparted/gparted.sh"),
-    "YARG": bua("yarg/yarg.sh"),
-    "Plex": bua("plex/plex.sh"),
-    "OpenTTD": bua("openttd/openttd.sh"),
-    "Luanti": bua("luanti/luanti.sh"),
-    "Parsec": bua("parsec/parsec.sh"),
-    "HBO Max": bua("hbomax/hbomax.sh"),
-    "Prime Video": bua("prime/prime.sh"),
-    "Crunchyroll": bua("crunchyroll/crunchyroll.sh"),
-    "Mubi": bua("mubi/mubi.sh"),
-    "Tidal": bua("tidal/tidal.sh"),
-    "FreeTube": bua("freetube/freetube.sh"),
-    "Super Mario X": bua("supermariox/supermariox.sh"),
-    "Celeste 64": bua("celeste64/celeste64.sh"),
-    "Steam": bua("steam/steam2.sh"),
-    "Lutris": bua("lutris/lutris.sh"),
-    "FileZilla": bua("filezilla/filezilla.sh"),
-    "PeaZip": bua("peazip/peazip.sh"),
-    "VLC": bua("vlc/vlc.sh"),
-    "Docker": bua("docker/docker.sh"),
-    "Bottles": bua("bottles/bottles.sh"),
-    "Extras": bua("extra/extra.sh"),
-    "UltraStar": bua("usdeluxe/usdeluxe.sh"),
-    "F1": bua("f1/f1.sh"),
-    "Desktop": bua("desktop/desktop.sh"),
-    "X11VNC": bua("x11vnc/x11vnc.sh"),
-    "QEMU GA": bua("qga/qga.sh"),
-    "Bridge": bua("bridge/bridge.sh"),
-    "Sandtrix": bua("sandtrix/sandtrix.sh"),
-    "Soar": bua("soar/soar.sh"),
-    "Dark Mode": bua("dark/dark.sh"),
-    "VClean": bua("vclean/vclean.sh"),
-    "Overlay Remove": bua("overlay-remove/overlay-remove.sh"),
-    "RGSX": "curl -L bit.ly/rgsx-install | sh",
-    "Raspberry Pi Imager": bua("rpi/rpi.sh"),
-    "Gamescope": bua("gamescope/gamescope.sh"),
-    "npsget": "curl -fsSL https://npsget.8101987.xyz | sh",
-    "ps3i": "curl -fsSL https://ps3i.8101987.xyz/install.sh | sh",
-    "chdress": "curl -fsSL https://chdress.8101987.xyz/install.sh | sh",
-    "iso2zar": "curl -fsSL https://iso2zar.8101987.xyz | sh",
-}
+def load_app_list() -> dict:
+    """Download the app list from the repo."""
+    try:
+        print(f"[BUA] Downloading app list from: {APPS_JSON_URL}")
+        data_bytes = fetch_url_with_retry(
+            APPS_JSON_URL,
+            headers={"User-Agent": "BUA-Installer"},
+            timeout=10
+        )
+        data = json.loads(data_bytes.decode('utf-8'))
+        if not isinstance(data, dict) or not isinstance(data.get("apps"), list):
+            raise ValueError("not an app list")
+        return data
+    except Exception as e:
+        print(f"[BUA] ERROR: Could not load the app list: {e}")
+        return {}
 
-# --- Integrated Windows Freeware installers (previously separate bash menu) ---
-# These run upstream installer scripts directly within the existing runner.
-APPS.update({
-    "AM2R": bua("windows/am2r.sh"),
-    "Maldita Castilla": bua("windows/castilla.sh"),
-    "Celeste": bua("windows/celeste.sh"),
-    "Donkey Kong Advanced": bua("windows/dka.sh"),
-    "Spelunky": bua("windows/spelunky.sh"),
-    "Zelda 2 PC Remake": bua("windows/zelda2.sh"),
-    "Zelda - Dungeons of Infinity": bua("windows/zeldadoi.sh"),
-    "Space Quest 3D": bua("windows/sq3d.sh"),
-    "Streets of Rage Remake": bua("windows/sorr.sh"),
-    "Super Crate Box": bua("windows/scb.sh"),
-    "Super Smash Flash 2": bua("windows/ssf2.sh"),
-    "TMNT Rescue Palooza": bua("windows/tmntrp.sh"),
-    "Crash Bandicoot - Back In Time": bua("windows/cbbit.sh"),
-    "Sonic Triple Trouble 16bit": bua("windows/stt.sh"),
-    "Sonic 3D in 2D": bua("windows/s3d2d.sh"),
-    "SHRUBNAUT": bua("windows/shrubnaut.sh"),
-    "Secret Maryo Chronicles": bua("windows/smc.sh"),
-    "SCP Containment Breach": bua("windows/scpcontainmentbreach.sh"),
-    "Zero-K": bua("windows/zerok.sh"),
-    "Modern Modern Chef": bua("windows/mmc.sh"),
-    "Sonic Robo Blast 2": bua("windows/srb2.sh"),
-    "Sonic Time Twisted": bua("windows/sttw.sh"),
-    "Super Smash Bros CMC+": bua("windows/cmc+.sh"),
-    "Unreal Tournament": bua("windows/ut.sh"),
-})
+def build_app_tables(app_list: dict):
+    """Turn the app list into the APPS, DESCRIPTIONS, CATEGORIES and
+    UNINSTALL tables the menu uses. The app name is the key in each."""
+    apps: Dict[str, str] = {}
+    descriptions: Dict[str, str] = {}
+    categories: Dict[str, List[str]] = {}
+    uninstall: Dict[str, str] = {}
+    for entry in app_list.get("apps", []):
+        try:
+            name = entry["name"]
+            apps[name] = entry["install"]
+        except (KeyError, TypeError):
+            continue
+        if entry.get("description"):
+            descriptions[name] = entry["description"]
+        for category in entry.get("categories", []):
+            categories.setdefault(category, []).append(name)
+        if entry.get("uninstall"):
+            uninstall[name] = entry["uninstall"]
+    return apps, descriptions, categories, uninstall
 
-# --- Integrated Docker app installers (previously separate bash menu) ---
-APPS.update({
-    "CasaOS": bua("docker/casaos.sh"),
-    "UmbrelOS": bua("docker/umbrelos.sh"),
-    "Arch KDE (Webtop)": bua("docker/archkde.sh"),
-    "Ubuntu MATE (Webtop)": bua("docker/ubuntumate.sh"),
-    "Alpine XFCE (Webtop)": bua("docker/alpinexfce.sh"),
-    "Jellyfin": bua("docker/jellyfin.sh"),
-    "Emby": bua("docker/emby.sh"),
-    "Arr-In-One": bua("docker/arrinone.sh"),
-    "Arr-In-One Downloaders": bua("docker/arrdownloaders.sh"),
-})
-
-DESCRIPTIONS: Dict[str, str] = {
-    "Sunshine": "Self-hosted game streaming server (host for Moonlight).",
-    "Moonlight": "Stream PC games on Batocera.",
-    "NVIDIA Patcher": "Enable NVIDIA GPU support on Batocera.",
-    "Switch": "Nintendo Switch emulator for Batocera.",
-    "Tailscale": "VPN service for secure Batocera connections.",
-    "Telegraf": "Server agent for collecting and reporting metrics.",
-    "Wine Manager": "Manage Windows games with Wine on Batocera.",
-    "Wine Dependencies x86": "Install Windows x86 dependencies with Wine on Batocera.",
-    "Wine Dependencies x64": "Install Windows x64 dependencies with Wine on Batocera.",
-    "ShadPS4": "UPDATED 11/11 to ShadPS4Plus | Experimental PS4 streaming client.",
-    "Conty": "Standalone Linux distro container.",
-    "Minecraft": "Minecraft: Java or Bedrock Edition.",
-    "Prism Launcher": "Open source Minecraft launcher with mod management and multi-instance support.",
-    "Armagetron": "Tron-style light cycle game.",
-    "Clone Hero": "Guitar Hero clone for Batocera.",
-    "Stremio": "Stremio video streaming app for Batocera.",
-    "Vesktop": "Discord client for Batocera.",
-    "Endless Sky": "Space exploration game.",
-    "EGGNOGG+": "Award-winning 2-player sword fighting game.",
-    "Chiaki": "PS4/PS5 Remote Play client.",
-    "Chrome": "Google Chrome web browser.",
-    "Amazon Luna": "Amazon Luna game streaming client.",
-    "PortMaster": "Download and manage games on handhelds.",
-    "Greenlight": "Client for xCloud and Xbox streaming.",
-    "Heroic": "Epic, GOG, and Amazon Games launcher.",
-    "YouTube": "YouTube client for Batocera.",
-    "Netflix": "Netflix streaming app for Batocera.",
-    "IPTV Nator": "IPTV client for watching live TV.",
-    "Input Leap": "Share Keyboard and mouse with other OSes.",
-    "Firefox": "Mozilla Firefox browser.",
-    "Flathub": "Browse different Flatpak applications.",
-    "Java Runtime": "Install the Java Runtime on your batocera.",
-    "Spotify": "Spotify music streaming client.",
-    "CLI Tools": ">=V40! Various CLI tools including Docker, ZSH, Git etc.",
-    "Arcade Manager": "Manage arcade ROMs and games.",
-    "CS Portable": "Fan-made portable Counter-Strike.",
-    "Brave": "Privacy-focused Brave browser.",
-    "OpenRGB": "Manage RGB lighting on devices.",
-    "Warzone 2100": "Real-time strategy and tactics game.",
-    "Xonotic": "Fast-paced open-source arena shooter.",
-    "Itch.io": "Indy Game Marketplace",
-    "Android": "Android System for Batocera (EXPERIMENTAL).",
-    "Freej2me": "J2ME classic game emulator.",
-    "Desktop For Batocera": "Desktop for batocera. (Native)",
-    "Winconfig (Windows Game Fix)": "Tool to simplify dependencies/config for Windows games (DRL Edition)",
-    "Fightcade": "*UPDATED* Play classic arcade games online.",
-    "SuperTuxKart": "Free and open-source kart racer.",
-    "OpenRA": "Modernized RTS for Command & Conquer.",
-    "AzaharPlus": "AzaharPlus 3DS emulator - selectable alongside Azahar in EmulationStation.",
-    "Assault Cube": "Multiplayer first-person shooter game.",
-    "OBS": "Streaming and video recording software.",
-    "SuperTux": "2D platformer starring Tux the Linux mascot.",
-    "Free Droid RPG": "Open-source role-playing game for Batocera.",
-    "Disney Plus": "Disney+ streaming app for Batocera.",
-    "Twitch": "Twitch streaming app for Batocera.",
-    "NVIDIA Clocker": "A CLI/Ports program to overclock NVIDIA GPUs",
-    "7zip": "A free and open-source file archiver",
-    "qBittorrent": "Free and open-source BitTorrent client",
-    "ITGMania": "In The Groove-focused rhythm game, fork of StepMania with ITG improvements.",
-    "Ambermoon": "Ambermoon.net, a port of the classic",
-    "Custom Wine": "Download Wine/Proton versions",
-    "GParted": "Linux partition manager",
-    "JDownloader": "Download manager with background service",
-    "YARG": "Yet Another Rhythm Game",
-    "Plex": "Plex Media Player",
-    "OpenTTD": "Open source clone of Transport Tycoon Deluxe",
-    "Luanti": "Voxel sandbox (Minecraft-like)",
-    "Nazi Zombies Portable": "Classic Nazi Zombies on modern platforms",
-    "Parsec": "Remote desktop & game streaming",
-    "HBO Max": "HBO Max streaming app",
-    "Prime Video": "Amazon Prime Video streaming app",
-    "Crunchyroll": "Anime-focused streaming service",
-    "Mubi": "Curated cinema platform",
-    "Tidal": "HiFi music streaming",
-    "Everest": "Celeste Mod Loader",
-    "FreeTube": "Privacy-minded YouTube client",
-    "Super Mario X": "Fan-made Super Mario tribute",
-    "Celeste 64": "Free 3D platformer (Celeste)",
-    "Steam": "NEW BUILD DEC 25 - Steam Big Picture / Desktop",
-    "Lutris": "Open source game manager",
-    "FileZilla": "Cross-platform FTP client",
-    "PeaZip": "Free and open-source file archiver",
-    "VLC": "VLC media player",
-    "Docker": "Docker/Podman/Portainer AIO.",
-    "Bottles": "Run Windows software on Linux",
-    "Extras": "Various scripts, incl. motion support.",
-    "UltraStar": "UltraStar Deluxe karaoke",
-    "F1": "Ports shortcut to file manager",
-    "Desktop": "Desktop mode (Ports)",
-    "X11VNC": "Remote control over VNC",
-    "QEMU GA": "Guest agent for VMs",
-    "Bridge": "Chart downloader for CloneHero/YARG",
-    "Sandtrix": "Falling sand physics puzzle game",
-    "Soar": "Soar package manager (integrated with BUA)",
-    "Dark Mode": "Toggle F1 dark mode",
-    "VClean": "Service to clean the Batocera version string (removes extra flags)",
-    "Overlay Remove": "Remove the Batocera boot overlay file from /boot/boot/overlay.",
-    "RGSX": "Retro Game Sets Xtra. A free, user-friendly ROM downloader for Batocera",
-    "Raspberry Pi Imager": "Flash OS images to USB and SD cards.",
-    "Gamescope": "Full-screen gaming compositor with smoother performance, scaling & low-latency control.",
-    "npsget": "Helper to download games, DLCs, updates, themes and avatars from NoPayStation",
-    "ps3i": "Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation",
-    "chdress": "GUI tool to convert any disc image to/from CHD format",
-    "NetWatch": "Shows which devices connect to Batocera, with on-screen alerts and a web dashboard.",
-    "iso2zar": "GUI tool to convert Xbox[360] .iso files directly into .zar format",
-}
-
-# Descriptions for integrated Windows Freeware entries
-DESCRIPTIONS.update({
-    "AM2R": "Another Metroid 2 Remake - Fan remake",
-    "Maldita Castilla": "Arcade action platformer",
-    "Celeste": "Indie platformer classic",
-    "Donkey Kong Advanced": "Fan remake/port",
-    "Spelunky": "Rogue-like platformer",
-    "Zelda 2 PC Remake": "Fan remake of Zelda II",
-    "Zelda - Dungeons of Infinity": "Zelda-inspired project",
-    "Space Quest 3D": "Fan project tribute",
-    "Streets of Rage Remake": "Enhanced beat 'em up remake",
-    "Super Crate Box": "Fast-paced arcade platformer",
-    "Super Smash Flash 2": "Fan fighting game",
-    "TMNT Rescue Palooza": "Beat 'em up fan game",
-    "Crash Bandicoot - Back In Time": "Fan game",
-    "Sonic Triple Trouble 16bit": "Fan remake",
-    "Sonic 3D in 2D": "2D demake of Sonic 3D Blast",
-    "SHRUBNAUT": "Space exploration and mining game",
-    "Secret Maryo Chronicles": "Super Mario-inspired platformer",
-    "SCP Containment Breach": "SCP Foundation horror survival game",
-    "Zero-K": "Free multiplayer real-time strategy game",
-    "Modern Modern Chef": "Indie title",
-    "Sonic Robo Blast 2": "Doom-based Sonic fangame",
-    "Sonic Time Twisted": "Time-traveling Sonic fan game",
-    "Super Smash Bros CMC+": "Fan crossover",
-        "Unreal Tournament": "Classic competitive first-person shooter",
-})
-
-# Descriptions for integrated Docker apps
-DESCRIPTIONS.update({
-    "CasaOS": "Simple home server UI and app store",
-    "UmbrelOS": "Self-hosted OS with app marketplace",
-    "Arch KDE (Webtop)": "Arch Linux desktop in browser (noVNC)",
-    "Ubuntu MATE (Webtop)": "Ubuntu MATE desktop in browser (noVNC)",
-    "Alpine XFCE (Webtop)": "Alpine XFCE desktop in browser (noVNC)",
-    "Jellyfin": "Open-source media server",
-    "Jellyfin Player": "Jellyfin media player client with controller support",
-    "Emby": "Media server and streaming",
-    "Arr-In-One": "All-in-one media management stack",
-    "Arr-In-One Downloaders": "Downloaders companion stack",
-})
-
-CATEGORIES: Dict[str, List[str]] = {
-    "Games": [
-        "Minecraft", "Prism Launcher", "Armagetron", "Clone Hero", "Endless Sky", "EGGNOGG+", "CS Portable",
-        "Warzone 2100", "Xonotic", "Fightcade", "SuperTuxKart", "OpenRA",
-        "Assault Cube", "SuperTux", "Free Droid RPG", "ITGMania", "Ambermoon",
-        "YARG", "OpenTTD", "Luanti", "Super Mario X", "Celeste 64", "UltraStar",
-        "Sandtrix"
-    ],
-    "Windows Freeware": [
-        "AM2R",
-        "Maldita Castilla",
-        "Celeste",
-        "Donkey Kong Advanced",
-        "Spelunky",
-        "Zelda 2 PC Remake",
-        "Zelda - Dungeons of Infinity",
-        "Space Quest 3D",
-        "Streets of Rage Remake",
-        "Super Crate Box",
-        "Super Smash Flash 2",
-        "TMNT Rescue Palooza",
-        "Crash Bandicoot - Back In Time",
-        "Sonic Triple Trouble 16bit",
-        "Sonic 3D in 2D",
-        "SHRUBNAUT",
-        "Secret Maryo Chronicles",
-        "SCP Containment Breach",
-        "Zero-K",
-        "Modern Modern Chef",
-        "Nazi Zombies Portable",
-        "Sonic Robo Blast 2",
-        "Sonic Time Twisted",
-        "Super Smash Bros CMC+",
-        "Unreal Tournament",
-    ],
-    "Docker Menu": [
-        "CasaOS",
-        "UmbrelOS",
-        "Arch KDE (Webtop)",
-        "Ubuntu MATE (Webtop)",
-        "Alpine XFCE (Webtop)",
-        "Jellyfin",
-        "Emby",
-        "Arr-In-One",
-        "Arr-In-One Downloaders",
-    ],
-    "Game Utilities": [
-        "Android", "Amazon Luna", "AzaharPlus", "PortMaster", "Greenlight", "ShadPS4",
-        "Chiaki", "Heroic", "Switch", "Parsec", "Java Runtime", "Freej2me",
-        "Steam", "Lutris", "Bottles", "Sunshine", "Moonlight", "Bridge",
-        "Itch.io", "Everest", "RGSX", "npsget", "ps3i", "chdress", "iso2zar"
-    ],
-    "System Utilities": [
-        "Desktop For Batocera", "Winconfig (Windows Game Fix)", "F1", "Tailscale",
-        "Telegraf", "Wine Manager", "Vesktop", "Chrome", "YouTube", "Netflix",
-        "Input Leap", "IPTV Nator", "Firefox", "Spotify", "Arcade Manager", "Brave",
-        "OpenRGB", "OBS", "Stremio", "Disney Plus", "Twitch", "7zip", "qBittorrent",
-        "GParted", "Plex", "HBO Max", "Prime Video", "Crunchyroll",
-        "Mubi", "Tidal", "FreeTube", "Jellyfin Player", "FileZilla", "PeaZip",
-        "Desktop", "Flathub", "JDownloader", "Raspberry Pi Imager", "NetWatch"
-    ],
-    "Developer Tools": [
-        "NVIDIA Patcher", "Conty", "CLI Tools", "NVIDIA Clocker", "Docker",
-        "Extras", "X11VNC", "QEMU GA", "Soar", "Dark Mode", "VClean", "Overlay Remove"
-    ],
-}
+APP_LIST = load_app_list()
+CHANGELOG = str(APP_LIST.get("changelog", "")).strip()
+APPS, DESCRIPTIONS, CATEGORIES, UNINSTALL = build_app_tables(APP_LIST)
 
 def get_top_level() -> List[Tuple[str, str]]:
     """Generate top-level menu items with current language translations"""
@@ -4975,8 +4601,8 @@ class UpdaterScreen(BaseScreen):
         if not cmd:
             return
 
-        # Generate uninstall command
-        uninstall_cmd = get_uninstall_command(cmd, app)
+        # The uninstall command comes from the app list
+        uninstall_cmd = UNINSTALL.get(app)
         if not uninstall_cmd:
             push_screen(InfoDialog(t("uninstall"), [t("uninstall_error")]))
             return
