@@ -1189,12 +1189,30 @@
     },
     {
       "name": "X11VNC",
-      "description": "Remote control over VNC",
+      "description": "Remote control over VNC (X11)",
       "categories": [
         "Developer Tools"
       ],
       "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/x11vnc/x11vnc.sh | bash",
       "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/x11vnc/x11vnc_uninstall.sh | bash"
+    },
+    {
+      "name": "WayVNC",
+      "description": "WayVNC for remote access (Wayland)",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/wayvnc/wayvnc.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/wayvnc/wayvnc_uninstall.sh | bash"
+    },
+    {
+      "name": "WayVNC Headless",
+      "description": "WayVNC for headless systems (Wayland)",
+      "categories": [
+        "Developer Tools"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/wayvnc_headless/wayvnc_headless.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/wayvnc_headless/wayvnc_headless_uninstall.sh | bash"
     },
     {
       "name": "Xonotic",

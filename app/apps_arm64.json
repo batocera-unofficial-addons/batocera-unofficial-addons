@@ -381,7 +381,7 @@
     },
     {
       "name": "WayVNC",
-      "description": "WayVNC for remote access",
+      "description": "WayVNC for remote access (Wayland)",
       "categories": [
         "Developer Tools"
       ],
@@ -390,7 +390,7 @@
     },
     {
       "name": "WayVNC Headless",
-      "description": "WayVNC for headless systems",
+      "description": "WayVNC for headless systems (Wayland)",
       "categories": [
         "Developer Tools"
       ],

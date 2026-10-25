@@ -3,7 +3,7 @@
 | File | Last Commit Date |
 |------|------------------|
 | `.dep/mousemove.sh` | 2025-05-22 18:53:29 +0100 |
-| `.github/scripts/generate_apps_json.py` | 2026-10-18 16:05:09 -0400 |
+| `.github/scripts/check_apps_json.py` | 2026-10-24 11:38:53 -0400 |
 | `.github/scripts/update_script_dates.py` | 2025-11-27 21:41:34 +0000 |
 | `7zip/7zip.sh` | 2025-05-22 17:09:18 +0100 |
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -28,9 +28,9 @@
 | `app/BatoceraUnofficialAddons_ARM64.sh` | 2025-05-22 17:15:31 +0100 |
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2026-07-02 16:31:40 -0300 |
-| `app/bua_cli.py` | 2026-10-18 16:05:09 -0400 |
-| `app/bua_installerarm64.py` | 2026-10-23 12:35:22 -0400 |
-| `app/bua_installerx86.py` | 2026-10-23 12:35:22 -0400 |
+| `app/bua_cli.py` | 2026-10-24 14:00:37 -0400 |
+| `app/bua_installerarm64.py` | 2026-10-25 22:40:48 +0000 |
+| `app/bua_installerx86.py` | 2026-10-25 22:40:48 +0000 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -281,8 +281,8 @@
 | `vlc/vlc_uninstall.sh` | 2026-10-18 16:24:04 -0400 |
 | `warzone2100/warzone2100.sh` | 2025-05-22 18:20:52 +0100 |
 | `warzone2100/warzone2100_uninstall.sh` | 2026-10-24 09:09:58 -0400 |
-| `wayvnc/wayvnc.sh` | 2025-05-22 18:21:12 +0100 |
-| `wayvnc_headless/wayvnc_headless.sh` | 2025-05-22 18:21:43 +0100 |
+| `wayvnc/wayvnc.sh` | 2026-10-25 22:40:49 +0000 |
+| `wayvnc_headless/wayvnc_headless.sh` | 2026-10-25 22:40:49 +0000 |
 | `windows/am2r.sh` | 2025-11-25 01:37:51 +0000 |
 | `windows/castilla.sh` | 2025-05-22 18:22:14 +0100 |
 | `windows/castilla_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -336,7 +336,7 @@
 | `winemanager/winemanager.sh` | 2025-01-07 21:03:20 -0300 |
 | `wps-office/wps-office.sh` | 2026-05-04 21:46:58 +0100 |
 | `wps-office/wps-office_uninstall.sh` | 2026-05-04 21:46:58 +0100 |
-| `x11vnc/x11vnc.sh` | 2025-05-22 13:08:04 -0400 |
+| `x11vnc/x11vnc.sh` | 2026-10-25 22:40:49 +0000 |
 | `x11vnc/x11vnc_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `xonotic/xonotic.sh` | 2025-05-22 13:05:59 -0400 |
 | `xonotic/xonotic_uninstall.sh` | 2026-10-24 09:10:15 -0400 |
