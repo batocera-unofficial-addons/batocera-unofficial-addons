@@ -281,8 +281,10 @@
 | `vlc/vlc_uninstall.sh` | 2026-10-18 16:24:04 -0400 |
 | `warzone2100/warzone2100.sh` | 2025-05-22 18:20:52 +0100 |
 | `warzone2100/warzone2100_uninstall.sh` | 2026-10-24 09:09:58 -0400 |
-| `wayvnc/wayvnc.sh` | 2026-10-25 22:40:49 +0000 |
-| `wayvnc_headless/wayvnc_headless.sh` | 2026-10-25 22:40:49 +0000 |
+| `wayvnc/wayvnc.sh` | 2026-10-25 22:40:48 +0000 |
+| `wayvnc/wayvnc_uninstall.sh` | 2026-10-25 22:54:38 +0000 |
+| `wayvnc_headless/wayvnc_headless.sh` | 2026-10-25 22:40:48 +0000 |
+| `wayvnc_headless/wayvnc_headless_uninstall.sh` | 2026-10-25 22:54:38 +0000 |
 | `windows/am2r.sh` | 2025-11-25 01:37:51 +0000 |
 | `windows/castilla.sh` | 2025-05-22 18:22:14 +0100 |
 | `windows/castilla_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -336,8 +338,8 @@
 | `winemanager/winemanager.sh` | 2025-01-07 21:03:20 -0300 |
 | `wps-office/wps-office.sh` | 2026-05-04 21:46:58 +0100 |
 | `wps-office/wps-office_uninstall.sh` | 2026-05-04 21:46:58 +0100 |
-| `x11vnc/x11vnc.sh` | 2026-10-25 22:40:49 +0000 |
-| `x11vnc/x11vnc_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `x11vnc/x11vnc.sh` | 2026-10-25 22:40:48 +0000 |
+| `x11vnc/x11vnc_uninstall.sh` | 2026-10-25 22:54:39 +0000 |
 | `xonotic/xonotic.sh` | 2025-05-22 13:05:59 -0400 |
 | `xonotic/xonotic_uninstall.sh` | 2026-10-24 09:10:15 -0400 |
 | `yarg/yarg.sh` | 2026-04-17 14:55:40 +0100 |

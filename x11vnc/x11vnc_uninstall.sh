@@ -8,14 +8,20 @@ echo "Uninstalling: X11VNC"
 echo "========================================="
 echo ""
 
-# Remove installed files
-if [ -f "/userdata/system/add-ons/x11vnc.tar.gz" ]; then
-    echo "Removing file: /userdata/system/add-ons/x11vnc.tar.gz"
-    rm -f "/userdata/system/add-ons/x11vnc.tar.gz"
-fi
+# Stop and disable service
+batocera-services stop x11vnc >/dev/null 2>&1
+batocera-services disable x11vnc >/dev/null 2>&1
+
+# Remove service script
 if [ -f "/userdata/system/services/x11vnc" ]; then
     echo "Removing file: /userdata/system/services/x11vnc"
     rm -f "/userdata/system/services/x11vnc"
+fi
+
+# Remove addon directory
+if [ -d "/userdata/system/add-ons/x11vnc" ]; then
+    echo "Removing directory: /userdata/system/add-ons/x11vnc"
+    rm -rf "/userdata/system/add-ons/x11vnc"
 fi
 
 # Remove created directories (deepest first)
