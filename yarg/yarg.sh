@@ -9,7 +9,7 @@ LOGO_PATH="${PORTS_DIR}/images/yarg-logo.png"
 PORT_SCRIPT="${PORTS_DIR}/${APP_NAME}.sh"
 DESKTOP_FILE="/usr/share/applications/YARC-Launcher.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/yarg/YARC-Launcher.desktop"
-ICON_URL="https://static.wikitide.net/yargwiki/3/3c/YARG_Icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/yarg/extra/icon.png"
 
 # Step 1: Detect architecture
 echo "Detecting system architecture..."
@@ -118,7 +118,8 @@ chmod +x "$PORT_SCRIPT"
 
 # Step 6: Add to gamelist.xml
 echo "Downloading YARG logo..."
-curl -L -o "$LOGO_PATH" "https://yarg.in/twitter-image.png"
+mkdir -p "${PORTS_DIR}/images"
+curl -fL -o "$LOGO_PATH" "$ICON_URL" || rm -f "$LOGO_PATH"
 
 echo "Adding YARG to gamelist.xml..."
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
