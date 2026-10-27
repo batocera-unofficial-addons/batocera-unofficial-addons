@@ -13,6 +13,10 @@ if [ -f "/userdata/roms/ports/AmazonLuna.sh" ]; then
     echo "Removing file: /userdata/roms/ports/AmazonLuna.sh"
     rm -f "/userdata/roms/ports/AmazonLuna.sh"
 fi
+if [ -f "/userdata/roms/ports/AmazonLuna.sh.keys" ]; then
+    echo "Removing file: /userdata/roms/ports/AmazonLuna.sh.keys"
+    rm -f "/userdata/roms/ports/AmazonLuna.sh.keys"
+fi
 if [ -f "/userdata/roms/ports/images/amazonluna.png" ]; then
     echo "Removing file: /userdata/roms/ports/images/amazonluna.png"
     rm -f "/userdata/roms/ports/images/amazonluna.png"

@@ -1,109 +1,90 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# Variables
+APPNAME="Amazon Luna"
+APPDIR="/userdata/system/add-ons/google-chrome"
+APPPATH="$APPDIR/GoogleChrome.AppImage"
+CHROME_INSTALLER_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh"
+PORT_SCRIPT="/userdata/roms/ports/AmazonLuna.sh"
+ICON_PATH="/userdata/roms/ports/images/amazonluna.png"
+KEYS_PATH="/userdata/roms/ports/AmazonLuna.sh.keys"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/amazonluna/extra/amazonluna.png"
+KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/amazonluna/extra/AmazonLuna.sh.keys"
+GAMELIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 1: Detect system architecture
 echo "Detecting system architecture..."
 arch=$(uname -m)
-
-if [ "$arch" == "x86_64" ]; then
-    echo "Architecture: x86_64 detected."
-    app_url="https://github.com/zencodes1/amazonluna-client/releases/download/release/amazonluna-electron-client.tar.xz"
-else
+if [ "$arch" != "x86_64" ]; then
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
 fi
 
-# Step 2: Download the application
-echo "Downloading Amazon Luna client from $app_url..."
-app_dir="/userdata/system/add-ons/amazonluna"
-mkdir -p "$app_dir"
-temp_dir="${app_dir}/temp"
-mkdir -p "$temp_dir"
+# Step 2: Show dialog to confirm
+dialog --title "Install $APPNAME" \
+  --yesno "This app requires you to install Google Chrome first.\nProceed with the setup?" 10 50
 
-wget -q --show-progress -O "${temp_dir}/amazonluna.tar.xz" "$app_url"
-if [ $? -ne 0 ]; then
-    echo "Failed to download Amazon Luna client. Exiting."
-    exit 1
+# Check the user's choice
+if [[ $? -ne 0 ]]; then
+  echo "Installation canceled by user."
+  exit 1
 fi
 
-# Step 3: Extract the application
-echo "Extracting Amazon Luna client..."
-tar -xf "${temp_dir}/amazonluna.tar.xz" -C "$temp_dir"
-mv "${temp_dir}/amazonluna"/* "$app_dir/"
-chmod a+x "${app_dir}/AmazonLuna"
-rm -rf "$temp_dir"
-echo "Amazon Luna client installed successfully."
+clear
+# Step 3: Check if Chrome is installed
+if [[ ! -f $APPPATH ]]; then
+  echo "Google Chrome is not installed. Downloading and installing..."
+  mkdir -p "$APPDIR"  # Ensure the directory exists
+  curl -L -o "$APPDIR/chrome.sh" "$CHROME_INSTALLER_URL"
+  chmod +x "$APPDIR/chrome.sh"
+  echo "Running the Google Chrome installer..."
+  bash "$APPDIR/chrome.sh"
+  if [[ ! -f $APPPATH ]]; then
+    echo "Google Chrome installation failed. Exiting."
+    exit 1
+  fi
+fi
 
-# Step 4: Create launcher script
-echo "Creating Amazon Luna script in Ports..."
-ports_dir="/userdata/roms/ports"
-mkdir -p "$ports_dir"
-cat << 'EOF' > "${ports_dir}/AmazonLuna.sh"
+# Remove leftovers from the old Electron client (download source no longer exists)
+rm -rf "/userdata/system/add-ons/amazonluna/temp"
+
+# Step 4: Create the ports script
+mkdir -p "$(dirname "$PORT_SCRIPT")"  # Ensure the ports directory exists
+mkdir -p "$(dirname "$ICON_PATH")"   # Ensure the images directory exists
+
+# Controllers reach Luna through Chrome's Gamepad API; the user agent
+# avoids Luna's unsupported-browser page on Linux.
+cat << EOF > $PORT_SCRIPT
 #!/bin/bash
-
-# Environment setup
-export $(cat /proc/1/environ | tr '\0' '\n')
-export DISPLAY=:0.0
-export HOME="/userdata/system/add-ons/amazonluna/home"
-export XDG_CONFIG_HOME="/userdata/system/add-ons/amazonluna/config"
-export XDG_DATA_HOME="/userdata/system/add-ons/amazonluna/home"
-export XDG_CURRENT_DESKTOP=XFCE
-export DESKTOP_SESSION=XFCE
-export LD_LIBRARY_PATH="/userdata/system/add-ons/.dep:${LD_LIBRARY_PATH}"
-
-# Ensure required directories exist
-mkdir -p "/userdata/system/add-ons/amazonluna/home"
-mkdir -p "/userdata/system/add-ons/amazonluna/config"
-mkdir -p "/userdata/system/add-ons/amazonluna/roms"
-
-# Configure system settings
-sysctl -w vm.max_map_count=2097152
-ulimit -H -n 819200
-ulimit -S -n 819200
-ulimit -H -l 61634
-ulimit -S -l 61634
-ulimit -H -s 61634
-ulimit -S -s 61634
-
-# Paths
-app_bin="/userdata/system/add-ons/amazonluna/AmazonLuna"
-log_dir="/userdata/system/logs"
-log_file="${log_dir}/amazonluna.log"
-
-# Ensure log directory exists
-mkdir -p "${log_dir}"
-
-# Append all output to the log file
-exec &> >(tee -a "$log_file")
-echo "$(date): Launching Amazon Luna"
-
-# Launch Amazon Luna
-if [ -x "${app_bin}" ]; then
-    cd "/userdata/system/add-ons/amazonluna"
-    ./AmazonLuna --no-sandbox --test-type "$@" > "${log_file}" 2>&1
-    echo "Amazon Luna exited."
-else
-    echo "AmazonLuna binary not found or not executable."
-    exit 1
-fi
+DISPLAY=:0.0 $APPPATH --no-sandbox --test-type --start-fullscreen \\
+  --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36" \\
+  'https://luna.amazon.com/'
 EOF
 
-chmod +x "${ports_dir}/AmazonLuna.sh"
+chmod +x $PORT_SCRIPT
 
-# Step 5: Refresh the Ports menu
+# Step 5: Download the icon
+echo "Downloading Amazon Luna logo..."
+curl -fL -o "$ICON_PATH" "$LOGO_URL"
+
+# Step 6: Download the key mapping file (Hotkey + Start closes Luna; all other
+# buttons are left to the game)
+echo "Downloading key mapping file..."
+curl -fL -o "$KEYS_PATH" "$KEYS_URL"
+
+# Step 7: Add Amazon Luna entry to gamelist.xml (replace any old entry)
+echo "Updating gamelist.xml..."
+if [[ -f "$GAMELIST" ]]; then
+  xmlstarlet ed -d "/gameList/game[path='./AmazonLuna.sh']" \
+    -s "/gameList" -t elem -n "game" -v "" \
+    -s "/gameList/game[last()]" -t elem -n "path" -v "./AmazonLuna.sh" \
+    -s "/gameList/game[last()]" -t elem -n "name" -v "$APPNAME" \
+    -s "/gameList/game[last()]" -t elem -n "image" -v "./images/amazonluna.png" \
+    "$GAMELIST" > "${GAMELIST}.tmp" && mv "${GAMELIST}.tmp" "$GAMELIST"
+fi
+
+# Step 8: Refresh the Ports menu
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
-# Download the image
-echo "Downloading Amazon Luna logo..."
-curl -L -o /userdata/roms/ports/images/amazonluna.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/amazonluna/extra/amazonluna.png
-echo "Adding logo to Amazon Luna entry in gamelist.xml..."
-xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-  -s "/gameList/game[last()]" -t elem -n "path" -v "./AmazonLuna.sh" \
-  -s "/gameList/game[last()]" -t elem -n "name" -v "Amazon Luna" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/amazonluna.png" \
-  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
-  
-curl http://127.0.0.1:1234/reloadgames
-
-echo
-echo "Installation complete! You can now launch Amazon Luna from the Ports menu."
+echo "$APPNAME port setup completed. You can now access Amazon Luna through Ports!"
