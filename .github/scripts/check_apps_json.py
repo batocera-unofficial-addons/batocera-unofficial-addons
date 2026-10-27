@@ -71,8 +71,6 @@ KNOWN_MISSING_UNINSTALL = {
         # No uninstall script in the repo
         "Overlay Remove",
         "Raspberry Pi Imager",
-        "WayVNC",
-        "WayVNC Headless",
         # Points at an -arm64 name; the add-on's uninstaller has another name
         "Amazon Luna",
         "Greenlight",
