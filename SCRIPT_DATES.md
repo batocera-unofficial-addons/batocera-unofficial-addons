@@ -3,11 +3,12 @@
 | File | Last Commit Date |
 |------|------------------|
 | `.dep/mousemove.sh` | 2025-05-22 18:53:29 +0100 |
-| `.github/scripts/check_apps_json.py` | 2026-10-24 11:38:53 -0400 |
+| `.github/scripts/check_apps_json.py` | 2026-10-27 01:34:21 +0000 |
 | `.github/scripts/update_script_dates.py` | 2025-11-27 21:41:34 +0000 |
 | `7zip/7zip.sh` | 2025-05-22 17:09:18 +0100 |
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Android/Install_Android.sh` | 2026-05-04 21:46:58 +0100 |
+| `Android/Install_Android_uninstall.sh` | 2026-10-26 23:57:00 -0400 |
 | `Desktop_for_Batocera/Install_Desktop.sh` | 2026-05-09 21:26:19 +0100 |
 | `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2026-05-11 11:35:15 +0100 |
 | `Freej2me/Install_j2me-old .sh` | 2025-03-29 15:06:00 -0300 |
@@ -18,8 +19,8 @@
 | `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config - old.sh` | 2025-05-14 19:17:39 -0300 |
 | `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config.sh` | 2025-05-27 17:37:55 -0300 |
 | `amazonluna/amazonluna-arm64.sh` | 2025-05-22 17:11:10 +0100 |
-| `amazonluna/amazonluna.sh` | 2025-05-22 17:10:51 +0100 |
-| `amazonluna/amazonluna_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `amazonluna/amazonluna.sh` | 2026-10-27 03:20:22 +0000 |
+| `amazonluna/amazonluna_uninstall.sh` | 2026-10-27 03:20:22 +0000 |
 | `ambermoon/ambermoon.sh` | 2026-04-17 14:03:29 +0100 |
 | `ambermoon/ambermoon_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `app/BUA.sh` | 2025-11-20 02:19:28 +0000 |
@@ -29,8 +30,8 @@
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2026-07-02 16:31:40 -0300 |
 | `app/bua_cli.py` | 2026-10-24 14:00:37 -0400 |
-| `app/bua_installerarm64.py` | 2026-10-25 22:40:48 +0000 |
-| `app/bua_installerx86.py` | 2026-10-25 22:40:48 +0000 |
+| `app/bua_installerarm64.py` | 2026-10-26 14:15:44 +0000 |
+| `app/bua_installerx86.py` | 2026-10-26 14:18:54 +0000 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -113,6 +114,7 @@
 | `docker/umbrelos.sh` | 2025-05-22 17:42:21 +0100 |
 | `docker/umbrelos_uninstall.sh` | 2026-10-18 16:09:09 -0400 |
 | `eggnoggplus/eggnoggplus.sh` | 2025-11-25 02:39:23 +0000 |
+| `eggnoggplus/eggnoggplus_uninstall.sh` | 2026-10-26 23:57:14 -0400 |
 | `endlesssky/endlesssky.sh` | 2026-04-17 14:03:29 +0100 |
 | `endlesssky/endlesssky_uninstall.sh` | 2026-10-23 12:37:08 -0400 |
 | `everest/everest.sh` | 2025-11-25 15:20:38 +0000 |
@@ -141,6 +143,7 @@
 | `freetube/freetube.sh` | 2025-11-28 16:44:12 +0000 |
 | `freetube/freetube_uninstall.sh` | 2026-10-23 12:37:46 -0400 |
 | `gamescope/gamescope.sh` | 2025-12-09 23:14:24 +0000 |
+| `gamescope/gamescope_uninstall.sh` | 2026-10-26 23:57:27 -0400 |
 | `gparted/gparted.sh` | 2025-12-11 02:16:04 +0000 |
 | `gparted/gparted_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `greenlight/greenlight.sh` | 2026-04-17 14:03:29 +0100 |
@@ -151,6 +154,7 @@
 | `heroic/create_game_launchers.sh` | 2025-01-04 14:59:32 +0000 |
 | `heroic/create_game_launchers_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `heroic/heroic.sh` | 2026-08-21 03:40:15 +0200 |
+| `heroic/heroic_uninstall.sh` | 2026-10-26 23:57:45 -0400 |
 | `heroic/monitor_heroic.sh` | 2025-01-04 05:18:01 +0000 |
 | `heroic/zenitysym.sh` | 2025-01-04 18:30:39 +0000 |
 | `hydra/extra/aria2-sync.sh` | 2025-01-07 21:38:25 +0000 |
@@ -178,7 +182,7 @@
 | `luanti/luanti_uninstall.sh` | 2026-10-24 09:05:41 -0400 |
 | `lutris/extra/create-lutris-launchers.sh` | 2026-05-04 21:46:58 +0100 |
 | `lutris/lutris.sh` | 2025-11-20 16:56:24 +0000 |
-| `lutris/lutris2.sh` | 2026-05-04 21:46:58 +0100 |
+| `lutris/lutris2.sh` | 2026-10-27 01:34:21 +0000 |
 | `lutris/lutris2_uninstall.sh` | 2026-05-04 21:46:58 +0100 |
 | `lutris/lutris_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `minecraft/bedrock.sh` | 2026-04-17 14:32:22 +0100 |
@@ -228,6 +232,9 @@
 | `qbittorrent/qbittorrent_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `qga/qga.sh` | 2025-05-22 18:10:40 +0100 |
 | `qga/qga_uninstall.sh` | 2026-10-18 16:29:19 -0400 |
+| `quiverlauncher/extra/create-quiver-launchers.sh` | 2026-10-27 03:20:22 +0000 |
+| `quiverlauncher/quiverlauncher.sh` | 2026-10-27 03:20:22 +0000 |
+| `quiverlauncher/quiverlauncher_uninstall.sh` | 2026-10-27 03:20:22 +0000 |
 | `rpi/rpi.sh` | 2025-11-24 21:18:47 +0000 |
 | `sandtrix/sandtrix.sh` | 2025-11-21 02:44:08 +0000 |
 | `shadps4plus/create_game_launchers.sh` | 2025-11-11 02:26:59 +0000 |
@@ -342,7 +349,7 @@
 | `x11vnc/x11vnc_uninstall.sh` | 2026-10-25 22:54:37 +0000 |
 | `xonotic/xonotic.sh` | 2025-05-22 13:05:59 -0400 |
 | `xonotic/xonotic_uninstall.sh` | 2026-10-24 09:10:15 -0400 |
-| `yarg/yarg.sh` | 2026-04-17 14:55:40 +0100 |
+| `yarg/yarg.sh` | 2026-10-27 03:20:22 +0000 |
 | `yarg/yarg_uninstall.sh` | 2026-10-24 09:10:28 -0400 |
 | `youtubetv/youtubetv.sh` | 2025-05-22 13:04:00 -0400 |
 | `youtubetv/youtubetv_uninstall.sh` | 2025-11-13 20:06:15 +0000 |
