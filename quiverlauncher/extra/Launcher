@@ -1,0 +1,36 @@
+#!/bin/bash
+# Starts Quiver Launcher and keeps the ES launchers in /userdata/roms/quiver
+# in sync with the apps installed through it.
+
+export $(cat /proc/1/environ | tr '\0' '\n')
+export DISPLAY=:0.0
+
+app_dir="/userdata/system/add-ons/quiverlauncher"
+app_image="${app_dir}/quiverlauncher.AppImage"
+generator="${app_dir}/create-quiver-launchers.sh"
+log_file="/userdata/system/logs/quiverlauncher.log"
+
+mkdir -p "$(dirname "$log_file")"
+exec &> >(tee -a "$log_file")
+echo "$(date): Launching Quiver Launcher"
+
+if [ ! -x "$app_image" ]; then
+    echo "quiverlauncher.AppImage not found or not executable."
+    exit 1
+fi
+
+# Pick up apps while Quiver is open
+if [ -x "$generator" ]; then
+    "$generator" &
+    generator_pid=$!
+fi
+
+cd "$app_dir"
+./quiverlauncher.AppImage "$@"
+echo "Quiver Launcher exited."
+
+# Final pass for anything installed or removed just before exit
+if [ -n "$generator_pid" ]; then
+    kill "$generator_pid" 2>/dev/null
+    "$generator" --once
+fi
