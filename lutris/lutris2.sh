@@ -17,6 +17,85 @@ echo "Downloading Lutris..."
 
 mkdir -p /userdata/system/add-ons/lutris
 
+###########################################################
+# Migrate data from old build (FlatImage container)       #
+###########################################################
+# The old build was a FlatImage without the "home" permission, so everything
+# Lutris wrote to its home (config, library, runners, wine prefixes in ~/Games)
+# lives in the container overlay. Move that home into the new HOME and point
+# game configs at the new location.
+NEW_HOME="/userdata/system/add-ons/lutris"
+CONFIG_DIR="/userdata/system/add-ons/lutris/.lutris.config"
+UPPER="$CONFIG_DIR/overlays/upperdir"
+MIGRATE_FAILED=0
+MIGRATED=0
+
+# Move everything in $1 into $2, merging directories. Never overwrites:
+# anything already at the destination is left in the source.
+merge_move() {
+    local src="$1" dest="$2" entry name
+    mkdir -p "$dest" || { MIGRATE_FAILED=1; return; }
+    for entry in "$src"/* "$src"/.[!.]* "$src"/..?*; do
+        [ -e "$entry" ] || [ -L "$entry" ] || continue
+        name="${entry##*/}"
+        if [ ! -e "$dest/$name" ] && [ ! -L "$dest/$name" ]; then
+            mv "$entry" "$dest/$name" || MIGRATE_FAILED=1
+        elif [ -d "$entry" ] && [ ! -L "$entry" ] && [ -d "$dest/$name" ]; then
+            merge_move "$entry" "$dest/$name"
+        else
+            echo "  Skipped (already exists): $dest/$name"
+            MIGRATE_FAILED=1
+        fi
+    done
+}
+
+# Old home is /userdata/system (Batocera's HOME) or /home/<user> if the image set its own
+for old_home in "$UPPER/userdata/system" "$UPPER"/home/*; do
+    [ -d "$old_home/.local/share/lutris" ] || [ -d "$old_home/.config/lutris" ] || continue
+    old_path="${old_home#$UPPER}"
+    echo "Old Lutris data detected in $old_path — migrating to $NEW_HOME..."
+    # Drop overlay whiteouts (char devices meaning "deleted") before moving
+    find "$old_home" -type c -delete 2>/dev/null
+    merge_move "$old_home" "$NEW_HOME"
+    MIGRATED=1
+
+    # Rewrite paths in game configs and the library database
+    for yml in "$NEW_HOME"/.local/share/lutris/games/*.yml "$NEW_HOME"/.config/lutris/games/*.yml; do
+        [ -f "$yml" ] && sed -i "s#$old_path/#$NEW_HOME/#g" "$yml"
+    done
+    if [ -f "$NEW_HOME/.local/share/lutris/pga.db" ]; then
+        python3 - "$NEW_HOME/.local/share/lutris/pga.db" "$old_path/" "$NEW_HOME/" <<'PYEOF' || MIGRATE_FAILED=1
+import sqlite3, sys
+con = sqlite3.connect(sys.argv[1])
+con.execute("UPDATE games SET directory = replace(directory, ?, ?)", (sys.argv[2], sys.argv[3]))
+con.commit()
+con.close()
+PYEOF
+    fi
+done
+
+# Remove the old container only if user data was found and all of it moved out
+if [ -d "$CONFIG_DIR" ]; then
+    if [ "$MIGRATED" -eq 1 ] && [ "$MIGRATE_FAILED" -eq 0 ]; then
+        echo "Removing old .lutris.config..."
+        rm -rf "$CONFIG_DIR"
+    elif [ "$MIGRATED" -eq 1 ]; then
+        echo "Not all old data was migrated — .lutris.config kept at $CONFIG_DIR"
+    fi
+fi
+
+# Old build put a launcher in Ports; Lutris now has its own system
+if [ -f /userdata/roms/ports/Lutris.sh ]; then
+    echo "Removing old Lutris Ports launcher..."
+    rm -f /userdata/roms/ports/Lutris.sh /userdata/roms/ports/Lutris.sh.keys
+    if [ -f /userdata/roms/ports/gamelist.xml ]; then
+        xmlstarlet ed -d "/gameList/game[path='./Lutris.sh']" \
+          /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp \
+          && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+    fi
+fi
+###########################################################
+
 lutris_file="/userdata/system/add-ons/lutris/lutris"
 
 # Always replace — ensures new version is downloaded cleanly
