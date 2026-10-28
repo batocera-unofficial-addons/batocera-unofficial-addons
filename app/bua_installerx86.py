@@ -989,7 +989,7 @@ def ensure_bua_updater_support():
     root = Path("/userdata/system/add-ons/bua")
     support_sha = "64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90"
     bundle_sha = "6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76"
-    upstream = "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/"
+    upstream = "https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/"
     if root.is_symlink():
         return "failed"
     try:
