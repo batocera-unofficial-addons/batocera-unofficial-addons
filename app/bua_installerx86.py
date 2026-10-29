@@ -489,7 +489,7 @@ def verify_bua_active_backend(root, trusted_bundle, bundle_sha256):
         compatibility = json.loads(contract.read_text())
 
         if metadata.get("package_sha256") != (
-            "64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90"
+            ({"6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76": "64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90", "33029b9dd5c97c45eff2ad67180acc2ea6b9359e17c043cbdf5f6c230ed2ec41": "129e2c603756c70c590b9c7273b56c167b12f070b1d0f8c1a21ec7fc2b1d58f0", "1c460d66d68984b1b70b1eec1e8ed66ca08c0a9fa219df22994e762f7e015929": "4e87f6333176d75bf5e8429565c6ed08166dc051ccd7691fccb8b709a9e72b14", "435cb39fe5b62cf97a39ab9d17852dc1dd5611c93d826661d91a2e958f448249": "c8f11750bcf6534df8a44c22f6487ee8ab207b6798ac5f3efa2a9aae44eb05e5"}.get(bundle_sha256))
         ):
             return False, "Unexpected updater package identity"
 
@@ -551,7 +551,7 @@ def verify_bua_candidate_pair(
         compatibility = json.loads(contract.read_text())
 
         if metadata.get("package_sha256") != (
-            "64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90"
+            ({"6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76": "64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90", "33029b9dd5c97c45eff2ad67180acc2ea6b9359e17c043cbdf5f6c230ed2ec41": "129e2c603756c70c590b9c7273b56c167b12f070b1d0f8c1a21ec7fc2b1d58f0", "1c460d66d68984b1b70b1eec1e8ed66ca08c0a9fa219df22994e762f7e015929": "4e87f6333176d75bf5e8429565c6ed08166dc051ccd7691fccb8b709a9e72b14", "435cb39fe5b62cf97a39ab9d17852dc1dd5611c93d826661d91a2e958f448249": "c8f11750bcf6534df8a44c22f6487ee8ab207b6798ac5f3efa2a9aae44eb05e5"}.get(bundle_sha256))
         ):
             return False, "Unexpected candidate updater package identity"
 
@@ -983,17 +983,285 @@ def install_verified_bua_pair(root, support_url, verification_url,
         return "failed", "Verified installation failed: " + str(exc)
 
 
+
+def migrate_bua_verified_generation(root, upstream, new_support_sha, new_bundle_sha, old_bundle_sha=None):
+    """Migrate exactly one pinned older generation, without trusting local markers.
+
+    Caller holds the shared installation lock. On failure, preserve an
+    authenticated old pair or fail closed with recoverable previous directories.
+    """
+    import hashlib
+    import os
+    import shutil
+    import tarfile
+    import tempfile
+    import urllib.request
+    import uuid
+    from pathlib import PurePosixPath
+
+    root = Path(root)
+    old_support = "64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90"
+    old_bundle = old_bundle_sha or "6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76"
+    if old_bundle not in ("6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76", "33029b9dd5c97c45eff2ad67180acc2ea6b9359e17c043cbdf5f6c230ed2ec41"):
+        return "failed", "Unrecognized previous verification identity"
+    cache = root / ".bua-verification-trusted.tar.gz"
+    prior_cache = root / ".bua-verification-prior.tar.gz"
+    updater = root / "updater"
+    verification = root / "verification"
+    prev_updater = root / ".bua-updater-previous"
+    prev_verification = root / ".bua-verification-previous"
+
+    for path in (root, updater, verification, prev_updater, prev_verification,
+                 cache, prior_cache):
+        if path.is_symlink():
+            return "failed", "Unsafe migration symlink: " + str(path)
+    if not root.is_dir() or any(p.exists() for p in (prev_updater, prev_verification)):
+        return "failed", "Incomplete or unsafe previous migration state"
+    old, reason = get_trusted_bua_verification_bundle(root, old_bundle)
+    if old is None:
+        return "not_applicable", reason
+    if not updater.is_dir() or not verification.is_dir():
+        return "failed", "Old verification cache exists without a complete installation"
+    verified, reason = verify_bua_candidate_pair(updater, verification, old, old_bundle)
+    if not verified:
+        return "failed", "Existing updater failed old-generation authentication: " + reason
+    if prior_cache.exists():
+        return "failed", "Prior verification cache already exists"
+
+    def download(url, destination, expected, maximum):
+        total = 0
+        digest = hashlib.sha256()
+        with urllib.request.urlopen(url, timeout=20) as response:
+            with destination.open("xb") as output:
+                while True:
+                    chunk = response.read(65536)
+                    if not chunk:
+                        break
+                    total += len(chunk)
+                    if total > maximum:
+                        raise ValueError("Archive exceeds size limit")
+                    digest.update(chunk)
+                    output.write(chunk)
+                output.flush()
+                os.fsync(output.fileno())
+        if digest.hexdigest() != expected:
+            raise ValueError("Downloaded archive SHA256 mismatch")
+
+    def unpack(archive_path, directory, prefix, maximum):
+        size = 0
+        seen = set()
+        with tarfile.open(archive_path, "r:gz") as archive:
+            for member in archive:
+                name = member.name
+                parts = tuple(part for part in PurePosixPath(name).parts if part != ".")
+                if not parts and member.isdir() and name in (".", "./"):
+                    continue
+                if (name.startswith("/") or not parts or parts[0] != prefix
+                        or ".." in parts or parts in seen
+                        or not (member.isfile() or member.isdir())):
+                    raise ValueError("Unsafe archive member: " + name)
+                seen.add(parts)
+                target = directory.joinpath(*parts)
+                if member.isdir():
+                    target.mkdir(parents=True, exist_ok=True)
+                else:
+                    size += member.size
+                    if size > maximum:
+                        raise ValueError("Extracted archive exceeds size limit")
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    with archive.extractfile(member) as source, target.open("xb") as out:
+                        shutil.copyfileobj(source, out)
+
+    # Nothing from the active generation changes during download and verification.
+    try:
+        with tempfile.TemporaryDirectory(prefix=".bua-migrate-stage-", dir=root) as tmp:
+            staged = Path(tmp)
+            new_verification_archive = staged / "verification.tar.gz"
+            new_support_archive = staged / "support.tar.gz"
+            download(upstream + "bua-updater-verification-x86_64.tar.gz",
+                     new_verification_archive, new_bundle_sha, 5 * 1024 * 1024)
+            download(upstream + "bua-updater-support-x86_64.tar.gz",
+                     new_support_archive, new_support_sha, 25 * 1024 * 1024)
+            unpack(new_verification_archive, staged, "verification", 5 * 1024 * 1024)
+            unpack(new_support_archive, staged, "updater", 150 * 1024 * 1024)
+            candidate_updater = staged / "updater"
+            candidate_verification = staged / "verification"
+            (candidate_updater / ".bua-support-sha256").write_text(new_support_sha + "\n")
+            (candidate_verification / ".bua-verification-sha256").write_text(new_bundle_sha + "\n")
+            valid, detail = verify_bua_candidate_pair(
+                candidate_updater, candidate_verification,
+                new_verification_archive, new_bundle_sha)
+            if not valid:
+                raise ValueError("Replacement pair rejected: " + detail)
+
+            # Keep the old cache available by a distinct name until commit.
+            # The fixed recovery procedure can authenticate the previous pair
+            # against that old pinned cache if activation is interrupted.
+            os.rename(cache, prior_cache)
+            try:
+                os.rename(updater, prev_updater)
+                os.rename(verification, prev_verification)
+                os.rename(candidate_updater, updater)
+                os.rename(candidate_verification, verification)
+                os.replace(new_verification_archive, cache)
+                valid, detail = verify_bua_candidate_pair(
+                    updater, verification, cache, new_bundle_sha)
+                if not valid:
+                    raise ValueError("Activated pair rejected: " + detail)
+            except Exception:
+                # Retain all generations on failed reversal, never delete evidence.
+                if prev_updater.is_dir() and prev_verification.is_dir():
+                    quarantine = root / ".bua-recovery-quarantine"
+                    quarantine.mkdir(mode=0o700, exist_ok=True)
+                    for active in (updater, verification):
+                        if active.exists():
+                            os.rename(active, quarantine / (active.name + "-" + uuid.uuid4().hex))
+                    os.rename(prev_updater, updater)
+                    os.rename(prev_verification, verification)
+                    if cache.exists():
+                        os.rename(cache, quarantine / ("cache-" + uuid.uuid4().hex))
+                    os.rename(prior_cache, cache)
+                raise
+
+            # Leave the prior cache and previous directories as authenticated
+            # recovery assets. Never silently delete or overwrite them.
+            return "ready", "Authenticated generation migration completed; old recovery assets preserved"
+    except Exception as exc:
+        old, _ = get_trusted_bua_verification_bundle(root, old_bundle)
+        if old is not None and updater.is_dir() and verification.is_dir():
+            valid, _ = verify_bua_candidate_pair(updater, verification, old, old_bundle)
+            if valid:
+                return "rolled_back", "Verified old generation preserved after migration failure: " + str(exc)
+        return "failed", "Migration failed; manual recovery may be required: " + str(exc)
+
 def ensure_bua_updater_support():
     """Fail-closed production startup with authenticated caching and pair installation."""
     import fcntl
     root = Path("/userdata/system/add-ons/bua")
-    support_sha = "64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90"
-    bundle_sha = "6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76"
+    support_sha = "c8f11750bcf6534df8a44c22f6487ee8ab207b6798ac5f3efa2a9aae44eb05e5"
+    bundle_sha = "435cb39fe5b62cf97a39ab9d17852dc1dd5611c93d826661d91a2e958f448249"
     upstream = "https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/"
     if root.is_symlink():
         return "failed"
     try:
         root.mkdir(parents=True, exist_ok=True)
+        # Recover an interrupted migration before ordinary startup checking.
+        # The previous pair must be authenticated by the *old* pinned bundle;
+        # the new bundle cannot verify the older generation.
+        prior = root / ".bua-verification-prior.tar.gz"
+        if prior.exists() or prior.is_symlink():
+            if prior.is_symlink() or not prior.is_file():
+                return "failed"
+            import hashlib
+            old_bundle_hash = hashlib.sha256(prior.read_bytes()).hexdigest()
+            if old_bundle_hash not in ("6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76", "33029b9dd5c97c45eff2ad67180acc2ea6b9359e17c043cbdf5f6c230ed2ec41"):
+                print("[BUA] Unrecognized previous verification cache")
+                return "failed"
+            if hashlib.sha256(prior.read_bytes()).hexdigest() != old_bundle_hash:
+                print("[BUA] Previous trust cache rejected")
+                return "failed"
+            previous_updater = root / ".bua-updater-previous"
+            previous_verification = root / ".bua-verification-previous"
+            if previous_updater.is_dir() and previous_verification.is_dir():
+                new_cache, _ = get_trusted_bua_verification_bundle(root, bundle_sha)
+                if new_cache is not None:
+                    active_verified, _ = verify_bua_candidate_pair(
+                        root / "updater", root / "verification", new_cache, bundle_sha)
+                    if active_verified:
+                        return "ready"
+                # Only a verified previous pair may be restored. The existing
+                # recovery coordinator manages all directory moves under lock.
+                import importlib.util
+                recovery_file = Path(__file__).resolve().parent / "bua_updater_recovery.py"
+                if (recovery_file.is_symlink() or not recovery_file.is_file()
+                        or hashlib.sha256(recovery_file.read_bytes()).hexdigest()
+                        != "855f7f2ff973855659f0d05978814105e14cb7c6fa7757f84a948a0349ce551c"):
+                    return "failed"
+                spec = importlib.util.spec_from_file_location("bua_recovery_migration", recovery_file)
+                recovery = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(recovery)
+                outcome, detail = recovery.recover_interrupted_updater(
+                    root, prior, old_bundle_hash, verify_bua_candidate_pair)
+                print("[BUA] Migration recovery result:", outcome, detail)
+                if outcome == "rolled_back":
+                    with (root / ".bua-support-install.lock").open("a+b") as lock:
+                        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+                        existing = root / ".bua-verification-trusted.tar.gz"
+                        if existing.is_symlink():
+                            return "failed"
+                        if existing.is_file():
+                            digest = hashlib.sha256(existing.read_bytes()).hexdigest()
+                            if digest != bundle_sha:
+                                return "failed"
+                            quarantine = root / ".bua-recovery-quarantine"
+                            quarantine.mkdir(mode=0o700, exist_ok=True)
+                            import uuid, os
+                            os.rename(existing, quarantine / ("trusted-cache-" + uuid.uuid4().hex))
+                        import os
+                        os.rename(prior, existing)
+                    return "rolled_back"
+                print("[BUA] Incomplete migration recovery:", detail)
+                return "failed"
+            elif not previous_updater.exists() and not previous_verification.exists():
+                # Interrupted before either old directory was moved.
+                old_valid, _ = verify_bua_candidate_pair(
+                    root / "updater", root / "verification", prior, old_bundle_hash)
+                if not old_valid:
+                    return "failed"
+                with (root / ".bua-support-install.lock").open("a+b") as lock:
+                    fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+                    target = root / ".bua-verification-trusted.tar.gz"
+                    if target.exists() or target.is_symlink():
+                        return "failed"
+                    import os
+                    os.rename(prior, target)
+                return "rolled_back"
+            elif (previous_updater.is_dir() and not previous_verification.exists()
+                  and not previous_verification.is_symlink()):
+                # Power loss after moving old updater but before moving old
+                # verification. The old pair is split across two paths.
+                # Authenticate both halves *before* touching either location.
+                active_updater = root / "updater"
+                active_verification = root / "verification"
+                old_valid, detail = verify_bua_candidate_pair(
+                    previous_updater, active_verification, prior, old_bundle_hash)
+                if not old_valid or active_updater.exists() or active_updater.is_symlink():
+                    print("[BUA] Split migration rejected:", detail)
+                    return "failed"
+                with (root / ".bua-support-install.lock").open("a+b") as lock:
+                    fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+                    # Revalidate after acquiring the lock to prevent races.
+                    old_valid, detail = verify_bua_candidate_pair(
+                        previous_updater, active_verification, prior, old_bundle_hash)
+                    target = root / ".bua-verification-trusted.tar.gz"
+                    if (not old_valid or active_updater.exists() or active_updater.is_symlink()
+                            or target.exists() or target.is_symlink()
+                            or not previous_updater.is_dir()):
+                        return "failed"
+                    import os
+                    os.rename(previous_updater, active_updater)
+                    os.rename(prior, target)
+                return "rolled_back"
+            else:
+                print("[BUA] Incomplete migration directories require recovery")
+                return "failed"
+        # Authenticate the previous generation before attempting rotation.
+        # This branch also prevents the new cache hash from hiding a valid old pair.
+        old_bundle_hash = None
+        for candidate_hash in ("6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76", "33029b9dd5c97c45eff2ad67180acc2ea6b9359e17c043cbdf5f6c230ed2ec41"):
+            candidate, _ = get_trusted_bua_verification_bundle(
+                root, candidate_hash)
+            if candidate is not None:
+                old_bundle_hash = candidate_hash
+                break
+        old_cached = old_bundle_hash is not None
+        if old_cached:
+            with (root / ".bua-support-install.lock").open("a+b") as lock:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+                migrated, detail = migrate_bua_verified_generation(
+                    root, upstream, support_sha, bundle_sha, old_bundle_hash)
+                print("[BUA]", detail)
+                return migrated if migrated in ("ready", "rolled_back") else "failed"
         # The recovery coordinator owns the shared lock internally.
         status, reason = check_verified_bua_startup(root, bundle_sha)
         if status in ("ready", "rolled_back"):
@@ -1180,14 +1448,12 @@ def save_translation_cache(cache: Dict[str, Dict[str, str]]):
         print(f"[BUA] Could not save translation cache: {e}")
 
 def load_translation_file(lang_code: str) -> Dict[str, str]:
-    """Load a translation JSON file from cache or GitHub with retry logic"""
-    # First, check disk cache
+    """Load a translation JSON file from GitHub, falling back to the disk cache"""
     cache = load_translation_cache()
-    if lang_code in cache:
-        print(f"[BUA] Using cached translation for {lang_code} ({len(cache[lang_code])} keys)")
-        return cache[lang_code]
 
-    # Not in cache, try downloading from GitHub
+    # Always try GitHub first, so strings added since the last run show up.
+    # With a cached copy to fall back on, try once, so a slow network
+    # doesn't hold up the start.
     try:
         github_url = f"{TRANSLATION_BASE_URL}/{lang_code}.json"
         print(f"[BUA] Downloading translation from: {github_url}")
@@ -1196,18 +1462,22 @@ def load_translation_file(lang_code: str) -> Dict[str, str]:
             github_url,
             headers={"User-Agent": "BUA-Installer"},
             timeout=5,
-            retries=2
+            retries=0 if lang_code in cache else 2
         )
 
         data = json.loads(data_bytes.decode('utf-8'))
         print(f"[BUA] Successfully downloaded translation {lang_code} ({len(data)} keys)")
 
         # Save to cache
-        cache[lang_code] = data
-        save_translation_cache(cache)
+        if cache.get(lang_code) != data:
+            cache[lang_code] = data
+            save_translation_cache(cache)
 
         return data
     except Exception as e:
+        if lang_code in cache:
+            print(f"[BUA] Could not download translation {lang_code} ({e}), using cached copy ({len(cache[lang_code])} keys)")
+            return cache[lang_code]
         print(f"[BUA] ERROR: Could not load translation {lang_code} after retries: {e}")
         print(f"[BUA] Continuing with empty translation (English fallback)")
         return {}
@@ -3639,33 +3909,7 @@ def mark_uninstalled(app_name: str):
         save_history(history)
 
 # Custom uninstall commands for apps that don't follow the standard pattern
-CUSTOM_UNINSTALL: Dict[str, str] = {
-    "Desktop For Batocera": "/userdata/system/configs/bat-drl/Remover_Desktop.sh",
-}
 
-def get_uninstall_command(install_cmd: str, app_name: str = None) -> str:
-    """Convert an installation command to an uninstall command.
-
-    First checks CUSTOM_UNINSTALL dictionary for app-specific uninstall scripts.
-    Otherwise, replaces .sh with _uninstall.sh in the URL.
-
-    Example:
-    https://.../ 7zip/7zip.sh -> https://.../7zip/7zip_uninstall.sh
-    """
-    # Check for custom uninstall command first
-    if app_name and app_name in CUSTOM_UNINSTALL:
-        return CUSTOM_UNINSTALL[app_name]
-
-    import re
-    # Find the .sh URL in the curl command
-    match = re.search(r'(https://[^\s]+)\.sh', install_cmd)
-    if match:
-        base_url = match.group(1)
-        # Replace .sh with _uninstall.sh
-        uninstall_url = f"{base_url}_uninstall.sh"
-        # Create the curl command
-        return f"curl -Ls {uninstall_url} | bash"
-    return None
 
 # ------------------------------
 # Apps and Install Commands
@@ -3674,9 +3918,6 @@ def get_uninstall_command(install_cmd: str, app_name: str = None) -> str:
 # Base URL for BUA repository scripts
 BUA_BASE_URL = "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main"
 
-def bua(path: str) -> str:
-    """Helper to build BUA install command from relative path"""
-    return f"curl -L {BUA_BASE_URL}/{path} | bash"
 
 
 # ------------------------------
@@ -5065,492 +5306,151 @@ def can_auto_update(app_name: str) -> bool:
     return get_update_method(app_name) == "reinstall"
 
 
-APPS: Dict[str, str] = {
-    "7zip": bua("7zip/7zip.sh"),
-    "Amazon Luna": bua("amazonluna/amazonluna.sh"),
-    "Ambermoon": bua("ambermoon/ambermoon.sh"),
-    "Android": bua("Android/Install_Android.sh"),
-    "Armagetron": bua("armagetron/armagetron.sh"),
-    "Arcade Manager": bua("arcademanager/arcademanager.sh"),
-    "Assault Cube": bua("assaultcube/assaultcube.sh"),
-    "AzaharPlus": bua("azaharplus/azaharplus.sh"),
-    "Brave": bua("brave/brave.sh"),
-    "Chiaki": bua("chiaki/chiaki.sh"),
-    "Chrome": bua("chrome/chrome.sh"),
-    "Clone Hero": bua("clonehero/clonehero.sh"),
-    "Conty": bua("conty/conty.sh"),
-    "CS Portable": bua("csportable/csportable.sh"),
-    "Disney Plus": bua("disneyplus/disneyplus.sh"),
-    "CLI Tools": bua("docker/cli.sh"),
-    "Endless Sky": bua("endlesssky/endlesssky.sh"),
-    "EGGNOGG+": bua("eggnoggplus/eggnoggplus.sh"),
-    "Everest": bua("everest/everest.sh"),
-    "Firefox": bua("firefox/firefox.sh"),
-    "Fightcade": bua("fightcade/fightcade.sh"),
-    "Flathub": bua("flathub/flathub.sh"),
-    "Freej2me": bua("Freej2me/Install_j2me.sh"),
-    "Winconfig (Windows Game Fix)": bua("Winconfig_Windows_Game_Fix/Install_Winconfig.sh"),
-    "Desktop For Batocera": bua("Desktop_for_Batocera/Install_Desktop.sh"),
-    "Free Droid RPG": bua("freedroidrpg/freedroidrpg.sh"),
-    "Greenlight": bua("greenlight/greenlight.sh"),
-    "Heroic": bua("heroic/heroic.sh"),
-    "IPTV Nator": bua("iptvnator/iptvnator.sh"),
-    "Input Leap": bua("inputleap/inputleap.sh"),
-    "Itch.io": bua("itchio/itch.sh"),
-    "Jellyfin Player": bua("jellyfin-client/jellyfin-client.sh"),
-    "JDownloader": bua("jdownloader/jdownloader.sh"),
-    "Java Runtime": bua("java/java.sh"),
-    "Minecraft": bua("minecraft/minecraft.sh"),
-    "Prism Launcher": bua("prismlauncher/prismlauncher.sh"),
-    "Moonlight": bua("moonlight/moonlight.sh"),
-    "Netflix": bua("netflix/netflix.sh"),
-    "NetWatch": bua("netwatch/netwatch.sh"),
-    "NVIDIA Patcher": bua("nvidiapatch/nvidiapatch.sh"),
-    "Nazi Zombies Portable": bua("nzp/nzp.sh"),
-    "OBS": bua("obs/obs.sh"),
-    "OpenRA": bua("openra/openra.sh"),
-    "OpenRGB": bua("openrgb/openrgb.sh"),
-    "PortMaster": bua("portmaster/portmaster.sh"),
-    "qBittorrent": bua("qbittorrent/qbittorrent.sh"),
-    "ShadPS4": bua("shadps4plus/shadps4plus.sh"),
-    "Spotify": bua("spotify/spotify.sh"),
-    "ITGMania": bua("itgmania/itgmania.sh"),
-    "Stremio": bua("stremio/stremio.sh"),
-    "Sunshine": bua("sunshine/sunshine.sh"),
-    "SuperTux": bua("supertux/supertux.sh"),
-    "SuperTuxKart": bua("supertuxkart/supertuxkart.sh"),
-    "Switch": bua("switch/switch.sh"),
-    "Tailscale": bua("tailscale/tailscale.sh"),
-    "Telegraf": bua("telegraf/telegraf.sh"),
-    "Twitch": bua("twitch/twitch.sh"),
-    "Vesktop": bua("vesktop/vesktop.sh"),
-    "Warzone 2100": bua("warzone2100/warzone2100.sh"),
-    "Wine Dependencies x86": bua("winemanager/install_redist_dependencies32.sh"),
-    "Wine Dependencies x64": bua("winemanager/install_redist_dependencies64.sh"),
-    "Wine Manager": bua("winemanager/winemanager.sh"),
-    "Xonotic": bua("xonotic/xonotic.sh"),
-    "YouTube": bua("youtubetv/youtubetv.sh"),
-    "NVIDIA Clocker": "curl -Ls https://raw.githubusercontent.com/nicolai-6/batocera-nvidia-clocker/refs/heads/main/install.sh | bash",
-    "Custom Wine": bua("wine-custom/wine.sh"),
-    "GParted": bua("gparted/gparted.sh"),
-    "YARG": bua("yarg/yarg.sh"),
-    "Plex": bua("plex/plex.sh"),
-    "OpenTTD": bua("openttd/openttd.sh"),
-    "Luanti": bua("luanti/luanti.sh"),
-    "Parsec": bua("parsec/parsec.sh"),
-    "HBO Max": bua("hbomax/hbomax.sh"),
-    "Prime Video": bua("prime/prime.sh"),
-    "Crunchyroll": bua("crunchyroll/crunchyroll.sh"),
-    "Mubi": bua("mubi/mubi.sh"),
-    "Tidal": bua("tidal/tidal.sh"),
-    "FreeTube": bua("freetube/freetube.sh"),
-    "Super Mario X": bua("supermariox/supermariox.sh"),
-    "Celeste 64": bua("celeste64/celeste64.sh"),
-    "Steam": bua("steam/steam2.sh"),
-    "Lutris": bua("lutris/lutris.sh"),
-    "FileZilla": bua("filezilla/filezilla.sh"),
-    "PeaZip": bua("peazip/peazip.sh"),
-    "VLC": bua("vlc/vlc.sh"),
-    "Docker": bua("docker/docker.sh"),
-    "Bottles": bua("bottles/bottles.sh"),
-    "Extras": bua("extra/extra.sh"),
-    "UltraStar": bua("usdeluxe/usdeluxe.sh"),
-    "F1": bua("f1/f1.sh"),
-    "Desktop": bua("desktop/desktop.sh"),
-    "X11VNC": bua("x11vnc/x11vnc.sh"),
-    "QEMU GA": bua("qga/qga.sh"),
-    "Bridge": bua("bridge/bridge.sh"),
-    "Sandtrix": bua("sandtrix/sandtrix.sh"),
-    "Soar": bua("soar/soar.sh"),
-    "Dark Mode": bua("dark/dark.sh"),
-    "VClean": bua("vclean/vclean.sh"),
-    "Overlay Remove": bua("overlay-remove/overlay-remove.sh"),
-    "RGSX": "curl -L bit.ly/rgsx-install | sh",
-    "Raspberry Pi Imager": bua("rpi/rpi.sh"),
-    "Gamescope": bua("gamescope/gamescope.sh"),
-    "npsget": "curl -fsSL https://npsget.8101987.xyz | sh",
-    "ps3i": "curl -fsSL https://ps3i.8101987.xyz/install.sh | sh",
-    "chdress": "curl -fsSL https://chdress.8101987.xyz/install.sh | sh",
-    "iso2zar": "curl -fsSL https://iso2zar.8101987.xyz | sh",
-}
+APPS: Dict[str, str] = {}
 
 # --- Integrated Windows Freeware installers (previously separate bash menu) ---
 # These run upstream installer scripts directly within the existing runner.
-APPS.update({
-    "AM2R": bua("windows/am2r.sh"),
-    "Maldita Castilla": bua("windows/castilla.sh"),
-    "Celeste": bua("windows/celeste.sh"),
-    "Donkey Kong Advanced": bua("windows/dka.sh"),
-    "Spelunky": bua("windows/spelunky.sh"),
-    "Zelda 2 PC Remake": bua("windows/zelda2.sh"),
-    "Zelda - Dungeons of Infinity": bua("windows/zeldadoi.sh"),
-    "Space Quest 3D": bua("windows/sq3d.sh"),
-    "Streets of Rage Remake": bua("windows/sorr.sh"),
-    "Super Crate Box": bua("windows/scb.sh"),
-    "Super Smash Flash 2": bua("windows/ssf2.sh"),
-    "TMNT Rescue Palooza": bua("windows/tmntrp.sh"),
-    "Crash Bandicoot - Back In Time": bua("windows/cbbit.sh"),
-    "Sonic Triple Trouble 16bit": bua("windows/stt.sh"),
-    "Sonic 3D in 2D": bua("windows/s3d2d.sh"),
-    "SHRUBNAUT": bua("windows/shrubnaut.sh"),
-    "Secret Maryo Chronicles": bua("windows/smc.sh"),
-    "SCP Containment Breach": bua("windows/scpcontainmentbreach.sh"),
-    "Zero-K": bua("windows/zerok.sh"),
-    "Modern Modern Chef": bua("windows/mmc.sh"),
-    "Sonic Robo Blast 2": bua("windows/srb2.sh"),
-    "Sonic Time Twisted": bua("windows/sttw.sh"),
-    "Super Smash Bros CMC+": bua("windows/cmc+.sh"),
-    "Unreal Tournament": bua("windows/ut.sh"),
-})
 
 # --- Integrated Docker app installers (previously separate bash menu) ---
-APPS.update({
-    "CasaOS": bua("docker/casaos.sh"),
-    "UmbrelOS": bua("docker/umbrelos.sh"),
-    "Arch KDE (Webtop)": bua("docker/archkde.sh"),
-    "Ubuntu MATE (Webtop)": bua("docker/ubuntumate.sh"),
-    "Alpine XFCE (Webtop)": bua("docker/alpinexfce.sh"),
-    "Jellyfin": bua("docker/jellyfin.sh"),
-    "Emby": bua("docker/emby.sh"),
-    "Arr-In-One": bua("docker/arrinone.sh"),
-    "Arr-In-One Downloaders": bua("docker/arrdownloaders.sh"),
-})
 
-DESCRIPTIONS: Dict[str, str] = {
-    "Sunshine": "Self-hosted game streaming server (host for Moonlight).",
-    "Moonlight": "Stream PC games on Batocera.",
-    "NVIDIA Patcher": "Enable NVIDIA GPU support on Batocera.",
-    "Switch": "Nintendo Switch emulator for Batocera.",
-    "Tailscale": "VPN service for secure Batocera connections.",
-    "Telegraf": "Server agent for collecting and reporting metrics.",
-    "Wine Manager": "Manage Windows games with Wine on Batocera.",
-    "Wine Dependencies x86": "Install Windows x86 dependencies with Wine on Batocera.",
-    "Wine Dependencies x64": "Install Windows x64 dependencies with Wine on Batocera.",
-    "ShadPS4": "UPDATED 11/11 to ShadPS4Plus | Experimental PS4 streaming client.",
-    "Conty": "Standalone Linux distro container.",
-    "Minecraft": "Minecraft: Java or Bedrock Edition.",
-    "Prism Launcher": "Open source Minecraft launcher with mod management and multi-instance support.",
-    "Armagetron": "Tron-style light cycle game.",
-    "Clone Hero": "Guitar Hero clone for Batocera.",
-    "Stremio": "Stremio video streaming app for Batocera.",
-    "Vesktop": "Discord client for Batocera.",
-    "Endless Sky": "Space exploration game.",
-    "EGGNOGG+": "Award-winning 2-player sword fighting game.",
-    "Chiaki": "PS4/PS5 Remote Play client.",
-    "Chrome": "Google Chrome web browser.",
-    "Amazon Luna": "Amazon Luna game streaming client.",
-    "PortMaster": "Download and manage games on handhelds.",
-    "Greenlight": "Client for xCloud and Xbox streaming.",
-    "Heroic": "Epic, GOG, and Amazon Games launcher.",
-    "YouTube": "YouTube client for Batocera.",
-    "Netflix": "Netflix streaming app for Batocera.",
-    "IPTV Nator": "IPTV client for watching live TV.",
-    "Input Leap": "Share Keyboard and mouse with other OSes.",
-    "Firefox": "Mozilla Firefox browser.",
-    "Flathub": "Browse different Flatpak applications.",
-    "Java Runtime": "Install the Java Runtime on your batocera.",
-    "Spotify": "Spotify music streaming client.",
-    "CLI Tools": ">=V40! Various CLI tools including Docker, ZSH, Git etc.",
-    "Arcade Manager": "Manage arcade ROMs and games.",
-    "CS Portable": "Fan-made portable Counter-Strike.",
-    "Brave": "Privacy-focused Brave browser.",
-    "OpenRGB": "Manage RGB lighting on devices.",
-    "Warzone 2100": "Real-time strategy and tactics game.",
-    "Xonotic": "Fast-paced open-source arena shooter.",
-    "Itch.io": "Indy Game Marketplace",
-    "Android": "Android System for Batocera (EXPERIMENTAL).",
-    "Freej2me": "J2ME classic game emulator.",
-    "Desktop For Batocera": "Desktop for batocera. (Native)",
-    "Winconfig (Windows Game Fix)": "Tool to simplify dependencies/config for Windows games (DRL Edition)",
-    "Fightcade": "*UPDATED* Play classic arcade games online.",
-    "SuperTuxKart": "Free and open-source kart racer.",
-    "OpenRA": "Modernized RTS for Command & Conquer.",
-    "AzaharPlus": "AzaharPlus 3DS emulator - selectable alongside Azahar in EmulationStation.",
-    "Assault Cube": "Multiplayer first-person shooter game.",
-    "OBS": "Streaming and video recording software.",
-    "SuperTux": "2D platformer starring Tux the Linux mascot.",
-    "Free Droid RPG": "Open-source role-playing game for Batocera.",
-    "Disney Plus": "Disney+ streaming app for Batocera.",
-    "Twitch": "Twitch streaming app for Batocera.",
-    "NVIDIA Clocker": "A CLI/Ports program to overclock NVIDIA GPUs",
-    "7zip": "A free and open-source file archiver",
-    "qBittorrent": "Free and open-source BitTorrent client",
-    "ITGMania": "In The Groove-focused rhythm game, fork of StepMania with ITG improvements.",
-    "Ambermoon": "Ambermoon.net, a port of the classic",
-    "Custom Wine": "Download Wine/Proton versions",
-    "GParted": "Linux partition manager",
-    "JDownloader": "Download manager with background service",
-    "YARG": "Yet Another Rhythm Game",
-    "Plex": "Plex Media Player",
-    "OpenTTD": "Open source clone of Transport Tycoon Deluxe",
-    "Luanti": "Voxel sandbox (Minecraft-like)",
-    "Nazi Zombies Portable": "Classic Nazi Zombies on modern platforms",
-    "Parsec": "Remote desktop & game streaming",
-    "HBO Max": "HBO Max streaming app",
-    "Prime Video": "Amazon Prime Video streaming app",
-    "Crunchyroll": "Anime-focused streaming service",
-    "Mubi": "Curated cinema platform",
-    "Tidal": "HiFi music streaming",
-    "Everest": "Celeste Mod Loader",
-    "FreeTube": "Privacy-minded YouTube client",
-    "Super Mario X": "Fan-made Super Mario tribute",
-    "Celeste 64": "Free 3D platformer (Celeste)",
-    "Steam": "NEW BUILD DEC 25 - Steam Big Picture / Desktop",
-    "Lutris": "Open source game manager",
-    "FileZilla": "Cross-platform FTP client",
-    "PeaZip": "Free and open-source file archiver",
-    "VLC": "VLC media player",
-    "Docker": "Docker/Podman/Portainer AIO.",
-    "Bottles": "Run Windows software on Linux",
-    "Extras": "Various scripts, incl. motion support.",
-    "UltraStar": "UltraStar Deluxe karaoke",
-    "F1": "Ports shortcut to file manager",
-    "Desktop": "Desktop mode (Ports)",
-    "X11VNC": "Remote control over VNC",
-    "QEMU GA": "Guest agent for VMs",
-    "Bridge": "Chart downloader for CloneHero/YARG",
-    "Sandtrix": "Falling sand physics puzzle game",
-    "Soar": "Soar package manager (integrated with BUA)",
-    "Dark Mode": "Toggle F1 dark mode",
-    "VClean": "Service to clean the Batocera version string (removes extra flags)",
-    "Overlay Remove": "Remove the Batocera boot overlay file from /boot/boot/overlay.",
-    "RGSX": "Retro Game Sets Xtra. A free, user-friendly ROM downloader for Batocera",
-    "Raspberry Pi Imager": "Flash OS images to USB and SD cards.",
-    "Gamescope": "Full-screen gaming compositor with smoother performance, scaling & low-latency control.",
-    "npsget": "Helper to download games, DLCs, updates, themes and avatars from NoPayStation",
-    "ps3i": "Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation",
-    "chdress": "GUI tool to convert any disc image to/from CHD format",
-    "NetWatch": "Shows which devices connect to Batocera, with on-screen alerts and a web dashboard.",
-    "iso2zar": "GUI tool to convert Xbox[360] .iso files directly into .zar format",
-}
+DESCRIPTIONS: Dict[str, str] = {}
 
 # Descriptions for integrated Windows Freeware entries
-DESCRIPTIONS.update({
-    "AM2R": "Another Metroid 2 Remake - Fan remake",
-    "Maldita Castilla": "Arcade action platformer",
-    "Celeste": "Indie platformer classic",
-    "Donkey Kong Advanced": "Fan remake/port",
-    "Spelunky": "Rogue-like platformer",
-    "Zelda 2 PC Remake": "Fan remake of Zelda II",
-    "Zelda - Dungeons of Infinity": "Zelda-inspired project",
-    "Space Quest 3D": "Fan project tribute",
-    "Streets of Rage Remake": "Enhanced beat 'em up remake",
-    "Super Crate Box": "Fast-paced arcade platformer",
-    "Super Smash Flash 2": "Fan fighting game",
-    "TMNT Rescue Palooza": "Beat 'em up fan game",
-    "Crash Bandicoot - Back In Time": "Fan game",
-    "Sonic Triple Trouble 16bit": "Fan remake",
-    "Sonic 3D in 2D": "2D demake of Sonic 3D Blast",
-    "SHRUBNAUT": "Space exploration and mining game",
-    "Secret Maryo Chronicles": "Super Mario-inspired platformer",
-    "SCP Containment Breach": "SCP Foundation horror survival game",
-    "Zero-K": "Free multiplayer real-time strategy game",
-    "Modern Modern Chef": "Indie title",
-    "Sonic Robo Blast 2": "Doom-based Sonic fangame",
-    "Sonic Time Twisted": "Time-traveling Sonic fan game",
-    "Super Smash Bros CMC+": "Fan crossover",
-        "Unreal Tournament": "Classic competitive first-person shooter",
-})
 
 # Descriptions for integrated Docker apps
-DESCRIPTIONS.update({
-    "CasaOS": "Simple home server UI and app store",
-    "UmbrelOS": "Self-hosted OS with app marketplace",
-    "Arch KDE (Webtop)": "Arch Linux desktop in browser (noVNC)",
-    "Ubuntu MATE (Webtop)": "Ubuntu MATE desktop in browser (noVNC)",
-    "Alpine XFCE (Webtop)": "Alpine XFCE desktop in browser (noVNC)",
-    "Jellyfin": "Open-source media server",
-    "Jellyfin Player": "Jellyfin media player client with controller support",
-    "Emby": "Media server and streaming",
-    "Arr-In-One": "All-in-one media management stack",
-    "Arr-In-One Downloaders": "Downloaders companion stack",
-})
 
 
 def sync_upstream_catalog():
+    """Refresh active menu tables from official BUA JSON only.
+
+    Refuse incomplete or unavailable catalogs. Never merge removed
+    official applications back in from the legacy Python catalog.
+    This changes menu metadata, not installed application files.
     """
-    Merge the current upstream BUA catalog into this patched frontend.
+    global APPS, DESCRIPTIONS, CATEGORIES, UNINSTALL, APP_LIST, CHANGELOG
 
-    Only catalog metadata is imported:
-      - APPS
-      - DESCRIPTIONS
-      - CATEGORIES
+    latest = load_app_list()
+    entries = latest.get("apps") if isinstance(latest, dict) else None
 
-    The rest of this frontend, including the global parent-source updater,
-    remains local and unchanged.
-    """
-    import ast
-    import urllib.request
+    if not isinstance(entries, list) or not entries:
+        print("[BUA] JSON catalog refresh unavailable; current menu retained")
+        return False
 
-    url = (
-        "https://raw.githubusercontent.com/"
-        "batocera-unofficial-addons/"
-        "batocera-unofficial-addons/main/app/bua_installerx86.py"
-    )
+    seen = set()
+    for entry in entries:
+        if not isinstance(entry, dict):
+            print("[BUA] Invalid JSON catalog entry; current menu retained")
+            return False
+        name = entry.get("name")
+        command = entry.get("install")
+        if (not isinstance(name, str) or not name.strip()
+                or not isinstance(command, str) or not command.strip()
+                or name in seen):
+            print("[BUA] Invalid or duplicate app; current menu retained")
+            return False
+        seen.add(name)
 
+    apps, descriptions, categories, uninstall = build_app_tables(latest)
+    if len(apps) != len(entries):
+        print("[BUA] Incomplete JSON catalog; current menu retained")
+        return False
+
+    # Prepare everything before changing a live table.
+    new_apps = dict(apps)
+    new_descriptions = dict(descriptions)
+    new_categories = {key: list(value) for key, value in categories.items()}
+    new_uninstall = dict(uninstall)
+
+    # Mutate in place to preserve references held by existing menu objects.
+    APPS.clear()
+    APPS.update(new_apps)
+    DESCRIPTIONS.clear()
+    DESCRIPTIONS.update(new_descriptions)
+    CATEGORIES.clear()
+    CATEGORIES.update(new_categories)
+    UNINSTALL.clear()
+    UNINSTALL.update(new_uninstall)
+
+    APP_LIST = latest
+    CHANGELOG = str(latest.get("changelog", "")).strip()
+    print("[BUA] Official JSON catalog refreshed:", len(APPS), "apps")
+    return True
+
+
+
+CATEGORIES: Dict[str, List[str]] = {}
+
+
+# Official BUA JSON application catalog.
+# Preserve the bundled legacy tables only when the official feed fails.
+APPS_JSON_URL = f"{BUA_BASE_URL}/app/apps_x86.json"
+
+def load_app_list() -> dict:
+    """Download the app list from the repo."""
     try:
-        req = urllib.request.Request(
-            url,
-            headers={"User-Agent": "BUA-Catalog-Sync"},
+        print(f"[BUA] Downloading app list from: {APPS_JSON_URL}")
+        data_bytes = fetch_url_with_retry(
+            APPS_JSON_URL,
+            headers={"User-Agent": "BUA-Installer"},
+            timeout=10
         )
-
-        with urllib.request.urlopen(req, timeout=8) as r:
-            source = r.read().decode("utf-8")
-
-        tree = ast.parse(source)
-
-        upstream_apps = {}
-        upstream_desc = {}
-        upstream_categories = {}
-
-        def eval_value(node):
-            if isinstance(node, ast.Constant):
-                return node.value
-
-            if isinstance(node, ast.List):
-                return [eval_value(x) for x in node.elts]
-
-            if isinstance(node, ast.Tuple):
-                return tuple(eval_value(x) for x in node.elts)
-
-            if isinstance(node, ast.Dict):
-                return {
-                    eval_value(k): eval_value(v)
-                    for k, v in zip(node.keys, node.values)
-                }
-
-            if (
-                isinstance(node, ast.Call)
-                and isinstance(node.func, ast.Name)
-                and node.func.id == "bua"
-                and len(node.args) == 1
-                and isinstance(node.args[0], ast.Constant)
-            ):
-                path = node.args[0].value
-                return f"curl -L {BUA_BASE_URL}/{path} | bash"
-
-            raise ValueError(f"Unsupported catalog node: {type(node).__name__}")
-
-        for node in tree.body:
-            # APPS = {...}, DESCRIPTIONS = {...}, CATEGORIES = {...}
-            if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
-                name = node.target.id
-
-                if name == "APPS":
-                    upstream_apps.update(eval_value(node.value))
-                elif name == "DESCRIPTIONS":
-                    upstream_desc.update(eval_value(node.value))
-                elif name == "CATEGORIES":
-                    upstream_categories.update(eval_value(node.value))
-
-            # APPS.update({...}) / DESCRIPTIONS.update({...})
-            elif (
-                isinstance(node, ast.Expr)
-                and isinstance(node.value, ast.Call)
-                and isinstance(node.value.func, ast.Attribute)
-                and isinstance(node.value.func.value, ast.Name)
-                and node.value.func.attr == "update"
-                and len(node.value.args) == 1
-            ):
-                name = node.value.func.value.id
-
-                if name == "APPS":
-                    upstream_apps.update(eval_value(node.value.args[0]))
-                elif name == "DESCRIPTIONS":
-                    upstream_desc.update(eval_value(node.value.args[0]))
-
-        if not upstream_apps:
-            raise RuntimeError("No upstream APPS entries parsed")
-
-        before = len(APPS)
-
-        # Upstream is authoritative for install commands/catalog metadata.
-        APPS.update(upstream_apps)
-        DESCRIPTIONS.update(upstream_desc)
-
-        for category, entries in upstream_categories.items():
-            CATEGORIES[category] = entries
-
-        after = len(APPS)
-
-        print(
-            f"[BUA] Upstream catalog sync OK: "
-            f"{len(upstream_apps)} upstream apps, "
-            f"{before} -> {after} local apps"
-        )
-
+        data = json.loads(data_bytes.decode('utf-8'))
+        if not isinstance(data, dict) or not isinstance(data.get("apps"), list):
+            raise ValueError("not an app list")
+        return data
     except Exception as e:
-        print(f"[BUA] Upstream catalog sync skipped: {e}")
+        print(f"[BUA] ERROR: Could not load the app list: {e}")
+        return {}
+
+def build_app_tables(app_list: dict):
+    """Turn the app list into the APPS, DESCRIPTIONS, CATEGORIES and
+    UNINSTALL tables the menu uses. The app name is the key in each."""
+    apps: Dict[str, str] = {}
+    descriptions: Dict[str, str] = {}
+    categories: Dict[str, List[str]] = {}
+    uninstall: Dict[str, str] = {}
+    for entry in app_list.get("apps", []):
+        try:
+            name = entry["name"]
+            apps[name] = entry["install"]
+        except (KeyError, TypeError):
+            continue
+        if entry.get("description"):
+            descriptions[name] = entry["description"]
+        for category in entry.get("categories", []):
+            categories.setdefault(category, []).append(name)
+        if entry.get("uninstall"):
+            uninstall[name] = entry["uninstall"]
+    return apps, descriptions, categories, uninstall
 
 
-CATEGORIES: Dict[str, List[str]] = {
-    "Games": [
-        "Minecraft", "Prism Launcher", "Armagetron", "Clone Hero", "Endless Sky", "EGGNOGG+", "CS Portable",
-        "Warzone 2100", "Xonotic", "Fightcade", "SuperTuxKart", "OpenRA",
-        "Assault Cube", "SuperTux", "Free Droid RPG", "ITGMania", "Ambermoon",
-        "YARG", "OpenTTD", "Luanti", "Super Mario X", "Celeste 64", "UltraStar",
-        "Sandtrix"
-    ],
-    "Windows Freeware": [
-        "AM2R",
-        "Maldita Castilla",
-        "Celeste",
-        "Donkey Kong Advanced",
-        "Spelunky",
-        "Zelda 2 PC Remake",
-        "Zelda - Dungeons of Infinity",
-        "Space Quest 3D",
-        "Streets of Rage Remake",
-        "Super Crate Box",
-        "Super Smash Flash 2",
-        "TMNT Rescue Palooza",
-        "Crash Bandicoot - Back In Time",
-        "Sonic Triple Trouble 16bit",
-        "Sonic 3D in 2D",
-        "SHRUBNAUT",
-        "Secret Maryo Chronicles",
-        "SCP Containment Breach",
-        "Zero-K",
-        "Modern Modern Chef",
-        "Nazi Zombies Portable",
-        "Sonic Robo Blast 2",
-        "Sonic Time Twisted",
-        "Super Smash Bros CMC+",
-        "Unreal Tournament",
-    ],
-    "Docker Menu": [
-        "CasaOS",
-        "UmbrelOS",
-        "Arch KDE (Webtop)",
-        "Ubuntu MATE (Webtop)",
-        "Alpine XFCE (Webtop)",
-        "Jellyfin",
-        "Emby",
-        "Arr-In-One",
-        "Arr-In-One Downloaders",
-    ],
-    "Game Utilities": [
-        "Android", "Amazon Luna", "AzaharPlus", "PortMaster", "Greenlight", "ShadPS4",
-        "Chiaki", "Heroic", "Switch", "Parsec", "Java Runtime", "Freej2me",
-        "Steam", "Lutris", "Bottles", "Sunshine", "Moonlight", "Bridge",
-        "Itch.io", "Everest", "RGSX", "npsget", "ps3i", "chdress", "iso2zar"
-    ],
-    "System Utilities": [
-        "Desktop For Batocera", "Winconfig (Windows Game Fix)", "F1", "Tailscale",
-        "Telegraf", "Wine Manager", "Vesktop", "Chrome", "YouTube", "Netflix",
-        "Input Leap", "IPTV Nator", "Firefox", "Spotify", "Arcade Manager", "Brave",
-        "OpenRGB", "OBS", "Stremio", "Disney Plus", "Twitch", "7zip", "qBittorrent",
-        "GParted", "Plex", "HBO Max", "Prime Video", "Crunchyroll",
-        "Mubi", "Tidal", "FreeTube", "Jellyfin Player", "FileZilla", "PeaZip",
-        "Desktop", "Flathub", "JDownloader", "Raspberry Pi Imager", "NetWatch"
-    ],
-    "Developer Tools": [
-        "NVIDIA Patcher", "Conty", "CLI Tools", "NVIDIA Clocker", "Docker",
-        "Extras", "X11VNC", "QEMU GA", "Soar", "Dark Mode", "VClean", "Overlay Remove"
-    ],
-}
+APP_LIST = load_app_list()
+CHANGELOG = str(APP_LIST.get("changelog", "")).strip()
+UNINSTALL: Dict[str, str] = {}
 
-sync_upstream_catalog()
+if APP_LIST.get("apps"):
+    (
+        _official_apps,
+        _official_descriptions,
+        _official_categories,
+        _official_uninstall,
+    ) = build_app_tables(APP_LIST)
+
+    if _official_apps:
+        APPS = _official_apps
+        DESCRIPTIONS = _official_descriptions
+        CATEGORIES = _official_categories
+        UNINSTALL = _official_uninstall
+        print(
+            "[BUA] Official JSON catalog loaded:",
+            len(APPS), "applications"
+        )
+    else:
+        print("[BUA] Invalid official JSON entries; no stale install commands offered")
+else:
+    print("[BUA] Official JSON unavailable; no stale install commands offered")
+
+
 
 def get_top_level() -> List[Tuple[str, str]]:
     """Generate top-level menu items with current language translations"""
@@ -9517,29 +9417,73 @@ GLOBAL_MANIFEST_BUILDER = Path(
 
 
 def get_live_apps_fingerprint() -> str:
-    """
-    Return a stable fingerprint of the complete live BUA APPS catalog.
-
-    Any app addition, removal, rename, or installer-command change
-    changes this fingerprint.
-    """
+    """Fingerprint current official BUA applications and local entries."""
     import hashlib
+    import urllib.request
+
+    url = (
+        "https://raw.githubusercontent.com/"
+        "batocera-unofficial-addons/batocera-unofficial-addons/"
+        "main/app/apps_x86.json"
+    )
+
+    request = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": "BUA-Global-Updater-Catalog-Sync/1",
+            "Cache-Control": "no-cache",
+        },
+    )
+
+    with urllib.request.urlopen(request, timeout=25) as response:
+        raw = response.read(2 * 1024 * 1024 + 1)
+
+    if len(raw) > 2 * 1024 * 1024:
+        raise ValueError("Official BUA catalog exceeds size limit")
+
+    catalog = json.loads(raw.decode("utf-8"))
+    if not isinstance(catalog, dict):
+        raise ValueError("Invalid official BUA catalog")
+
+    entries = catalog.get("apps")
+    if not isinstance(entries, list) or not entries:
+        raise ValueError("Official BUA applications missing")
+
+    official = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            raise ValueError("Malformed official application entry")
+
+        name = entry.get("name")
+        command = entry.get("install")
+
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("Official application name missing")
+
+        if not isinstance(command, str) or not command.strip():
+            raise ValueError("Official installer command missing")
+
+        name = name.strip()
+        if name in official:
+            raise ValueError("Duplicate official application: " + name)
+
+        official[name] = command
+
+    effective = {
+        str(name): str(command)
+        for name, command in APPS.items()
+    }
+    effective = dict(official)
 
     payload = json.dumps(
-        sorted(
-            (
-                str(app),
-                str(command),
-            )
-            for app, command in APPS.items()
-        ),
+        sorted(effective.items()),
         ensure_ascii=False,
         separators=(",", ":"),
     ).encode("utf-8")
 
-    return hashlib.sha256(
-        payload
-    ).hexdigest()
+    return hashlib.sha256(payload).hexdigest()
+
+
 
 
 def ensure_global_manifest_current() -> Dict:
@@ -9556,9 +9500,14 @@ def ensure_global_manifest_current() -> Dict:
         "error": None,
     }
 
-    live_fingerprint = (
-        get_live_apps_fingerprint()
-    )
+    try:
+        live_fingerprint = get_live_apps_fingerprint()
+    except Exception as exc:
+        result["error"] = (
+            "Official BUA catalog unavailable; "
+            "existing manifest preserved: " + str(exc)
+        )
+        return result
 
     saved_fingerprint = ""
 
@@ -9594,6 +9543,7 @@ def ensure_global_manifest_current() -> Dict:
                 sys.executable,
                 str(GLOBAL_MANIFEST_BUILDER),
             ],
+            env=dict(os.environ, BUA_REQUIRE_OFFICIAL_JSON="1"),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -10333,12 +10283,7 @@ class UpdaterScreen(BaseScreen):
         if not cmd:
             return
 
-        uninstall_cmd = (
-            get_uninstall_command(
-                cmd,
-                app,
-            )
-        )
+        uninstall_cmd = UNINSTALL.get(app)
 
         if not uninstall_cmd:
             push_screen(

@@ -1,9 +1,7 @@
 {
-  "schema_version": 1,
   "backend_api_version": 1,
-  "package_sha256": "64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90",
   "file_hashes": {
-    "bua_installerx86.py": "e289e3200c03d7581dc852e81bb4af7d51480e0b8bfc3933984a2119f022c019",
+    "bua_installerx86.py": "6322148e694a79f6883509a49535fa3540caec629f4dae028780c762532ca6f9",
     "catalog/audit_github_parent_sources.py": "d86df49130168de2b87944d27b971e5d76925941a6906dcbf5f9bb1fa143453d",
     "catalog/audit_mirror_backed_sources.py": "be55e0f006c33126ae7fd80d4c1afc0b0d973c920f9faa3b7fb1380557cf7261",
     "catalog/blissos_sourceforge_identity.py": "3b7e34a3d9203531b75945d6db072f9069ab129f98a5b83b6d6e97e15cb0a8e1",
@@ -12,7 +10,7 @@
     "catalog/build_github_release_adapters.py": "d2eeff8176a3c69a0b461ef6de7c8f773beee43672a3b56f3c75b1ef50f2d88e",
     "catalog/build_github_release_download_adapters.py": "bcb34fb3fdb3d33634e27191c1477c137b5e60dbbd16e3a364c55ca40e31cbf3",
     "catalog/build_github_web_parent_adapters.py": "b6640dd3c214b2e314099a1e3add5abeb74e148d026018ded32bb6e52c25526d",
-    "catalog/build_global_update_manifest.py": "7af0064e8d6a1cffbd81a55be032fe7f38136da67c878dbfe3d391274ed6e0f4",
+    "catalog/build_global_update_manifest.py": "cea0601508cd226c70940a6dbd8528a85aec7b330b8850ab340194b0a52e4c83",
     "catalog/build_trusted_github_parent_adapters.py": "7cb3e4deeff4b8046b9386c8d29e2c3f9af7aa0fa885003c6b5f8a97901fddca",
     "catalog/downstream/custom-wine/ge-proton.sh": "87a04ba81930a7dc25f586bc5f1f316eba6851b65b92d4139ed240b9e4645b7e",
     "catalog/downstream/custom-wine/steamy.sh": "2be4df2a8eb6309d5e045d0d1b07c4e38dae9ca7d951a3ea8b3d1f5bafc76959",
@@ -104,7 +102,7 @@
     "catalog/rgsx_identity.py": "a4929fc55c9da0256e6e2e734913b8baa84c335f2f8c5e1275a70330c18f6f66",
     "catalog/shadps4_filtered_identity.py": "c3bb702970278b7be28f407498381c900b54388a29edafbe71d97252325b221f",
     "catalog/super_mario_x_identity.py": "794f3a5265d557695af1d6c38118d2895537135533637a4458e34fb476533c25",
-    "catalog/switch_identity.py": "c7384258d277b7e30fa09d3d8140f1d3c90d867d050cc7670a0633e24a7d353c",
+    "catalog/switch_identity.py": "09b346d827858a37bf228ac93fac008cafb5b3e231272d282638cefb3d79b855",
     "catalog/vlc_web_identity.py": "d3fb1998429dd791cb3615e5a3c7e64d9fcd28d73959f36955d3e65d6516e0e6",
     "catalog/xonotic_identity.py": "e5a839ba62b233f9a4ff015ffc287631c94efedaff8fd021bdbd083a10230337",
     "converted/flathub/bottles/086-Bottles.sh": "8c26ae476e94a362953c58c8463a32db66af3e1d3953ed926cadc5a62511f045",
@@ -276,8 +274,10 @@
     "converted/web-wrappers/spotify/047-Spotify.sh": "774c54210f4f38b71c5d35e20c952af272d62f4e1311862de57113b3b4fb7ff5",
     "converted/web-wrappers/twitch/056-Twitch.sh": "7c944d01917277a309aad67b6ca264c853e73fcced59fd4eedb3e1608dec2cb0",
     "integrations/__pycache__/apply_switch_nextendo.cpython-314.pyc": "e62f797692dc2e36a0a60c404f400974f505fceaecf84c72a29dd18406f952a5",
-    "integrations/apply_switch_nextendo.py": "5180dfd681dd929e4f13c803e39ebbf1a61a773e187521935717c65b86a12bc5",
+    "integrations/apply_switch_nextendo.py": "0b11299c1334f0676fc36512e656f7a68e97b098c6ee48133c0ad00a697d9f5d",
     "integrations/nextendo-browser-select.py": "e99358d15d85a2dcedb6bdc2d68d9902320f54acc72925575a78571d687c85ff",
     "integrations/switch-motion-restore.sh": "267636f85b8096c1c387e99f3b571174b77bb693e7653966f79f487b7995083c"
-  }
+  },
+  "package_sha256": "c8f11750bcf6534df8a44c22f6487ee8ab207b6798ac5f3efa2a9aae44eb05e5",
+  "schema_version": 1
 }

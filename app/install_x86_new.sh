@@ -4,13 +4,13 @@
 # URLs
 SCRIPT_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/app/symlinks.sh"
 BATOCERA_ADDONS_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/BUA.sh"
-UPDATER_SUPPORT_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/bua-updater-support-x86_64.tar.gz"
-UPDATER_SUPPORT_SHA256="64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90"
+UPDATER_SUPPORT_URL="https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/bua-updater-support-x86_64.tar.gz"
+UPDATER_SUPPORT_SHA256="c8f11750bcf6534df8a44c22f6487ee8ab207b6798ac5f3efa2a9aae44eb05e5"
 UPDATER_ROOT="/userdata/system/add-ons/bua/updater"
 
 # Authenticated updater verification metadata.
-UPDATER_VERIFICATION_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/bua-updater-verification-x86_64.tar.gz"
-UPDATER_VERIFICATION_SHA256="6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76"
+UPDATER_VERIFICATION_URL="https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/bua-updater-verification-x86_64.tar.gz"
+UPDATER_VERIFICATION_SHA256="435cb39fe5b62cf97a39ab9d17852dc1dd5611c93d826661d91a2e958f448249"
 UPDATER_VERIFICATION_ROOT="/userdata/system/add-ons/bua/verification"
 BATOCERA_ADDONS_LOGO_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra/batocera-unofficial-addons.png"
 BATOCERA_ADDONS_WHEEL_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra/batocera-unofficial-addons-wheel.png"
@@ -634,7 +634,7 @@ from pathlib import Path
 
 updater, verification, bundle = map(Path, sys.argv[1:4])
 expected_sha = sys.argv[4]
-expected_package = "64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90"
+expected_package = "c8f11750bcf6534df8a44c22f6487ee8ab207b6798ac5f3efa2a9aae44eb05e5"
 
 try:
     if bundle.is_symlink() or not bundle.is_file():
