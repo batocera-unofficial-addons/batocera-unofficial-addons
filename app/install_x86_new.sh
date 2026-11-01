@@ -5,12 +5,15 @@
 SCRIPT_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/refs/heads/main/app/symlinks.sh"
 BATOCERA_ADDONS_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/BUA.sh"
 UPDATER_SUPPORT_URL="https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/bua-updater-support-x86_64.tar.gz"
-UPDATER_SUPPORT_SHA256="c8f11750bcf6534df8a44c22f6487ee8ab207b6798ac5f3efa2a9aae44eb05e5"
+UPDATER_SUPPORT_SHA256="1d7a5792a1aab97379ae0ecb7872e6eff335b93158688fc1f44f7094561d511a"
 UPDATER_ROOT="/userdata/system/add-ons/bua/updater"
 
 # Authenticated updater verification metadata.
 UPDATER_VERIFICATION_URL="https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/bua-updater-verification-x86_64.tar.gz"
-UPDATER_VERIFICATION_SHA256="435cb39fe5b62cf97a39ab9d17852dc1dd5611c93d826661d91a2e958f448249"
+UPDATER_VERIFICATION_SHA256="6498bda1ea34f863d9c07db9d232978a12c8e5f031eac58bfa64caa9b4472714"
+# Only an exact, separately authenticated historical v70 install may be migrated.
+UPDATER_LEGACY_V70_VERIFICATION_URL="https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/bua-updater-verification-v70-x86_64.tar.gz"
+UPDATER_LEGACY_V70_VERIFICATION_SHA256="0ee758b3450587b71da870ef41c95e81b27a088f4de6a2257e95df78c08fd274"
 UPDATER_VERIFICATION_ROOT="/userdata/system/add-ons/bua/verification"
 BATOCERA_ADDONS_LOGO_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra/batocera-unofficial-addons.png"
 BATOCERA_ADDONS_WHEEL_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra/batocera-unofficial-addons-wheel.png"
@@ -420,79 +423,140 @@ printf '%s\n' "$UPDATER_VERIFICATION_SHA256" > \
 
 echo "BUA updater and verification bundles staged successfully."
 
-# Publish the SHA256-authenticated verification archive before activation.
-# Keep it outside updater/ and verification/ so it survives recovery.
+# Keep the previous trusted archive until NEW activation is authenticated.
+# A previous archive is trusted only if its SHA256 is a pinned known version.
 UPDATER_TRUSTED_CACHE="$UPDATER_BASE/.bua-verification-trusted.tar.gz"
+UPDATER_PREVIOUS_TRUSTED_ARCHIVE="$UPDATER_TRUSTED_CACHE"
+UPDATER_PREVIOUS_VERIFICATION_SHA256=""
+UPDATER_PREVIOUS_SUPPORT_SHA256=""
 UPDATER_CACHE_TEMP=""
 
 if [ -L "$UPDATER_TRUSTED_CACHE" ]; then
-    echo "BUA trusted verification cache is an unexpected symlink."
-    rm -rf "$UPDATER_STAGE"
+    echo "BUA previous trusted verification cache is a symlink; stopping."
     exit 1
 fi
-
 if [ -e "$UPDATER_TRUSTED_CACHE" ]; then
     if [ ! -f "$UPDATER_TRUSTED_CACHE" ]; then
-        echo "BUA trusted verification cache has an unexpected type."
-        rm -rf "$UPDATER_STAGE"
+        echo "BUA previous trusted verification cache is not a regular file."
         exit 1
     fi
-
-    EXISTING_CACHE_SHA256="$(
-        sha256sum "$UPDATER_TRUSTED_CACHE" | awk '{print $1}'
-    )"
-
-    if [ "$EXISTING_CACHE_SHA256" != "$UPDATER_VERIFICATION_SHA256" ]; then
-        echo "BUA trusted verification cache is corrupted; refusing replacement."
-        rm -rf "$UPDATER_STAGE"
-        exit 1
-    fi
-
-    echo "Existing authenticated BUA verification cache retained."
-else
-    UPDATER_CACHE_TEMP="$(
-        mktemp "$UPDATER_BASE/.bua-verification-cache.XXXXXX"
-    )" || {
-        echo "Unable to allocate trusted verification cache staging file."
-        rm -rf "$UPDATER_STAGE"
-        exit 1
-    }
-
-    if ! cp "$UPDATER_VERIFICATION_TMP" "$UPDATER_CACHE_TEMP"; then
-        echo "Unable to stage trusted verification cache."
-        rm -f "$UPDATER_CACHE_TEMP"
-        rm -rf "$UPDATER_STAGE"
-        exit 1
-    fi
-
-    STAGED_CACHE_SHA256="$(
-        sha256sum "$UPDATER_CACHE_TEMP" | awk '{print $1}'
-    )"
-
-    if [ "$STAGED_CACHE_SHA256" != "$UPDATER_VERIFICATION_SHA256" ]; then
-        echo "Staged trusted cache checksum mismatch."
-        rm -f "$UPDATER_CACHE_TEMP"
-        rm -rf "$UPDATER_STAGE"
-        exit 1
-    fi
-
-    if [ -e "$UPDATER_TRUSTED_CACHE" ] || [ -L "$UPDATER_TRUSTED_CACHE" ]; then
-        echo "Trusted cache destination appeared unexpectedly."
-        rm -f "$UPDATER_CACHE_TEMP"
-        rm -rf "$UPDATER_STAGE"
-        exit 1
-    fi
-
-    if ! mv "$UPDATER_CACHE_TEMP" "$UPDATER_TRUSTED_CACHE"; then
-        echo "Unable to publish trusted verification cache."
-        rm -f "$UPDATER_CACHE_TEMP"
-        rm -rf "$UPDATER_STAGE"
-        exit 1
-    fi
-
-    echo "Authenticated BUA verification cache published."
+    previous_cache_sha="$(sha256sum "$UPDATER_TRUSTED_CACHE" | awk '{print $1}')"
+    case "$previous_cache_sha" in
+        0ee758b3450587b71da870ef41c95e81b27a088f4de6a2257e95df78c08fd274)
+            UPDATER_PREVIOUS_VERIFICATION_SHA256="0ee758b3450587b71da870ef41c95e81b27a088f4de6a2257e95df78c08fd274"
+            UPDATER_PREVIOUS_SUPPORT_SHA256="c197a322d0de94485ee6850e3564d7087246467786a5a1be450aa3794badafff"
+            ;;
+        435cb39fe5b62cf97a39ab9d17852dc1dd5611c93d826661d91a2e958f448249)
+            UPDATER_PREVIOUS_VERIFICATION_SHA256="435cb39fe5b62cf97a39ab9d17852dc1dd5611c93d826661d91a2e958f448249"
+            UPDATER_PREVIOUS_SUPPORT_SHA256="c8f11750bcf6534df8a44c22f6487ee8ab207b6798ac5f3efa2a9aae44eb05e5"
+            ;;
+        6498bda1ea34f863d9c07db9d232978a12c8e5f031eac58bfa64caa9b4472714)
+            UPDATER_PREVIOUS_VERIFICATION_SHA256="6498bda1ea34f863d9c07db9d232978a12c8e5f031eac58bfa64caa9b4472714"
+            UPDATER_PREVIOUS_SUPPORT_SHA256="1d7a5792a1aab97379ae0ecb7872e6eff335b93158688fc1f44f7094561d511a"
+            ;;
+        *)
+            echo "Unrecognized previous trusted bundle; refusing unsafe replacement."
+            exit 1
+            ;;
+    esac
 fi
 
+# Safe legacy v70 migration is restricted to exact historical immutable files.
+# Never accept an unrecognized installation or derive trust from its own files.
+BUA_LEGACY_V70_ATTESTED=0
+if [ -d "$UPDATER_ROOT" ] && [ ! -L "$UPDATER_ROOT" ] &&
+   [ ! -e "$UPDATER_VERIFICATION_ROOT" ] && [ ! -L "$UPDATER_VERIFICATION_ROOT" ] &&
+   [ -z "$UPDATER_PREVIOUS_VERIFICATION_SHA256" ] &&
+   [ ! -e "$UPDATER_TRUSTED_CACHE" ] && [ ! -L "$UPDATER_TRUSTED_CACHE" ]; then
+    UPDATER_LEGACY_V70_ARCHIVE="$UPDATER_STAGE/legacy-v70-verification.tar.gz"
+    if ! curl -fLs --max-time 45 -o "$UPDATER_LEGACY_V70_ARCHIVE" \
+        "$UPDATER_LEGACY_V70_VERIFICATION_URL"; then
+        echo "Historical verification archive unavailable; legacy install untouched."
+        exit 1
+    fi
+    if [ ! -f "$UPDATER_LEGACY_V70_ARCHIVE" ] || [ -L "$UPDATER_LEGACY_V70_ARCHIVE" ] ||
+       [ "$(sha256sum "$UPDATER_LEGACY_V70_ARCHIVE" | awk '{print $1}')" != "$UPDATER_LEGACY_V70_VERIFICATION_SHA256" ]; then
+        echo "Historical v70 archive checksum mismatch; legacy install untouched."
+        exit 1
+    fi
+    if ! python3 - "$UPDATER_ROOT" "$UPDATER_LEGACY_V70_ARCHIVE" \
+      "$UPDATER_STAGE/legacy-v70-verification" \
+      "$UPDATER_LEGACY_V70_VERIFICATION_SHA256" \
+      "c197a322d0de94485ee6850e3564d7087246467786a5a1be450aa3794badafff" <<'BUA_V70_ATTEST'
+import hashlib
+import importlib.util
+import json
+import sys
+import tarfile
+from pathlib import Path, PurePosixPath
+installed, archive_path, output = map(Path, sys.argv[1:4])
+expected_archive, expected_support = sys.argv[4:6]
+if not installed.is_dir() or installed.is_symlink():
+    raise RuntimeError("Unsafe legacy installation directory")
+if archive_path.is_symlink() or not archive_path.is_file():
+    raise RuntimeError("Unsafe historical verification archive")
+if hashlib.sha256(archive_path.read_bytes()).hexdigest() != expected_archive:
+    raise RuntimeError("Historical verification archive SHA256 mismatch")
+required = {"bua-updater-compatibility.json", "bua-updater-package-integrity.json", "bua_updater_integrity.py"}
+items = {}
+with tarfile.open(archive_path, "r:gz") as tf:
+    for member in tf:
+        path = PurePosixPath(member.name)
+        if (not member.isfile() or len(path.parts) != 2 or path.parts[0] != "verification"
+            or path.parts[1] not in required or path.parts[1] in items):
+            raise RuntimeError("Unexpected historical verification member")
+        with tf.extractfile(member) as handle:
+            items[path.parts[1]] = handle.read()
+if set(items) != required:
+    raise RuntimeError("Incomplete historical verification metadata")
+if json.loads(items["bua-updater-package-integrity.json"]).get("package_sha256") != expected_support:
+    raise RuntimeError("Historical support package identity mismatch")
+output.mkdir(parents=True, exist_ok=False)
+for filename, contents in items.items():
+    (output / filename).write_bytes(contents)
+spec = importlib.util.spec_from_file_location("bua_v84p_pinned_v70_integrity", output / "bua_updater_integrity.py")
+if spec is None or spec.loader is None:
+    raise RuntimeError("Historical verifier could not be loaded")
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+valid, reason = module.verify_updater_installation(
+    installed, output / "bua-updater-package-integrity.json",
+    output / "bua-updater-compatibility.json", frontend_api_version=1)
+if not valid:
+    raise RuntimeError("Historical legacy files did not match pinned v70: " + reason)
+print("Verified pinned v70 legacy installation: " + reason)
+BUA_V70_ATTEST
+    then
+        echo "Legacy installation is not an exact verified v70 package; no active changes."
+        exit 1
+    fi
+    UPDATER_PREVIOUS_TRUSTED_ARCHIVE="$UPDATER_LEGACY_V70_ARCHIVE"
+    UPDATER_PREVIOUS_VERIFICATION_SHA256="$UPDATER_LEGACY_V70_VERIFICATION_SHA256"
+    UPDATER_PREVIOUS_SUPPORT_SHA256="c197a322d0de94485ee6850e3564d7087246467786a5a1be450aa3794badafff"
+    BUA_LEGACY_V70_ATTESTED=1
+fi
+
+# Unknown or incomplete previous installations remain strictly blocked.
+if [ -d "$UPDATER_ROOT" ] || [ -d "$UPDATER_VERIFICATION_ROOT" ]; then
+    if [ ! -d "$UPDATER_ROOT" ] ||
+       { [ ! -d "$UPDATER_VERIFICATION_ROOT" ] && [ "$BUA_LEGACY_V70_ATTESTED" -ne 1 ]; } ||
+       [ -z "$UPDATER_PREVIOUS_VERIFICATION_SHA256" ]; then
+        echo "Previous BUA installation lacks a recognized authenticated pair."
+        exit 1
+    fi
+fi
+
+# Stage new archive independently, without replacing previous trusted cache.
+UPDATER_CACHE_TEMP="$(mktemp "$UPDATER_BASE/.bua-verification-cache.XXXXXX")" || exit 1
+if ! cp "$UPDATER_VERIFICATION_TMP" "$UPDATER_CACHE_TEMP"; then
+    rm -f "$UPDATER_CACHE_TEMP"
+    exit 1
+fi
+if [ "$(sha256sum "$UPDATER_CACHE_TEMP" | awk '{print $1}')" != "$UPDATER_VERIFICATION_SHA256" ]; then
+    echo "Staged new cache checksum mismatch."
+    rm -f "$UPDATER_CACHE_TEMP"
+    exit 1
+fi
 
 # Preserve both active directories before activating the new pair.
 UPDATER_VERIFICATION_PREVIOUS="$UPDATER_BASE/.bua-verification-previous"
@@ -539,6 +603,16 @@ if [ -d "$UPDATER_VERIFICATION_ROOT" ]; then
         exit 1
     fi
     HAD_VERIFICATION=1
+elif [ "$BUA_LEGACY_V70_ATTESTED" -eq 1 ]; then
+    if ! mv "$UPDATER_STAGE/legacy-v70-verification" "$UPDATER_VERIFICATION_PREVIOUS"; then
+        echo "Cannot stage attested legacy verification metadata."
+        if [ "$HAD_UPDATER" -eq 1 ]; then
+            mv "$UPDATER_PREVIOUS" "$UPDATER_ROOT" ||
+                echo "CRITICAL: Legacy updater recovery requires manual repair."
+        fi
+        exit 1
+    fi
+    HAD_VERIFICATION=1
 fi
 
 NEW_UPDATER_ACTIVE=0
@@ -578,7 +652,12 @@ if [ "$NEW_UPDATER_ACTIVE" -ne 1 ] || [ "$NEW_VERIFICATION_ACTIVE" -ne 1 ]; then
     fi
 
     if [ "$HAD_VERIFICATION" -eq 1 ]; then
-        if ! mv "$UPDATER_VERIFICATION_PREVIOUS" \
+        if [ "$BUA_LEGACY_V70_ATTESTED" -eq 1 ]; then
+            if ! mv "$UPDATER_VERIFICATION_PREVIOUS" "$UPDATER_STAGE/legacy-v70-verification"; then
+                echo "CRITICAL: Attested legacy metadata recovery failed."
+                ROLLBACK_FAILED=1
+            fi
+        elif ! mv "$UPDATER_VERIFICATION_PREVIOUS" \
             "$UPDATER_VERIFICATION_ROOT"; then
             echo "CRITICAL: Previous verification restoration failed."
             ROLLBACK_FAILED=1
@@ -624,7 +703,7 @@ retain_previous() {
 # Verify the activated updater against authenticated metadata before
 # retaining previous installations or declaring installation successful.
 bua_verify_installed_pair() {
-    python3 - "$1" "$2" "$UPDATER_TRUSTED_CACHE" "$UPDATER_VERIFICATION_SHA256" <<'BUA_VERIFY_PAIR'
+    python3 - "$1" "$2" "$3" "$4" "$5" <<'BUA_VERIFY_PAIR'
 import hashlib
 import importlib.util
 import json
@@ -634,7 +713,7 @@ from pathlib import Path
 
 updater, verification, bundle = map(Path, sys.argv[1:4])
 expected_sha = sys.argv[4]
-expected_package = "c8f11750bcf6534df8a44c22f6487ee8ab207b6798ac5f3efa2a9aae44eb05e5"
+expected_package = sys.argv[5]
 
 try:
     if bundle.is_symlink() or not bundle.is_file():
@@ -710,10 +789,61 @@ except Exception as exc:
 BUA_VERIFY_PAIR
 }
 
+bua_publish_trusted_verification_cache() {
+    local previous_cache_sha backup_dir backup_file
+    if [ -f "$UPDATER_TRUSTED_CACHE" ]; then
+        previous_cache_sha="$(sha256sum "$UPDATER_TRUSTED_CACHE" | awk '{print $1}')"
+        backup_dir="$UPDATER_BASE/.bua-verification-trusted-backups"
+        if [ -L "$backup_dir" ] || ! mkdir -p "$backup_dir"; then
+            echo "Cannot preserve previous verification trust archive."
+            return 1
+        fi
+        backup_file="$backup_dir/$previous_cache_sha.tar.gz"
+        if [ -L "$backup_file" ]; then return 1; fi
+        if [ ! -e "$backup_file" ]; then
+            if ! cp "$UPDATER_TRUSTED_CACHE" "$backup_file"; then return 1; fi
+        fi
+        if [ ! -f "$backup_file" ] ||
+           [ "$(sha256sum "$backup_file" | awk '{print $1}')" != "$previous_cache_sha" ]; then
+            echo "Previous trust archive backup verification failed."
+            return 1
+        fi
+    fi
+    if [ "$BUA_LEGACY_V70_ATTESTED" -eq 1 ]; then
+        backup_dir="$UPDATER_BASE/.bua-verification-trusted-backups"
+        backup_file="$backup_dir/$UPDATER_LEGACY_V70_VERIFICATION_SHA256.tar.gz"
+        if [ -L "$backup_dir" ] || ! mkdir -p "$backup_dir" || [ -L "$backup_file" ]; then
+            return 1
+        fi
+        if [ ! -e "$backup_file" ]; then
+            if ! cp "$UPDATER_LEGACY_V70_ARCHIVE" "$backup_file"; then return 1; fi
+        fi
+        if [ ! -f "$backup_file" ] ||
+           [ "$(sha256sum "$backup_file" | awk '{print $1}')" != "$UPDATER_LEGACY_V70_VERIFICATION_SHA256" ]; then
+            return 1
+        fi
+    fi
+    if [ ! -f "$UPDATER_CACHE_TEMP" ] || [ -L "$UPDATER_CACHE_TEMP" ] ||
+       [ "$(sha256sum "$UPDATER_CACHE_TEMP" | awk '{print $1}')" != "$UPDATER_VERIFICATION_SHA256" ]; then
+        echo "New authenticated cache unavailable."
+        return 1
+    fi
+    # Atomic same-directory replacement after authenticated activation.
+    if ! mv -f "$UPDATER_CACHE_TEMP" "$UPDATER_TRUSTED_CACHE"; then
+        echo "Unable to publish new trusted archive; previous remains intact."
+        return 1
+    fi
+    UPDATER_CACHE_TEMP=""
+    return 0
+}
+
 BUA_POST_ACTIVATION_VERIFIED=0
 
-if bua_verify_installed_pair "$UPDATER_ROOT" "$UPDATER_VERIFICATION_ROOT"; then
-    BUA_POST_ACTIVATION_VERIFIED=1
+if bua_verify_installed_pair "$UPDATER_ROOT" "$UPDATER_VERIFICATION_ROOT" \
+    "$UPDATER_VERIFICATION_TMP" "$UPDATER_VERIFICATION_SHA256" "$UPDATER_SUPPORT_SHA256"; then
+    if bua_publish_trusted_verification_cache; then
+        BUA_POST_ACTIVATION_VERIFIED=1
+    fi
 fi
 
 if [ "$BUA_POST_ACTIVATION_VERIFIED" -ne 1 ]; then
@@ -749,7 +879,10 @@ if [ "$BUA_POST_ACTIVATION_VERIFIED" -ne 1 ]; then
     if [ "$HAD_UPDATER" -eq 1 ] && [ "$HAD_VERIFICATION" -eq 1 ]; then
         if ! bua_verify_installed_pair \
             "$UPDATER_PREVIOUS" \
-            "$UPDATER_VERIFICATION_PREVIOUS"
+            "$UPDATER_VERIFICATION_PREVIOUS" \
+            "$UPDATER_PREVIOUS_TRUSTED_ARCHIVE" \
+            "$UPDATER_PREVIOUS_VERIFICATION_SHA256" \
+            "$UPDATER_PREVIOUS_SUPPORT_SHA256"
         then
             echo "CRITICAL: Previous updater is not authenticated."
             echo "Recovery files retained. Manual recovery required."
@@ -780,12 +913,28 @@ if [ "$BUA_POST_ACTIVATION_VERIFIED" -ne 1 ]; then
     # Require fresh verification after both previous directories have been restored.
     if ! bua_verify_installed_pair \
         "$UPDATER_ROOT" \
-        "$UPDATER_VERIFICATION_ROOT"; then
+        "$UPDATER_VERIFICATION_ROOT" \
+        "$UPDATER_PREVIOUS_TRUSTED_ARCHIVE" \
+        "$UPDATER_PREVIOUS_VERIFICATION_SHA256" \
+        "$UPDATER_PREVIOUS_SUPPORT_SHA256"; then
         echo "CRITICAL: Restored BUA updater failed integrity verification."
         echo "Recovery files preserved at $BUA_FAILED_INSTALL"
         exit 1
     fi
 
+    if [ "$BUA_LEGACY_V70_ATTESTED" -eq 1 ]; then
+        if [ -e "$UPDATER_TRUSTED_CACHE" ] || [ -L "$UPDATER_TRUSTED_CACHE" ]; then
+            echo "CRITICAL: Unexpected trust cache during legacy rollback."
+            exit 1
+        fi
+        legacy_cache_tmp="$(mktemp "$UPDATER_BASE/.bua-legacy-trust.XXXXXX")" || exit 1
+        if ! cp "$UPDATER_LEGACY_V70_ARCHIVE" "$legacy_cache_tmp" ||
+           [ "$(sha256sum "$legacy_cache_tmp" | awk '{print $1}')" != "$UPDATER_LEGACY_V70_VERIFICATION_SHA256" ] ||
+           ! mv "$legacy_cache_tmp" "$UPDATER_TRUSTED_CACHE"; then
+            echo "CRITICAL: Legacy updater restored but trust cache publication failed."
+            exit 1
+        fi
+    fi
     echo "Previous installation directories restored and authenticated."
     echo "Failed installation preserved at $BUA_FAILED_INSTALL"
     exit 1

@@ -22,9 +22,6 @@ from typing import Dict, List, Tuple
 from pathlib import Path
 import hashlib
 
-# BUA_SECURITY_EXTRACT_V1: strict TAR/ZIP path and link validation.
-BUA_SAFE_EXTRACT_SOURCE = '#!/usr/bin/env python3\n"""BUA archive extraction guard. Deliberately rejects links, special files and duplicate paths."""\nimport os\nimport stat\nimport sys\nimport tarfile\nimport zipfile\nfrom pathlib import Path, PurePosixPath\n\nMAX_MEMBERS = 100000\nMAX_TOTAL_SIZE = 20 * 1024**3\n\ndef checked_name(name):\n    if not isinstance(name, str) or not name or \'\\\\\' in name or \'\\x00\' in name:\n        raise ValueError(f\'Unsafe archive name: {name!r}\')\n    if name.startswith(\'/\') or name.startswith(\'//\'):\n        raise ValueError(f\'Absolute archive path: {name!r}\')\n    parts = name.rstrip(\'/\').split(\'/\')\n    if parts and parts[0] == \'.\':\n        parts = parts[1:]\n    if not parts or any(x in (\'\', \'.\', \'..\') for x in parts):\n        raise ValueError(f\'Traversal or noncanonical path: {name!r}\')\n    if \':\' in parts[0]:\n        raise ValueError(f\'Drive-like archive path: {name!r}\')\n    return tuple(parts)\n\ndef extract(archive_path, destination):\n    archive_path = Path(archive_path)\n    root = Path(destination)\n    if root.is_symlink():\n        raise ValueError(\'Extraction destination is symlink\')\n    for ancestor in root.parents:\n        if ancestor.is_symlink():\n            raise ValueError(\'Extraction ancestor is symlink\')\n    root.mkdir(parents=True, exist_ok=True)\n    root = root.resolve(strict=True)\n    if not root.is_dir():\n        raise ValueError(\'Extraction destination is not directory\')\n    mode = \'zip\' if zipfile.is_zipfile(archive_path) else \'tar\'\n    with (zipfile.ZipFile(archive_path) if mode == \'zip\' else tarfile.open(archive_path, \'r:*\')) as archive:\n        members = archive.infolist() if mode == \'zip\' else archive.getmembers()\n        if len(members) > MAX_MEMBERS:\n            raise ValueError(\'Too many archive members\')\n        seen = set()\n        total = 0\n        validated = []\n        for member in members:\n            name = member.filename if mode == \'zip\' else member.name\n            if name in (".", "./") and ((member.is_dir() if mode == \'zip\' else member.isdir())):\n                continue\n            key = checked_name(name)\n            if key in seen:\n                raise ValueError(f\'Duplicate archive entry: {name!r}\')\n            seen.add(key)\n            if mode == \'zip\':\n                kind = (member.external_attr >> 16) & 0o170000\n                is_dir = member.is_dir()\n                if kind not in (0, stat.S_IFREG, stat.S_IFDIR) or (is_dir and kind == stat.S_IFREG):\n                    raise ValueError(f\'Unsafe ZIP file type: {name!r}\')\n                size = member.file_size\n            else:\n                is_dir = member.isdir()\n                if not (is_dir or member.isfile()):\n                    raise ValueError(f\'Unsafe TAR file type/link: {name!r}\')\n                size = member.size\n            total += size\n            if total > MAX_TOTAL_SIZE:\n                raise ValueError(\'Archive exceeds extraction size limit\')\n            validated.append((member, key, is_dir))\n        # Validate collisions between ancestor files and descendants before writing.\n        file_keys = {key for _, key, is_dir in validated if not is_dir}\n        for _, key, _ in validated:\n            if any(key[:i] in file_keys for i in range(1, len(key))):\n                raise ValueError(f\'File used as directory: {key!r}\')\n        # Refuse existing symlink parents and destinations even inside staging roots.\n        for _, key, _ in validated:\n            target = root\n            for part in key:\n                target = target / part\n                if target.is_symlink():\n                    raise ValueError(f\'Existing symlink within extraction: {target}\')\n                if target.exists() and not (target.is_dir() or target.is_file()):\n                    raise ValueError(f\'Existing special file: {target}\')\n        for member, key, is_dir in validated:\n            target = root.joinpath(*key)\n            if is_dir:\n                if target.exists() and not target.is_dir():\n                    raise ValueError(f\'Directory collides with existing file: {target}\')\n                target.mkdir(parents=True, exist_ok=True)\n                continue\n            target.parent.mkdir(parents=True, exist_ok=True)\n            with (archive.open(member, \'r\') if mode == \'zip\' else archive.extractfile(member)) as source:\n                if source is None:\n                    raise ValueError(\'Missing member file content\')\n                with target.open(\'xb\') as output:\n                    while True:\n                        chunk = source.read(1024*1024)\n                        if not chunk:\n                            break\n                        output.write(chunk)\n            # Preserve executable mode for known regular files, never special bits.\n            permissions = ((member.external_attr >> 16) if mode == \'zip\' else member.mode) & 0o777\n            os.chmod(target, permissions & 0o777)\n\nif __name__ == \'__main__\':\n    if len(sys.argv) != 3:\n        raise SystemExit(\'Usage: bua_safe_extract.py ARCHIVE DESTINATION\')\n    try:\n        extract(sys.argv[1], sys.argv[2])\n    except Exception as exc:\n        print(f\'[BUA] Unsafe or invalid archive rejected: {exc}\', file=sys.stderr)\n        raise SystemExit(1)\n'
-
 # ------------------------------
 # Changelog
 # ------------------------------
@@ -32,8 +29,6 @@ BUA_SAFE_EXTRACT_SOURCE = '#!/usr/bin/env python3\n"""BUA archive extraction gua
 # This will be shown once to users when they first launch after an update.
 
 CHANGELOG = """
-- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format
-- Added chdress - GUI tool to convert any disc image to/from CHD format
 - Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation
 - Added ps3i - Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation
 - Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support
@@ -51,1271 +46,6 @@ CHANGELOG = """
 # Use this for one-time setup tasks, migrations, or live fixes.
 # Keep it lightweight - heavy operations will slow down app startup.
 
-
-def _ensure_bua_updater_support_unlocked():
-    """Install verified updater support on first launch or version change."""
-    import hashlib
-    import os
-    import shutil
-    import tarfile
-    import tempfile
-    import urllib.request
-
-    root = Path("/userdata/system/add-ons/bua")
-    target = root / "updater"
-    marker = target / ".bua-support-sha256"
-
-    expected = '64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90'
-
-    verification_sha256 = (
-        "6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76"
-    )
-    verification_url = (
-        "https://raw.githubusercontent.com/"
-        "batocera-unofficial-addons/batocera-unofficial-addons/"
-        "main/app/bua-updater-verification-x86_64.tar.gz"
-    )
-    verification_root = root / "verification"
-    url = 'https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/bua-updater-support-x86_64.tar.gz'
-
-    required = (
-        "bua_installerx86.py",
-        "catalog/build_global_update_manifest.py",
-        "catalog/global/app-update-recipes.json",
-        "integrations/apply_switch_nextendo.py",
-    )
-
-    def complete(path):
-        return all((path / name).is_file() for name in required)
-
-    try:
-        old = root / ".bua-updater-previous"
-        if old.exists():
-            if target.exists():
-                if (
-                    complete(target)
-                    and marker.is_file()
-                    and marker.read_text().strip() == expected
-                ):
-                    print(
-                        "[BUA] Current updater verified; "
-                        "preserving leftover recovery backup"
-                    )
-                    return True
-                raise RuntimeError(
-                    "Previous updater backup requires recovery review"
-                )
-            os.replace(old, target)
-            print("[BUA] Recovered previous updater installation")
-
-        if (
-            complete(target)
-            and marker.is_file()
-            and marker.read_text().strip() == expected
-        ):
-            return True
-
-        root.mkdir(parents=True, exist_ok=True)
-
-        with tempfile.TemporaryDirectory(
-            prefix=".bua-support-stage-",
-            dir=str(root),
-        ) as temporary:
-            work = Path(temporary)
-            archive = work / "support.tar.gz"
-
-            digest = hashlib.sha256()
-            size = 0
-
-            with urllib.request.urlopen(url, timeout=20) as response:
-                with archive.open("wb") as output:
-                    while True:
-                        chunk = response.read(65536)
-                        if not chunk:
-                            break
-                        size += len(chunk)
-                        if size > 25 * 1024 * 1024:
-                            raise ValueError("Archive exceeds download limit")
-                        digest.update(chunk)
-                        output.write(chunk)
-
-            if digest.hexdigest() != expected:
-                raise ValueError("Updater package SHA256 mismatch")
-
-            with tarfile.open(archive, "r:gz") as package:
-                members = package.getmembers()
-
-                for member in members:
-                    from pathlib import PurePosixPath
-                    parts = PurePosixPath(member.name).parts
-                    clean = [
-                        part for part in parts
-                        if part not in ("", ".")
-                    ]
-
-                    if (
-                        not clean
-                        or clean[0] != "updater"
-                        or ".." in clean
-                        or member.name.startswith("/")
-                        or not (member.isfile() or member.isdir())
-                    ):
-                        if member.name in (".", "./"):
-                            continue
-                        raise ValueError("Unsafe package entry")
-
-                for member in members:
-                    name = member.name.lstrip("./")
-                    if not name:
-                        continue
-                    destination = work.joinpath(*name.split("/"))
-                    if member.isdir():
-                        destination.mkdir(parents=True, exist_ok=True)
-                    elif member.isfile():
-                        destination.parent.mkdir(
-                            parents=True, exist_ok=True
-                        )
-                        stream = package.extractfile(member)
-                        if stream is None:
-                            raise ValueError("Unreadable archive entry")
-                        with stream, destination.open("wb") as output:
-                            shutil.copyfileobj(stream, output)
-
-            staged = work / "updater"
-
-            if not complete(staged):
-                raise ValueError("Updater package is incomplete")
-
-            (staged / ".bua-support-sha256").write_text(
-                expected + "\n"
-            )
-
-            old = root / ".bua-updater-previous"
-            previous_exists = target.exists()
-
-            if previous_exists:
-                if old.exists():
-                    raise RuntimeError("Recovery backup already exists")
-                if target.is_symlink() or not target.is_dir():
-                    raise ValueError("Unexpected updater installation type")
-                os.replace(target, old)
-
-            try:
-                os.replace(staged, target)
-            except Exception:
-                if previous_exists:
-                    os.replace(old, target)
-                raise
-
-            if previous_exists:
-                import uuid
-
-                backups = root / ".bua-updater-backups"
-                backups.mkdir(parents=True, exist_ok=True)
-
-                retained = backups / uuid.uuid4().hex
-                os.replace(old, retained)
-
-                print(
-                    "[BUA] Previous updater retained at "
-                    + str(retained)
-                )
-
-            print("[BUA] Verified updater support installed")
-            return True
-
-    except Exception as exc:
-        print(
-            "[BUA] WARNING: Updater support setup failed: "
-            + str(exc),
-            file=sys.stderr,
-        )
-
-        # A failed upgrade may leave the previous backend intact.
-        # Never treat an unmarked or incomplete installation as verified.
-        try:
-            if (
-                target.is_dir()
-                and not target.is_symlink()
-                and complete(target)
-                and marker.is_file()
-                and marker.read_text().strip() == expected
-            ):
-                print(
-                    "[BUA] Previous verified updater remains available"
-                )
-                return "rolled_back"
-        except Exception:
-            pass
-
-        return False
-
-
-
-
-def install_bua_verification_bundle(
-    root,
-    url,
-    expected_sha256,
-):
-    """Install authenticated verification metadata transactionally."""
-    import hashlib
-    import os
-    import shutil
-    import tarfile
-    import tempfile
-    import urllib.request
-    from pathlib import PurePosixPath
-
-    root = Path(root)
-    target = root / "verification"
-    previous = root / ".bua-verification-previous"
-
-    expected_files = {
-        "bua-updater-compatibility.json",
-        "bua-updater-package-integrity.json",
-        "bua_updater_integrity.py",
-    }
-
-    if not (
-        isinstance(expected_sha256, str)
-        and len(expected_sha256) == 64
-        and all(c in "0123456789abcdef" for c in expected_sha256)
-    ):
-        raise ValueError("Invalid trusted verification bundle SHA256")
-
-    if previous.exists():
-        if previous.is_symlink() or not previous.is_dir():
-            raise RuntimeError("Invalid verification recovery backup")
-
-        if target.exists() or target.is_symlink():
-            raise RuntimeError(
-                "Ambiguous verification recovery state"
-            )
-
-        # Recover an interrupted directory switch. This does not
-        # establish that the recovered metadata is authenticated.
-        os.replace(previous, target)
-        print("[BUA] Previous verification directory restored")
-
-    root.mkdir(parents=True, exist_ok=True)
-
-    with tempfile.TemporaryDirectory(
-        prefix=".bua-verification-stage-",
-        dir=str(root),
-    ) as temporary:
-        work = Path(temporary)
-        archive = work / "verification.tar.gz"
-        digest = hashlib.sha256()
-        total = 0
-
-        with urllib.request.urlopen(url, timeout=20) as response:
-            with archive.open("wb") as output:
-                while True:
-                    chunk = response.read(65536)
-                    if not chunk:
-                        break
-                    total += len(chunk)
-                    if total > 5 * 1024 * 1024:
-                        raise ValueError("Verification bundle exceeds size limit")
-                    digest.update(chunk)
-                    output.write(chunk)
-
-        if digest.hexdigest() != expected_sha256:
-            raise ValueError("Verification bundle SHA256 mismatch")
-
-        with tarfile.open(archive, "r:gz") as package:
-            members = package.getmembers()
-            names = set()
-
-            for member in members:
-                parts = PurePosixPath(member.name).parts
-
-                if (
-                    not member.isfile()
-                    or len(parts) != 2
-                    or parts[0] != "verification"
-                    or parts[1] not in expected_files
-                    or member.name.startswith("/")
-                ):
-                    raise ValueError("Unexpected verification archive entry")
-
-                if parts[1] in names:
-                    raise ValueError("Duplicate verification archive entry")
-                names.add(parts[1])
-
-            if names != expected_files:
-                raise ValueError("Incomplete verification bundle")
-
-            staged = work / "verification"
-            staged.mkdir()
-
-            for member in members:
-                stream = package.extractfile(member)
-                if stream is None:
-                    raise ValueError("Unreadable verification archive entry")
-
-                destination = staged / PurePosixPath(member.name).name
-                with stream, destination.open("wb") as output:
-                    shutil.copyfileobj(stream, output)
-
-        marker = staged / ".bua-verification-sha256"
-        marker.write_text(expected_sha256 + "\n")
-
-        had_previous = target.exists()
-
-        if had_previous:
-            if target.is_symlink() or not target.is_dir():
-                raise ValueError("Unexpected verification installation type")
-            os.replace(target, previous)
-
-        try:
-            os.replace(staged, target)
-        except Exception:
-            if had_previous:
-                os.replace(previous, target)
-            raise
-
-        if had_previous:
-            retained_root = root / ".bua-verification-backups"
-            retained_root.mkdir(exist_ok=True)
-            import uuid
-            retained = retained_root / uuid.uuid4().hex
-            os.replace(previous, retained)
-
-    return True
-
-
-
-def authenticate_bua_verification_files(
-    verification_dir,
-    trusted_bundle,
-    expected_sha256,
-):
-    """Authenticate installed metadata against a trusted bundle."""
-    import hashlib
-    import tarfile
-    from pathlib import PurePosixPath
-
-    root = Path(verification_dir)
-    bundle = Path(trusted_bundle)
-
-    expected_files = {
-        "bua-updater-compatibility.json",
-        "bua-updater-package-integrity.json",
-        "bua_updater_integrity.py",
-    }
-
-    if root.is_symlink() or not root.is_dir():
-        return False, "Verification directory missing or invalid"
-
-    if hashlib.sha256(bundle.read_bytes()).hexdigest() != expected_sha256:
-        return False, "Trusted verification bundle hash mismatch"
-
-    marker = root / ".bua-verification-sha256"
-    if (
-        marker.is_symlink()
-        or not marker.is_file()
-        or marker.read_text().strip() != expected_sha256
-    ):
-        return False, "Verification installation marker mismatch"
-
-    with tarfile.open(bundle, "r:gz") as package:
-        members = package.getmembers()
-        names = set()
-
-        for member in members:
-            parts = PurePosixPath(member.name).parts
-
-            if (
-                not member.isfile()
-                or len(parts) != 2
-                or parts[0] != "verification"
-                or parts[1] not in expected_files
-                or parts[1] in names
-            ):
-                return False, "Unexpected trusted bundle content"
-
-            names.add(parts[1])
-
-            installed = root / parts[1]
-            if installed.is_symlink() or not installed.is_file():
-                return False, "Missing verification file: " + parts[1]
-
-            stream = package.extractfile(member)
-            if stream is None:
-                return False, "Unreadable trusted bundle entry"
-
-            with stream:
-                expected_digest = hashlib.sha256(stream.read()).digest()
-
-            actual_digest = hashlib.sha256(
-                installed.read_bytes()
-            ).digest()
-
-            if actual_digest != expected_digest:
-                return False, "Modified verification file: " + parts[1]
-
-        if names != expected_files:
-            return False, "Incomplete trusted bundle"
-
-    return True, "Authenticated verification metadata"
-
-
-def verify_bua_active_backend(root, trusted_bundle, bundle_sha256):
-    """Verify the installed backend against authenticated metadata."""
-    import importlib.util
-    import json
-
-    root = Path(root)
-    verification = root / "verification"
-    updater = root / "updater"
-
-    authenticated, reason = authenticate_bua_verification_files(
-        verification,
-        trusted_bundle,
-        bundle_sha256,
-    )
-
-    if not authenticated:
-        return False, reason
-
-    manifest = verification / "bua-updater-package-integrity.json"
-    contract = verification / "bua-updater-compatibility.json"
-    verifier = verification / "bua_updater_integrity.py"
-
-    try:
-        metadata = json.loads(manifest.read_text())
-        compatibility = json.loads(contract.read_text())
-
-        if metadata.get("package_sha256") != (
-            ({"6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76": "64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90", "33029b9dd5c97c45eff2ad67180acc2ea6b9359e17c043cbdf5f6c230ed2ec41": "129e2c603756c70c590b9c7273b56c167b12f070b1d0f8c1a21ec7fc2b1d58f0", "1c460d66d68984b1b70b1eec1e8ed66ca08c0a9fa219df22994e762f7e015929": "4e87f6333176d75bf5e8429565c6ed08166dc051ccd7691fccb8b709a9e72b14", "435cb39fe5b62cf97a39ab9d17852dc1dd5611c93d826661d91a2e958f448249": "c8f11750bcf6534df8a44c22f6487ee8ab207b6798ac5f3efa2a9aae44eb05e5"}.get(bundle_sha256))
-        ):
-            return False, "Unexpected updater package identity"
-
-        if compatibility.get("backend_api_version") != 1:
-            return False, "Unsupported backend API"
-
-        spec = importlib.util.spec_from_file_location(
-            "bua_verified_integrity",
-            verifier,
-        )
-
-        if spec is None or spec.loader is None:
-            return False, "Integrity verifier could not be loaded"
-
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-
-        return module.verify_updater_installation(
-            updater,
-            manifest,
-            contract,
-            frontend_api_version=1,
-        )
-
-    except Exception as exc:
-        return False, "Backend verification failed: " + str(exc)
-
-
-def verify_bua_candidate_pair(
-    updater_dir,
-    verification_dir,
-    trusted_bundle,
-    bundle_sha256,
-):
-    """Authenticate and verify an updater/metadata pair without moving it."""
-    import importlib.util
-    import json
-
-    updater = Path(updater_dir)
-    verification = Path(verification_dir)
-
-    if updater.is_symlink() or not updater.is_dir():
-        return False, "Candidate updater directory missing or invalid"
-
-    authenticated, reason = authenticate_bua_verification_files(
-        verification,
-        trusted_bundle,
-        bundle_sha256,
-    )
-    if not authenticated:
-        return False, reason
-
-    manifest = verification / "bua-updater-package-integrity.json"
-    contract = verification / "bua-updater-compatibility.json"
-    verifier = verification / "bua_updater_integrity.py"
-
-    try:
-        metadata = json.loads(manifest.read_text())
-        compatibility = json.loads(contract.read_text())
-
-        if metadata.get("package_sha256") != (
-            ({"6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76": "64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90", "33029b9dd5c97c45eff2ad67180acc2ea6b9359e17c043cbdf5f6c230ed2ec41": "129e2c603756c70c590b9c7273b56c167b12f070b1d0f8c1a21ec7fc2b1d58f0", "1c460d66d68984b1b70b1eec1e8ed66ca08c0a9fa219df22994e762f7e015929": "4e87f6333176d75bf5e8429565c6ed08166dc051ccd7691fccb8b709a9e72b14", "435cb39fe5b62cf97a39ab9d17852dc1dd5611c93d826661d91a2e958f448249": "c8f11750bcf6534df8a44c22f6487ee8ab207b6798ac5f3efa2a9aae44eb05e5"}.get(bundle_sha256))
-        ):
-            return False, "Unexpected candidate updater package identity"
-
-        if compatibility.get("backend_api_version") != 1:
-            return False, "Unsupported candidate backend API"
-
-        spec = importlib.util.spec_from_file_location(
-            "bua_candidate_integrity",
-            verifier,
-        )
-        if spec is None or spec.loader is None:
-            return False, "Candidate integrity verifier could not be loaded"
-
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-
-        return module.verify_updater_installation(
-            updater,
-            manifest,
-            contract,
-            frontend_api_version=1,
-        )
-
-    except Exception as exc:
-        return False, "Candidate verification failed: " + str(exc)
-
-
-def get_trusted_bua_verification_bundle(
-    root,
-    expected_sha256,
-):
-    """Return a cached verification archive only when its hash is trusted."""
-    import hashlib
-
-    root = Path(root)
-    archive = root / ".bua-verification-trusted.tar.gz"
-
-    if root.is_symlink() or not root.is_dir():
-        return None, "Invalid BUA installation root"
-
-    if archive.is_symlink() or not archive.is_file():
-        return None, "Trusted verification archive is not cached"
-
-    if archive.stat().st_size > 5 * 1024 * 1024:
-        return None, "Trusted verification archive exceeds size limit"
-
-    digest = hashlib.sha256()
-
-    try:
-        with archive.open("rb") as stream:
-            while True:
-                chunk = stream.read(1024 * 1024)
-                if not chunk:
-                    break
-                digest.update(chunk)
-    except OSError as exc:
-        return None, "Cannot read trusted archive: " + str(exc)
-
-    if digest.hexdigest() != expected_sha256:
-        return None, "Cached verification archive SHA256 mismatch"
-
-    return archive, "Authenticated cached verification archive"
-
-
-def install_trusted_bua_verification_cache(
-    root,
-    url,
-    expected_sha256,
-):
-    """Download, authenticate and atomically publish the trusted archive."""
-    import hashlib
-    import os
-    import tempfile
-    import urllib.request
-
-    root = Path(root)
-
-    if root.is_symlink() or not root.is_dir():
-        return False, "Invalid BUA installation root"
-
-    target = root / ".bua-verification-trusted.tar.gz"
-
-    if target.is_symlink():
-        return False, "Unexpected trusted cache symlink"
-
-    if target.exists():
-        current, reason = get_trusted_bua_verification_bundle(
-            root, expected_sha256
-        )
-        if current is not None:
-            return True, "Trusted cache already authenticated"
-
-        return False, "Existing trusted cache is invalid: " + reason
-
-    temp_path = None
-    limit = 5 * 1024 * 1024
-
-    try:
-        fd, temporary = tempfile.mkstemp(
-            prefix=".bua-verification-download-",
-            suffix=".tmp",
-            dir=root,
-        )
-        temp_path = Path(temporary)
-
-        digest = hashlib.sha256()
-        received = 0
-
-        with os.fdopen(fd, "wb") as output:
-            with urllib.request.urlopen(url, timeout=20) as response:
-                while True:
-                    chunk = response.read(1024 * 1024)
-                    if not chunk:
-                        break
-
-                    received += len(chunk)
-                    if received > limit:
-                        raise ValueError(
-                            "Verification download exceeds 5 MiB"
-                        )
-
-                    digest.update(chunk)
-                    output.write(chunk)
-
-            output.flush()
-            os.fsync(output.fileno())
-
-        if digest.hexdigest() != expected_sha256:
-            raise ValueError(
-                "Downloaded verification archive SHA256 mismatch"
-            )
-
-        if target.exists() or target.is_symlink():
-            raise ValueError("Trusted cache destination appeared during download")
-
-        os.replace(temp_path, target)
-        temp_path = None
-
-        authenticated, reason = get_trusted_bua_verification_bundle(
-            root, expected_sha256
-        )
-        if authenticated is None:
-            return False, reason
-
-        return True, "Trusted offline verification cache installed"
-
-    except Exception as exc:
-        return False, "Trusted cache installation failed: " + str(exc)
-
-    finally:
-        if temp_path is not None:
-            try:
-                temp_path.unlink(missing_ok=True)
-            except OSError:
-                pass
-
-
-def verify_bua_backend_locked(root, trusted_bundle, bundle_sha256):
-    """Verify active backend while holding the shared installation lock."""
-    import fcntl
-
-    root = Path(root)
-    root.mkdir(parents=True, exist_ok=True)
-
-    lock_path = root / ".bua-support-install.lock"
-
-    with lock_path.open("a+b") as lock:
-        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-        try:
-            verified, reason = verify_bua_active_backend(
-                root,
-                trusted_bundle,
-                bundle_sha256,
-            )
-
-            if verified:
-                return "ready", reason
-
-            return "failed", reason
-
-        finally:
-            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
-
-def check_verified_bua_startup(
-    root,
-    expected_bundle_sha256,
-):
-    """Inspect and recover an installed backend; never accept marker-only proof."""
-    import importlib.util
-
-    root = Path(root)
-
-    if root.is_symlink() or not root.is_dir():
-        return "failed", "Invalid BUA installation root"
-
-    trusted_bundle, reason = get_trusted_bua_verification_bundle(
-        root,
-        expected_bundle_sha256,
-    )
-
-    if trusted_bundle is None:
-        return "cache_required", reason
-
-    recovery_module = Path(__file__).resolve().parent / "bua_updater_recovery.py"
-
-    if recovery_module.is_symlink() or not recovery_module.is_file():
-        return "failed", "Trusted recovery module unavailable"
-
-    # Trusted identity is pinned in the frontend, not read from the
-    # recovery module or an unauthenticated local manifest.
-    expected_recovery_sha256 = "855f7f2ff973855659f0d05978814105e14cb7c6fa7757f84a948a0349ce551c"
-
-    import hashlib
-
-    try:
-        actual_recovery_sha256 = hashlib.sha256(
-            recovery_module.read_bytes()
-        ).hexdigest()
-    except OSError as exc:
-        return "failed", "Cannot authenticate recovery module: " + str(exc)
-
-    if actual_recovery_sha256 != expected_recovery_sha256:
-        return "failed", "Recovery module SHA256 mismatch"
-
-    try:
-        spec = importlib.util.spec_from_file_location(
-            "bua_updater_recovery_runtime",
-            recovery_module,
-        )
-        if spec is None or spec.loader is None:
-            return "failed", "Recovery module could not be loaded"
-
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-
-        status, detail = module.recover_interrupted_updater(
-            root,
-            trusted_bundle,
-            expected_bundle_sha256,
-            verify_bua_candidate_pair,
-        )
-
-        if status in ("ready", "rolled_back"):
-            return status, detail
-
-        # A completely missing installation may be installed later.
-        paths = (
-            root / "updater",
-            root / "verification",
-            root / ".bua-updater-previous",
-            root / ".bua-verification-previous",
-        )
-
-        if all(not p.exists() and not p.is_symlink() for p in paths):
-            return "install_required", "No updater installation present"
-
-        return "failed", detail
-
-    except Exception as exc:
-        return "failed", "Verified startup check failed: " + str(exc)
-
-
-def install_verified_bua_pair(root, support_url, verification_url,
-                              support_sha256, bundle_sha256):
-    """Install a complete authenticated pair with previous directories retained.
-
-    Call only while holding .bua-support-install.lock. No marker is trusted.
-    Returns (status, reason). Only verified installations may return ready or
-    rolled_back. External source files and persistent runtime data are not removed.
-    """
-    import hashlib
-    import os
-    import shutil
-    import tarfile
-    import tempfile
-    import urllib.request
-    import uuid
-    from pathlib import PurePosixPath
-
-    root = Path(root)
-    updater = root / "updater"
-    verification = root / "verification"
-    prev_updater = root / ".bua-updater-previous"
-    prev_verification = root / ".bua-verification-previous"
-
-    def fetch(url, destination, expected, limit):
-        digest = hashlib.sha256()
-        total = 0
-        with urllib.request.urlopen(url, timeout=20) as response:
-            with destination.open("wb") as output:
-                while True:
-                    chunk = response.read(65536)
-                    if not chunk:
-                        break
-                    total += len(chunk)
-                    if total > limit:
-                        raise ValueError("Archive exceeds download limit")
-                    digest.update(chunk)
-                    output.write(chunk)
-                output.flush()
-                os.fsync(output.fileno())
-        if digest.hexdigest() != expected:
-            raise ValueError("Downloaded archive SHA256 mismatch")
-
-    def extract(archive, stage, prefix, max_bytes):
-        seen = set()
-        total = 0
-        with tarfile.open(archive, "r:gz") as package:
-            for member in package:
-                parts = PurePosixPath(member.name).parts
-                clean = [part for part in parts if part not in ("", ".")]
-                if not clean:
-                    if member.isdir() and member.name in (".", "./"):
-                        continue
-                    raise ValueError("Unsafe archive root")
-                if (clean[0] != prefix or ".." in clean or
-                        member.name.startswith("/") or
-                        not (member.isdir() or member.isfile())):
-                    raise ValueError("Unsafe archive entry")
-                relative = tuple(clean)
-                if relative in seen:
-                    raise ValueError("Duplicate archive entry")
-                seen.add(relative)
-                dest = stage.joinpath(*relative)
-                if member.isdir():
-                    dest.mkdir(parents=True, exist_ok=True)
-                else:
-                    total += member.size
-                    if total > max_bytes:
-                        raise ValueError("Extracted archive exceeds size limit")
-                    dest.parent.mkdir(parents=True, exist_ok=True)
-                    stream = package.extractfile(member)
-                    if stream is None:
-                        raise ValueError("Missing archive data")
-                    with stream, dest.open("xb") as output:
-                        shutil.copyfileobj(stream, output)
-
-    # Refuse ambiguous recovery states. The recovery coordinator must handle them.
-    for path in (prev_updater, prev_verification):
-        if path.exists() or path.is_symlink():
-            return "failed", "Interrupted installation requires recovery: " + str(path)
-    for path in (updater, verification):
-        if path.is_symlink() or (path.exists() and not path.is_dir()):
-            return "failed", "Unsafe active directory: " + str(path)
-
-    old_pair_verified = False
-    if updater.is_dir() and verification.is_dir():
-        trusted, reason = get_trusted_bua_verification_bundle(root, bundle_sha256)
-        if trusted is not None:
-            old_pair_verified, _ = verify_bua_candidate_pair(
-                updater, verification, trusted, bundle_sha256)
-
-    # The cache is authenticated, and persists outside both versioned directories.
-    cached, reason = get_trusted_bua_verification_bundle(root, bundle_sha256)
-    if cached is None:
-        ok, reason = install_trusted_bua_verification_cache(
-            root, verification_url, bundle_sha256)
-        if not ok:
-            return "failed", reason
-        cached, reason = get_trusted_bua_verification_bundle(root, bundle_sha256)
-        if cached is None:
-            return "failed", reason
-
-    moved_old = []
-    activated_new = []
-    try:
-        with tempfile.TemporaryDirectory(prefix=".bua-verified-stage-", dir=root) as tmp:
-            stage = Path(tmp)
-            download = stage / "support.tar.gz"
-            fetch(support_url, download, support_sha256, 25 * 1024 * 1024)
-            extract(download, stage, "updater", 150 * 1024 * 1024)
-            extract(cached, stage, "verification", 5 * 1024 * 1024)
-            staged_updater = stage / "updater"
-            staged_verification = stage / "verification"
-            (staged_updater / ".bua-support-sha256").write_text(support_sha256 + "\n")
-            (staged_verification / ".bua-verification-sha256").write_text(bundle_sha256 + "\n")
-            valid, reason = verify_bua_candidate_pair(
-                staged_updater, staged_verification, cached, bundle_sha256)
-            if not valid:
-                raise ValueError("Staged pair rejected: " + reason)
-
-            for active, previous in ((updater, prev_updater),
-                                     (verification, prev_verification)):
-                if active.exists():
-                    os.rename(active, previous)
-                    moved_old.append((active, previous))
-            for staged, active in ((staged_updater, updater),
-                                   (staged_verification, verification)):
-                os.rename(staged, active)
-                activated_new.append(active)
-            valid, reason = verify_bua_candidate_pair(
-                updater, verification, cached, bundle_sha256)
-            if not valid:
-                raise ValueError("Activated pair rejected: " + reason)
-
-            for active, previous in moved_old:
-                if previous.is_dir():
-                    backup_dir = root / (".bua-updater-backups" if active == updater
-                                         else ".bua-verification-backups")
-                    try:
-                        backup_dir.mkdir(exist_ok=True)
-                        os.rename(previous, backup_dir / uuid.uuid4().hex)
-                    except OSError as exc:
-                        print("[BUA] Previous installation retained for recovery:", exc)
-            return "ready", "Authenticated updater pair installed"
-    except Exception as exc:
-        errors = []
-        for active in reversed(activated_new):
-            try:
-                if active.exists():
-                    quarantine = root / ".bua-recovery-quarantine"
-                    quarantine.mkdir(exist_ok=True)
-                    os.rename(active, quarantine / (active.name + "-" + uuid.uuid4().hex))
-            except OSError as err:
-                errors.append(str(err))
-        for active, previous in reversed(moved_old):
-            try:
-                if active.exists() or active.is_symlink() or not previous.is_dir():
-                    raise OSError("Unsafe rollback destination")
-                os.rename(previous, active)
-            except OSError as err:
-                errors.append(str(err))
-        if errors:
-            return "failed", "Installation and restoration failed: " + str(exc) + "; " + "; ".join(errors)
-        if old_pair_verified:
-            valid, detail = verify_bua_candidate_pair(updater, verification, cached, bundle_sha256)
-            if valid:
-                return "rolled_back", "New installation failed; verified previous pair restored: " + str(exc)
-        return "failed", "Verified installation failed: " + str(exc)
-
-
-
-def migrate_bua_verified_generation(root, upstream, new_support_sha, new_bundle_sha, old_bundle_sha=None):
-    """Migrate exactly one pinned older generation, without trusting local markers.
-
-    Caller holds the shared installation lock. On failure, preserve an
-    authenticated old pair or fail closed with recoverable previous directories.
-    """
-    import hashlib
-    import os
-    import shutil
-    import tarfile
-    import tempfile
-    import urllib.request
-    import uuid
-    from pathlib import PurePosixPath
-
-    root = Path(root)
-    old_support = "64affa257acc580ddcb39d14188e6c6bdd24d2c039b6a87d69e63af4646f7b90"
-    old_bundle = old_bundle_sha or "6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76"
-    if old_bundle not in ("6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76", "33029b9dd5c97c45eff2ad67180acc2ea6b9359e17c043cbdf5f6c230ed2ec41"):
-        return "failed", "Unrecognized previous verification identity"
-    cache = root / ".bua-verification-trusted.tar.gz"
-    prior_cache = root / ".bua-verification-prior.tar.gz"
-    updater = root / "updater"
-    verification = root / "verification"
-    prev_updater = root / ".bua-updater-previous"
-    prev_verification = root / ".bua-verification-previous"
-
-    for path in (root, updater, verification, prev_updater, prev_verification,
-                 cache, prior_cache):
-        if path.is_symlink():
-            return "failed", "Unsafe migration symlink: " + str(path)
-    if not root.is_dir() or any(p.exists() for p in (prev_updater, prev_verification)):
-        return "failed", "Incomplete or unsafe previous migration state"
-    old, reason = get_trusted_bua_verification_bundle(root, old_bundle)
-    if old is None:
-        return "not_applicable", reason
-    if not updater.is_dir() or not verification.is_dir():
-        return "failed", "Old verification cache exists without a complete installation"
-    verified, reason = verify_bua_candidate_pair(updater, verification, old, old_bundle)
-    if not verified:
-        return "failed", "Existing updater failed old-generation authentication: " + reason
-    if prior_cache.exists():
-        return "failed", "Prior verification cache already exists"
-
-    def download(url, destination, expected, maximum):
-        total = 0
-        digest = hashlib.sha256()
-        with urllib.request.urlopen(url, timeout=20) as response:
-            with destination.open("xb") as output:
-                while True:
-                    chunk = response.read(65536)
-                    if not chunk:
-                        break
-                    total += len(chunk)
-                    if total > maximum:
-                        raise ValueError("Archive exceeds size limit")
-                    digest.update(chunk)
-                    output.write(chunk)
-                output.flush()
-                os.fsync(output.fileno())
-        if digest.hexdigest() != expected:
-            raise ValueError("Downloaded archive SHA256 mismatch")
-
-    def unpack(archive_path, directory, prefix, maximum):
-        size = 0
-        seen = set()
-        with tarfile.open(archive_path, "r:gz") as archive:
-            for member in archive:
-                name = member.name
-                parts = tuple(part for part in PurePosixPath(name).parts if part != ".")
-                if not parts and member.isdir() and name in (".", "./"):
-                    continue
-                if (name.startswith("/") or not parts or parts[0] != prefix
-                        or ".." in parts or parts in seen
-                        or not (member.isfile() or member.isdir())):
-                    raise ValueError("Unsafe archive member: " + name)
-                seen.add(parts)
-                target = directory.joinpath(*parts)
-                if member.isdir():
-                    target.mkdir(parents=True, exist_ok=True)
-                else:
-                    size += member.size
-                    if size > maximum:
-                        raise ValueError("Extracted archive exceeds size limit")
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    with archive.extractfile(member) as source, target.open("xb") as out:
-                        shutil.copyfileobj(source, out)
-
-    # Nothing from the active generation changes during download and verification.
-    try:
-        with tempfile.TemporaryDirectory(prefix=".bua-migrate-stage-", dir=root) as tmp:
-            staged = Path(tmp)
-            new_verification_archive = staged / "verification.tar.gz"
-            new_support_archive = staged / "support.tar.gz"
-            download(upstream + "bua-updater-verification-x86_64.tar.gz",
-                     new_verification_archive, new_bundle_sha, 5 * 1024 * 1024)
-            download(upstream + "bua-updater-support-x86_64.tar.gz",
-                     new_support_archive, new_support_sha, 25 * 1024 * 1024)
-            unpack(new_verification_archive, staged, "verification", 5 * 1024 * 1024)
-            unpack(new_support_archive, staged, "updater", 150 * 1024 * 1024)
-            candidate_updater = staged / "updater"
-            candidate_verification = staged / "verification"
-            (candidate_updater / ".bua-support-sha256").write_text(new_support_sha + "\n")
-            (candidate_verification / ".bua-verification-sha256").write_text(new_bundle_sha + "\n")
-            valid, detail = verify_bua_candidate_pair(
-                candidate_updater, candidate_verification,
-                new_verification_archive, new_bundle_sha)
-            if not valid:
-                raise ValueError("Replacement pair rejected: " + detail)
-
-            # Keep the old cache available by a distinct name until commit.
-            # The fixed recovery procedure can authenticate the previous pair
-            # against that old pinned cache if activation is interrupted.
-            os.rename(cache, prior_cache)
-            try:
-                os.rename(updater, prev_updater)
-                os.rename(verification, prev_verification)
-                os.rename(candidate_updater, updater)
-                os.rename(candidate_verification, verification)
-                os.replace(new_verification_archive, cache)
-                valid, detail = verify_bua_candidate_pair(
-                    updater, verification, cache, new_bundle_sha)
-                if not valid:
-                    raise ValueError("Activated pair rejected: " + detail)
-            except Exception:
-                # Retain all generations on failed reversal, never delete evidence.
-                if prev_updater.is_dir() and prev_verification.is_dir():
-                    quarantine = root / ".bua-recovery-quarantine"
-                    quarantine.mkdir(mode=0o700, exist_ok=True)
-                    for active in (updater, verification):
-                        if active.exists():
-                            os.rename(active, quarantine / (active.name + "-" + uuid.uuid4().hex))
-                    os.rename(prev_updater, updater)
-                    os.rename(prev_verification, verification)
-                    if cache.exists():
-                        os.rename(cache, quarantine / ("cache-" + uuid.uuid4().hex))
-                    os.rename(prior_cache, cache)
-                raise
-
-            # Leave the prior cache and previous directories as authenticated
-            # recovery assets. Never silently delete or overwrite them.
-            return "ready", "Authenticated generation migration completed; old recovery assets preserved"
-    except Exception as exc:
-        old, _ = get_trusted_bua_verification_bundle(root, old_bundle)
-        if old is not None and updater.is_dir() and verification.is_dir():
-            valid, _ = verify_bua_candidate_pair(updater, verification, old, old_bundle)
-            if valid:
-                return "rolled_back", "Verified old generation preserved after migration failure: " + str(exc)
-        return "failed", "Migration failed; manual recovery may be required: " + str(exc)
-
-def ensure_bua_updater_support():
-    """Fail-closed production startup with authenticated caching and pair installation."""
-    import fcntl
-    root = Path("/userdata/system/add-ons/bua")
-    support_sha = "c8f11750bcf6534df8a44c22f6487ee8ab207b6798ac5f3efa2a9aae44eb05e5"
-    bundle_sha = "435cb39fe5b62cf97a39ab9d17852dc1dd5611c93d826661d91a2e958f448249"
-    upstream = "https://raw.githubusercontent.com/klova5/batocera-unofficial-addons/feature/global-parent-source-updater/app/"
-    if root.is_symlink():
-        return "failed"
-    try:
-        root.mkdir(parents=True, exist_ok=True)
-        # Recover an interrupted migration before ordinary startup checking.
-        # The previous pair must be authenticated by the *old* pinned bundle;
-        # the new bundle cannot verify the older generation.
-        prior = root / ".bua-verification-prior.tar.gz"
-        if prior.exists() or prior.is_symlink():
-            if prior.is_symlink() or not prior.is_file():
-                return "failed"
-            import hashlib
-            old_bundle_hash = hashlib.sha256(prior.read_bytes()).hexdigest()
-            if old_bundle_hash not in ("6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76", "33029b9dd5c97c45eff2ad67180acc2ea6b9359e17c043cbdf5f6c230ed2ec41"):
-                print("[BUA] Unrecognized previous verification cache")
-                return "failed"
-            if hashlib.sha256(prior.read_bytes()).hexdigest() != old_bundle_hash:
-                print("[BUA] Previous trust cache rejected")
-                return "failed"
-            previous_updater = root / ".bua-updater-previous"
-            previous_verification = root / ".bua-verification-previous"
-            if previous_updater.is_dir() and previous_verification.is_dir():
-                new_cache, _ = get_trusted_bua_verification_bundle(root, bundle_sha)
-                if new_cache is not None:
-                    active_verified, _ = verify_bua_candidate_pair(
-                        root / "updater", root / "verification", new_cache, bundle_sha)
-                    if active_verified:
-                        return "ready"
-                # Only a verified previous pair may be restored. The existing
-                # recovery coordinator manages all directory moves under lock.
-                import importlib.util
-                recovery_file = Path(__file__).resolve().parent / "bua_updater_recovery.py"
-                if (recovery_file.is_symlink() or not recovery_file.is_file()
-                        or hashlib.sha256(recovery_file.read_bytes()).hexdigest()
-                        != "855f7f2ff973855659f0d05978814105e14cb7c6fa7757f84a948a0349ce551c"):
-                    return "failed"
-                spec = importlib.util.spec_from_file_location("bua_recovery_migration", recovery_file)
-                recovery = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(recovery)
-                outcome, detail = recovery.recover_interrupted_updater(
-                    root, prior, old_bundle_hash, verify_bua_candidate_pair)
-                print("[BUA] Migration recovery result:", outcome, detail)
-                if outcome == "rolled_back":
-                    with (root / ".bua-support-install.lock").open("a+b") as lock:
-                        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-                        existing = root / ".bua-verification-trusted.tar.gz"
-                        if existing.is_symlink():
-                            return "failed"
-                        if existing.is_file():
-                            digest = hashlib.sha256(existing.read_bytes()).hexdigest()
-                            if digest != bundle_sha:
-                                return "failed"
-                            quarantine = root / ".bua-recovery-quarantine"
-                            quarantine.mkdir(mode=0o700, exist_ok=True)
-                            import uuid, os
-                            os.rename(existing, quarantine / ("trusted-cache-" + uuid.uuid4().hex))
-                        import os
-                        os.rename(prior, existing)
-                    return "rolled_back"
-                print("[BUA] Incomplete migration recovery:", detail)
-                return "failed"
-            elif not previous_updater.exists() and not previous_verification.exists():
-                # Interrupted before either old directory was moved.
-                old_valid, _ = verify_bua_candidate_pair(
-                    root / "updater", root / "verification", prior, old_bundle_hash)
-                if not old_valid:
-                    return "failed"
-                with (root / ".bua-support-install.lock").open("a+b") as lock:
-                    fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-                    target = root / ".bua-verification-trusted.tar.gz"
-                    if target.exists() or target.is_symlink():
-                        return "failed"
-                    import os
-                    os.rename(prior, target)
-                return "rolled_back"
-            elif (previous_updater.is_dir() and not previous_verification.exists()
-                  and not previous_verification.is_symlink()):
-                # Power loss after moving old updater but before moving old
-                # verification. The old pair is split across two paths.
-                # Authenticate both halves *before* touching either location.
-                active_updater = root / "updater"
-                active_verification = root / "verification"
-                old_valid, detail = verify_bua_candidate_pair(
-                    previous_updater, active_verification, prior, old_bundle_hash)
-                if not old_valid or active_updater.exists() or active_updater.is_symlink():
-                    print("[BUA] Split migration rejected:", detail)
-                    return "failed"
-                with (root / ".bua-support-install.lock").open("a+b") as lock:
-                    fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-                    # Revalidate after acquiring the lock to prevent races.
-                    old_valid, detail = verify_bua_candidate_pair(
-                        previous_updater, active_verification, prior, old_bundle_hash)
-                    target = root / ".bua-verification-trusted.tar.gz"
-                    if (not old_valid or active_updater.exists() or active_updater.is_symlink()
-                            or target.exists() or target.is_symlink()
-                            or not previous_updater.is_dir()):
-                        return "failed"
-                    import os
-                    os.rename(previous_updater, active_updater)
-                    os.rename(prior, target)
-                return "rolled_back"
-            else:
-                print("[BUA] Incomplete migration directories require recovery")
-                return "failed"
-        # Authenticate the previous generation before attempting rotation.
-        # This branch also prevents the new cache hash from hiding a valid old pair.
-        old_bundle_hash = None
-        for candidate_hash in ("6c2543a5af8117680f48313591aca486650d492c67ec8eb635b33c9f11e00d76", "33029b9dd5c97c45eff2ad67180acc2ea6b9359e17c043cbdf5f6c230ed2ec41"):
-            candidate, _ = get_trusted_bua_verification_bundle(
-                root, candidate_hash)
-            if candidate is not None:
-                old_bundle_hash = candidate_hash
-                break
-        old_cached = old_bundle_hash is not None
-        if old_cached:
-            with (root / ".bua-support-install.lock").open("a+b") as lock:
-                fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-                migrated, detail = migrate_bua_verified_generation(
-                    root, upstream, support_sha, bundle_sha, old_bundle_hash)
-                print("[BUA]", detail)
-                return migrated if migrated in ("ready", "rolled_back") else "failed"
-        # The recovery coordinator owns the shared lock internally.
-        status, reason = check_verified_bua_startup(root, bundle_sha)
-        if status in ("ready", "rolled_back"):
-            return status
-        if status == "cache_required":
-            # Cache installation must happen while the same lock is held.
-            with (root / ".bua-support-install.lock").open("a+b") as lock:
-                fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-                try:
-                    ok, detail = install_trusted_bua_verification_cache(
-                        root, upstream + "bua-updater-verification-x86_64.tar.gz", bundle_sha)
-                    if not ok:
-                        print("[BUA] Trusted cache unavailable:", detail)
-                        return "failed"
-                finally:
-                    fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
-            status, reason = check_verified_bua_startup(root, bundle_sha)
-            if status in ("ready", "rolled_back"):
-                return status
-        # Never mask interrupted recovery or unsafe file types with a reinstall.
-        if any((root / name).exists() or (root / name).is_symlink() for name in
-               (".bua-updater-previous", ".bua-verification-previous")):
-            print("[BUA] Recovery requires attention:", reason)
-            return "failed"
-        if status == "failed" and not (root / "updater").is_dir():
-            print("[BUA] Startup verification rejected:", reason)
-            return "failed"
-        if status not in ("failed", "install_required"):
-            return "failed"
-        with (root / ".bua-support-install.lock").open("a+b") as lock:
-            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-            try:
-                cached, _ = get_trusted_bua_verification_bundle(root, bundle_sha)
-                if cached is None:
-                    return "failed"
-                # Recheck active pair after acquiring lock; another BUA may have installed it.
-                if (root / "updater").is_dir() and (root / "verification").is_dir():
-                    valid, _ = verify_bua_candidate_pair(
-                        root / "updater", root / "verification", cached, bundle_sha)
-                    if valid:
-                        return "ready"
-                result, detail = install_verified_bua_pair(
-                    root, upstream + "bua-updater-support-x86_64.tar.gz",
-                    upstream + "bua-updater-verification-x86_64.tar.gz",
-                    support_sha, bundle_sha)
-                print("[BUA]", detail)
-                return result
-            finally:
-                fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
-    except Exception as exc:
-        print("[BUA] Verified startup failed:", exc, file=sys.stderr)
-        return "failed"
-
-
 def live_update_block():
     """
     Code block that runs on every app launch.
@@ -1329,24 +59,12 @@ def live_update_block():
     IMPORTANT: Keep this fast! It runs on EVERY launch.
     """
     try:
-        result = ensure_bua_updater_support()
-        if result in ("ready", "rolled_back"):
-            setup_custom_service_handler()
-            check_symlink_manager_and_warn()
-            live_update()
-
-        if result is True or result == "ready":
-            return "ready"
-
-        if result == "rolled_back":
-            return "rolled_back"
-
-        print("[BUA] Startup blocked: updater support unavailable")
-        return "failed"
+        setup_custom_service_handler()
+        check_symlink_manager_and_warn()
+        live_update()
 
     except Exception as e:
         print(f"[BUA] Live update block error: {e}")
-        return "failed"
 
 # ------------------------------
 # Translation System
@@ -2820,22 +1538,14 @@ def _build_dev_registration_adapters() -> Dict[str, str]:
     return result
 
 
-DEV_REGISTRATION_ADAPTERS: Dict[str, str] = {}
+DEV_REGISTRATION_ADAPTERS: Dict[str, str] = (
+    _build_dev_registration_adapters()
+)
 
-
-def refresh_dev_registration_adapters():
-    """Reload registration adapters from the verified active updater."""
-    global DEV_REGISTRATION_ADAPTERS
-
-    refreshed = _build_dev_registration_adapters()
-
-    refreshed["Wine Manager"] = (
-        "/userdata/system/add-ons/bua/updater/converted/"
-        "integration-packages/wine-manager/061-Wine_Manager.sh"
-    )
-
-    DEV_REGISTRATION_ADAPTERS.clear()
-    DEV_REGISTRATION_ADAPTERS.update(refreshed)
+DEV_REGISTRATION_ADAPTERS["Wine Manager"] = (
+    "/userdata/system/add-ons/bua/updater/converted/"
+    "integration-packages/wine-manager/061-Wine_Manager.sh"
+)
 
 
 def get_dev_registration_adapter(app_name: str) -> str | None:
@@ -3840,7 +2550,7 @@ def mark_installed(app_name: str, success: bool):
     history = load_history()
     if app_name not in history:
         history[app_name] = []
-
+    
     history[app_name].append({
         'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'success': success
@@ -3909,7 +2619,33 @@ def mark_uninstalled(app_name: str):
         save_history(history)
 
 # Custom uninstall commands for apps that don't follow the standard pattern
+CUSTOM_UNINSTALL: Dict[str, str] = {
+    "Desktop For Batocera": "/userdata/system/configs/bat-drl/Remover_Desktop.sh",
+}
 
+def get_uninstall_command(install_cmd: str, app_name: str = None) -> str:
+    """Convert an installation command to an uninstall command.
+
+    First checks CUSTOM_UNINSTALL dictionary for app-specific uninstall scripts.
+    Otherwise, replaces .sh with _uninstall.sh in the URL.
+
+    Example:
+    https://.../ 7zip/7zip.sh -> https://.../7zip/7zip_uninstall.sh
+    """
+    # Check for custom uninstall command first
+    if app_name and app_name in CUSTOM_UNINSTALL:
+        return CUSTOM_UNINSTALL[app_name]
+
+    import re
+    # Find the .sh URL in the curl command
+    match = re.search(r'(https://[^\s]+)\.sh', install_cmd)
+    if match:
+        base_url = match.group(1)
+        # Replace .sh with _uninstall.sh
+        uninstall_url = f"{base_url}_uninstall.sh"
+        # Create the curl command
+        return f"curl -Ls {uninstall_url} | bash"
+    return None
 
 # ------------------------------
 # Apps and Install Commands
@@ -3918,6 +2654,9 @@ def mark_uninstalled(app_name: str):
 # Base URL for BUA repository scripts
 BUA_BASE_URL = "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main"
 
+def bua(path: str) -> str:
+    """Helper to build BUA install command from relative path"""
+    return f"curl -L {BUA_BASE_URL}/{path} | bash"
 
 
 # ------------------------------
@@ -4397,8 +3136,83 @@ def resolve_parent_update_asset(app_name: str) -> Dict:
     return result
 
 
+
+BUA_SCANNED_RELEASES={}
+
+def _bua_release_fingerprint(status):
+    if not isinstance(status,dict):return None
+    if status.get("status")!="update_available" or status.get("needs_update") is not True:return None
+    return (status.get("latest_source"),status.get("latest_version"),status.get("latest_update_identity"))
+
+def _bua_bind_selected_payload(app,selection):
+    """Reject resolution of a different software asset than the selected one."""
+    from urllib.parse import urlsplit,unquote
+    import re,fnmatch
+    if _bua_release_fingerprint(selection) is None:return None,"No selected release"
+    source=selection.get("latest_source")
+    version=selection.get("latest_version")
+    if source not in ("bua","parent") or not isinstance(version,str) or not version.strip():
+        return None,"Missing selected source/version"
+    resolved=resolve_parent_update_asset(app)
+    if not isinstance(resolved,dict) or not resolved.get("supported"):
+        return None,(resolved.get("error") if isinstance(resolved,dict) else None) or "No supported payload recipe"
+    recipe=resolved.get("recipe") or {}
+    registration=resolved.get("registration") or {}
+    if not isinstance(recipe,dict) or not isinstance(registration,dict):return None,"Invalid recipe or registration"
+    # Switch is preserved, but its five separate independent releases must
+    # each be verified before a global version can authorize replacement.
+    if recipe.get("type")=="multi_component":return None,"Switch needs per-component asset identity verification"
+    if recipe.get("type") not in ("replace_file","replace_archive","replace_bundle"):
+        return None,"Unsupported payload recipe"
+    target=resolved.get("target")
+    if not isinstance(target,str) or not target.startswith("/userdata/"):
+        return None,"Unexpected update target"
+    url=resolved.get("url")
+    if not isinstance(url,str):return None,"Missing resolved asset URL"
+    u=urlsplit(url)
+    if u.scheme!="https" or not u.hostname or u.username or u.password:
+        return None,"Insecure payload URL"
+    if source=="bua":
+        current_version=registration.get("app_version")
+        identity=registration.get("update_identity") or current_version
+        if current_version!=version or identity!=selection.get("latest_update_identity"):
+            return None,"BUA release/version/identity no longer matches selection"
+        upstream=registration.get("upstream") or {}
+        explicit=registration.get("update_recipe") or {}
+        if not isinstance(explicit,dict):explicit={}
+        direct=(url==explicit.get("download_url") or url==upstream.get("url")) if isinstance(upstream,dict) else False
+    else:
+        upstream=get_registered_version_metadata(app).get("upstream") or {}
+        direct=False
+    if not isinstance(upstream,dict):return None,"Invalid upstream metadata"
+    if upstream.get("type")=="github_release":
+        owner,repo=upstream.get("owner"),upstream.get("repo")
+        if not (isinstance(owner,str) and isinstance(repo,str)
+                and re.fullmatch(r"[A-Za-z0-9-]{1,39}",owner)
+                and re.fullmatch(r"[A-Za-z0-9_.-]{1,100}",repo)
+                and ".." not in repo):return None,"Invalid GitHub owner/repository"
+        parts=[unquote(p) for p in u.path.split("/") if p]
+        if any(p in (".","..") or "/" in p or "\\" in p for p in parts):
+            return None,"Unsafe release URL path"
+        matched=(u.hostname=="github.com" and u.port in (None,443)
+                 and len(parts)==6 and parts[0:4]==[owner,repo,"releases","download"]
+                 and parts[4]==version and bool(parts[5]) and not u.query and not u.fragment)
+        if not matched and not (source=="bua" and direct):
+            return None,"Payload does not match selected release tag/repository"
+        if source=="parent":
+            pattern=recipe.get("asset_pattern")
+            if not isinstance(pattern,str) or not pattern or not fnmatch.fnmatch(parts[5],pattern):
+                return None,"Developer payload does not match asset pattern"
+            exclude=recipe.get("asset_exclude_pattern")
+            if isinstance(exclude,str) and exclude and fnmatch.fnmatch(parts[5],exclude):
+                return None,"Excluded developer asset"
+    elif not (source=="bua" and direct):
+        return None,"Source-specific payload proof unavailable"
+    return resolved,None
+
 def build_parent_update_command(
     app_name: str,
+    selected_status: Dict | None = None,
 ) -> tuple[str | None, str | None]:
     """
     Build one generic parent-source payload update job.
@@ -4408,7 +3222,9 @@ def build_parent_update_command(
     """
     import shlex
 
-    resolved = resolve_parent_update_asset(app_name)
+    resolved, binding_error = _bua_bind_selected_payload(app_name, selected_status)
+    if not resolved:
+        return None, binding_error
 
     if not resolved.get("supported"):
         return None, resolved.get("error")
@@ -4435,11 +3251,6 @@ def build_parent_update_command(
     q_url = shlex.quote(url)
     q_target = shlex.quote(target)
     q_marker = shlex.quote(marker)
-
-    # BUA_SECURITY_DOWNLOAD_SCAN_V1: scan download before original installation
-    SECURITY_GATE_TEMPLATE = 'BUA_SEC_CODE=0; BUA_SEC_MSG=$(python3 -c \'import base64;exec(base64.b64decode("IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJSZWFkLW9ubHkgc3RhZ2VkIHBheWxvYWQgc2VjdXJpdHkgc2Nhbi4gRXhpdCAwPWNsZWFuLCAyPXJldmlldywgMz1oYXJkIHJlamVjdC4iIiIKaW1wb3J0IG9zLCBzdGF0LCBzeXMsIHRhcmZpbGUsIHppcGZpbGUKZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCk1BWF9CWVRFUz04KjEwMjQqKjMKTUFYX0VYUEFOREVEPTI0KjEwMjQqKjMKTUFYX0VOVFJJRVM9MTAwMDAwCk1BWF9SQVRJTz0xMDAwClNDUklQVF9FWFQ9eycuc2gnLCcuYmFzaCcsJy5weScsJy5wbCcsJy5wczEnLCcuYmF0JywnLmNtZCcsJy5kZXNrdG9wJ30KCmRlZiBzY2FuKHApOgogICAgaGFyZD1bXTsgd2Fybj1bXTsgZXhwYW5kZWQ9MDsgc2Vlbj1zZXQoKTsgZmlsZXM9c2V0KCk7IHBhdGhzPVtdCiAgICBpZiBwLmlzX3N5bWxpbmsoKSBvciBub3QgcC5pc19maWxlKCk6IHJldHVybiAzLCdEb3dubG9hZGVkIHBheWxvYWQgaXMgYSBzeW1saW5rIG9yIG5vdCBhIHJlZ3VsYXIgZmlsZScKICAgIHNpemU9cC5zdGF0KCkuc3Rfc2l6ZQogICAgaWYgbm90IHNpemUgb3Igc2l6ZT5NQVhfQllURVM6IHJldHVybiAzLCdEb3dubG9hZGVkIHBheWxvYWQgZW1wdHkgb3IgZXhjZWVkcyA4IEdpQicKICAgIGRlZiBhZGQobmFtZSxpc19kaXIsbW9kZSx1c2l6ZSxjc2l6ZSk6CiAgICAgICAgbm9ubG9jYWwgZXhwYW5kZWQKICAgICAgICBpZiBub3QgaXNpbnN0YW5jZShuYW1lLHN0cikgb3Igbm90IG5hbWUgb3IgJ1xcJyBpbiBuYW1lIG9yICdceDAwJyBpbiBuYW1lIG9yIG5hbWUuc3RhcnRzd2l0aCgnLycpOgogICAgICAgICAgICBoYXJkLmFwcGVuZCgnSW52YWxpZC9hYnNvbHV0ZSBhcmNoaXZlIHBhdGgnKTtyZXR1cm4KICAgICAgICBwYXJ0cz1uYW1lLnJzdHJpcCgnLycpLnNwbGl0KCcvJykKICAgICAgICBpZiBwYXJ0cyBhbmQgcGFydHNbMF09PScuJzogcGFydHM9cGFydHNbMTpdCiAgICAgICAgaWYgbm90IHBhcnRzIG9yIGFueSh4IGluICgnJywnLicsJy4uJykgZm9yIHggaW4gcGFydHMpIG9yICc6JyBpbiBwYXJ0c1swXToKICAgICAgICAgICAgaGFyZC5hcHBlbmQoJ1RyYXZlcnNhbC9ub25jYW5vbmljYWwgYXJjaGl2ZSBwYXRoJyk7cmV0dXJuCiAgICAgICAga2V5PXR1cGxlKHBhcnRzKQogICAgICAgIGlmIGtleSBpbiBzZWVuOiBoYXJkLmFwcGVuZCgnRHVwbGljYXRlIGFyY2hpdmUgcGF0aCcpCiAgICAgICAgc2Vlbi5hZGQoa2V5KTtwYXRocy5hcHBlbmQoa2V5KQogICAgICAgIGlmIG5vdCBpc19kaXI6IGZpbGVzLmFkZChrZXkpCiAgICAgICAgZXhwYW5kZWQrPXVzaXplCiAgICAgICAgaWYgZXhwYW5kZWQ+TUFYX0VYUEFOREVEOiBoYXJkLmFwcGVuZCgnRXhjZXNzaXZlIGV4cGFuZGVkIHNpemUnKQogICAgICAgIGlmIGNzaXplPjAgYW5kIHVzaXplPjEwKjEwMjQqMTAyNCBhbmQgdXNpemUvY3NpemU+TUFYX1JBVElPOiBoYXJkLmFwcGVuZCgnRXh0cmVtZSBjb21wcmVzc2lvbiByYXRpbycpCiAgICAgICAgaWYgbW9kZSAmIChzdGF0LlNfSVNVSUR8c3RhdC5TX0lTR0lEKTogd2Fybi5hcHBlbmQoJ1ByaXZpbGVnZWQgcGVybWlzc2lvbiBiaXRzJykKICAgICAgICBpZiBQYXRoKG5hbWUpLnN1ZmZpeC5sb3dlcigpIGluIFNDUklQVF9FWFQ6IHdhcm4uYXBwZW5kKCdTY3JpcHQgb3IgZGVza3RvcCBsYXVuY2hlciBpbiBwYWNrYWdlJykKICAgIHRyeToKICAgICAgICBpZiB6aXBmaWxlLmlzX3ppcGZpbGUocCk6CiAgICAgICAgICAgIHdpdGggemlwZmlsZS5aaXBGaWxlKHApIGFzIHo6CiAgICAgICAgICAgICAgICBlbnRyaWVzPXouaW5mb2xpc3QoKQogICAgICAgICAgICAgICAgaWYgbGVuKGVudHJpZXMpPk1BWF9FTlRSSUVTOiByZXR1cm4gMywnVG9vIG1hbnkgWklQIG1lbWJlcnMnCiAgICAgICAgICAgICAgICBmb3IgZSBpbiBlbnRyaWVzOgogICAgICAgICAgICAgICAgICAgIG1vZGU9KGUuZXh0ZXJuYWxfYXR0cj4+MTYpCiAgICAgICAgICAgICAgICAgICAga2luZD1zdGF0LlNfSUZNVChtb2RlKQogICAgICAgICAgICAgICAgICAgIGlmIGtpbmQgbm90IGluICgwLHN0YXQuU19JRlJFRyxzdGF0LlNfSUZESVIpIG9yIChlLmlzX2RpcigpIGFuZCBraW5kPT1zdGF0LlNfSUZSRUcpOiBoYXJkLmFwcGVuZCgnU3ltbGluayBvciBzcGVjaWFsIFpJUCBtZW1iZXInKQogICAgICAgICAgICAgICAgICAgIGFkZChlLmZpbGVuYW1lLGUuaXNfZGlyKCksbW9kZSxlLmZpbGVfc2l6ZSxlLmNvbXByZXNzX3NpemUpCiAgICAgICAgZWxpZiB0YXJmaWxlLmlzX3RhcmZpbGUocCk6CiAgICAgICAgICAgIHdpdGggdGFyZmlsZS5vcGVuKHAsJ3I6KicpIGFzIHQ6CiAgICAgICAgICAgICAgICBlbnRyaWVzPXQuZ2V0bWVtYmVycygpCiAgICAgICAgICAgICAgICBpZiBsZW4oZW50cmllcyk+TUFYX0VOVFJJRVM6IHJldHVybiAzLCdUb28gbWFueSBUQVIgbWVtYmVycycKICAgICAgICAgICAgICAgIGZvciBlIGluIGVudHJpZXM6CiAgICAgICAgICAgICAgICAgICAgaWYgbm90IChlLmlzZmlsZSgpIG9yIGUuaXNkaXIoKSk6IGhhcmQuYXBwZW5kKCdTeW1saW5rLCBoYXJkbGluayBvciBzcGVjaWFsIFRBUiBtZW1iZXInKQogICAgICAgICAgICAgICAgICAgIGFkZChlLm5hbWUsZS5pc2RpcigpLGUubW9kZSxlLnNpemUsMCkKICAgICAgICBlbHNlOgogICAgICAgICAgICB3aXRoIHAub3BlbigncmInKSBhcyBmOiBoZWFkPWYucmVhZCgyNTYpCiAgICAgICAgICAgIGlmIGhlYWQuc3RhcnRzd2l0aChiJyMhJyk6IHdhcm4uYXBwZW5kKCdEb3dubG9hZGVkIGV4ZWN1dGFibGUgc2NyaXB0JykKICAgICAgICAgICAgaWYgaGVhZC5zdGFydHN3aXRoKGInXHg3ZkVMRicpIG9yIGhlYWQuc3RhcnRzd2l0aChiJ01aJyk6IHdhcm4uYXBwZW5kKCdEb3dubG9hZGVkIGV4ZWN1dGFibGUgYmluYXJ5IChwdWJsaXNoZXIgbm90IGluZGVwZW5kZW50bHkgYXR0ZXN0ZWQpJykKICAgICAgICAgICAgaWYgaGVhZC5zdGFydHN3aXRoKGInUEtceDAzXHgwNCcpOiBoYXJkLmFwcGVuZCgnTWFsZm9ybWVkIFpJUCBmaWxlJykKICAgICAgICBpZiBhbnkoYW55KGtbOmldIGluIGZpbGVzIGZvciBpIGluIHJhbmdlKDEsbGVuKGspKSkgZm9yIGsgaW4gcGF0aHMpOiBoYXJkLmFwcGVuZCgnRmlsZS1kaXJlY3RvcnkgcGF0aCBjb25mbGljdCcpCiAgICBleGNlcHQgKE9TRXJyb3IsVmFsdWVFcnJvcixFT0ZFcnJvcix0YXJmaWxlLlRhckVycm9yLHppcGZpbGUuQmFkWmlwRmlsZSkgYXMgZToKICAgICAgICByZXR1cm4gMywnVW5yZWFkYWJsZSBvciBtYWxmb3JtZWQgYXJjaGl2ZTogJytzdHIoZSlbOjEyMF0KICAgIGlmIGhhcmQ6cmV0dXJuIDMsJ0JMT0NLRUQ6ICcrJywgJy5qb2luKHNvcnRlZChzZXQoaGFyZCkpWzo0XSkKICAgIGlmIHdhcm46cmV0dXJuIDIsJ1JFVklFVzogJysnLCAnLmpvaW4oc29ydGVkKHNldCh3YXJuKSlbOjRdKQogICAgcmV0dXJuIDAsJ0NMRUFOOiBubyBwcm9oaWJpdGVkIGFyY2hpdmUgZW50cmllcyBkZXRlY3RlZCAobm90IG1hbHdhcmUtZnJlZSBjZXJ0aWZpY2F0aW9uKScKaWYgX19uYW1lX189PSdfX21haW5fXyc6CiAgICBjb2RlLG1lc3NhZ2U9c2NhbihQYXRoKHN5cy5hcmd2WzFdKSk7cHJpbnQobWVzc2FnZSk7c3lzLmV4aXQoY29kZSkK"))\' __STAGED__ 2>&1) || BUA_SEC_CODE=$?; echo "[BUA SECURITY] $BUA_SEC_MSG"; if [ "$BUA_SEC_CODE" -eq 2 ]; then dialog --defaultno --title "BUA Update Security" --yesno "Suspicious content detected. $BUA_SEC_MSG. Accept the Risk to install this update; Cancel skips it." 12 75 || exit 42; elif [ "$BUA_SEC_CODE" -ne 0 ]; then echo "[BUA SECURITY] Update blocked"; exit 43; fi; '
-    def gate_multi_component(staged_path):
-        return SECURITY_GATE_TEMPLATE.replace("__STAGED__", staged_path).rstrip("; ")
 
     if recipe_type == "multi_component":
         components = recipe.get("components") or []
@@ -4493,63 +3304,108 @@ def build_parent_update_command(
                 ),
             })
 
-        scan_command = 'python3 -c \'import base64;exec(base64.b64decode("IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJSZWFkLW9ubHkgc3RhZ2VkIHBheWxvYWQgc2VjdXJpdHkgc2Nhbi4gRXhpdCAwPWNsZWFuLCAyPXJldmlldywgMz1oYXJkIHJlamVjdC4iIiIKaW1wb3J0IG9zLCBzdGF0LCBzeXMsIHRhcmZpbGUsIHppcGZpbGUKZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCk1BWF9CWVRFUz04KjEwMjQqKjMKTUFYX0VYUEFOREVEPTI0KjEwMjQqKjMKTUFYX0VOVFJJRVM9MTAwMDAwCk1BWF9SQVRJTz0xMDAwClNDUklQVF9FWFQ9eycuc2gnLCcuYmFzaCcsJy5weScsJy5wbCcsJy5wczEnLCcuYmF0JywnLmNtZCcsJy5kZXNrdG9wJ30KCmRlZiBzY2FuKHApOgogICAgaGFyZD1bXTsgd2Fybj1bXTsgZXhwYW5kZWQ9MDsgc2Vlbj1zZXQoKTsgZmlsZXM9c2V0KCk7IHBhdGhzPVtdCiAgICBpZiBwLmlzX3N5bWxpbmsoKSBvciBub3QgcC5pc19maWxlKCk6IHJldHVybiAzLCdEb3dubG9hZGVkIHBheWxvYWQgaXMgYSBzeW1saW5rIG9yIG5vdCBhIHJlZ3VsYXIgZmlsZScKICAgIHNpemU9cC5zdGF0KCkuc3Rfc2l6ZQogICAgaWYgbm90IHNpemUgb3Igc2l6ZT5NQVhfQllURVM6IHJldHVybiAzLCdEb3dubG9hZGVkIHBheWxvYWQgZW1wdHkgb3IgZXhjZWVkcyA4IEdpQicKICAgIGRlZiBhZGQobmFtZSxpc19kaXIsbW9kZSx1c2l6ZSxjc2l6ZSk6CiAgICAgICAgbm9ubG9jYWwgZXhwYW5kZWQKICAgICAgICBpZiBub3QgaXNpbnN0YW5jZShuYW1lLHN0cikgb3Igbm90IG5hbWUgb3IgJ1xcJyBpbiBuYW1lIG9yICdceDAwJyBpbiBuYW1lIG9yIG5hbWUuc3RhcnRzd2l0aCgnLycpOgogICAgICAgICAgICBoYXJkLmFwcGVuZCgnSW52YWxpZC9hYnNvbHV0ZSBhcmNoaXZlIHBhdGgnKTtyZXR1cm4KICAgICAgICBwYXJ0cz1uYW1lLnJzdHJpcCgnLycpLnNwbGl0KCcvJykKICAgICAgICBpZiBwYXJ0cyBhbmQgcGFydHNbMF09PScuJzogcGFydHM9cGFydHNbMTpdCiAgICAgICAgaWYgbm90IHBhcnRzIG9yIGFueSh4IGluICgnJywnLicsJy4uJykgZm9yIHggaW4gcGFydHMpIG9yICc6JyBpbiBwYXJ0c1swXToKICAgICAgICAgICAgaGFyZC5hcHBlbmQoJ1RyYXZlcnNhbC9ub25jYW5vbmljYWwgYXJjaGl2ZSBwYXRoJyk7cmV0dXJuCiAgICAgICAga2V5PXR1cGxlKHBhcnRzKQogICAgICAgIGlmIGtleSBpbiBzZWVuOiBoYXJkLmFwcGVuZCgnRHVwbGljYXRlIGFyY2hpdmUgcGF0aCcpCiAgICAgICAgc2Vlbi5hZGQoa2V5KTtwYXRocy5hcHBlbmQoa2V5KQogICAgICAgIGlmIG5vdCBpc19kaXI6IGZpbGVzLmFkZChrZXkpCiAgICAgICAgZXhwYW5kZWQrPXVzaXplCiAgICAgICAgaWYgZXhwYW5kZWQ+TUFYX0VYUEFOREVEOiBoYXJkLmFwcGVuZCgnRXhjZXNzaXZlIGV4cGFuZGVkIHNpemUnKQogICAgICAgIGlmIGNzaXplPjAgYW5kIHVzaXplPjEwKjEwMjQqMTAyNCBhbmQgdXNpemUvY3NpemU+TUFYX1JBVElPOiBoYXJkLmFwcGVuZCgnRXh0cmVtZSBjb21wcmVzc2lvbiByYXRpbycpCiAgICAgICAgaWYgbW9kZSAmIChzdGF0LlNfSVNVSUR8c3RhdC5TX0lTR0lEKTogd2Fybi5hcHBlbmQoJ1ByaXZpbGVnZWQgcGVybWlzc2lvbiBiaXRzJykKICAgICAgICBpZiBQYXRoKG5hbWUpLnN1ZmZpeC5sb3dlcigpIGluIFNDUklQVF9FWFQ6IHdhcm4uYXBwZW5kKCdTY3JpcHQgb3IgZGVza3RvcCBsYXVuY2hlciBpbiBwYWNrYWdlJykKICAgIHRyeToKICAgICAgICBpZiB6aXBmaWxlLmlzX3ppcGZpbGUocCk6CiAgICAgICAgICAgIHdpdGggemlwZmlsZS5aaXBGaWxlKHApIGFzIHo6CiAgICAgICAgICAgICAgICBlbnRyaWVzPXouaW5mb2xpc3QoKQogICAgICAgICAgICAgICAgaWYgbGVuKGVudHJpZXMpPk1BWF9FTlRSSUVTOiByZXR1cm4gMywnVG9vIG1hbnkgWklQIG1lbWJlcnMnCiAgICAgICAgICAgICAgICBmb3IgZSBpbiBlbnRyaWVzOgogICAgICAgICAgICAgICAgICAgIG1vZGU9KGUuZXh0ZXJuYWxfYXR0cj4+MTYpCiAgICAgICAgICAgICAgICAgICAga2luZD1zdGF0LlNfSUZNVChtb2RlKQogICAgICAgICAgICAgICAgICAgIGlmIGtpbmQgbm90IGluICgwLHN0YXQuU19JRlJFRyxzdGF0LlNfSUZESVIpIG9yIChlLmlzX2RpcigpIGFuZCBraW5kPT1zdGF0LlNfSUZSRUcpOiBoYXJkLmFwcGVuZCgnU3ltbGluayBvciBzcGVjaWFsIFpJUCBtZW1iZXInKQogICAgICAgICAgICAgICAgICAgIGFkZChlLmZpbGVuYW1lLGUuaXNfZGlyKCksbW9kZSxlLmZpbGVfc2l6ZSxlLmNvbXByZXNzX3NpemUpCiAgICAgICAgZWxpZiB0YXJmaWxlLmlzX3RhcmZpbGUocCk6CiAgICAgICAgICAgIHdpdGggdGFyZmlsZS5vcGVuKHAsJ3I6KicpIGFzIHQ6CiAgICAgICAgICAgICAgICBlbnRyaWVzPXQuZ2V0bWVtYmVycygpCiAgICAgICAgICAgICAgICBpZiBsZW4oZW50cmllcyk+TUFYX0VOVFJJRVM6IHJldHVybiAzLCdUb28gbWFueSBUQVIgbWVtYmVycycKICAgICAgICAgICAgICAgIGZvciBlIGluIGVudHJpZXM6CiAgICAgICAgICAgICAgICAgICAgaWYgbm90IChlLmlzZmlsZSgpIG9yIGUuaXNkaXIoKSk6IGhhcmQuYXBwZW5kKCdTeW1saW5rLCBoYXJkbGluayBvciBzcGVjaWFsIFRBUiBtZW1iZXInKQogICAgICAgICAgICAgICAgICAgIGFkZChlLm5hbWUsZS5pc2RpcigpLGUubW9kZSxlLnNpemUsMCkKICAgICAgICBlbHNlOgogICAgICAgICAgICB3aXRoIHAub3BlbigncmInKSBhcyBmOiBoZWFkPWYucmVhZCgyNTYpCiAgICAgICAgICAgIGlmIGhlYWQuc3RhcnRzd2l0aChiJyMhJyk6IHdhcm4uYXBwZW5kKCdEb3dubG9hZGVkIGV4ZWN1dGFibGUgc2NyaXB0JykKICAgICAgICAgICAgaWYgaGVhZC5zdGFydHN3aXRoKGInXHg3ZkVMRicpIG9yIGhlYWQuc3RhcnRzd2l0aChiJ01aJyk6IHdhcm4uYXBwZW5kKCdEb3dubG9hZGVkIGV4ZWN1dGFibGUgYmluYXJ5IChwdWJsaXNoZXIgbm90IGluZGVwZW5kZW50bHkgYXR0ZXN0ZWQpJykKICAgICAgICAgICAgaWYgaGVhZC5zdGFydHN3aXRoKGInUEtceDAzXHgwNCcpOiBoYXJkLmFwcGVuZCgnTWFsZm9ybWVkIFpJUCBmaWxlJykKICAgICAgICBpZiBhbnkoYW55KGtbOmldIGluIGZpbGVzIGZvciBpIGluIHJhbmdlKDEsbGVuKGspKSkgZm9yIGsgaW4gcGF0aHMpOiBoYXJkLmFwcGVuZCgnRmlsZS1kaXJlY3RvcnkgcGF0aCBjb25mbGljdCcpCiAgICBleGNlcHQgKE9TRXJyb3IsVmFsdWVFcnJvcixFT0ZFcnJvcix0YXJmaWxlLlRhckVycm9yLHppcGZpbGUuQmFkWmlwRmlsZSkgYXMgZToKICAgICAgICByZXR1cm4gMywnVW5yZWFkYWJsZSBvciBtYWxmb3JtZWQgYXJjaGl2ZTogJytzdHIoZSlbOjEyMF0KICAgIGlmIGhhcmQ6cmV0dXJuIDMsJ0JMT0NLRUQ6ICcrJywgJy5qb2luKHNvcnRlZChzZXQoaGFyZCkpWzo0XSkKICAgIGlmIHdhcm46cmV0dXJuIDIsJ1JFVklFVzogJysnLCAnLmpvaW4oc29ydGVkKHNldCh3YXJuKSlbOjRdKQogICAgcmV0dXJuIDAsJ0NMRUFOOiBubyBwcm9oaWJpdGVkIGFyY2hpdmUgZW50cmllcyBkZXRlY3RlZCAobm90IG1hbHdhcmUtZnJlZSBjZXJ0aWZpY2F0aW9uKScKaWYgX19uYW1lX189PSdfX21haW5fXyc6CiAgICBjb2RlLG1lc3NhZ2U9c2NhbihQYXRoKHN5cy5hcmd2WzFdKSk7cHJpbnQobWVzc2FnZSk7c3lzLmV4aXQoY29kZSkK"))\''
-        # BUA_SWITCH_SEVERITY_ORDER_V1: stage all, scan all, then present
-        # hard-blocked results before reviewable results. Never edit the
-        # installed copy for a rejected component.
         parts = [
             "BUA_PARENT_UPDATE=1",
             "set -e",
             'WORK=$(mktemp -d /tmp/bua-multi-update.XXXXXX)',
             'trap \'rm -rf "$WORK"\' EXIT',
         ]
+
+        # Stage every component before touching installed payloads.
         for index, component in enumerate(clean_components):
+            q_name = shlex.quote(component["name"])
+            q_component_url = shlex.quote(component["url"])
+            staged = shlex.quote(
+                f'$WORK/component-{index}'
+            )
+
+            # Keep $WORK expandable rather than shell-quoting it.
             staged = f'"$WORK/component-{index}"'
+
             parts.extend([
                 f"echo '[BUA] Downloading {component['name']}'",
-                f"curl -fL --retry 3 -o {staged} {shlex.quote(component['url'])}",
+                (
+                    "curl -fL --retry 3 -o "
+                    f"{staged} {q_component_url}"
+                ),
                 f"test -s {staged}",
-                f"BUA_SCAN_{index}=0",
-                f'BUA_MSG_{index}=$({scan_command} {staged} 2>&1) || BUA_SCAN_{index}=$?',
-                f'case "$BUA_SCAN_{index}" in 0|2|3) ;; *) BUA_SCAN_{index}=3 ;; esac',
-                f'BUA_KEEP_{index}=1',
             ])
-        # First pass: ALL dangerous components, each with its own OK window.
+
+            if component["executable"]:
+                parts.append(f"chmod +x {staged}")
+
+        # Back up all currently installed component files.
         for index, component in enumerate(clean_components):
-            staged=f'"$WORK/component-{index}"'
-            display_name=shlex.quote(component['name'])
-            parts.append(
-                f'if [ "$BUA_SCAN_{index}" -eq 3 ]; then '
-                f'dialog --title "Dangerous update content blocked" --msgbox '
-                f'"{component["name"]}: $BUA_MSG_{index}. This downloaded file will be deleted." 12 75; '
-                f'rm -f -- {staged}; BUA_KEEP_{index}=0; fi'
+            q_target_component = shlex.quote(
+                component["target"]
             )
-        # Second pass: ALL suspicious components, default Cancel.
+
+            parts.extend([
+                f"TARGET_{index}={q_target_component}",
+                (
+                    f'OLD_{index}="${{TARGET_{index}}}'
+                    '.bua-old.$$"'
+                ),
+                (
+                    f'mkdir -p "$(dirname '
+                    f'"${{TARGET_{index}}}")"'
+                ),
+                f'rm -f "$OLD_{index}"',
+                (
+                    f'if [ -e "${{TARGET_{index}}}" ]; then '
+                    f'mv "${{TARGET_{index}}}" "$OLD_{index}"; '
+                    "fi"
+                ),
+            ])
+
+        # Install every staged component.
+        parts.append("FAILED=0")
+
         for index, component in enumerate(clean_components):
-            staged=f'"$WORK/component-{index}"'
             parts.append(
-                f'if [ "$BUA_SCAN_{index}" -eq 2 ]; then '
-                f'if dialog --defaultno --title "BUA Update Security" --yesno '
-                f'"{component["name"]}: $BUA_MSG_{index}. Accept the Risk to install this file; Cancel deletes only this downloaded file." 12 75; '
-                f'then :; else rm -f -- {staged}; BUA_KEEP_{index}=0; fi; fi'
+                f'if ! mv "$WORK/component-{index}" '
+                f'"${{TARGET_{index}}}"; then '
+                "FAILED=1; "
+                "fi"
             )
-        # Install only approved components. Each installation preserves its
-        # own previous file until the replacement succeeds.
+
+        # Roll everything back if any component failed.
+        rollback = []
+
         for index, component in enumerate(clean_components):
-            target=shlex.quote(component['target'])
-            staged=f'"$WORK/component-{index}"'
-            chmod='chmod +x '+staged+'; ' if component['executable'] else ''
-            parts.append(
-                f'if [ "$BUA_KEEP_{index}" -eq 1 ]; then '
-                f'TARGET={target}; OLD="${{TARGET}}.bua-old.$$"; '
-                f'mkdir -p "$(dirname "$TARGET")"; '
-                f'rm -f -- "$OLD"; '
-                f'if [ -e "$TARGET" ]; then mv "$TARGET" "$OLD"; fi; '
-                f'{chmod}'
-                f'if mv {staged} "$TARGET"; then rm -f -- "$OLD"; '
-                f'else if [ -e "$OLD" ]; then mv "$OLD" "$TARGET"; fi; exit 1; fi; fi'
+            if index == 0:
+                rollback.append(
+                    f'if [ "$FAILED" -ne 0 ]; then '
+                    f'rm -f "${{TARGET_{index}}}"'
+                )
+            else:
+                rollback.append(
+                    f'rm -f "${{TARGET_{index}}}"'
+                )
+
+            rollback.append(
+                f'if [ -e "$OLD_{index}" ]; then '
+                f'mv "$OLD_{index}" '
+                f'"${{TARGET_{index}}}"; fi'
             )
-        parts.extend(["trap - EXIT", 'rm -rf "$WORK"', f"echo {q_marker}"])
+
+        rollback.extend([
+            "exit 1",
+            "fi",
+        ])
+
+        parts.extend(rollback)
+
+        # Commit successful transaction.
+        for index, component in enumerate(clean_components):
+            parts.append(f'rm -f "$OLD_{index}"')
+
+        parts.extend([
+            "trap - EXIT",
+            'rm -rf "$WORK"',
+            f"echo {q_marker}",
+        ])
+
         return "; ".join(parts), None
 
     if recipe_type == "replace_file":
@@ -4568,7 +3424,6 @@ def build_parent_update_command(
             f"echo '[BUA] Downloading newest {app_name} payload'; "
             f'curl -fL --retry 3 -o "$TMP" {q_url}; '
             'test -s "$TMP"; '
-            'BUA_SEC_CODE=0; BUA_SEC_MSG=$(python3 -c \'import base64;exec(base64.b64decode("IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJSZWFkLW9ubHkgc3RhZ2VkIHBheWxvYWQgc2VjdXJpdHkgc2Nhbi4gRXhpdCAwPWNsZWFuLCAyPXJldmlldywgMz1oYXJkIHJlamVjdC4iIiIKaW1wb3J0IG9zLCBzdGF0LCBzeXMsIHRhcmZpbGUsIHppcGZpbGUKZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCk1BWF9CWVRFUz04KjEwMjQqKjMKTUFYX0VYUEFOREVEPTI0KjEwMjQqKjMKTUFYX0VOVFJJRVM9MTAwMDAwCk1BWF9SQVRJTz0xMDAwClNDUklQVF9FWFQ9eycuc2gnLCcuYmFzaCcsJy5weScsJy5wbCcsJy5wczEnLCcuYmF0JywnLmNtZCcsJy5kZXNrdG9wJ30KCmRlZiBzY2FuKHApOgogICAgaGFyZD1bXTsgd2Fybj1bXTsgZXhwYW5kZWQ9MDsgc2Vlbj1zZXQoKTsgZmlsZXM9c2V0KCk7IHBhdGhzPVtdCiAgICBpZiBwLmlzX3N5bWxpbmsoKSBvciBub3QgcC5pc19maWxlKCk6IHJldHVybiAzLCdEb3dubG9hZGVkIHBheWxvYWQgaXMgYSBzeW1saW5rIG9yIG5vdCBhIHJlZ3VsYXIgZmlsZScKICAgIHNpemU9cC5zdGF0KCkuc3Rfc2l6ZQogICAgaWYgbm90IHNpemUgb3Igc2l6ZT5NQVhfQllURVM6IHJldHVybiAzLCdEb3dubG9hZGVkIHBheWxvYWQgZW1wdHkgb3IgZXhjZWVkcyA4IEdpQicKICAgIGRlZiBhZGQobmFtZSxpc19kaXIsbW9kZSx1c2l6ZSxjc2l6ZSk6CiAgICAgICAgbm9ubG9jYWwgZXhwYW5kZWQKICAgICAgICBpZiBub3QgaXNpbnN0YW5jZShuYW1lLHN0cikgb3Igbm90IG5hbWUgb3IgJ1xcJyBpbiBuYW1lIG9yICdceDAwJyBpbiBuYW1lIG9yIG5hbWUuc3RhcnRzd2l0aCgnLycpOgogICAgICAgICAgICBoYXJkLmFwcGVuZCgnSW52YWxpZC9hYnNvbHV0ZSBhcmNoaXZlIHBhdGgnKTtyZXR1cm4KICAgICAgICBwYXJ0cz1uYW1lLnJzdHJpcCgnLycpLnNwbGl0KCcvJykKICAgICAgICBpZiBwYXJ0cyBhbmQgcGFydHNbMF09PScuJzogcGFydHM9cGFydHNbMTpdCiAgICAgICAgaWYgbm90IHBhcnRzIG9yIGFueSh4IGluICgnJywnLicsJy4uJykgZm9yIHggaW4gcGFydHMpIG9yICc6JyBpbiBwYXJ0c1swXToKICAgICAgICAgICAgaGFyZC5hcHBlbmQoJ1RyYXZlcnNhbC9ub25jYW5vbmljYWwgYXJjaGl2ZSBwYXRoJyk7cmV0dXJuCiAgICAgICAga2V5PXR1cGxlKHBhcnRzKQogICAgICAgIGlmIGtleSBpbiBzZWVuOiBoYXJkLmFwcGVuZCgnRHVwbGljYXRlIGFyY2hpdmUgcGF0aCcpCiAgICAgICAgc2Vlbi5hZGQoa2V5KTtwYXRocy5hcHBlbmQoa2V5KQogICAgICAgIGlmIG5vdCBpc19kaXI6IGZpbGVzLmFkZChrZXkpCiAgICAgICAgZXhwYW5kZWQrPXVzaXplCiAgICAgICAgaWYgZXhwYW5kZWQ+TUFYX0VYUEFOREVEOiBoYXJkLmFwcGVuZCgnRXhjZXNzaXZlIGV4cGFuZGVkIHNpemUnKQogICAgICAgIGlmIGNzaXplPjAgYW5kIHVzaXplPjEwKjEwMjQqMTAyNCBhbmQgdXNpemUvY3NpemU+TUFYX1JBVElPOiBoYXJkLmFwcGVuZCgnRXh0cmVtZSBjb21wcmVzc2lvbiByYXRpbycpCiAgICAgICAgaWYgbW9kZSAmIChzdGF0LlNfSVNVSUR8c3RhdC5TX0lTR0lEKTogd2Fybi5hcHBlbmQoJ1ByaXZpbGVnZWQgcGVybWlzc2lvbiBiaXRzJykKICAgICAgICBpZiBQYXRoKG5hbWUpLnN1ZmZpeC5sb3dlcigpIGluIFNDUklQVF9FWFQ6IHdhcm4uYXBwZW5kKCdTY3JpcHQgb3IgZGVza3RvcCBsYXVuY2hlciBpbiBwYWNrYWdlJykKICAgIHRyeToKICAgICAgICBpZiB6aXBmaWxlLmlzX3ppcGZpbGUocCk6CiAgICAgICAgICAgIHdpdGggemlwZmlsZS5aaXBGaWxlKHApIGFzIHo6CiAgICAgICAgICAgICAgICBlbnRyaWVzPXouaW5mb2xpc3QoKQogICAgICAgICAgICAgICAgaWYgbGVuKGVudHJpZXMpPk1BWF9FTlRSSUVTOiByZXR1cm4gMywnVG9vIG1hbnkgWklQIG1lbWJlcnMnCiAgICAgICAgICAgICAgICBmb3IgZSBpbiBlbnRyaWVzOgogICAgICAgICAgICAgICAgICAgIG1vZGU9KGUuZXh0ZXJuYWxfYXR0cj4+MTYpCiAgICAgICAgICAgICAgICAgICAga2luZD1zdGF0LlNfSUZNVChtb2RlKQogICAgICAgICAgICAgICAgICAgIGlmIGtpbmQgbm90IGluICgwLHN0YXQuU19JRlJFRyxzdGF0LlNfSUZESVIpIG9yIChlLmlzX2RpcigpIGFuZCBraW5kPT1zdGF0LlNfSUZSRUcpOiBoYXJkLmFwcGVuZCgnU3ltbGluayBvciBzcGVjaWFsIFpJUCBtZW1iZXInKQogICAgICAgICAgICAgICAgICAgIGFkZChlLmZpbGVuYW1lLGUuaXNfZGlyKCksbW9kZSxlLmZpbGVfc2l6ZSxlLmNvbXByZXNzX3NpemUpCiAgICAgICAgZWxpZiB0YXJmaWxlLmlzX3RhcmZpbGUocCk6CiAgICAgICAgICAgIHdpdGggdGFyZmlsZS5vcGVuKHAsJ3I6KicpIGFzIHQ6CiAgICAgICAgICAgICAgICBlbnRyaWVzPXQuZ2V0bWVtYmVycygpCiAgICAgICAgICAgICAgICBpZiBsZW4oZW50cmllcyk+TUFYX0VOVFJJRVM6IHJldHVybiAzLCdUb28gbWFueSBUQVIgbWVtYmVycycKICAgICAgICAgICAgICAgIGZvciBlIGluIGVudHJpZXM6CiAgICAgICAgICAgICAgICAgICAgaWYgbm90IChlLmlzZmlsZSgpIG9yIGUuaXNkaXIoKSk6IGhhcmQuYXBwZW5kKCdTeW1saW5rLCBoYXJkbGluayBvciBzcGVjaWFsIFRBUiBtZW1iZXInKQogICAgICAgICAgICAgICAgICAgIGFkZChlLm5hbWUsZS5pc2RpcigpLGUubW9kZSxlLnNpemUsMCkKICAgICAgICBlbHNlOgogICAgICAgICAgICB3aXRoIHAub3BlbigncmInKSBhcyBmOiBoZWFkPWYucmVhZCgyNTYpCiAgICAgICAgICAgIGlmIGhlYWQuc3RhcnRzd2l0aChiJyMhJyk6IHdhcm4uYXBwZW5kKCdEb3dubG9hZGVkIGV4ZWN1dGFibGUgc2NyaXB0JykKICAgICAgICAgICAgaWYgaGVhZC5zdGFydHN3aXRoKGInXHg3ZkVMRicpIG9yIGhlYWQuc3RhcnRzd2l0aChiJ01aJyk6IHdhcm4uYXBwZW5kKCdEb3dubG9hZGVkIGV4ZWN1dGFibGUgYmluYXJ5IChwdWJsaXNoZXIgbm90IGluZGVwZW5kZW50bHkgYXR0ZXN0ZWQpJykKICAgICAgICAgICAgaWYgaGVhZC5zdGFydHN3aXRoKGInUEtceDAzXHgwNCcpOiBoYXJkLmFwcGVuZCgnTWFsZm9ybWVkIFpJUCBmaWxlJykKICAgICAgICBpZiBhbnkoYW55KGtbOmldIGluIGZpbGVzIGZvciBpIGluIHJhbmdlKDEsbGVuKGspKSkgZm9yIGsgaW4gcGF0aHMpOiBoYXJkLmFwcGVuZCgnRmlsZS1kaXJlY3RvcnkgcGF0aCBjb25mbGljdCcpCiAgICBleGNlcHQgKE9TRXJyb3IsVmFsdWVFcnJvcixFT0ZFcnJvcix0YXJmaWxlLlRhckVycm9yLHppcGZpbGUuQmFkWmlwRmlsZSkgYXMgZToKICAgICAgICByZXR1cm4gMywnVW5yZWFkYWJsZSBvciBtYWxmb3JtZWQgYXJjaGl2ZTogJytzdHIoZSlbOjEyMF0KICAgIGlmIGhhcmQ6cmV0dXJuIDMsJ0JMT0NLRUQ6ICcrJywgJy5qb2luKHNvcnRlZChzZXQoaGFyZCkpWzo0XSkKICAgIGlmIHdhcm46cmV0dXJuIDIsJ1JFVklFVzogJysnLCAnLmpvaW4oc29ydGVkKHNldCh3YXJuKSlbOjRdKQogICAgcmV0dXJuIDAsJ0NMRUFOOiBubyBwcm9oaWJpdGVkIGFyY2hpdmUgZW50cmllcyBkZXRlY3RlZCAobm90IG1hbHdhcmUtZnJlZSBjZXJ0aWZpY2F0aW9uKScKaWYgX19uYW1lX189PSdfX21haW5fXyc6CiAgICBjb2RlLG1lc3NhZ2U9c2NhbihQYXRoKHN5cy5hcmd2WzFdKSk7cHJpbnQobWVzc2FnZSk7c3lzLmV4aXQoY29kZSkK"))\' "$TMP" 2>&1) || BUA_SEC_CODE=$?; echo "[BUA SECURITY] $BUA_SEC_MSG"; if [ "$BUA_SEC_CODE" -eq 2 ]; then dialog --defaultno --title "BUA Update Security" --yesno "Suspicious content detected. $BUA_SEC_MSG. Accept the Risk to install this update; Cancel skips it." 12 75 || exit 42; elif [ "$BUA_SEC_CODE" -ne 0 ]; then echo "[BUA SECURITY] Update blocked"; exit 43; fi; '
             + chmod_step
             + 'mv -f "$TMP" "$TARGET"; '
             'trap - EXIT; '
@@ -4604,16 +3459,15 @@ def build_parent_update_command(
             f"echo '[BUA] Downloading newest {app_name} payload'; "
             'curl -fL --retry 3 -o "$ARCHIVE" "$URL"; '
             'test -s "$ARCHIVE"; '
-            'BUA_SEC_CODE=0; BUA_SEC_MSG=$(python3 -c \'import base64;exec(base64.b64decode("IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJSZWFkLW9ubHkgc3RhZ2VkIHBheWxvYWQgc2VjdXJpdHkgc2Nhbi4gRXhpdCAwPWNsZWFuLCAyPXJldmlldywgMz1oYXJkIHJlamVjdC4iIiIKaW1wb3J0IG9zLCBzdGF0LCBzeXMsIHRhcmZpbGUsIHppcGZpbGUKZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCk1BWF9CWVRFUz04KjEwMjQqKjMKTUFYX0VYUEFOREVEPTI0KjEwMjQqKjMKTUFYX0VOVFJJRVM9MTAwMDAwCk1BWF9SQVRJTz0xMDAwClNDUklQVF9FWFQ9eycuc2gnLCcuYmFzaCcsJy5weScsJy5wbCcsJy5wczEnLCcuYmF0JywnLmNtZCcsJy5kZXNrdG9wJ30KCmRlZiBzY2FuKHApOgogICAgaGFyZD1bXTsgd2Fybj1bXTsgZXhwYW5kZWQ9MDsgc2Vlbj1zZXQoKTsgZmlsZXM9c2V0KCk7IHBhdGhzPVtdCiAgICBpZiBwLmlzX3N5bWxpbmsoKSBvciBub3QgcC5pc19maWxlKCk6IHJldHVybiAzLCdEb3dubG9hZGVkIHBheWxvYWQgaXMgYSBzeW1saW5rIG9yIG5vdCBhIHJlZ3VsYXIgZmlsZScKICAgIHNpemU9cC5zdGF0KCkuc3Rfc2l6ZQogICAgaWYgbm90IHNpemUgb3Igc2l6ZT5NQVhfQllURVM6IHJldHVybiAzLCdEb3dubG9hZGVkIHBheWxvYWQgZW1wdHkgb3IgZXhjZWVkcyA4IEdpQicKICAgIGRlZiBhZGQobmFtZSxpc19kaXIsbW9kZSx1c2l6ZSxjc2l6ZSk6CiAgICAgICAgbm9ubG9jYWwgZXhwYW5kZWQKICAgICAgICBpZiBub3QgaXNpbnN0YW5jZShuYW1lLHN0cikgb3Igbm90IG5hbWUgb3IgJ1xcJyBpbiBuYW1lIG9yICdceDAwJyBpbiBuYW1lIG9yIG5hbWUuc3RhcnRzd2l0aCgnLycpOgogICAgICAgICAgICBoYXJkLmFwcGVuZCgnSW52YWxpZC9hYnNvbHV0ZSBhcmNoaXZlIHBhdGgnKTtyZXR1cm4KICAgICAgICBwYXJ0cz1uYW1lLnJzdHJpcCgnLycpLnNwbGl0KCcvJykKICAgICAgICBpZiBwYXJ0cyBhbmQgcGFydHNbMF09PScuJzogcGFydHM9cGFydHNbMTpdCiAgICAgICAgaWYgbm90IHBhcnRzIG9yIGFueSh4IGluICgnJywnLicsJy4uJykgZm9yIHggaW4gcGFydHMpIG9yICc6JyBpbiBwYXJ0c1swXToKICAgICAgICAgICAgaGFyZC5hcHBlbmQoJ1RyYXZlcnNhbC9ub25jYW5vbmljYWwgYXJjaGl2ZSBwYXRoJyk7cmV0dXJuCiAgICAgICAga2V5PXR1cGxlKHBhcnRzKQogICAgICAgIGlmIGtleSBpbiBzZWVuOiBoYXJkLmFwcGVuZCgnRHVwbGljYXRlIGFyY2hpdmUgcGF0aCcpCiAgICAgICAgc2Vlbi5hZGQoa2V5KTtwYXRocy5hcHBlbmQoa2V5KQogICAgICAgIGlmIG5vdCBpc19kaXI6IGZpbGVzLmFkZChrZXkpCiAgICAgICAgZXhwYW5kZWQrPXVzaXplCiAgICAgICAgaWYgZXhwYW5kZWQ+TUFYX0VYUEFOREVEOiBoYXJkLmFwcGVuZCgnRXhjZXNzaXZlIGV4cGFuZGVkIHNpemUnKQogICAgICAgIGlmIGNzaXplPjAgYW5kIHVzaXplPjEwKjEwMjQqMTAyNCBhbmQgdXNpemUvY3NpemU+TUFYX1JBVElPOiBoYXJkLmFwcGVuZCgnRXh0cmVtZSBjb21wcmVzc2lvbiByYXRpbycpCiAgICAgICAgaWYgbW9kZSAmIChzdGF0LlNfSVNVSUR8c3RhdC5TX0lTR0lEKTogd2Fybi5hcHBlbmQoJ1ByaXZpbGVnZWQgcGVybWlzc2lvbiBiaXRzJykKICAgICAgICBpZiBQYXRoKG5hbWUpLnN1ZmZpeC5sb3dlcigpIGluIFNDUklQVF9FWFQ6IHdhcm4uYXBwZW5kKCdTY3JpcHQgb3IgZGVza3RvcCBsYXVuY2hlciBpbiBwYWNrYWdlJykKICAgIHRyeToKICAgICAgICBpZiB6aXBmaWxlLmlzX3ppcGZpbGUocCk6CiAgICAgICAgICAgIHdpdGggemlwZmlsZS5aaXBGaWxlKHApIGFzIHo6CiAgICAgICAgICAgICAgICBlbnRyaWVzPXouaW5mb2xpc3QoKQogICAgICAgICAgICAgICAgaWYgbGVuKGVudHJpZXMpPk1BWF9FTlRSSUVTOiByZXR1cm4gMywnVG9vIG1hbnkgWklQIG1lbWJlcnMnCiAgICAgICAgICAgICAgICBmb3IgZSBpbiBlbnRyaWVzOgogICAgICAgICAgICAgICAgICAgIG1vZGU9KGUuZXh0ZXJuYWxfYXR0cj4+MTYpCiAgICAgICAgICAgICAgICAgICAga2luZD1zdGF0LlNfSUZNVChtb2RlKQogICAgICAgICAgICAgICAgICAgIGlmIGtpbmQgbm90IGluICgwLHN0YXQuU19JRlJFRyxzdGF0LlNfSUZESVIpIG9yIChlLmlzX2RpcigpIGFuZCBraW5kPT1zdGF0LlNfSUZSRUcpOiBoYXJkLmFwcGVuZCgnU3ltbGluayBvciBzcGVjaWFsIFpJUCBtZW1iZXInKQogICAgICAgICAgICAgICAgICAgIGFkZChlLmZpbGVuYW1lLGUuaXNfZGlyKCksbW9kZSxlLmZpbGVfc2l6ZSxlLmNvbXByZXNzX3NpemUpCiAgICAgICAgZWxpZiB0YXJmaWxlLmlzX3RhcmZpbGUocCk6CiAgICAgICAgICAgIHdpdGggdGFyZmlsZS5vcGVuKHAsJ3I6KicpIGFzIHQ6CiAgICAgICAgICAgICAgICBlbnRyaWVzPXQuZ2V0bWVtYmVycygpCiAgICAgICAgICAgICAgICBpZiBsZW4oZW50cmllcyk+TUFYX0VOVFJJRVM6IHJldHVybiAzLCdUb28gbWFueSBUQVIgbWVtYmVycycKICAgICAgICAgICAgICAgIGZvciBlIGluIGVudHJpZXM6CiAgICAgICAgICAgICAgICAgICAgaWYgbm90IChlLmlzZmlsZSgpIG9yIGUuaXNkaXIoKSk6IGhhcmQuYXBwZW5kKCdTeW1saW5rLCBoYXJkbGluayBvciBzcGVjaWFsIFRBUiBtZW1iZXInKQogICAgICAgICAgICAgICAgICAgIGFkZChlLm5hbWUsZS5pc2RpcigpLGUubW9kZSxlLnNpemUsMCkKICAgICAgICBlbHNlOgogICAgICAgICAgICB3aXRoIHAub3BlbigncmInKSBhcyBmOiBoZWFkPWYucmVhZCgyNTYpCiAgICAgICAgICAgIGlmIGhlYWQuc3RhcnRzd2l0aChiJyMhJyk6IHdhcm4uYXBwZW5kKCdEb3dubG9hZGVkIGV4ZWN1dGFibGUgc2NyaXB0JykKICAgICAgICAgICAgaWYgaGVhZC5zdGFydHN3aXRoKGInXHg3ZkVMRicpIG9yIGhlYWQuc3RhcnRzd2l0aChiJ01aJyk6IHdhcm4uYXBwZW5kKCdEb3dubG9hZGVkIGV4ZWN1dGFibGUgYmluYXJ5IChwdWJsaXNoZXIgbm90IGluZGVwZW5kZW50bHkgYXR0ZXN0ZWQpJykKICAgICAgICAgICAgaWYgaGVhZC5zdGFydHN3aXRoKGInUEtceDAzXHgwNCcpOiBoYXJkLmFwcGVuZCgnTWFsZm9ybWVkIFpJUCBmaWxlJykKICAgICAgICBpZiBhbnkoYW55KGtbOmldIGluIGZpbGVzIGZvciBpIGluIHJhbmdlKDEsbGVuKGspKSkgZm9yIGsgaW4gcGF0aHMpOiBoYXJkLmFwcGVuZCgnRmlsZS1kaXJlY3RvcnkgcGF0aCBjb25mbGljdCcpCiAgICBleGNlcHQgKE9TRXJyb3IsVmFsdWVFcnJvcixFT0ZFcnJvcix0YXJmaWxlLlRhckVycm9yLHppcGZpbGUuQmFkWmlwRmlsZSkgYXMgZToKICAgICAgICByZXR1cm4gMywnVW5yZWFkYWJsZSBvciBtYWxmb3JtZWQgYXJjaGl2ZTogJytzdHIoZSlbOjEyMF0KICAgIGlmIGhhcmQ6cmV0dXJuIDMsJ0JMT0NLRUQ6ICcrJywgJy5qb2luKHNvcnRlZChzZXQoaGFyZCkpWzo0XSkKICAgIGlmIHdhcm46cmV0dXJuIDIsJ1JFVklFVzogJysnLCAnLmpvaW4oc29ydGVkKHNldCh3YXJuKSlbOjRdKQogICAgcmV0dXJuIDAsJ0NMRUFOOiBubyBwcm9oaWJpdGVkIGFyY2hpdmUgZW50cmllcyBkZXRlY3RlZCAobm90IG1hbHdhcmUtZnJlZSBjZXJ0aWZpY2F0aW9uKScKaWYgX19uYW1lX189PSdfX21haW5fXyc6CiAgICBjb2RlLG1lc3NhZ2U9c2NhbihQYXRoKHN5cy5hcmd2WzFdKSk7cHJpbnQobWVzc2FnZSk7c3lzLmV4aXQoY29kZSkK"))\' "$ARCHIVE" 2>&1) || BUA_SEC_CODE=$?; echo "[BUA SECURITY] $BUA_SEC_MSG"; if [ "$BUA_SEC_CODE" -eq 2 ]; then dialog --defaultno --title "BUA Update Security" --yesno "Suspicious content detected. $BUA_SEC_MSG. Accept the Risk to install this update; Cancel skips it." 12 75 || exit 42; elif [ "$BUA_SEC_CODE" -ne 0 ]; then echo "[BUA SECURITY] Update blocked"; exit 43; fi; '
             'case "$ARCHIVE_FORMAT" in '
-            'bsdtar) python3 -c \'import base64;exec(base64.b64decode("IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJCVUEgYXJjaGl2ZSBleHRyYWN0aW9uIGd1YXJkLiBEZWxpYmVyYXRlbHkgcmVqZWN0cyBsaW5rcywgc3BlY2lhbCBmaWxlcyBhbmQgZHVwbGljYXRlIHBhdGhzLiIiIgppbXBvcnQgb3MKaW1wb3J0IHN0YXQKaW1wb3J0IHN5cwppbXBvcnQgdGFyZmlsZQppbXBvcnQgemlwZmlsZQpmcm9tIHBhdGhsaWIgaW1wb3J0IFBhdGgsIFB1cmVQb3NpeFBhdGgKCk1BWF9NRU1CRVJTID0gMTAwMDAwCk1BWF9UT1RBTF9TSVpFID0gMjAgKiAxMDI0KiozCgpkZWYgY2hlY2tlZF9uYW1lKG5hbWUpOgogICAgaWYgbm90IGlzaW5zdGFuY2UobmFtZSwgc3RyKSBvciBub3QgbmFtZSBvciAnXFwnIGluIG5hbWUgb3IgJ1x4MDAnIGluIG5hbWU6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBhcmNoaXZlIG5hbWU6IHtuYW1lIXJ9JykKICAgIGlmIG5hbWUuc3RhcnRzd2l0aCgnLycpIG9yIG5hbWUuc3RhcnRzd2l0aCgnLy8nKToKICAgICAgICByYWlzZSBWYWx1ZUVycm9yKGYnQWJzb2x1dGUgYXJjaGl2ZSBwYXRoOiB7bmFtZSFyfScpCiAgICBwYXJ0cyA9IG5hbWUucnN0cmlwKCcvJykuc3BsaXQoJy8nKQogICAgaWYgcGFydHMgYW5kIHBhcnRzWzBdID09ICcuJzoKICAgICAgICBwYXJ0cyA9IHBhcnRzWzE6XQogICAgaWYgbm90IHBhcnRzIG9yIGFueSh4IGluICgnJywgJy4nLCAnLi4nKSBmb3IgeCBpbiBwYXJ0cyk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1RyYXZlcnNhbCBvciBub25jYW5vbmljYWwgcGF0aDoge25hbWUhcn0nKQogICAgaWYgJzonIGluIHBhcnRzWzBdOgogICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidEcml2ZS1saWtlIGFyY2hpdmUgcGF0aDoge25hbWUhcn0nKQogICAgcmV0dXJuIHR1cGxlKHBhcnRzKQoKZGVmIGV4dHJhY3QoYXJjaGl2ZV9wYXRoLCBkZXN0aW5hdGlvbik6CiAgICBhcmNoaXZlX3BhdGggPSBQYXRoKGFyY2hpdmVfcGF0aCkKICAgIHJvb3QgPSBQYXRoKGRlc3RpbmF0aW9uKQogICAgaWYgcm9vdC5pc19zeW1saW5rKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBzeW1saW5rJykKICAgIGZvciBhbmNlc3RvciBpbiByb290LnBhcmVudHM6CiAgICAgICAgaWYgYW5jZXN0b3IuaXNfc3ltbGluaygpOgogICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdFeHRyYWN0aW9uIGFuY2VzdG9yIGlzIHN5bWxpbmsnKQogICAgcm9vdC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICByb290ID0gcm9vdC5yZXNvbHZlKHN0cmljdD1UcnVlKQogICAgaWYgbm90IHJvb3QuaXNfZGlyKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBub3QgZGlyZWN0b3J5JykKICAgIG1vZGUgPSAnemlwJyBpZiB6aXBmaWxlLmlzX3ppcGZpbGUoYXJjaGl2ZV9wYXRoKSBlbHNlICd0YXInCiAgICB3aXRoICh6aXBmaWxlLlppcEZpbGUoYXJjaGl2ZV9wYXRoKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgdGFyZmlsZS5vcGVuKGFyY2hpdmVfcGF0aCwgJ3I6KicpKSBhcyBhcmNoaXZlOgogICAgICAgIG1lbWJlcnMgPSBhcmNoaXZlLmluZm9saXN0KCkgaWYgbW9kZSA9PSAnemlwJyBlbHNlIGFyY2hpdmUuZ2V0bWVtYmVycygpCiAgICAgICAgaWYgbGVuKG1lbWJlcnMpID4gTUFYX01FTUJFUlM6CiAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoJ1RvbyBtYW55IGFyY2hpdmUgbWVtYmVycycpCiAgICAgICAgc2VlbiA9IHNldCgpCiAgICAgICAgdG90YWwgPSAwCiAgICAgICAgdmFsaWRhdGVkID0gW10KICAgICAgICBmb3IgbWVtYmVyIGluIG1lbWJlcnM6CiAgICAgICAgICAgIG5hbWUgPSBtZW1iZXIuZmlsZW5hbWUgaWYgbW9kZSA9PSAnemlwJyBlbHNlIG1lbWJlci5uYW1lCiAgICAgICAgICAgIGlmIG5hbWUgaW4gKCIuIiwgIi4vIikgYW5kICgobWVtYmVyLmlzX2RpcigpIGlmIG1vZGUgPT0gJ3ppcCcgZWxzZSBtZW1iZXIuaXNkaXIoKSkpOgogICAgICAgICAgICAgICAgY29udGludWUKICAgICAgICAgICAga2V5ID0gY2hlY2tlZF9uYW1lKG5hbWUpCiAgICAgICAgICAgIGlmIGtleSBpbiBzZWVuOgogICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0R1cGxpY2F0ZSBhcmNoaXZlIGVudHJ5OiB7bmFtZSFyfScpCiAgICAgICAgICAgIHNlZW4uYWRkKGtleSkKICAgICAgICAgICAgaWYgbW9kZSA9PSAnemlwJzoKICAgICAgICAgICAgICAgIGtpbmQgPSAobWVtYmVyLmV4dGVybmFsX2F0dHIgPj4gMTYpICYgMG8xNzAwMDAKICAgICAgICAgICAgICAgIGlzX2RpciA9IG1lbWJlci5pc19kaXIoKQogICAgICAgICAgICAgICAgaWYga2luZCBub3QgaW4gKDAsIHN0YXQuU19JRlJFRywgc3RhdC5TX0lGRElSKSBvciAoaXNfZGlyIGFuZCBraW5kID09IHN0YXQuU19JRlJFRyk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBaSVAgZmlsZSB0eXBlOiB7bmFtZSFyfScpCiAgICAgICAgICAgICAgICBzaXplID0gbWVtYmVyLmZpbGVfc2l6ZQogICAgICAgICAgICBlbHNlOgogICAgICAgICAgICAgICAgaXNfZGlyID0gbWVtYmVyLmlzZGlyKCkKICAgICAgICAgICAgICAgIGlmIG5vdCAoaXNfZGlyIG9yIG1lbWJlci5pc2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBUQVIgZmlsZSB0eXBlL2xpbms6IHtuYW1lIXJ9JykKICAgICAgICAgICAgICAgIHNpemUgPSBtZW1iZXIuc2l6ZQogICAgICAgICAgICB0b3RhbCArPSBzaXplCiAgICAgICAgICAgIGlmIHRvdGFsID4gTUFYX1RPVEFMX1NJWkU6CiAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdBcmNoaXZlIGV4Y2VlZHMgZXh0cmFjdGlvbiBzaXplIGxpbWl0JykKICAgICAgICAgICAgdmFsaWRhdGVkLmFwcGVuZCgobWVtYmVyLCBrZXksIGlzX2RpcikpCiAgICAgICAgIyBWYWxpZGF0ZSBjb2xsaXNpb25zIGJldHdlZW4gYW5jZXN0b3IgZmlsZXMgYW5kIGRlc2NlbmRhbnRzIGJlZm9yZSB3cml0aW5nLgogICAgICAgIGZpbGVfa2V5cyA9IHtrZXkgZm9yIF8sIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZCBpZiBub3QgaXNfZGlyfQogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICBpZiBhbnkoa2V5WzppXSBpbiBmaWxlX2tleXMgZm9yIGkgaW4gcmFuZ2UoMSwgbGVuKGtleSkpKToKICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidGaWxlIHVzZWQgYXMgZGlyZWN0b3J5OiB7a2V5IXJ9JykKICAgICAgICAjIFJlZnVzZSBleGlzdGluZyBzeW1saW5rIHBhcmVudHMgYW5kIGRlc3RpbmF0aW9ucyBldmVuIGluc2lkZSBzdGFnaW5nIHJvb3RzLgogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICB0YXJnZXQgPSByb290CiAgICAgICAgICAgIGZvciBwYXJ0IGluIGtleToKICAgICAgICAgICAgICAgIHRhcmdldCA9IHRhcmdldCAvIHBhcnQKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5pc19zeW1saW5rKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHN5bWxpbmsgd2l0aGluIGV4dHJhY3Rpb246IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5leGlzdHMoKSBhbmQgbm90ICh0YXJnZXQuaXNfZGlyKCkgb3IgdGFyZ2V0LmlzX2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHNwZWNpYWwgZmlsZToge3RhcmdldH0nKQogICAgICAgIGZvciBtZW1iZXIsIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZDoKICAgICAgICAgICAgdGFyZ2V0ID0gcm9vdC5qb2lucGF0aCgqa2V5KQogICAgICAgICAgICBpZiBpc19kaXI6CiAgICAgICAgICAgICAgICBpZiB0YXJnZXQuZXhpc3RzKCkgYW5kIG5vdCB0YXJnZXQuaXNfZGlyKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0RpcmVjdG9yeSBjb2xsaWRlcyB3aXRoIGV4aXN0aW5nIGZpbGU6IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIHRhcmdldC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICAgICAgICAgICAgICBjb250aW51ZQogICAgICAgICAgICB0YXJnZXQucGFyZW50Lm1rZGlyKHBhcmVudHM9VHJ1ZSwgZXhpc3Rfb2s9VHJ1ZSkKICAgICAgICAgICAgd2l0aCAoYXJjaGl2ZS5vcGVuKG1lbWJlciwgJ3InKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgYXJjaGl2ZS5leHRyYWN0ZmlsZShtZW1iZXIpKSBhcyBzb3VyY2U6CiAgICAgICAgICAgICAgICBpZiBzb3VyY2UgaXMgTm9uZToKICAgICAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdNaXNzaW5nIG1lbWJlciBmaWxlIGNvbnRlbnQnKQogICAgICAgICAgICAgICAgd2l0aCB0YXJnZXQub3BlbigneGInKSBhcyBvdXRwdXQ6CiAgICAgICAgICAgICAgICAgICAgd2hpbGUgVHJ1ZToKICAgICAgICAgICAgICAgICAgICAgICAgY2h1bmsgPSBzb3VyY2UucmVhZCgxMDI0KjEwMjQpCiAgICAgICAgICAgICAgICAgICAgICAgIGlmIG5vdCBjaHVuazoKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJyZWFrCiAgICAgICAgICAgICAgICAgICAgICAgIG91dHB1dC53cml0ZShjaHVuaykKICAgICAgICAgICAgIyBQcmVzZXJ2ZSBleGVjdXRhYmxlIG1vZGUgZm9yIGtub3duIHJlZ3VsYXIgZmlsZXMsIG5ldmVyIHNwZWNpYWwgYml0cy4KICAgICAgICAgICAgcGVybWlzc2lvbnMgPSAoKG1lbWJlci5leHRlcm5hbF9hdHRyID4+IDE2KSBpZiBtb2RlID09ICd6aXAnIGVsc2UgbWVtYmVyLm1vZGUpICYgMG83NzcKICAgICAgICAgICAgb3MuY2htb2QodGFyZ2V0LCBwZXJtaXNzaW9ucyAmIDBvNzc3KQoKaWYgX19uYW1lX18gPT0gJ19fbWFpbl9fJzoKICAgIGlmIGxlbihzeXMuYXJndikgIT0gMzoKICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KCdVc2FnZTogYnVhX3NhZmVfZXh0cmFjdC5weSBBUkNISVZFIERFU1RJTkFUSU9OJykKICAgIHRyeToKICAgICAgICBleHRyYWN0KHN5cy5hcmd2WzFdLCBzeXMuYXJndlsyXSkKICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZXhjOgogICAgICAgIHByaW50KGYnW0JVQV0gVW5zYWZlIG9yIGludmFsaWQgYXJjaGl2ZSByZWplY3RlZDoge2V4Y30nLCBmaWxlPXN5cy5zdGRlcnIpCiAgICAgICAgcmFpc2UgU3lzdGVtRXhpdCgxKQo="))\' "$ARCHIVE" "$EXTRACT" ;; '
-            'zip) python3 -c \'import base64;exec(base64.b64decode("IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJCVUEgYXJjaGl2ZSBleHRyYWN0aW9uIGd1YXJkLiBEZWxpYmVyYXRlbHkgcmVqZWN0cyBsaW5rcywgc3BlY2lhbCBmaWxlcyBhbmQgZHVwbGljYXRlIHBhdGhzLiIiIgppbXBvcnQgb3MKaW1wb3J0IHN0YXQKaW1wb3J0IHN5cwppbXBvcnQgdGFyZmlsZQppbXBvcnQgemlwZmlsZQpmcm9tIHBhdGhsaWIgaW1wb3J0IFBhdGgsIFB1cmVQb3NpeFBhdGgKCk1BWF9NRU1CRVJTID0gMTAwMDAwCk1BWF9UT1RBTF9TSVpFID0gMjAgKiAxMDI0KiozCgpkZWYgY2hlY2tlZF9uYW1lKG5hbWUpOgogICAgaWYgbm90IGlzaW5zdGFuY2UobmFtZSwgc3RyKSBvciBub3QgbmFtZSBvciAnXFwnIGluIG5hbWUgb3IgJ1x4MDAnIGluIG5hbWU6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBhcmNoaXZlIG5hbWU6IHtuYW1lIXJ9JykKICAgIGlmIG5hbWUuc3RhcnRzd2l0aCgnLycpIG9yIG5hbWUuc3RhcnRzd2l0aCgnLy8nKToKICAgICAgICByYWlzZSBWYWx1ZUVycm9yKGYnQWJzb2x1dGUgYXJjaGl2ZSBwYXRoOiB7bmFtZSFyfScpCiAgICBwYXJ0cyA9IG5hbWUucnN0cmlwKCcvJykuc3BsaXQoJy8nKQogICAgaWYgcGFydHMgYW5kIHBhcnRzWzBdID09ICcuJzoKICAgICAgICBwYXJ0cyA9IHBhcnRzWzE6XQogICAgaWYgbm90IHBhcnRzIG9yIGFueSh4IGluICgnJywgJy4nLCAnLi4nKSBmb3IgeCBpbiBwYXJ0cyk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1RyYXZlcnNhbCBvciBub25jYW5vbmljYWwgcGF0aDoge25hbWUhcn0nKQogICAgaWYgJzonIGluIHBhcnRzWzBdOgogICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidEcml2ZS1saWtlIGFyY2hpdmUgcGF0aDoge25hbWUhcn0nKQogICAgcmV0dXJuIHR1cGxlKHBhcnRzKQoKZGVmIGV4dHJhY3QoYXJjaGl2ZV9wYXRoLCBkZXN0aW5hdGlvbik6CiAgICBhcmNoaXZlX3BhdGggPSBQYXRoKGFyY2hpdmVfcGF0aCkKICAgIHJvb3QgPSBQYXRoKGRlc3RpbmF0aW9uKQogICAgaWYgcm9vdC5pc19zeW1saW5rKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBzeW1saW5rJykKICAgIGZvciBhbmNlc3RvciBpbiByb290LnBhcmVudHM6CiAgICAgICAgaWYgYW5jZXN0b3IuaXNfc3ltbGluaygpOgogICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdFeHRyYWN0aW9uIGFuY2VzdG9yIGlzIHN5bWxpbmsnKQogICAgcm9vdC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICByb290ID0gcm9vdC5yZXNvbHZlKHN0cmljdD1UcnVlKQogICAgaWYgbm90IHJvb3QuaXNfZGlyKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBub3QgZGlyZWN0b3J5JykKICAgIG1vZGUgPSAnemlwJyBpZiB6aXBmaWxlLmlzX3ppcGZpbGUoYXJjaGl2ZV9wYXRoKSBlbHNlICd0YXInCiAgICB3aXRoICh6aXBmaWxlLlppcEZpbGUoYXJjaGl2ZV9wYXRoKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgdGFyZmlsZS5vcGVuKGFyY2hpdmVfcGF0aCwgJ3I6KicpKSBhcyBhcmNoaXZlOgogICAgICAgIG1lbWJlcnMgPSBhcmNoaXZlLmluZm9saXN0KCkgaWYgbW9kZSA9PSAnemlwJyBlbHNlIGFyY2hpdmUuZ2V0bWVtYmVycygpCiAgICAgICAgaWYgbGVuKG1lbWJlcnMpID4gTUFYX01FTUJFUlM6CiAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoJ1RvbyBtYW55IGFyY2hpdmUgbWVtYmVycycpCiAgICAgICAgc2VlbiA9IHNldCgpCiAgICAgICAgdG90YWwgPSAwCiAgICAgICAgdmFsaWRhdGVkID0gW10KICAgICAgICBmb3IgbWVtYmVyIGluIG1lbWJlcnM6CiAgICAgICAgICAgIG5hbWUgPSBtZW1iZXIuZmlsZW5hbWUgaWYgbW9kZSA9PSAnemlwJyBlbHNlIG1lbWJlci5uYW1lCiAgICAgICAgICAgIGlmIG5hbWUgaW4gKCIuIiwgIi4vIikgYW5kICgobWVtYmVyLmlzX2RpcigpIGlmIG1vZGUgPT0gJ3ppcCcgZWxzZSBtZW1iZXIuaXNkaXIoKSkpOgogICAgICAgICAgICAgICAgY29udGludWUKICAgICAgICAgICAga2V5ID0gY2hlY2tlZF9uYW1lKG5hbWUpCiAgICAgICAgICAgIGlmIGtleSBpbiBzZWVuOgogICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0R1cGxpY2F0ZSBhcmNoaXZlIGVudHJ5OiB7bmFtZSFyfScpCiAgICAgICAgICAgIHNlZW4uYWRkKGtleSkKICAgICAgICAgICAgaWYgbW9kZSA9PSAnemlwJzoKICAgICAgICAgICAgICAgIGtpbmQgPSAobWVtYmVyLmV4dGVybmFsX2F0dHIgPj4gMTYpICYgMG8xNzAwMDAKICAgICAgICAgICAgICAgIGlzX2RpciA9IG1lbWJlci5pc19kaXIoKQogICAgICAgICAgICAgICAgaWYga2luZCBub3QgaW4gKDAsIHN0YXQuU19JRlJFRywgc3RhdC5TX0lGRElSKSBvciAoaXNfZGlyIGFuZCBraW5kID09IHN0YXQuU19JRlJFRyk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBaSVAgZmlsZSB0eXBlOiB7bmFtZSFyfScpCiAgICAgICAgICAgICAgICBzaXplID0gbWVtYmVyLmZpbGVfc2l6ZQogICAgICAgICAgICBlbHNlOgogICAgICAgICAgICAgICAgaXNfZGlyID0gbWVtYmVyLmlzZGlyKCkKICAgICAgICAgICAgICAgIGlmIG5vdCAoaXNfZGlyIG9yIG1lbWJlci5pc2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBUQVIgZmlsZSB0eXBlL2xpbms6IHtuYW1lIXJ9JykKICAgICAgICAgICAgICAgIHNpemUgPSBtZW1iZXIuc2l6ZQogICAgICAgICAgICB0b3RhbCArPSBzaXplCiAgICAgICAgICAgIGlmIHRvdGFsID4gTUFYX1RPVEFMX1NJWkU6CiAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdBcmNoaXZlIGV4Y2VlZHMgZXh0cmFjdGlvbiBzaXplIGxpbWl0JykKICAgICAgICAgICAgdmFsaWRhdGVkLmFwcGVuZCgobWVtYmVyLCBrZXksIGlzX2RpcikpCiAgICAgICAgIyBWYWxpZGF0ZSBjb2xsaXNpb25zIGJldHdlZW4gYW5jZXN0b3IgZmlsZXMgYW5kIGRlc2NlbmRhbnRzIGJlZm9yZSB3cml0aW5nLgogICAgICAgIGZpbGVfa2V5cyA9IHtrZXkgZm9yIF8sIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZCBpZiBub3QgaXNfZGlyfQogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICBpZiBhbnkoa2V5WzppXSBpbiBmaWxlX2tleXMgZm9yIGkgaW4gcmFuZ2UoMSwgbGVuKGtleSkpKToKICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidGaWxlIHVzZWQgYXMgZGlyZWN0b3J5OiB7a2V5IXJ9JykKICAgICAgICAjIFJlZnVzZSBleGlzdGluZyBzeW1saW5rIHBhcmVudHMgYW5kIGRlc3RpbmF0aW9ucyBldmVuIGluc2lkZSBzdGFnaW5nIHJvb3RzLgogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICB0YXJnZXQgPSByb290CiAgICAgICAgICAgIGZvciBwYXJ0IGluIGtleToKICAgICAgICAgICAgICAgIHRhcmdldCA9IHRhcmdldCAvIHBhcnQKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5pc19zeW1saW5rKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHN5bWxpbmsgd2l0aGluIGV4dHJhY3Rpb246IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5leGlzdHMoKSBhbmQgbm90ICh0YXJnZXQuaXNfZGlyKCkgb3IgdGFyZ2V0LmlzX2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHNwZWNpYWwgZmlsZToge3RhcmdldH0nKQogICAgICAgIGZvciBtZW1iZXIsIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZDoKICAgICAgICAgICAgdGFyZ2V0ID0gcm9vdC5qb2lucGF0aCgqa2V5KQogICAgICAgICAgICBpZiBpc19kaXI6CiAgICAgICAgICAgICAgICBpZiB0YXJnZXQuZXhpc3RzKCkgYW5kIG5vdCB0YXJnZXQuaXNfZGlyKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0RpcmVjdG9yeSBjb2xsaWRlcyB3aXRoIGV4aXN0aW5nIGZpbGU6IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIHRhcmdldC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICAgICAgICAgICAgICBjb250aW51ZQogICAgICAgICAgICB0YXJnZXQucGFyZW50Lm1rZGlyKHBhcmVudHM9VHJ1ZSwgZXhpc3Rfb2s9VHJ1ZSkKICAgICAgICAgICAgd2l0aCAoYXJjaGl2ZS5vcGVuKG1lbWJlciwgJ3InKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgYXJjaGl2ZS5leHRyYWN0ZmlsZShtZW1iZXIpKSBhcyBzb3VyY2U6CiAgICAgICAgICAgICAgICBpZiBzb3VyY2UgaXMgTm9uZToKICAgICAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdNaXNzaW5nIG1lbWJlciBmaWxlIGNvbnRlbnQnKQogICAgICAgICAgICAgICAgd2l0aCB0YXJnZXQub3BlbigneGInKSBhcyBvdXRwdXQ6CiAgICAgICAgICAgICAgICAgICAgd2hpbGUgVHJ1ZToKICAgICAgICAgICAgICAgICAgICAgICAgY2h1bmsgPSBzb3VyY2UucmVhZCgxMDI0KjEwMjQpCiAgICAgICAgICAgICAgICAgICAgICAgIGlmIG5vdCBjaHVuazoKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJyZWFrCiAgICAgICAgICAgICAgICAgICAgICAgIG91dHB1dC53cml0ZShjaHVuaykKICAgICAgICAgICAgIyBQcmVzZXJ2ZSBleGVjdXRhYmxlIG1vZGUgZm9yIGtub3duIHJlZ3VsYXIgZmlsZXMsIG5ldmVyIHNwZWNpYWwgYml0cy4KICAgICAgICAgICAgcGVybWlzc2lvbnMgPSAoKG1lbWJlci5leHRlcm5hbF9hdHRyID4+IDE2KSBpZiBtb2RlID09ICd6aXAnIGVsc2UgbWVtYmVyLm1vZGUpICYgMG83NzcKICAgICAgICAgICAgb3MuY2htb2QodGFyZ2V0LCBwZXJtaXNzaW9ucyAmIDBvNzc3KQoKaWYgX19uYW1lX18gPT0gJ19fbWFpbl9fJzoKICAgIGlmIGxlbihzeXMuYXJndikgIT0gMzoKICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KCdVc2FnZTogYnVhX3NhZmVfZXh0cmFjdC5weSBBUkNISVZFIERFU1RJTkFUSU9OJykKICAgIHRyeToKICAgICAgICBleHRyYWN0KHN5cy5hcmd2WzFdLCBzeXMuYXJndlsyXSkKICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZXhjOgogICAgICAgIHByaW50KGYnW0JVQV0gVW5zYWZlIG9yIGludmFsaWQgYXJjaGl2ZSByZWplY3RlZDoge2V4Y30nLCBmaWxlPXN5cy5zdGRlcnIpCiAgICAgICAgcmFpc2UgU3lzdGVtRXhpdCgxKQo="))\' "$ARCHIVE" "$EXTRACT" ;; '
-            'tar) python3 -c \'import base64;exec(base64.b64decode("IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJCVUEgYXJjaGl2ZSBleHRyYWN0aW9uIGd1YXJkLiBEZWxpYmVyYXRlbHkgcmVqZWN0cyBsaW5rcywgc3BlY2lhbCBmaWxlcyBhbmQgZHVwbGljYXRlIHBhdGhzLiIiIgppbXBvcnQgb3MKaW1wb3J0IHN0YXQKaW1wb3J0IHN5cwppbXBvcnQgdGFyZmlsZQppbXBvcnQgemlwZmlsZQpmcm9tIHBhdGhsaWIgaW1wb3J0IFBhdGgsIFB1cmVQb3NpeFBhdGgKCk1BWF9NRU1CRVJTID0gMTAwMDAwCk1BWF9UT1RBTF9TSVpFID0gMjAgKiAxMDI0KiozCgpkZWYgY2hlY2tlZF9uYW1lKG5hbWUpOgogICAgaWYgbm90IGlzaW5zdGFuY2UobmFtZSwgc3RyKSBvciBub3QgbmFtZSBvciAnXFwnIGluIG5hbWUgb3IgJ1x4MDAnIGluIG5hbWU6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBhcmNoaXZlIG5hbWU6IHtuYW1lIXJ9JykKICAgIGlmIG5hbWUuc3RhcnRzd2l0aCgnLycpIG9yIG5hbWUuc3RhcnRzd2l0aCgnLy8nKToKICAgICAgICByYWlzZSBWYWx1ZUVycm9yKGYnQWJzb2x1dGUgYXJjaGl2ZSBwYXRoOiB7bmFtZSFyfScpCiAgICBwYXJ0cyA9IG5hbWUucnN0cmlwKCcvJykuc3BsaXQoJy8nKQogICAgaWYgcGFydHMgYW5kIHBhcnRzWzBdID09ICcuJzoKICAgICAgICBwYXJ0cyA9IHBhcnRzWzE6XQogICAgaWYgbm90IHBhcnRzIG9yIGFueSh4IGluICgnJywgJy4nLCAnLi4nKSBmb3IgeCBpbiBwYXJ0cyk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1RyYXZlcnNhbCBvciBub25jYW5vbmljYWwgcGF0aDoge25hbWUhcn0nKQogICAgaWYgJzonIGluIHBhcnRzWzBdOgogICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidEcml2ZS1saWtlIGFyY2hpdmUgcGF0aDoge25hbWUhcn0nKQogICAgcmV0dXJuIHR1cGxlKHBhcnRzKQoKZGVmIGV4dHJhY3QoYXJjaGl2ZV9wYXRoLCBkZXN0aW5hdGlvbik6CiAgICBhcmNoaXZlX3BhdGggPSBQYXRoKGFyY2hpdmVfcGF0aCkKICAgIHJvb3QgPSBQYXRoKGRlc3RpbmF0aW9uKQogICAgaWYgcm9vdC5pc19zeW1saW5rKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBzeW1saW5rJykKICAgIGZvciBhbmNlc3RvciBpbiByb290LnBhcmVudHM6CiAgICAgICAgaWYgYW5jZXN0b3IuaXNfc3ltbGluaygpOgogICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdFeHRyYWN0aW9uIGFuY2VzdG9yIGlzIHN5bWxpbmsnKQogICAgcm9vdC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICByb290ID0gcm9vdC5yZXNvbHZlKHN0cmljdD1UcnVlKQogICAgaWYgbm90IHJvb3QuaXNfZGlyKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBub3QgZGlyZWN0b3J5JykKICAgIG1vZGUgPSAnemlwJyBpZiB6aXBmaWxlLmlzX3ppcGZpbGUoYXJjaGl2ZV9wYXRoKSBlbHNlICd0YXInCiAgICB3aXRoICh6aXBmaWxlLlppcEZpbGUoYXJjaGl2ZV9wYXRoKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgdGFyZmlsZS5vcGVuKGFyY2hpdmVfcGF0aCwgJ3I6KicpKSBhcyBhcmNoaXZlOgogICAgICAgIG1lbWJlcnMgPSBhcmNoaXZlLmluZm9saXN0KCkgaWYgbW9kZSA9PSAnemlwJyBlbHNlIGFyY2hpdmUuZ2V0bWVtYmVycygpCiAgICAgICAgaWYgbGVuKG1lbWJlcnMpID4gTUFYX01FTUJFUlM6CiAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoJ1RvbyBtYW55IGFyY2hpdmUgbWVtYmVycycpCiAgICAgICAgc2VlbiA9IHNldCgpCiAgICAgICAgdG90YWwgPSAwCiAgICAgICAgdmFsaWRhdGVkID0gW10KICAgICAgICBmb3IgbWVtYmVyIGluIG1lbWJlcnM6CiAgICAgICAgICAgIG5hbWUgPSBtZW1iZXIuZmlsZW5hbWUgaWYgbW9kZSA9PSAnemlwJyBlbHNlIG1lbWJlci5uYW1lCiAgICAgICAgICAgIGlmIG5hbWUgaW4gKCIuIiwgIi4vIikgYW5kICgobWVtYmVyLmlzX2RpcigpIGlmIG1vZGUgPT0gJ3ppcCcgZWxzZSBtZW1iZXIuaXNkaXIoKSkpOgogICAgICAgICAgICAgICAgY29udGludWUKICAgICAgICAgICAga2V5ID0gY2hlY2tlZF9uYW1lKG5hbWUpCiAgICAgICAgICAgIGlmIGtleSBpbiBzZWVuOgogICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0R1cGxpY2F0ZSBhcmNoaXZlIGVudHJ5OiB7bmFtZSFyfScpCiAgICAgICAgICAgIHNlZW4uYWRkKGtleSkKICAgICAgICAgICAgaWYgbW9kZSA9PSAnemlwJzoKICAgICAgICAgICAgICAgIGtpbmQgPSAobWVtYmVyLmV4dGVybmFsX2F0dHIgPj4gMTYpICYgMG8xNzAwMDAKICAgICAgICAgICAgICAgIGlzX2RpciA9IG1lbWJlci5pc19kaXIoKQogICAgICAgICAgICAgICAgaWYga2luZCBub3QgaW4gKDAsIHN0YXQuU19JRlJFRywgc3RhdC5TX0lGRElSKSBvciAoaXNfZGlyIGFuZCBraW5kID09IHN0YXQuU19JRlJFRyk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBaSVAgZmlsZSB0eXBlOiB7bmFtZSFyfScpCiAgICAgICAgICAgICAgICBzaXplID0gbWVtYmVyLmZpbGVfc2l6ZQogICAgICAgICAgICBlbHNlOgogICAgICAgICAgICAgICAgaXNfZGlyID0gbWVtYmVyLmlzZGlyKCkKICAgICAgICAgICAgICAgIGlmIG5vdCAoaXNfZGlyIG9yIG1lbWJlci5pc2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBUQVIgZmlsZSB0eXBlL2xpbms6IHtuYW1lIXJ9JykKICAgICAgICAgICAgICAgIHNpemUgPSBtZW1iZXIuc2l6ZQogICAgICAgICAgICB0b3RhbCArPSBzaXplCiAgICAgICAgICAgIGlmIHRvdGFsID4gTUFYX1RPVEFMX1NJWkU6CiAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdBcmNoaXZlIGV4Y2VlZHMgZXh0cmFjdGlvbiBzaXplIGxpbWl0JykKICAgICAgICAgICAgdmFsaWRhdGVkLmFwcGVuZCgobWVtYmVyLCBrZXksIGlzX2RpcikpCiAgICAgICAgIyBWYWxpZGF0ZSBjb2xsaXNpb25zIGJldHdlZW4gYW5jZXN0b3IgZmlsZXMgYW5kIGRlc2NlbmRhbnRzIGJlZm9yZSB3cml0aW5nLgogICAgICAgIGZpbGVfa2V5cyA9IHtrZXkgZm9yIF8sIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZCBpZiBub3QgaXNfZGlyfQogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICBpZiBhbnkoa2V5WzppXSBpbiBmaWxlX2tleXMgZm9yIGkgaW4gcmFuZ2UoMSwgbGVuKGtleSkpKToKICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidGaWxlIHVzZWQgYXMgZGlyZWN0b3J5OiB7a2V5IXJ9JykKICAgICAgICAjIFJlZnVzZSBleGlzdGluZyBzeW1saW5rIHBhcmVudHMgYW5kIGRlc3RpbmF0aW9ucyBldmVuIGluc2lkZSBzdGFnaW5nIHJvb3RzLgogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICB0YXJnZXQgPSByb290CiAgICAgICAgICAgIGZvciBwYXJ0IGluIGtleToKICAgICAgICAgICAgICAgIHRhcmdldCA9IHRhcmdldCAvIHBhcnQKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5pc19zeW1saW5rKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHN5bWxpbmsgd2l0aGluIGV4dHJhY3Rpb246IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5leGlzdHMoKSBhbmQgbm90ICh0YXJnZXQuaXNfZGlyKCkgb3IgdGFyZ2V0LmlzX2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHNwZWNpYWwgZmlsZToge3RhcmdldH0nKQogICAgICAgIGZvciBtZW1iZXIsIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZDoKICAgICAgICAgICAgdGFyZ2V0ID0gcm9vdC5qb2lucGF0aCgqa2V5KQogICAgICAgICAgICBpZiBpc19kaXI6CiAgICAgICAgICAgICAgICBpZiB0YXJnZXQuZXhpc3RzKCkgYW5kIG5vdCB0YXJnZXQuaXNfZGlyKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0RpcmVjdG9yeSBjb2xsaWRlcyB3aXRoIGV4aXN0aW5nIGZpbGU6IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIHRhcmdldC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICAgICAgICAgICAgICBjb250aW51ZQogICAgICAgICAgICB0YXJnZXQucGFyZW50Lm1rZGlyKHBhcmVudHM9VHJ1ZSwgZXhpc3Rfb2s9VHJ1ZSkKICAgICAgICAgICAgd2l0aCAoYXJjaGl2ZS5vcGVuKG1lbWJlciwgJ3InKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgYXJjaGl2ZS5leHRyYWN0ZmlsZShtZW1iZXIpKSBhcyBzb3VyY2U6CiAgICAgICAgICAgICAgICBpZiBzb3VyY2UgaXMgTm9uZToKICAgICAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdNaXNzaW5nIG1lbWJlciBmaWxlIGNvbnRlbnQnKQogICAgICAgICAgICAgICAgd2l0aCB0YXJnZXQub3BlbigneGInKSBhcyBvdXRwdXQ6CiAgICAgICAgICAgICAgICAgICAgd2hpbGUgVHJ1ZToKICAgICAgICAgICAgICAgICAgICAgICAgY2h1bmsgPSBzb3VyY2UucmVhZCgxMDI0KjEwMjQpCiAgICAgICAgICAgICAgICAgICAgICAgIGlmIG5vdCBjaHVuazoKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJyZWFrCiAgICAgICAgICAgICAgICAgICAgICAgIG91dHB1dC53cml0ZShjaHVuaykKICAgICAgICAgICAgIyBQcmVzZXJ2ZSBleGVjdXRhYmxlIG1vZGUgZm9yIGtub3duIHJlZ3VsYXIgZmlsZXMsIG5ldmVyIHNwZWNpYWwgYml0cy4KICAgICAgICAgICAgcGVybWlzc2lvbnMgPSAoKG1lbWJlci5leHRlcm5hbF9hdHRyID4+IDE2KSBpZiBtb2RlID09ICd6aXAnIGVsc2UgbWVtYmVyLm1vZGUpICYgMG83NzcKICAgICAgICAgICAgb3MuY2htb2QodGFyZ2V0LCBwZXJtaXNzaW9ucyAmIDBvNzc3KQoKaWYgX19uYW1lX18gPT0gJ19fbWFpbl9fJzoKICAgIGlmIGxlbihzeXMuYXJndikgIT0gMzoKICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KCdVc2FnZTogYnVhX3NhZmVfZXh0cmFjdC5weSBBUkNISVZFIERFU1RJTkFUSU9OJykKICAgIHRyeToKICAgICAgICBleHRyYWN0KHN5cy5hcmd2WzFdLCBzeXMuYXJndlsyXSkKICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZXhjOgogICAgICAgIHByaW50KGYnW0JVQV0gVW5zYWZlIG9yIGludmFsaWQgYXJjaGl2ZSByZWplY3RlZDoge2V4Y30nLCBmaWxlPXN5cy5zdGRlcnIpCiAgICAgICAgcmFpc2UgU3lzdGVtRXhpdCgxKQo="))\' "$ARCHIVE" "$EXTRACT" ;; '
+            'bsdtar) bsdtar -xf "$ARCHIVE" -C "$EXTRACT" ;; '
+            'zip) unzip -oq "$ARCHIVE" -d "$EXTRACT" ;; '
+            'tar) tar -xf "$ARCHIVE" -C "$EXTRACT" ;; '
             '"") '
             'case "$URL" in '
-            '*.zip*) python3 -c \'import base64;exec(base64.b64decode("IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJCVUEgYXJjaGl2ZSBleHRyYWN0aW9uIGd1YXJkLiBEZWxpYmVyYXRlbHkgcmVqZWN0cyBsaW5rcywgc3BlY2lhbCBmaWxlcyBhbmQgZHVwbGljYXRlIHBhdGhzLiIiIgppbXBvcnQgb3MKaW1wb3J0IHN0YXQKaW1wb3J0IHN5cwppbXBvcnQgdGFyZmlsZQppbXBvcnQgemlwZmlsZQpmcm9tIHBhdGhsaWIgaW1wb3J0IFBhdGgsIFB1cmVQb3NpeFBhdGgKCk1BWF9NRU1CRVJTID0gMTAwMDAwCk1BWF9UT1RBTF9TSVpFID0gMjAgKiAxMDI0KiozCgpkZWYgY2hlY2tlZF9uYW1lKG5hbWUpOgogICAgaWYgbm90IGlzaW5zdGFuY2UobmFtZSwgc3RyKSBvciBub3QgbmFtZSBvciAnXFwnIGluIG5hbWUgb3IgJ1x4MDAnIGluIG5hbWU6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBhcmNoaXZlIG5hbWU6IHtuYW1lIXJ9JykKICAgIGlmIG5hbWUuc3RhcnRzd2l0aCgnLycpIG9yIG5hbWUuc3RhcnRzd2l0aCgnLy8nKToKICAgICAgICByYWlzZSBWYWx1ZUVycm9yKGYnQWJzb2x1dGUgYXJjaGl2ZSBwYXRoOiB7bmFtZSFyfScpCiAgICBwYXJ0cyA9IG5hbWUucnN0cmlwKCcvJykuc3BsaXQoJy8nKQogICAgaWYgcGFydHMgYW5kIHBhcnRzWzBdID09ICcuJzoKICAgICAgICBwYXJ0cyA9IHBhcnRzWzE6XQogICAgaWYgbm90IHBhcnRzIG9yIGFueSh4IGluICgnJywgJy4nLCAnLi4nKSBmb3IgeCBpbiBwYXJ0cyk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1RyYXZlcnNhbCBvciBub25jYW5vbmljYWwgcGF0aDoge25hbWUhcn0nKQogICAgaWYgJzonIGluIHBhcnRzWzBdOgogICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidEcml2ZS1saWtlIGFyY2hpdmUgcGF0aDoge25hbWUhcn0nKQogICAgcmV0dXJuIHR1cGxlKHBhcnRzKQoKZGVmIGV4dHJhY3QoYXJjaGl2ZV9wYXRoLCBkZXN0aW5hdGlvbik6CiAgICBhcmNoaXZlX3BhdGggPSBQYXRoKGFyY2hpdmVfcGF0aCkKICAgIHJvb3QgPSBQYXRoKGRlc3RpbmF0aW9uKQogICAgaWYgcm9vdC5pc19zeW1saW5rKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBzeW1saW5rJykKICAgIGZvciBhbmNlc3RvciBpbiByb290LnBhcmVudHM6CiAgICAgICAgaWYgYW5jZXN0b3IuaXNfc3ltbGluaygpOgogICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdFeHRyYWN0aW9uIGFuY2VzdG9yIGlzIHN5bWxpbmsnKQogICAgcm9vdC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICByb290ID0gcm9vdC5yZXNvbHZlKHN0cmljdD1UcnVlKQogICAgaWYgbm90IHJvb3QuaXNfZGlyKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBub3QgZGlyZWN0b3J5JykKICAgIG1vZGUgPSAnemlwJyBpZiB6aXBmaWxlLmlzX3ppcGZpbGUoYXJjaGl2ZV9wYXRoKSBlbHNlICd0YXInCiAgICB3aXRoICh6aXBmaWxlLlppcEZpbGUoYXJjaGl2ZV9wYXRoKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgdGFyZmlsZS5vcGVuKGFyY2hpdmVfcGF0aCwgJ3I6KicpKSBhcyBhcmNoaXZlOgogICAgICAgIG1lbWJlcnMgPSBhcmNoaXZlLmluZm9saXN0KCkgaWYgbW9kZSA9PSAnemlwJyBlbHNlIGFyY2hpdmUuZ2V0bWVtYmVycygpCiAgICAgICAgaWYgbGVuKG1lbWJlcnMpID4gTUFYX01FTUJFUlM6CiAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoJ1RvbyBtYW55IGFyY2hpdmUgbWVtYmVycycpCiAgICAgICAgc2VlbiA9IHNldCgpCiAgICAgICAgdG90YWwgPSAwCiAgICAgICAgdmFsaWRhdGVkID0gW10KICAgICAgICBmb3IgbWVtYmVyIGluIG1lbWJlcnM6CiAgICAgICAgICAgIG5hbWUgPSBtZW1iZXIuZmlsZW5hbWUgaWYgbW9kZSA9PSAnemlwJyBlbHNlIG1lbWJlci5uYW1lCiAgICAgICAgICAgIGlmIG5hbWUgaW4gKCIuIiwgIi4vIikgYW5kICgobWVtYmVyLmlzX2RpcigpIGlmIG1vZGUgPT0gJ3ppcCcgZWxzZSBtZW1iZXIuaXNkaXIoKSkpOgogICAgICAgICAgICAgICAgY29udGludWUKICAgICAgICAgICAga2V5ID0gY2hlY2tlZF9uYW1lKG5hbWUpCiAgICAgICAgICAgIGlmIGtleSBpbiBzZWVuOgogICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0R1cGxpY2F0ZSBhcmNoaXZlIGVudHJ5OiB7bmFtZSFyfScpCiAgICAgICAgICAgIHNlZW4uYWRkKGtleSkKICAgICAgICAgICAgaWYgbW9kZSA9PSAnemlwJzoKICAgICAgICAgICAgICAgIGtpbmQgPSAobWVtYmVyLmV4dGVybmFsX2F0dHIgPj4gMTYpICYgMG8xNzAwMDAKICAgICAgICAgICAgICAgIGlzX2RpciA9IG1lbWJlci5pc19kaXIoKQogICAgICAgICAgICAgICAgaWYga2luZCBub3QgaW4gKDAsIHN0YXQuU19JRlJFRywgc3RhdC5TX0lGRElSKSBvciAoaXNfZGlyIGFuZCBraW5kID09IHN0YXQuU19JRlJFRyk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBaSVAgZmlsZSB0eXBlOiB7bmFtZSFyfScpCiAgICAgICAgICAgICAgICBzaXplID0gbWVtYmVyLmZpbGVfc2l6ZQogICAgICAgICAgICBlbHNlOgogICAgICAgICAgICAgICAgaXNfZGlyID0gbWVtYmVyLmlzZGlyKCkKICAgICAgICAgICAgICAgIGlmIG5vdCAoaXNfZGlyIG9yIG1lbWJlci5pc2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBUQVIgZmlsZSB0eXBlL2xpbms6IHtuYW1lIXJ9JykKICAgICAgICAgICAgICAgIHNpemUgPSBtZW1iZXIuc2l6ZQogICAgICAgICAgICB0b3RhbCArPSBzaXplCiAgICAgICAgICAgIGlmIHRvdGFsID4gTUFYX1RPVEFMX1NJWkU6CiAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdBcmNoaXZlIGV4Y2VlZHMgZXh0cmFjdGlvbiBzaXplIGxpbWl0JykKICAgICAgICAgICAgdmFsaWRhdGVkLmFwcGVuZCgobWVtYmVyLCBrZXksIGlzX2RpcikpCiAgICAgICAgIyBWYWxpZGF0ZSBjb2xsaXNpb25zIGJldHdlZW4gYW5jZXN0b3IgZmlsZXMgYW5kIGRlc2NlbmRhbnRzIGJlZm9yZSB3cml0aW5nLgogICAgICAgIGZpbGVfa2V5cyA9IHtrZXkgZm9yIF8sIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZCBpZiBub3QgaXNfZGlyfQogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICBpZiBhbnkoa2V5WzppXSBpbiBmaWxlX2tleXMgZm9yIGkgaW4gcmFuZ2UoMSwgbGVuKGtleSkpKToKICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidGaWxlIHVzZWQgYXMgZGlyZWN0b3J5OiB7a2V5IXJ9JykKICAgICAgICAjIFJlZnVzZSBleGlzdGluZyBzeW1saW5rIHBhcmVudHMgYW5kIGRlc3RpbmF0aW9ucyBldmVuIGluc2lkZSBzdGFnaW5nIHJvb3RzLgogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICB0YXJnZXQgPSByb290CiAgICAgICAgICAgIGZvciBwYXJ0IGluIGtleToKICAgICAgICAgICAgICAgIHRhcmdldCA9IHRhcmdldCAvIHBhcnQKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5pc19zeW1saW5rKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHN5bWxpbmsgd2l0aGluIGV4dHJhY3Rpb246IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5leGlzdHMoKSBhbmQgbm90ICh0YXJnZXQuaXNfZGlyKCkgb3IgdGFyZ2V0LmlzX2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHNwZWNpYWwgZmlsZToge3RhcmdldH0nKQogICAgICAgIGZvciBtZW1iZXIsIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZDoKICAgICAgICAgICAgdGFyZ2V0ID0gcm9vdC5qb2lucGF0aCgqa2V5KQogICAgICAgICAgICBpZiBpc19kaXI6CiAgICAgICAgICAgICAgICBpZiB0YXJnZXQuZXhpc3RzKCkgYW5kIG5vdCB0YXJnZXQuaXNfZGlyKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0RpcmVjdG9yeSBjb2xsaWRlcyB3aXRoIGV4aXN0aW5nIGZpbGU6IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIHRhcmdldC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICAgICAgICAgICAgICBjb250aW51ZQogICAgICAgICAgICB0YXJnZXQucGFyZW50Lm1rZGlyKHBhcmVudHM9VHJ1ZSwgZXhpc3Rfb2s9VHJ1ZSkKICAgICAgICAgICAgd2l0aCAoYXJjaGl2ZS5vcGVuKG1lbWJlciwgJ3InKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgYXJjaGl2ZS5leHRyYWN0ZmlsZShtZW1iZXIpKSBhcyBzb3VyY2U6CiAgICAgICAgICAgICAgICBpZiBzb3VyY2UgaXMgTm9uZToKICAgICAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdNaXNzaW5nIG1lbWJlciBmaWxlIGNvbnRlbnQnKQogICAgICAgICAgICAgICAgd2l0aCB0YXJnZXQub3BlbigneGInKSBhcyBvdXRwdXQ6CiAgICAgICAgICAgICAgICAgICAgd2hpbGUgVHJ1ZToKICAgICAgICAgICAgICAgICAgICAgICAgY2h1bmsgPSBzb3VyY2UucmVhZCgxMDI0KjEwMjQpCiAgICAgICAgICAgICAgICAgICAgICAgIGlmIG5vdCBjaHVuazoKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJyZWFrCiAgICAgICAgICAgICAgICAgICAgICAgIG91dHB1dC53cml0ZShjaHVuaykKICAgICAgICAgICAgIyBQcmVzZXJ2ZSBleGVjdXRhYmxlIG1vZGUgZm9yIGtub3duIHJlZ3VsYXIgZmlsZXMsIG5ldmVyIHNwZWNpYWwgYml0cy4KICAgICAgICAgICAgcGVybWlzc2lvbnMgPSAoKG1lbWJlci5leHRlcm5hbF9hdHRyID4+IDE2KSBpZiBtb2RlID09ICd6aXAnIGVsc2UgbWVtYmVyLm1vZGUpICYgMG83NzcKICAgICAgICAgICAgb3MuY2htb2QodGFyZ2V0LCBwZXJtaXNzaW9ucyAmIDBvNzc3KQoKaWYgX19uYW1lX18gPT0gJ19fbWFpbl9fJzoKICAgIGlmIGxlbihzeXMuYXJndikgIT0gMzoKICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KCdVc2FnZTogYnVhX3NhZmVfZXh0cmFjdC5weSBBUkNISVZFIERFU1RJTkFUSU9OJykKICAgIHRyeToKICAgICAgICBleHRyYWN0KHN5cy5hcmd2WzFdLCBzeXMuYXJndlsyXSkKICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZXhjOgogICAgICAgIHByaW50KGYnW0JVQV0gVW5zYWZlIG9yIGludmFsaWQgYXJjaGl2ZSByZWplY3RlZDoge2V4Y30nLCBmaWxlPXN5cy5zdGRlcnIpCiAgICAgICAgcmFpc2UgU3lzdGVtRXhpdCgxKQo="))\' "$ARCHIVE" "$EXTRACT" ;; '
+            '*.zip*) unzip -oq "$ARCHIVE" -d "$EXTRACT" ;; '
             '*.tar.gz*|*.tgz*|*.tar.xz*|*.txz*|*.tar.bz2*|*.tbz2*) '
-            'python3 -c \'import base64;exec(base64.b64decode("IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJCVUEgYXJjaGl2ZSBleHRyYWN0aW9uIGd1YXJkLiBEZWxpYmVyYXRlbHkgcmVqZWN0cyBsaW5rcywgc3BlY2lhbCBmaWxlcyBhbmQgZHVwbGljYXRlIHBhdGhzLiIiIgppbXBvcnQgb3MKaW1wb3J0IHN0YXQKaW1wb3J0IHN5cwppbXBvcnQgdGFyZmlsZQppbXBvcnQgemlwZmlsZQpmcm9tIHBhdGhsaWIgaW1wb3J0IFBhdGgsIFB1cmVQb3NpeFBhdGgKCk1BWF9NRU1CRVJTID0gMTAwMDAwCk1BWF9UT1RBTF9TSVpFID0gMjAgKiAxMDI0KiozCgpkZWYgY2hlY2tlZF9uYW1lKG5hbWUpOgogICAgaWYgbm90IGlzaW5zdGFuY2UobmFtZSwgc3RyKSBvciBub3QgbmFtZSBvciAnXFwnIGluIG5hbWUgb3IgJ1x4MDAnIGluIG5hbWU6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBhcmNoaXZlIG5hbWU6IHtuYW1lIXJ9JykKICAgIGlmIG5hbWUuc3RhcnRzd2l0aCgnLycpIG9yIG5hbWUuc3RhcnRzd2l0aCgnLy8nKToKICAgICAgICByYWlzZSBWYWx1ZUVycm9yKGYnQWJzb2x1dGUgYXJjaGl2ZSBwYXRoOiB7bmFtZSFyfScpCiAgICBwYXJ0cyA9IG5hbWUucnN0cmlwKCcvJykuc3BsaXQoJy8nKQogICAgaWYgcGFydHMgYW5kIHBhcnRzWzBdID09ICcuJzoKICAgICAgICBwYXJ0cyA9IHBhcnRzWzE6XQogICAgaWYgbm90IHBhcnRzIG9yIGFueSh4IGluICgnJywgJy4nLCAnLi4nKSBmb3IgeCBpbiBwYXJ0cyk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1RyYXZlcnNhbCBvciBub25jYW5vbmljYWwgcGF0aDoge25hbWUhcn0nKQogICAgaWYgJzonIGluIHBhcnRzWzBdOgogICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidEcml2ZS1saWtlIGFyY2hpdmUgcGF0aDoge25hbWUhcn0nKQogICAgcmV0dXJuIHR1cGxlKHBhcnRzKQoKZGVmIGV4dHJhY3QoYXJjaGl2ZV9wYXRoLCBkZXN0aW5hdGlvbik6CiAgICBhcmNoaXZlX3BhdGggPSBQYXRoKGFyY2hpdmVfcGF0aCkKICAgIHJvb3QgPSBQYXRoKGRlc3RpbmF0aW9uKQogICAgaWYgcm9vdC5pc19zeW1saW5rKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBzeW1saW5rJykKICAgIGZvciBhbmNlc3RvciBpbiByb290LnBhcmVudHM6CiAgICAgICAgaWYgYW5jZXN0b3IuaXNfc3ltbGluaygpOgogICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdFeHRyYWN0aW9uIGFuY2VzdG9yIGlzIHN5bWxpbmsnKQogICAgcm9vdC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICByb290ID0gcm9vdC5yZXNvbHZlKHN0cmljdD1UcnVlKQogICAgaWYgbm90IHJvb3QuaXNfZGlyKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBub3QgZGlyZWN0b3J5JykKICAgIG1vZGUgPSAnemlwJyBpZiB6aXBmaWxlLmlzX3ppcGZpbGUoYXJjaGl2ZV9wYXRoKSBlbHNlICd0YXInCiAgICB3aXRoICh6aXBmaWxlLlppcEZpbGUoYXJjaGl2ZV9wYXRoKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgdGFyZmlsZS5vcGVuKGFyY2hpdmVfcGF0aCwgJ3I6KicpKSBhcyBhcmNoaXZlOgogICAgICAgIG1lbWJlcnMgPSBhcmNoaXZlLmluZm9saXN0KCkgaWYgbW9kZSA9PSAnemlwJyBlbHNlIGFyY2hpdmUuZ2V0bWVtYmVycygpCiAgICAgICAgaWYgbGVuKG1lbWJlcnMpID4gTUFYX01FTUJFUlM6CiAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoJ1RvbyBtYW55IGFyY2hpdmUgbWVtYmVycycpCiAgICAgICAgc2VlbiA9IHNldCgpCiAgICAgICAgdG90YWwgPSAwCiAgICAgICAgdmFsaWRhdGVkID0gW10KICAgICAgICBmb3IgbWVtYmVyIGluIG1lbWJlcnM6CiAgICAgICAgICAgIG5hbWUgPSBtZW1iZXIuZmlsZW5hbWUgaWYgbW9kZSA9PSAnemlwJyBlbHNlIG1lbWJlci5uYW1lCiAgICAgICAgICAgIGlmIG5hbWUgaW4gKCIuIiwgIi4vIikgYW5kICgobWVtYmVyLmlzX2RpcigpIGlmIG1vZGUgPT0gJ3ppcCcgZWxzZSBtZW1iZXIuaXNkaXIoKSkpOgogICAgICAgICAgICAgICAgY29udGludWUKICAgICAgICAgICAga2V5ID0gY2hlY2tlZF9uYW1lKG5hbWUpCiAgICAgICAgICAgIGlmIGtleSBpbiBzZWVuOgogICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0R1cGxpY2F0ZSBhcmNoaXZlIGVudHJ5OiB7bmFtZSFyfScpCiAgICAgICAgICAgIHNlZW4uYWRkKGtleSkKICAgICAgICAgICAgaWYgbW9kZSA9PSAnemlwJzoKICAgICAgICAgICAgICAgIGtpbmQgPSAobWVtYmVyLmV4dGVybmFsX2F0dHIgPj4gMTYpICYgMG8xNzAwMDAKICAgICAgICAgICAgICAgIGlzX2RpciA9IG1lbWJlci5pc19kaXIoKQogICAgICAgICAgICAgICAgaWYga2luZCBub3QgaW4gKDAsIHN0YXQuU19JRlJFRywgc3RhdC5TX0lGRElSKSBvciAoaXNfZGlyIGFuZCBraW5kID09IHN0YXQuU19JRlJFRyk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBaSVAgZmlsZSB0eXBlOiB7bmFtZSFyfScpCiAgICAgICAgICAgICAgICBzaXplID0gbWVtYmVyLmZpbGVfc2l6ZQogICAgICAgICAgICBlbHNlOgogICAgICAgICAgICAgICAgaXNfZGlyID0gbWVtYmVyLmlzZGlyKCkKICAgICAgICAgICAgICAgIGlmIG5vdCAoaXNfZGlyIG9yIG1lbWJlci5pc2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBUQVIgZmlsZSB0eXBlL2xpbms6IHtuYW1lIXJ9JykKICAgICAgICAgICAgICAgIHNpemUgPSBtZW1iZXIuc2l6ZQogICAgICAgICAgICB0b3RhbCArPSBzaXplCiAgICAgICAgICAgIGlmIHRvdGFsID4gTUFYX1RPVEFMX1NJWkU6CiAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdBcmNoaXZlIGV4Y2VlZHMgZXh0cmFjdGlvbiBzaXplIGxpbWl0JykKICAgICAgICAgICAgdmFsaWRhdGVkLmFwcGVuZCgobWVtYmVyLCBrZXksIGlzX2RpcikpCiAgICAgICAgIyBWYWxpZGF0ZSBjb2xsaXNpb25zIGJldHdlZW4gYW5jZXN0b3IgZmlsZXMgYW5kIGRlc2NlbmRhbnRzIGJlZm9yZSB3cml0aW5nLgogICAgICAgIGZpbGVfa2V5cyA9IHtrZXkgZm9yIF8sIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZCBpZiBub3QgaXNfZGlyfQogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICBpZiBhbnkoa2V5WzppXSBpbiBmaWxlX2tleXMgZm9yIGkgaW4gcmFuZ2UoMSwgbGVuKGtleSkpKToKICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidGaWxlIHVzZWQgYXMgZGlyZWN0b3J5OiB7a2V5IXJ9JykKICAgICAgICAjIFJlZnVzZSBleGlzdGluZyBzeW1saW5rIHBhcmVudHMgYW5kIGRlc3RpbmF0aW9ucyBldmVuIGluc2lkZSBzdGFnaW5nIHJvb3RzLgogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICB0YXJnZXQgPSByb290CiAgICAgICAgICAgIGZvciBwYXJ0IGluIGtleToKICAgICAgICAgICAgICAgIHRhcmdldCA9IHRhcmdldCAvIHBhcnQKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5pc19zeW1saW5rKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHN5bWxpbmsgd2l0aGluIGV4dHJhY3Rpb246IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5leGlzdHMoKSBhbmQgbm90ICh0YXJnZXQuaXNfZGlyKCkgb3IgdGFyZ2V0LmlzX2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHNwZWNpYWwgZmlsZToge3RhcmdldH0nKQogICAgICAgIGZvciBtZW1iZXIsIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZDoKICAgICAgICAgICAgdGFyZ2V0ID0gcm9vdC5qb2lucGF0aCgqa2V5KQogICAgICAgICAgICBpZiBpc19kaXI6CiAgICAgICAgICAgICAgICBpZiB0YXJnZXQuZXhpc3RzKCkgYW5kIG5vdCB0YXJnZXQuaXNfZGlyKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0RpcmVjdG9yeSBjb2xsaWRlcyB3aXRoIGV4aXN0aW5nIGZpbGU6IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIHRhcmdldC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICAgICAgICAgICAgICBjb250aW51ZQogICAgICAgICAgICB0YXJnZXQucGFyZW50Lm1rZGlyKHBhcmVudHM9VHJ1ZSwgZXhpc3Rfb2s9VHJ1ZSkKICAgICAgICAgICAgd2l0aCAoYXJjaGl2ZS5vcGVuKG1lbWJlciwgJ3InKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgYXJjaGl2ZS5leHRyYWN0ZmlsZShtZW1iZXIpKSBhcyBzb3VyY2U6CiAgICAgICAgICAgICAgICBpZiBzb3VyY2UgaXMgTm9uZToKICAgICAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdNaXNzaW5nIG1lbWJlciBmaWxlIGNvbnRlbnQnKQogICAgICAgICAgICAgICAgd2l0aCB0YXJnZXQub3BlbigneGInKSBhcyBvdXRwdXQ6CiAgICAgICAgICAgICAgICAgICAgd2hpbGUgVHJ1ZToKICAgICAgICAgICAgICAgICAgICAgICAgY2h1bmsgPSBzb3VyY2UucmVhZCgxMDI0KjEwMjQpCiAgICAgICAgICAgICAgICAgICAgICAgIGlmIG5vdCBjaHVuazoKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJyZWFrCiAgICAgICAgICAgICAgICAgICAgICAgIG91dHB1dC53cml0ZShjaHVuaykKICAgICAgICAgICAgIyBQcmVzZXJ2ZSBleGVjdXRhYmxlIG1vZGUgZm9yIGtub3duIHJlZ3VsYXIgZmlsZXMsIG5ldmVyIHNwZWNpYWwgYml0cy4KICAgICAgICAgICAgcGVybWlzc2lvbnMgPSAoKG1lbWJlci5leHRlcm5hbF9hdHRyID4+IDE2KSBpZiBtb2RlID09ICd6aXAnIGVsc2UgbWVtYmVyLm1vZGUpICYgMG83NzcKICAgICAgICAgICAgb3MuY2htb2QodGFyZ2V0LCBwZXJtaXNzaW9ucyAmIDBvNzc3KQoKaWYgX19uYW1lX18gPT0gJ19fbWFpbl9fJzoKICAgIGlmIGxlbihzeXMuYXJndikgIT0gMzoKICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KCdVc2FnZTogYnVhX3NhZmVfZXh0cmFjdC5weSBBUkNISVZFIERFU1RJTkFUSU9OJykKICAgIHRyeToKICAgICAgICBleHRyYWN0KHN5cy5hcmd2WzFdLCBzeXMuYXJndlsyXSkKICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZXhjOgogICAgICAgIHByaW50KGYnW0JVQV0gVW5zYWZlIG9yIGludmFsaWQgYXJjaGl2ZSByZWplY3RlZDoge2V4Y30nLCBmaWxlPXN5cy5zdGRlcnIpCiAgICAgICAgcmFpc2UgU3lzdGVtRXhpdCgxKQo="))\' "$ARCHIVE" "$EXTRACT" ;; '
+            'tar -xf "$ARCHIVE" -C "$EXTRACT" ;; '
             '*) echo "[BUA] Unsupported archive format: $URL"; exit 1 ;; '
             'esac ;; '
             '*) echo "[BUA] Unsupported archive extractor: $ARCHIVE_FORMAT"; exit 1 ;; '
@@ -4700,14 +3554,13 @@ def build_parent_update_command(
             f"echo '[BUA] Downloading newest {app_name} payload'; "
             'curl -fL --retry 3 -o "$ARCHIVE" "$URL"; '
             'test -s "$ARCHIVE"; '
-            'BUA_SEC_CODE=0; BUA_SEC_MSG=$(python3 -c \'import base64;exec(base64.b64decode("IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJSZWFkLW9ubHkgc3RhZ2VkIHBheWxvYWQgc2VjdXJpdHkgc2Nhbi4gRXhpdCAwPWNsZWFuLCAyPXJldmlldywgMz1oYXJkIHJlamVjdC4iIiIKaW1wb3J0IG9zLCBzdGF0LCBzeXMsIHRhcmZpbGUsIHppcGZpbGUKZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCk1BWF9CWVRFUz04KjEwMjQqKjMKTUFYX0VYUEFOREVEPTI0KjEwMjQqKjMKTUFYX0VOVFJJRVM9MTAwMDAwCk1BWF9SQVRJTz0xMDAwClNDUklQVF9FWFQ9eycuc2gnLCcuYmFzaCcsJy5weScsJy5wbCcsJy5wczEnLCcuYmF0JywnLmNtZCcsJy5kZXNrdG9wJ30KCmRlZiBzY2FuKHApOgogICAgaGFyZD1bXTsgd2Fybj1bXTsgZXhwYW5kZWQ9MDsgc2Vlbj1zZXQoKTsgZmlsZXM9c2V0KCk7IHBhdGhzPVtdCiAgICBpZiBwLmlzX3N5bWxpbmsoKSBvciBub3QgcC5pc19maWxlKCk6IHJldHVybiAzLCdEb3dubG9hZGVkIHBheWxvYWQgaXMgYSBzeW1saW5rIG9yIG5vdCBhIHJlZ3VsYXIgZmlsZScKICAgIHNpemU9cC5zdGF0KCkuc3Rfc2l6ZQogICAgaWYgbm90IHNpemUgb3Igc2l6ZT5NQVhfQllURVM6IHJldHVybiAzLCdEb3dubG9hZGVkIHBheWxvYWQgZW1wdHkgb3IgZXhjZWVkcyA4IEdpQicKICAgIGRlZiBhZGQobmFtZSxpc19kaXIsbW9kZSx1c2l6ZSxjc2l6ZSk6CiAgICAgICAgbm9ubG9jYWwgZXhwYW5kZWQKICAgICAgICBpZiBub3QgaXNpbnN0YW5jZShuYW1lLHN0cikgb3Igbm90IG5hbWUgb3IgJ1xcJyBpbiBuYW1lIG9yICdceDAwJyBpbiBuYW1lIG9yIG5hbWUuc3RhcnRzd2l0aCgnLycpOgogICAgICAgICAgICBoYXJkLmFwcGVuZCgnSW52YWxpZC9hYnNvbHV0ZSBhcmNoaXZlIHBhdGgnKTtyZXR1cm4KICAgICAgICBwYXJ0cz1uYW1lLnJzdHJpcCgnLycpLnNwbGl0KCcvJykKICAgICAgICBpZiBwYXJ0cyBhbmQgcGFydHNbMF09PScuJzogcGFydHM9cGFydHNbMTpdCiAgICAgICAgaWYgbm90IHBhcnRzIG9yIGFueSh4IGluICgnJywnLicsJy4uJykgZm9yIHggaW4gcGFydHMpIG9yICc6JyBpbiBwYXJ0c1swXToKICAgICAgICAgICAgaGFyZC5hcHBlbmQoJ1RyYXZlcnNhbC9ub25jYW5vbmljYWwgYXJjaGl2ZSBwYXRoJyk7cmV0dXJuCiAgICAgICAga2V5PXR1cGxlKHBhcnRzKQogICAgICAgIGlmIGtleSBpbiBzZWVuOiBoYXJkLmFwcGVuZCgnRHVwbGljYXRlIGFyY2hpdmUgcGF0aCcpCiAgICAgICAgc2Vlbi5hZGQoa2V5KTtwYXRocy5hcHBlbmQoa2V5KQogICAgICAgIGlmIG5vdCBpc19kaXI6IGZpbGVzLmFkZChrZXkpCiAgICAgICAgZXhwYW5kZWQrPXVzaXplCiAgICAgICAgaWYgZXhwYW5kZWQ+TUFYX0VYUEFOREVEOiBoYXJkLmFwcGVuZCgnRXhjZXNzaXZlIGV4cGFuZGVkIHNpemUnKQogICAgICAgIGlmIGNzaXplPjAgYW5kIHVzaXplPjEwKjEwMjQqMTAyNCBhbmQgdXNpemUvY3NpemU+TUFYX1JBVElPOiBoYXJkLmFwcGVuZCgnRXh0cmVtZSBjb21wcmVzc2lvbiByYXRpbycpCiAgICAgICAgaWYgbW9kZSAmIChzdGF0LlNfSVNVSUR8c3RhdC5TX0lTR0lEKTogd2Fybi5hcHBlbmQoJ1ByaXZpbGVnZWQgcGVybWlzc2lvbiBiaXRzJykKICAgICAgICBpZiBQYXRoKG5hbWUpLnN1ZmZpeC5sb3dlcigpIGluIFNDUklQVF9FWFQ6IHdhcm4uYXBwZW5kKCdTY3JpcHQgb3IgZGVza3RvcCBsYXVuY2hlciBpbiBwYWNrYWdlJykKICAgIHRyeToKICAgICAgICBpZiB6aXBmaWxlLmlzX3ppcGZpbGUocCk6CiAgICAgICAgICAgIHdpdGggemlwZmlsZS5aaXBGaWxlKHApIGFzIHo6CiAgICAgICAgICAgICAgICBlbnRyaWVzPXouaW5mb2xpc3QoKQogICAgICAgICAgICAgICAgaWYgbGVuKGVudHJpZXMpPk1BWF9FTlRSSUVTOiByZXR1cm4gMywnVG9vIG1hbnkgWklQIG1lbWJlcnMnCiAgICAgICAgICAgICAgICBmb3IgZSBpbiBlbnRyaWVzOgogICAgICAgICAgICAgICAgICAgIG1vZGU9KGUuZXh0ZXJuYWxfYXR0cj4+MTYpCiAgICAgICAgICAgICAgICAgICAga2luZD1zdGF0LlNfSUZNVChtb2RlKQogICAgICAgICAgICAgICAgICAgIGlmIGtpbmQgbm90IGluICgwLHN0YXQuU19JRlJFRyxzdGF0LlNfSUZESVIpIG9yIChlLmlzX2RpcigpIGFuZCBraW5kPT1zdGF0LlNfSUZSRUcpOiBoYXJkLmFwcGVuZCgnU3ltbGluayBvciBzcGVjaWFsIFpJUCBtZW1iZXInKQogICAgICAgICAgICAgICAgICAgIGFkZChlLmZpbGVuYW1lLGUuaXNfZGlyKCksbW9kZSxlLmZpbGVfc2l6ZSxlLmNvbXByZXNzX3NpemUpCiAgICAgICAgZWxpZiB0YXJmaWxlLmlzX3RhcmZpbGUocCk6CiAgICAgICAgICAgIHdpdGggdGFyZmlsZS5vcGVuKHAsJ3I6KicpIGFzIHQ6CiAgICAgICAgICAgICAgICBlbnRyaWVzPXQuZ2V0bWVtYmVycygpCiAgICAgICAgICAgICAgICBpZiBsZW4oZW50cmllcyk+TUFYX0VOVFJJRVM6IHJldHVybiAzLCdUb28gbWFueSBUQVIgbWVtYmVycycKICAgICAgICAgICAgICAgIGZvciBlIGluIGVudHJpZXM6CiAgICAgICAgICAgICAgICAgICAgaWYgbm90IChlLmlzZmlsZSgpIG9yIGUuaXNkaXIoKSk6IGhhcmQuYXBwZW5kKCdTeW1saW5rLCBoYXJkbGluayBvciBzcGVjaWFsIFRBUiBtZW1iZXInKQogICAgICAgICAgICAgICAgICAgIGFkZChlLm5hbWUsZS5pc2RpcigpLGUubW9kZSxlLnNpemUsMCkKICAgICAgICBlbHNlOgogICAgICAgICAgICB3aXRoIHAub3BlbigncmInKSBhcyBmOiBoZWFkPWYucmVhZCgyNTYpCiAgICAgICAgICAgIGlmIGhlYWQuc3RhcnRzd2l0aChiJyMhJyk6IHdhcm4uYXBwZW5kKCdEb3dubG9hZGVkIGV4ZWN1dGFibGUgc2NyaXB0JykKICAgICAgICAgICAgaWYgaGVhZC5zdGFydHN3aXRoKGInXHg3ZkVMRicpIG9yIGhlYWQuc3RhcnRzd2l0aChiJ01aJyk6IHdhcm4uYXBwZW5kKCdEb3dubG9hZGVkIGV4ZWN1dGFibGUgYmluYXJ5IChwdWJsaXNoZXIgbm90IGluZGVwZW5kZW50bHkgYXR0ZXN0ZWQpJykKICAgICAgICAgICAgaWYgaGVhZC5zdGFydHN3aXRoKGInUEtceDAzXHgwNCcpOiBoYXJkLmFwcGVuZCgnTWFsZm9ybWVkIFpJUCBmaWxlJykKICAgICAgICBpZiBhbnkoYW55KGtbOmldIGluIGZpbGVzIGZvciBpIGluIHJhbmdlKDEsbGVuKGspKSkgZm9yIGsgaW4gcGF0aHMpOiBoYXJkLmFwcGVuZCgnRmlsZS1kaXJlY3RvcnkgcGF0aCBjb25mbGljdCcpCiAgICBleGNlcHQgKE9TRXJyb3IsVmFsdWVFcnJvcixFT0ZFcnJvcix0YXJmaWxlLlRhckVycm9yLHppcGZpbGUuQmFkWmlwRmlsZSkgYXMgZToKICAgICAgICByZXR1cm4gMywnVW5yZWFkYWJsZSBvciBtYWxmb3JtZWQgYXJjaGl2ZTogJytzdHIoZSlbOjEyMF0KICAgIGlmIGhhcmQ6cmV0dXJuIDMsJ0JMT0NLRUQ6ICcrJywgJy5qb2luKHNvcnRlZChzZXQoaGFyZCkpWzo0XSkKICAgIGlmIHdhcm46cmV0dXJuIDIsJ1JFVklFVzogJysnLCAnLmpvaW4oc29ydGVkKHNldCh3YXJuKSlbOjRdKQogICAgcmV0dXJuIDAsJ0NMRUFOOiBubyBwcm9oaWJpdGVkIGFyY2hpdmUgZW50cmllcyBkZXRlY3RlZCAobm90IG1hbHdhcmUtZnJlZSBjZXJ0aWZpY2F0aW9uKScKaWYgX19uYW1lX189PSdfX21haW5fXyc6CiAgICBjb2RlLG1lc3NhZ2U9c2NhbihQYXRoKHN5cy5hcmd2WzFdKSk7cHJpbnQobWVzc2FnZSk7c3lzLmV4aXQoY29kZSkK"))\' "$ARCHIVE" 2>&1) || BUA_SEC_CODE=$?; echo "[BUA SECURITY] $BUA_SEC_MSG"; if [ "$BUA_SEC_CODE" -eq 2 ]; then dialog --defaultno --title "BUA Update Security" --yesno "Suspicious content detected. $BUA_SEC_MSG. Accept the Risk to install this update; Cancel skips it." 12 75 || exit 42; elif [ "$BUA_SEC_CODE" -ne 0 ]; then echo "[BUA SECURITY] Update blocked"; exit 43; fi; '
             'if [ "$ARCHIVE_FORMAT" = "squashfs" ]; then '
-            '  echo "[BUA] SquashFS extraction requires security review" >&2; exit 1; '
+            '  unsquashfs -f -d "$EXTRACT" "$ARCHIVE"; '
             'else '
             '  case "$URL" in '
-            '  *.zip*) python3 -c \'import base64;exec(base64.b64decode("IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJCVUEgYXJjaGl2ZSBleHRyYWN0aW9uIGd1YXJkLiBEZWxpYmVyYXRlbHkgcmVqZWN0cyBsaW5rcywgc3BlY2lhbCBmaWxlcyBhbmQgZHVwbGljYXRlIHBhdGhzLiIiIgppbXBvcnQgb3MKaW1wb3J0IHN0YXQKaW1wb3J0IHN5cwppbXBvcnQgdGFyZmlsZQppbXBvcnQgemlwZmlsZQpmcm9tIHBhdGhsaWIgaW1wb3J0IFBhdGgsIFB1cmVQb3NpeFBhdGgKCk1BWF9NRU1CRVJTID0gMTAwMDAwCk1BWF9UT1RBTF9TSVpFID0gMjAgKiAxMDI0KiozCgpkZWYgY2hlY2tlZF9uYW1lKG5hbWUpOgogICAgaWYgbm90IGlzaW5zdGFuY2UobmFtZSwgc3RyKSBvciBub3QgbmFtZSBvciAnXFwnIGluIG5hbWUgb3IgJ1x4MDAnIGluIG5hbWU6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBhcmNoaXZlIG5hbWU6IHtuYW1lIXJ9JykKICAgIGlmIG5hbWUuc3RhcnRzd2l0aCgnLycpIG9yIG5hbWUuc3RhcnRzd2l0aCgnLy8nKToKICAgICAgICByYWlzZSBWYWx1ZUVycm9yKGYnQWJzb2x1dGUgYXJjaGl2ZSBwYXRoOiB7bmFtZSFyfScpCiAgICBwYXJ0cyA9IG5hbWUucnN0cmlwKCcvJykuc3BsaXQoJy8nKQogICAgaWYgcGFydHMgYW5kIHBhcnRzWzBdID09ICcuJzoKICAgICAgICBwYXJ0cyA9IHBhcnRzWzE6XQogICAgaWYgbm90IHBhcnRzIG9yIGFueSh4IGluICgnJywgJy4nLCAnLi4nKSBmb3IgeCBpbiBwYXJ0cyk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1RyYXZlcnNhbCBvciBub25jYW5vbmljYWwgcGF0aDoge25hbWUhcn0nKQogICAgaWYgJzonIGluIHBhcnRzWzBdOgogICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidEcml2ZS1saWtlIGFyY2hpdmUgcGF0aDoge25hbWUhcn0nKQogICAgcmV0dXJuIHR1cGxlKHBhcnRzKQoKZGVmIGV4dHJhY3QoYXJjaGl2ZV9wYXRoLCBkZXN0aW5hdGlvbik6CiAgICBhcmNoaXZlX3BhdGggPSBQYXRoKGFyY2hpdmVfcGF0aCkKICAgIHJvb3QgPSBQYXRoKGRlc3RpbmF0aW9uKQogICAgaWYgcm9vdC5pc19zeW1saW5rKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBzeW1saW5rJykKICAgIGZvciBhbmNlc3RvciBpbiByb290LnBhcmVudHM6CiAgICAgICAgaWYgYW5jZXN0b3IuaXNfc3ltbGluaygpOgogICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdFeHRyYWN0aW9uIGFuY2VzdG9yIGlzIHN5bWxpbmsnKQogICAgcm9vdC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICByb290ID0gcm9vdC5yZXNvbHZlKHN0cmljdD1UcnVlKQogICAgaWYgbm90IHJvb3QuaXNfZGlyKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBub3QgZGlyZWN0b3J5JykKICAgIG1vZGUgPSAnemlwJyBpZiB6aXBmaWxlLmlzX3ppcGZpbGUoYXJjaGl2ZV9wYXRoKSBlbHNlICd0YXInCiAgICB3aXRoICh6aXBmaWxlLlppcEZpbGUoYXJjaGl2ZV9wYXRoKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgdGFyZmlsZS5vcGVuKGFyY2hpdmVfcGF0aCwgJ3I6KicpKSBhcyBhcmNoaXZlOgogICAgICAgIG1lbWJlcnMgPSBhcmNoaXZlLmluZm9saXN0KCkgaWYgbW9kZSA9PSAnemlwJyBlbHNlIGFyY2hpdmUuZ2V0bWVtYmVycygpCiAgICAgICAgaWYgbGVuKG1lbWJlcnMpID4gTUFYX01FTUJFUlM6CiAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoJ1RvbyBtYW55IGFyY2hpdmUgbWVtYmVycycpCiAgICAgICAgc2VlbiA9IHNldCgpCiAgICAgICAgdG90YWwgPSAwCiAgICAgICAgdmFsaWRhdGVkID0gW10KICAgICAgICBmb3IgbWVtYmVyIGluIG1lbWJlcnM6CiAgICAgICAgICAgIG5hbWUgPSBtZW1iZXIuZmlsZW5hbWUgaWYgbW9kZSA9PSAnemlwJyBlbHNlIG1lbWJlci5uYW1lCiAgICAgICAgICAgIGlmIG5hbWUgaW4gKCIuIiwgIi4vIikgYW5kICgobWVtYmVyLmlzX2RpcigpIGlmIG1vZGUgPT0gJ3ppcCcgZWxzZSBtZW1iZXIuaXNkaXIoKSkpOgogICAgICAgICAgICAgICAgY29udGludWUKICAgICAgICAgICAga2V5ID0gY2hlY2tlZF9uYW1lKG5hbWUpCiAgICAgICAgICAgIGlmIGtleSBpbiBzZWVuOgogICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0R1cGxpY2F0ZSBhcmNoaXZlIGVudHJ5OiB7bmFtZSFyfScpCiAgICAgICAgICAgIHNlZW4uYWRkKGtleSkKICAgICAgICAgICAgaWYgbW9kZSA9PSAnemlwJzoKICAgICAgICAgICAgICAgIGtpbmQgPSAobWVtYmVyLmV4dGVybmFsX2F0dHIgPj4gMTYpICYgMG8xNzAwMDAKICAgICAgICAgICAgICAgIGlzX2RpciA9IG1lbWJlci5pc19kaXIoKQogICAgICAgICAgICAgICAgaWYga2luZCBub3QgaW4gKDAsIHN0YXQuU19JRlJFRywgc3RhdC5TX0lGRElSKSBvciAoaXNfZGlyIGFuZCBraW5kID09IHN0YXQuU19JRlJFRyk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBaSVAgZmlsZSB0eXBlOiB7bmFtZSFyfScpCiAgICAgICAgICAgICAgICBzaXplID0gbWVtYmVyLmZpbGVfc2l6ZQogICAgICAgICAgICBlbHNlOgogICAgICAgICAgICAgICAgaXNfZGlyID0gbWVtYmVyLmlzZGlyKCkKICAgICAgICAgICAgICAgIGlmIG5vdCAoaXNfZGlyIG9yIG1lbWJlci5pc2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBUQVIgZmlsZSB0eXBlL2xpbms6IHtuYW1lIXJ9JykKICAgICAgICAgICAgICAgIHNpemUgPSBtZW1iZXIuc2l6ZQogICAgICAgICAgICB0b3RhbCArPSBzaXplCiAgICAgICAgICAgIGlmIHRvdGFsID4gTUFYX1RPVEFMX1NJWkU6CiAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdBcmNoaXZlIGV4Y2VlZHMgZXh0cmFjdGlvbiBzaXplIGxpbWl0JykKICAgICAgICAgICAgdmFsaWRhdGVkLmFwcGVuZCgobWVtYmVyLCBrZXksIGlzX2RpcikpCiAgICAgICAgIyBWYWxpZGF0ZSBjb2xsaXNpb25zIGJldHdlZW4gYW5jZXN0b3IgZmlsZXMgYW5kIGRlc2NlbmRhbnRzIGJlZm9yZSB3cml0aW5nLgogICAgICAgIGZpbGVfa2V5cyA9IHtrZXkgZm9yIF8sIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZCBpZiBub3QgaXNfZGlyfQogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICBpZiBhbnkoa2V5WzppXSBpbiBmaWxlX2tleXMgZm9yIGkgaW4gcmFuZ2UoMSwgbGVuKGtleSkpKToKICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidGaWxlIHVzZWQgYXMgZGlyZWN0b3J5OiB7a2V5IXJ9JykKICAgICAgICAjIFJlZnVzZSBleGlzdGluZyBzeW1saW5rIHBhcmVudHMgYW5kIGRlc3RpbmF0aW9ucyBldmVuIGluc2lkZSBzdGFnaW5nIHJvb3RzLgogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICB0YXJnZXQgPSByb290CiAgICAgICAgICAgIGZvciBwYXJ0IGluIGtleToKICAgICAgICAgICAgICAgIHRhcmdldCA9IHRhcmdldCAvIHBhcnQKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5pc19zeW1saW5rKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHN5bWxpbmsgd2l0aGluIGV4dHJhY3Rpb246IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5leGlzdHMoKSBhbmQgbm90ICh0YXJnZXQuaXNfZGlyKCkgb3IgdGFyZ2V0LmlzX2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHNwZWNpYWwgZmlsZToge3RhcmdldH0nKQogICAgICAgIGZvciBtZW1iZXIsIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZDoKICAgICAgICAgICAgdGFyZ2V0ID0gcm9vdC5qb2lucGF0aCgqa2V5KQogICAgICAgICAgICBpZiBpc19kaXI6CiAgICAgICAgICAgICAgICBpZiB0YXJnZXQuZXhpc3RzKCkgYW5kIG5vdCB0YXJnZXQuaXNfZGlyKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0RpcmVjdG9yeSBjb2xsaWRlcyB3aXRoIGV4aXN0aW5nIGZpbGU6IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIHRhcmdldC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICAgICAgICAgICAgICBjb250aW51ZQogICAgICAgICAgICB0YXJnZXQucGFyZW50Lm1rZGlyKHBhcmVudHM9VHJ1ZSwgZXhpc3Rfb2s9VHJ1ZSkKICAgICAgICAgICAgd2l0aCAoYXJjaGl2ZS5vcGVuKG1lbWJlciwgJ3InKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgYXJjaGl2ZS5leHRyYWN0ZmlsZShtZW1iZXIpKSBhcyBzb3VyY2U6CiAgICAgICAgICAgICAgICBpZiBzb3VyY2UgaXMgTm9uZToKICAgICAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdNaXNzaW5nIG1lbWJlciBmaWxlIGNvbnRlbnQnKQogICAgICAgICAgICAgICAgd2l0aCB0YXJnZXQub3BlbigneGInKSBhcyBvdXRwdXQ6CiAgICAgICAgICAgICAgICAgICAgd2hpbGUgVHJ1ZToKICAgICAgICAgICAgICAgICAgICAgICAgY2h1bmsgPSBzb3VyY2UucmVhZCgxMDI0KjEwMjQpCiAgICAgICAgICAgICAgICAgICAgICAgIGlmIG5vdCBjaHVuazoKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJyZWFrCiAgICAgICAgICAgICAgICAgICAgICAgIG91dHB1dC53cml0ZShjaHVuaykKICAgICAgICAgICAgIyBQcmVzZXJ2ZSBleGVjdXRhYmxlIG1vZGUgZm9yIGtub3duIHJlZ3VsYXIgZmlsZXMsIG5ldmVyIHNwZWNpYWwgYml0cy4KICAgICAgICAgICAgcGVybWlzc2lvbnMgPSAoKG1lbWJlci5leHRlcm5hbF9hdHRyID4+IDE2KSBpZiBtb2RlID09ICd6aXAnIGVsc2UgbWVtYmVyLm1vZGUpICYgMG83NzcKICAgICAgICAgICAgb3MuY2htb2QodGFyZ2V0LCBwZXJtaXNzaW9ucyAmIDBvNzc3KQoKaWYgX19uYW1lX18gPT0gJ19fbWFpbl9fJzoKICAgIGlmIGxlbihzeXMuYXJndikgIT0gMzoKICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KCdVc2FnZTogYnVhX3NhZmVfZXh0cmFjdC5weSBBUkNISVZFIERFU1RJTkFUSU9OJykKICAgIHRyeToKICAgICAgICBleHRyYWN0KHN5cy5hcmd2WzFdLCBzeXMuYXJndlsyXSkKICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZXhjOgogICAgICAgIHByaW50KGYnW0JVQV0gVW5zYWZlIG9yIGludmFsaWQgYXJjaGl2ZSByZWplY3RlZDoge2V4Y30nLCBmaWxlPXN5cy5zdGRlcnIpCiAgICAgICAgcmFpc2UgU3lzdGVtRXhpdCgxKQo="))\' "$ARCHIVE" "$EXTRACT" ;; '
+            '  *.zip*) unzip -oq "$ARCHIVE" -d "$EXTRACT" ;; '
             '  *.tar.gz*|*.tgz*|*.tar.xz*|*.txz*|*.tar.bz2*|*.tbz2*) '
-            '  python3 -c \'import base64;exec(base64.b64decode("IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJCVUEgYXJjaGl2ZSBleHRyYWN0aW9uIGd1YXJkLiBEZWxpYmVyYXRlbHkgcmVqZWN0cyBsaW5rcywgc3BlY2lhbCBmaWxlcyBhbmQgZHVwbGljYXRlIHBhdGhzLiIiIgppbXBvcnQgb3MKaW1wb3J0IHN0YXQKaW1wb3J0IHN5cwppbXBvcnQgdGFyZmlsZQppbXBvcnQgemlwZmlsZQpmcm9tIHBhdGhsaWIgaW1wb3J0IFBhdGgsIFB1cmVQb3NpeFBhdGgKCk1BWF9NRU1CRVJTID0gMTAwMDAwCk1BWF9UT1RBTF9TSVpFID0gMjAgKiAxMDI0KiozCgpkZWYgY2hlY2tlZF9uYW1lKG5hbWUpOgogICAgaWYgbm90IGlzaW5zdGFuY2UobmFtZSwgc3RyKSBvciBub3QgbmFtZSBvciAnXFwnIGluIG5hbWUgb3IgJ1x4MDAnIGluIG5hbWU6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBhcmNoaXZlIG5hbWU6IHtuYW1lIXJ9JykKICAgIGlmIG5hbWUuc3RhcnRzd2l0aCgnLycpIG9yIG5hbWUuc3RhcnRzd2l0aCgnLy8nKToKICAgICAgICByYWlzZSBWYWx1ZUVycm9yKGYnQWJzb2x1dGUgYXJjaGl2ZSBwYXRoOiB7bmFtZSFyfScpCiAgICBwYXJ0cyA9IG5hbWUucnN0cmlwKCcvJykuc3BsaXQoJy8nKQogICAgaWYgcGFydHMgYW5kIHBhcnRzWzBdID09ICcuJzoKICAgICAgICBwYXJ0cyA9IHBhcnRzWzE6XQogICAgaWYgbm90IHBhcnRzIG9yIGFueSh4IGluICgnJywgJy4nLCAnLi4nKSBmb3IgeCBpbiBwYXJ0cyk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1RyYXZlcnNhbCBvciBub25jYW5vbmljYWwgcGF0aDoge25hbWUhcn0nKQogICAgaWYgJzonIGluIHBhcnRzWzBdOgogICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidEcml2ZS1saWtlIGFyY2hpdmUgcGF0aDoge25hbWUhcn0nKQogICAgcmV0dXJuIHR1cGxlKHBhcnRzKQoKZGVmIGV4dHJhY3QoYXJjaGl2ZV9wYXRoLCBkZXN0aW5hdGlvbik6CiAgICBhcmNoaXZlX3BhdGggPSBQYXRoKGFyY2hpdmVfcGF0aCkKICAgIHJvb3QgPSBQYXRoKGRlc3RpbmF0aW9uKQogICAgaWYgcm9vdC5pc19zeW1saW5rKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBzeW1saW5rJykKICAgIGZvciBhbmNlc3RvciBpbiByb290LnBhcmVudHM6CiAgICAgICAgaWYgYW5jZXN0b3IuaXNfc3ltbGluaygpOgogICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdFeHRyYWN0aW9uIGFuY2VzdG9yIGlzIHN5bWxpbmsnKQogICAgcm9vdC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICByb290ID0gcm9vdC5yZXNvbHZlKHN0cmljdD1UcnVlKQogICAgaWYgbm90IHJvb3QuaXNfZGlyKCk6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXh0cmFjdGlvbiBkZXN0aW5hdGlvbiBpcyBub3QgZGlyZWN0b3J5JykKICAgIG1vZGUgPSAnemlwJyBpZiB6aXBmaWxlLmlzX3ppcGZpbGUoYXJjaGl2ZV9wYXRoKSBlbHNlICd0YXInCiAgICB3aXRoICh6aXBmaWxlLlppcEZpbGUoYXJjaGl2ZV9wYXRoKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgdGFyZmlsZS5vcGVuKGFyY2hpdmVfcGF0aCwgJ3I6KicpKSBhcyBhcmNoaXZlOgogICAgICAgIG1lbWJlcnMgPSBhcmNoaXZlLmluZm9saXN0KCkgaWYgbW9kZSA9PSAnemlwJyBlbHNlIGFyY2hpdmUuZ2V0bWVtYmVycygpCiAgICAgICAgaWYgbGVuKG1lbWJlcnMpID4gTUFYX01FTUJFUlM6CiAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoJ1RvbyBtYW55IGFyY2hpdmUgbWVtYmVycycpCiAgICAgICAgc2VlbiA9IHNldCgpCiAgICAgICAgdG90YWwgPSAwCiAgICAgICAgdmFsaWRhdGVkID0gW10KICAgICAgICBmb3IgbWVtYmVyIGluIG1lbWJlcnM6CiAgICAgICAgICAgIG5hbWUgPSBtZW1iZXIuZmlsZW5hbWUgaWYgbW9kZSA9PSAnemlwJyBlbHNlIG1lbWJlci5uYW1lCiAgICAgICAgICAgIGlmIG5hbWUgaW4gKCIuIiwgIi4vIikgYW5kICgobWVtYmVyLmlzX2RpcigpIGlmIG1vZGUgPT0gJ3ppcCcgZWxzZSBtZW1iZXIuaXNkaXIoKSkpOgogICAgICAgICAgICAgICAgY29udGludWUKICAgICAgICAgICAga2V5ID0gY2hlY2tlZF9uYW1lKG5hbWUpCiAgICAgICAgICAgIGlmIGtleSBpbiBzZWVuOgogICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0R1cGxpY2F0ZSBhcmNoaXZlIGVudHJ5OiB7bmFtZSFyfScpCiAgICAgICAgICAgIHNlZW4uYWRkKGtleSkKICAgICAgICAgICAgaWYgbW9kZSA9PSAnemlwJzoKICAgICAgICAgICAgICAgIGtpbmQgPSAobWVtYmVyLmV4dGVybmFsX2F0dHIgPj4gMTYpICYgMG8xNzAwMDAKICAgICAgICAgICAgICAgIGlzX2RpciA9IG1lbWJlci5pc19kaXIoKQogICAgICAgICAgICAgICAgaWYga2luZCBub3QgaW4gKDAsIHN0YXQuU19JRlJFRywgc3RhdC5TX0lGRElSKSBvciAoaXNfZGlyIGFuZCBraW5kID09IHN0YXQuU19JRlJFRyk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBaSVAgZmlsZSB0eXBlOiB7bmFtZSFyfScpCiAgICAgICAgICAgICAgICBzaXplID0gbWVtYmVyLmZpbGVfc2l6ZQogICAgICAgICAgICBlbHNlOgogICAgICAgICAgICAgICAgaXNfZGlyID0gbWVtYmVyLmlzZGlyKCkKICAgICAgICAgICAgICAgIGlmIG5vdCAoaXNfZGlyIG9yIG1lbWJlci5pc2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ1Vuc2FmZSBUQVIgZmlsZSB0eXBlL2xpbms6IHtuYW1lIXJ9JykKICAgICAgICAgICAgICAgIHNpemUgPSBtZW1iZXIuc2l6ZQogICAgICAgICAgICB0b3RhbCArPSBzaXplCiAgICAgICAgICAgIGlmIHRvdGFsID4gTUFYX1RPVEFMX1NJWkU6CiAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdBcmNoaXZlIGV4Y2VlZHMgZXh0cmFjdGlvbiBzaXplIGxpbWl0JykKICAgICAgICAgICAgdmFsaWRhdGVkLmFwcGVuZCgobWVtYmVyLCBrZXksIGlzX2RpcikpCiAgICAgICAgIyBWYWxpZGF0ZSBjb2xsaXNpb25zIGJldHdlZW4gYW5jZXN0b3IgZmlsZXMgYW5kIGRlc2NlbmRhbnRzIGJlZm9yZSB3cml0aW5nLgogICAgICAgIGZpbGVfa2V5cyA9IHtrZXkgZm9yIF8sIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZCBpZiBub3QgaXNfZGlyfQogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICBpZiBhbnkoa2V5WzppXSBpbiBmaWxlX2tleXMgZm9yIGkgaW4gcmFuZ2UoMSwgbGVuKGtleSkpKToKICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoZidGaWxlIHVzZWQgYXMgZGlyZWN0b3J5OiB7a2V5IXJ9JykKICAgICAgICAjIFJlZnVzZSBleGlzdGluZyBzeW1saW5rIHBhcmVudHMgYW5kIGRlc3RpbmF0aW9ucyBldmVuIGluc2lkZSBzdGFnaW5nIHJvb3RzLgogICAgICAgIGZvciBfLCBrZXksIF8gaW4gdmFsaWRhdGVkOgogICAgICAgICAgICB0YXJnZXQgPSByb290CiAgICAgICAgICAgIGZvciBwYXJ0IGluIGtleToKICAgICAgICAgICAgICAgIHRhcmdldCA9IHRhcmdldCAvIHBhcnQKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5pc19zeW1saW5rKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHN5bWxpbmsgd2l0aGluIGV4dHJhY3Rpb246IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIGlmIHRhcmdldC5leGlzdHMoKSBhbmQgbm90ICh0YXJnZXQuaXNfZGlyKCkgb3IgdGFyZ2V0LmlzX2ZpbGUoKSk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0V4aXN0aW5nIHNwZWNpYWwgZmlsZToge3RhcmdldH0nKQogICAgICAgIGZvciBtZW1iZXIsIGtleSwgaXNfZGlyIGluIHZhbGlkYXRlZDoKICAgICAgICAgICAgdGFyZ2V0ID0gcm9vdC5qb2lucGF0aCgqa2V5KQogICAgICAgICAgICBpZiBpc19kaXI6CiAgICAgICAgICAgICAgICBpZiB0YXJnZXQuZXhpc3RzKCkgYW5kIG5vdCB0YXJnZXQuaXNfZGlyKCk6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihmJ0RpcmVjdG9yeSBjb2xsaWRlcyB3aXRoIGV4aXN0aW5nIGZpbGU6IHt0YXJnZXR9JykKICAgICAgICAgICAgICAgIHRhcmdldC5ta2RpcihwYXJlbnRzPVRydWUsIGV4aXN0X29rPVRydWUpCiAgICAgICAgICAgICAgICBjb250aW51ZQogICAgICAgICAgICB0YXJnZXQucGFyZW50Lm1rZGlyKHBhcmVudHM9VHJ1ZSwgZXhpc3Rfb2s9VHJ1ZSkKICAgICAgICAgICAgd2l0aCAoYXJjaGl2ZS5vcGVuKG1lbWJlciwgJ3InKSBpZiBtb2RlID09ICd6aXAnIGVsc2UgYXJjaGl2ZS5leHRyYWN0ZmlsZShtZW1iZXIpKSBhcyBzb3VyY2U6CiAgICAgICAgICAgICAgICBpZiBzb3VyY2UgaXMgTm9uZToKICAgICAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdNaXNzaW5nIG1lbWJlciBmaWxlIGNvbnRlbnQnKQogICAgICAgICAgICAgICAgd2l0aCB0YXJnZXQub3BlbigneGInKSBhcyBvdXRwdXQ6CiAgICAgICAgICAgICAgICAgICAgd2hpbGUgVHJ1ZToKICAgICAgICAgICAgICAgICAgICAgICAgY2h1bmsgPSBzb3VyY2UucmVhZCgxMDI0KjEwMjQpCiAgICAgICAgICAgICAgICAgICAgICAgIGlmIG5vdCBjaHVuazoKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJyZWFrCiAgICAgICAgICAgICAgICAgICAgICAgIG91dHB1dC53cml0ZShjaHVuaykKICAgICAgICAgICAgIyBQcmVzZXJ2ZSBleGVjdXRhYmxlIG1vZGUgZm9yIGtub3duIHJlZ3VsYXIgZmlsZXMsIG5ldmVyIHNwZWNpYWwgYml0cy4KICAgICAgICAgICAgcGVybWlzc2lvbnMgPSAoKG1lbWJlci5leHRlcm5hbF9hdHRyID4+IDE2KSBpZiBtb2RlID09ICd6aXAnIGVsc2UgbWVtYmVyLm1vZGUpICYgMG83NzcKICAgICAgICAgICAgb3MuY2htb2QodGFyZ2V0LCBwZXJtaXNzaW9ucyAmIDBvNzc3KQoKaWYgX19uYW1lX18gPT0gJ19fbWFpbl9fJzoKICAgIGlmIGxlbihzeXMuYXJndikgIT0gMzoKICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KCdVc2FnZTogYnVhX3NhZmVfZXh0cmFjdC5weSBBUkNISVZFIERFU1RJTkFUSU9OJykKICAgIHRyeToKICAgICAgICBleHRyYWN0KHN5cy5hcmd2WzFdLCBzeXMuYXJndlsyXSkKICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZXhjOgogICAgICAgIHByaW50KGYnW0JVQV0gVW5zYWZlIG9yIGludmFsaWQgYXJjaGl2ZSByZWplY3RlZDoge2V4Y30nLCBmaWxlPXN5cy5zdGRlcnIpCiAgICAgICAgcmFpc2UgU3lzdGVtRXhpdCgxKQo="))\' "$ARCHIVE" "$EXTRACT" ;; '
+            '  tar -xf "$ARCHIVE" -C "$EXTRACT" ;; '
             '  *) echo "[BUA] Unsupported archive format: $URL"; exit 1 ;; '
             '  esac; '
             'fi; '
@@ -4933,14 +3786,33 @@ def try_adopt_verified_payload_baseline(
             1,
         )[0]
 
-        # BUA_SECURITY_EXTRACT_V1: validate all archive members before any writes.
-        try:
-            namespace = {"__name__": "bua_embedded_archive_guard"}
-            exec(BUA_SAFE_EXTRACT_SOURCE, namespace)
-            namespace["extract"](payload_path, extract_root)
-        except Exception as exc:
-            print(f"[BUA] Unsafe baseline archive rejected: {exc}")
-            return False
+        if lower_url.endswith(".zip"):
+            with zipfile.ZipFile(
+                payload_path
+            ) as archive:
+                archive.extractall(
+                    extract_root
+                )
+
+        else:
+            try:
+                with tarfile.open(
+                    payload_path,
+                    mode="r:*",
+                ) as archive:
+                    # Python 3.12+ safe extraction policy.
+                    try:
+                        archive.extractall(
+                            extract_root,
+                            filter="data",
+                        )
+                    except TypeError:
+                        archive.extractall(
+                            extract_root
+                        )
+
+            except tarfile.TarError:
+                return False
 
         # Some archives contain the payload directly at archive root.
         # Others wrap everything in one top-level directory.
@@ -5101,6 +3973,29 @@ def try_adopt_verified_payload_baseline(
         )
 
 
+def _bua_order_software_versions(left, right):
+    """Order uncomplicated published numeric versions; None means incomparable.
+
+    No assertion is made about forks, nightlies, opaque hashes or prereleases.
+    Those require source-specific version ordering before enabling updates.
+    """
+    import re
+
+    def parse(value):
+        if not isinstance(value, str):
+            return None
+        match = re.fullmatch(r"[vV]?(\d+(?:\.\d+){0,5})", value.strip())
+        if not match:
+            return None
+        numbers = tuple(int(x) for x in match.group(1).split('.'))
+        return numbers + (0,) * (6 - len(numbers))
+
+    a, b = parse(left), parse(right)
+    if a is None or b is None:
+        return None
+    return (a > b) - (a < b)
+
+
 def get_app_version_status(app_name: str) -> Dict:
     """
     Compare the installed update identity with the latest identity
@@ -5156,13 +4051,29 @@ def get_app_version_status(app_name: str) -> Dict:
     else:
         snapshot_error = snapshot.get("error")
 
-    # Compatibility fallback for installers not yet converted.
-    if not latest_version:
-        latest_version = get_latest_app_version(
-            app_name
-        )
+    # Compare BOTH advertised sources. The independent developer is not
+    # subordinate to BUA; whichever has the newer comparable release wins.
+    # Ties prefer BUA for its established integration and install metadata.
+    official_version = latest_version
+    parent_version = get_latest_app_version(app_name)
+    latest_source = "bua" if latest_version else None
+    source_comparison_error = None
 
-        latest_identity = latest_version
+    if parent_version and not latest_version:
+        latest_version = parent_version
+        latest_identity = parent_version
+        latest_source = "parent"
+    elif parent_version and latest_version:
+        order = _bua_order_software_versions(parent_version, latest_version)
+        if order is not None and order > 0:
+            latest_version = parent_version
+            latest_identity = parent_version
+            latest_source = "parent"
+        elif order is None and str(parent_version).strip() != str(latest_version).strip():
+            source_comparison_error = (
+                "Cannot order official BUA and parent release versions"
+            )
+            latest_source = None
 
     registration_mismatch = bool(
         probe_version
@@ -5204,6 +4115,7 @@ def get_app_version_status(app_name: str) -> Dict:
                 "needs_update": False,
                 "installed_version": None,
                 "latest_version": latest_version,
+                "latest_source": latest_source,
                 "installed_update_identity": installed_identity,
                 "latest_update_identity": latest_identity,
                 "registered_version": registered_version,
@@ -5223,25 +4135,32 @@ def get_app_version_status(app_name: str) -> Dict:
             if latest_cmp.lower().startswith("v"):
                 latest_cmp = latest_cmp[1:]
 
+            order = _bua_order_software_versions(latest_version, installed_version)
             needs_update = (
-                installed_cmp != latest_cmp
+                order is not None
+                and order > 0
+                and source_comparison_error is None
             )
+            unknown = order is None or source_comparison_error is not None
 
             return {
                 "status": (
-                    "update_available"
-                    if needs_update
-                    else "current"
+                    "unknown" if unknown else
+                    "update_available" if needs_update else "current"
                 ),
                 "needs_update": needs_update,
                 "installed_version": installed_version,
                 "latest_version": latest_version,
+                "latest_source": latest_source,
                 "installed_update_identity": None,
                 "latest_update_identity": latest_identity,
                 "registered_version": registered_version,
                 "probe_version": probe_version,
                 "registration_mismatch": registration_mismatch,
-                "error": None,
+                "error": (
+                    source_comparison_error
+                    or "Versions cannot be ordered" if unknown else None
+                ),
             }
 
         return {
@@ -5249,6 +4168,7 @@ def get_app_version_status(app_name: str) -> Dict:
             "needs_update": False,
             "installed_version": installed_version,
             "latest_version": latest_version,
+            "latest_source": latest_source,
             "installed_update_identity": None,
             "latest_update_identity": latest_identity,
             "registered_version": registered_version,
@@ -5263,6 +4183,7 @@ def get_app_version_status(app_name: str) -> Dict:
             "needs_update": False,
             "installed_version": installed_version,
             "latest_version": latest_version,
+            "latest_source": latest_source,
             "installed_update_identity": installed_identity,
             "latest_update_identity": None,
             "registered_version": registered_version,
@@ -5271,9 +4192,46 @@ def get_app_version_status(app_name: str) -> Dict:
             "error": snapshot_error,
         }
 
-    needs_update = (
-        installed_identity != latest_identity
-    )
+    order = _bua_order_software_versions(latest_version, installed_version)
+    if source_comparison_error:
+        return {
+            "status": "unknown", "needs_update": False,
+            "installed_version": installed_version,
+            "latest_version": latest_version,
+            "latest_source": latest_source,
+            "installed_update_identity": installed_identity,
+            "latest_update_identity": latest_identity,
+            "registered_version": registered_version,
+            "probe_version": probe_version,
+            "registration_mismatch": registration_mismatch,
+            "error": source_comparison_error,
+        }
+    if order is not None:
+        # A lower published version must never count as an update.
+        needs_update = order > 0
+        # Preserve the original BUA revision/identity mechanism for
+        # software with the same public version but a new BUA payload.
+        if order == 0 and latest_source == "bua":
+            needs_update = installed_identity != latest_identity
+    elif (
+        installed_version is not None
+        and latest_version is not None
+        and str(installed_version).strip() == str(latest_version).strip()
+    ):
+        needs_update = installed_identity != latest_identity
+    else:
+        return {
+            "status": "unknown", "needs_update": False,
+            "installed_version": installed_version,
+            "latest_version": latest_version,
+            "latest_source": latest_source,
+            "installed_update_identity": installed_identity,
+            "latest_update_identity": latest_identity,
+            "registered_version": registered_version,
+            "probe_version": probe_version,
+            "registration_mismatch": registration_mismatch,
+            "error": "Installed and offered versions are not safely orderable",
+        }
 
     return {
         "status": (
@@ -5284,6 +4242,7 @@ def get_app_version_status(app_name: str) -> Dict:
         "needs_update": needs_update,
         "installed_version": installed_version,
         "latest_version": latest_version,
+        "latest_source": latest_source,
         "installed_update_identity": installed_identity,
         "latest_update_identity": latest_identity,
         "registered_version": registered_version,
@@ -5306,84 +4265,9 @@ def can_auto_update(app_name: str) -> bool:
     return get_update_method(app_name) == "reinstall"
 
 
-APPS: Dict[str, str] = {}
 
-# --- Integrated Windows Freeware installers (previously separate bash menu) ---
-# These run upstream installer scripts directly within the existing runner.
-
-# --- Integrated Docker app installers (previously separate bash menu) ---
-
-DESCRIPTIONS: Dict[str, str] = {}
-
-# Descriptions for integrated Windows Freeware entries
-
-# Descriptions for integrated Docker apps
-
-
-def sync_upstream_catalog():
-    """Refresh active menu tables from official BUA JSON only.
-
-    Refuse incomplete or unavailable catalogs. Never merge removed
-    official applications back in from the legacy Python catalog.
-    This changes menu metadata, not installed application files.
-    """
-    global APPS, DESCRIPTIONS, CATEGORIES, UNINSTALL, APP_LIST, CHANGELOG
-
-    latest = load_app_list()
-    entries = latest.get("apps") if isinstance(latest, dict) else None
-
-    if not isinstance(entries, list) or not entries:
-        print("[BUA] JSON catalog refresh unavailable; current menu retained")
-        return False
-
-    seen = set()
-    for entry in entries:
-        if not isinstance(entry, dict):
-            print("[BUA] Invalid JSON catalog entry; current menu retained")
-            return False
-        name = entry.get("name")
-        command = entry.get("install")
-        if (not isinstance(name, str) or not name.strip()
-                or not isinstance(command, str) or not command.strip()
-                or name in seen):
-            print("[BUA] Invalid or duplicate app; current menu retained")
-            return False
-        seen.add(name)
-
-    apps, descriptions, categories, uninstall = build_app_tables(latest)
-    if len(apps) != len(entries):
-        print("[BUA] Incomplete JSON catalog; current menu retained")
-        return False
-
-    # Prepare everything before changing a live table.
-    new_apps = dict(apps)
-    new_descriptions = dict(descriptions)
-    new_categories = {key: list(value) for key, value in categories.items()}
-    new_uninstall = dict(uninstall)
-
-    # Mutate in place to preserve references held by existing menu objects.
-    APPS.clear()
-    APPS.update(new_apps)
-    DESCRIPTIONS.clear()
-    DESCRIPTIONS.update(new_descriptions)
-    CATEGORIES.clear()
-    CATEGORIES.update(new_categories)
-    UNINSTALL.clear()
-    UNINSTALL.update(new_uninstall)
-
-    APP_LIST = latest
-    CHANGELOG = str(latest.get("changelog", "")).strip()
-    print("[BUA] Official JSON catalog refreshed:", len(APPS), "apps")
-    return True
-
-
-
-CATEGORIES: Dict[str, List[str]] = {}
-
-
-# Official BUA JSON application catalog.
-# Preserve the bundled legacy tables only when the official feed fails.
 APPS_JSON_URL = f"{BUA_BASE_URL}/app/apps_x86.json"
+
 
 def load_app_list() -> dict:
     """Download the app list from the repo."""
@@ -5401,6 +4285,7 @@ def load_app_list() -> dict:
     except Exception as e:
         print(f"[BUA] ERROR: Could not load the app list: {e}")
         return {}
+
 
 def build_app_tables(app_list: dict):
     """Turn the app list into the APPS, DESCRIPTIONS, CATEGORIES and
@@ -5424,33 +4309,59 @@ def build_app_tables(app_list: dict):
     return apps, descriptions, categories, uninstall
 
 
-APP_LIST = load_app_list()
-CHANGELOG = str(APP_LIST.get("changelog", "")).strip()
+APPS: Dict[str, str] = {}
+
+# --- Integrated Windows Freeware installers (previously separate bash menu) ---
+# These run upstream installer scripts directly within the existing runner.
+
+# --- Integrated Docker app installers (previously separate bash menu) ---
+
+DESCRIPTIONS: Dict[str, str] = {}
+
+# Descriptions for integrated Windows Freeware entries
+
+# Descriptions for integrated Docker apps
+
+
+def sync_upstream_catalog():
+    """Atomically replace active menu tables from official BUA JSON."""
+    global APPS, DESCRIPTIONS, CATEGORIES, UNINSTALL, APP_LIST, CHANGELOG
+    latest = load_app_list()
+    entries = latest.get("apps") if isinstance(latest, dict) else None
+    if not isinstance(entries, list) or not entries:
+        print("[BUA] Official JSON unavailable; keeping last valid catalog")
+        return False
+    names = set()
+    for entry in entries:
+        if not isinstance(entry, dict):
+            return False
+        name, command = entry.get("name"), entry.get("install")
+        if (not isinstance(name, str) or not name.strip()
+            or not isinstance(command, str) or not command.strip()
+            or name in names):
+            return False
+        if ("uninstall" in entry and entry["uninstall"] is not None
+            and not isinstance(entry["uninstall"], str)):
+            return False
+        if ("categories" in entry
+            and (not isinstance(entry["categories"], list)
+                 or any(not isinstance(cat, str) for cat in entry["categories"]))):
+            return False
+        names.add(name)
+    apps, descriptions, categories, uninstall = build_app_tables(latest)
+    if len(apps) != len(entries):
+        return False
+    APPS, DESCRIPTIONS, CATEGORIES, UNINSTALL = apps, descriptions, categories, uninstall
+    APP_LIST = latest
+    CHANGELOG = str(latest.get("changelog", ""))
+    return True
+
+
+CATEGORIES: Dict[str, List[str]] = {}
+
+APP_LIST = {}
 UNINSTALL: Dict[str, str] = {}
-
-if APP_LIST.get("apps"):
-    (
-        _official_apps,
-        _official_descriptions,
-        _official_categories,
-        _official_uninstall,
-    ) = build_app_tables(APP_LIST)
-
-    if _official_apps:
-        APPS = _official_apps
-        DESCRIPTIONS = _official_descriptions
-        CATEGORIES = _official_categories
-        UNINSTALL = _official_uninstall
-        print(
-            "[BUA] Official JSON catalog loaded:",
-            len(APPS), "applications"
-        )
-    else:
-        print("[BUA] Invalid official JSON entries; no stale install commands offered")
-else:
-    print("[BUA] Official JSON unavailable; no stale install commands offered")
-
-
+sync_upstream_catalog()
 
 def get_top_level() -> List[Tuple[str, str]]:
     """Generate top-level menu items with current language translations"""
@@ -6704,8 +5615,7 @@ class Runner:
     def run(self, cmd: str):
         # Execute the command and wait for completion
         # Add 'wait' to ensure all background processes finish
-        # Keep the job's exit code: 'wait' on its own always returns 0
-        full_cmd = f"({cmd}); bua_rc=$?; wait; exit $bua_rc"
+        full_cmd = f"({cmd}); wait"
 
         # Create a PTY so the subprocess has a controlling terminal.
         # Scripts like foclabroc's newswitch.sh redirect to /dev/tty, which
@@ -6728,23 +5638,14 @@ class Runner:
         )
         os.close(slave_fd)
         self._pty_master = master_fd  # keep open so slave doesn't get SIGHUP
-        output_lines = []
         def reader():
             assert self.proc and self.proc.stdout
+            output_lines = []
             for line in self.proc.stdout:
-                if self.done:
-                    # Keep draining so a background process never blocks on a full pipe
-                    continue
                 stripped = line.rstrip("\n")
                 self.append(stripped)
                 output_lines.append(stripped)
-        def waiter():
-            assert self.proc
             self.proc.wait()
-            # The job is over when its shell exits. Background processes it
-            # started (nohup, setsid) inherit the output pipe and keep it open,
-            # so don't wait for EOF: give the reader a moment to catch up.
-            t.join(timeout=2)
             self.returncode = self.proc.returncode
             # Store last 10 lines for error display
             self.error_output = "\n".join(output_lines[-10:])
@@ -6755,7 +5656,6 @@ class Runner:
             self.done = True
         t = threading.Thread(target=reader, daemon=True)
         t.start()
-        threading.Thread(target=waiter, daemon=True).start()
 
     def kill(self):
         if self.proc and self.proc.poll() is None:
@@ -7126,8 +6026,6 @@ class ConfirmDialog(BaseScreen):
 
 
 class InfoDialog(BaseScreen):
-    border_color = ACCENT  # the dialog's border and OK button
-
     def __init__(self, title: str, message: List[str], on_close=None):
         self.title = title
         self.message = message
@@ -7168,7 +6066,7 @@ class InfoDialog(BaseScreen):
         dialog_y = (H - dialog_h) // 2
         dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h)
         pygame.draw.rect(screen, CARD, dialog_rect, border_radius=15)
-        pygame.draw.rect(screen, self.border_color, dialog_rect, width=3, border_radius=15)
+        pygame.draw.rect(screen, ACCENT, dialog_rect, width=3, border_radius=15)
 
         draw_text(screen, self.title, FONT_BIG, FG, (dialog_x + S(30), dialog_y + S(30)))
 
@@ -7191,7 +6089,7 @@ class InfoDialog(BaseScreen):
         # OK button
         btn_w, btn_h = S(120), S(45)
         btn_rect = pygame.Rect(dialog_x + (dialog_w - btn_w)//2, dialog_y + dialog_h - S(60), btn_w, btn_h)
-        pygame.draw.rect(screen, self.border_color, btn_rect, border_radius=8)
+        pygame.draw.rect(screen, ACCENT, btn_rect, border_radius=8)
         draw_text(screen, t("ok"), FONT, FG, (btn_rect.x + (btn_w - FONT.size(t("ok"))[0])//2, btn_rect.y + S(10)))
 
 
@@ -7298,10 +6196,6 @@ class InteractiveDialog(BaseScreen):
         else:  # yesno
             self.options = [("0", "Yes"), ("1", "No")]
             self.checked = []
-        self.security_warning = title == "BUA Update Security" and dialog_type == "yesno"
-        if self.security_warning:
-            self.idx = 1  # Default to Cancel for update security warnings
-            self.options = [("0", "Accept the Risk"), ("1", "Cancel")]
 
     def handle(self, events):
         for e in events:
@@ -7386,15 +6280,9 @@ class InteractiveDialog(BaseScreen):
         # Title
         draw_text(screen, self.title, FONT_BIG, FG, (dialog_x + S(30), dialog_y + S(30)))
 
-        # Message box area: grows with the message (e.g. a warning that lists
-        # apps), leaving room for up to 3 options below it
+        # Message box area
         msg_y = dialog_y + S(80)
-        text_w = dialog_w - S(80)
-        needed_h = S(20)
-        for raw_line in self.message:
-            needed_h += S(8) if not raw_line else S(22) * len(wrap(raw_line, text_w, FONT))
-        max_msg_h = dialog_h - S(80) - S(50) - S(30) - min(len(self.options), 3) * S(50)
-        msg_h = max(S(120), min(needed_h, max_msg_h))
+        msg_h = S(120)
         msg_rect = pygame.Rect(dialog_x + S(30), msg_y, dialog_w - S(60), msg_h)
         pygame.draw.rect(screen, (30, 34, 44), msg_rect, border_radius=10)
 
@@ -8569,13 +7457,13 @@ class RunListScreen(BaseScreen):
                 "for arg in \"$@\"; do "
                 "  case \"$arg\" in "
                 "    --title) next_title=1 ;; "
-                "    --backtitle|--timeout|--default-button|--yes-label|--no-label|--ok-label|--cancel-label|--extra-label) skip_backtitle=1 ;; "
+                "    --backtitle) skip_backtitle=1 ;; "
                 "    --msgbox) dtype=\"msgbox\"; next_text=1 ;; "
                 "    --infobox) dtype=\"infobox\"; next_text=1 ;; "
                 "    --yesno) dtype=\"yesno\"; next_text=1 ;; "
                 "    --menu) dtype=\"menu\"; next_text=1 ;; "
                 "    --checklist) dtype=\"checklist\"; next_text=1 ;; "
-                "    --stdout|--clear|--defaultno|--extra-button) ;; "
+                "    --stdout|--clear) ;; "
                 "    *) "
                 "      if [ $skip_backtitle -eq 1 ]; then skip_backtitle=0; "
                 "      elif [ $next_title -eq 1 ]; then title=\"$arg\"; next_title=0; "
@@ -8706,9 +7594,6 @@ export -f desktop
         # Add debug markers to track execution
         debug_start = f"echo '[BUA] Starting installation: {name}'; "
         debug_end = "; echo '[BUA] Installation finished'"
-        # Uninstall jobs end with the uninstaller's exit code, so a cancelled
-        # or failed uninstall is shown as failed and stays in the history
-        exit_rc = "; exit $bua_rc" if "(Uninstall)" in name else ""
 
         # Prefer the converted registration-aware installer when one is
         # explicitly mapped. Unmapped packages retain the original BUA command.
@@ -8724,21 +7609,19 @@ export -f desktop
             parts = cmd.split("|", 1)
             if len(parts) == 2:
                 curl_part = parts[0].strip()
-                # Arguments for the script: curl ... | bash -s -- <args>
-                script_args = re.sub(r"^\s*bash(\s+-s)?(\s+--)?", "", parts[1]).strip()
                 wrapper_code = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{registration_wrap}"
                 cmd = (
                     f"{debug_start}"
                     f"TMPSCRIPT=$(mktemp); "
                     f"{curl_part} > \"$TMPSCRIPT\"; "
-                    f"( {wrapper_code} source \"$TMPSCRIPT\" {script_args}); bua_rc=$?; "
+                    f"( {wrapper_code} source \"$TMPSCRIPT\" ); "
                     f"rm -f \"$TMPSCRIPT\""
-                    f"{debug_end}{exit_rc}"
+                    f"{debug_end}"
                 )
             else:
-                cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{registration_wrap}{debug_start}{cmd}; bua_rc=$?{debug_end}{exit_rc}"
+                cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{registration_wrap}{debug_start}{cmd}{debug_end}"
         else:
-            cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{registration_wrap}{debug_start}{cmd}; bua_rc=$?{debug_end}{exit_rc}"
+            cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{registration_wrap}{debug_start}{cmd}{debug_end}"
 
         self.runner.run(cmd)
         self.started = True
@@ -9190,215 +8073,6 @@ def github_latest_commit_date(owner: str, repo: str, branch: str, path: str) -> 
         return None
 
 
-# ------------------------------
-# Uninstall BUA
-# ------------------------------
-
-# Runs "bua uninstall --ignore-warning" with the newest bua command from the
-# repo, so it also works on installs made before the command existed: every
-# installed app's uninstaller, then app/uninstall.sh for BUA itself.
-BUA_UNINSTALL_CMD = (
-    "BUA_CLI=$(mktemp); "
-    f"curl -fsSL -o \"$BUA_CLI\" {BUA_BASE_URL}/app/bua_cli.py "
-    "&& python3 \"$BUA_CLI\" uninstall --ignore-warning; "
-    "rm -f \"$BUA_CLI\""
-)
-# Files app/uninstall.sh removes; if either is left, the uninstall failed.
-BUA_UNINSTALL_CHECK = ["/userdata/roms/ports/bua.sh", "/userdata/system/services/symlink_manager"]
-
-KONAMI_CODE = ["UP", "UP", "DOWN", "DOWN", "LEFT", "RIGHT", "LEFT", "RIGHT", "B", "A", "START"]
-KONAMI_SECONDS = 10
-KONAMI_ARROWS = {"UP": "↑", "DOWN": "↓", "LEFT": "←", "RIGHT": "→"}
-BUA_UNINSTALL_RED = (255, 100, 100)
-
-
-class BuaUninstallInfoScreen(InfoDialog):
-    """Says what uninstalling BUA does. A or Start goes on to the code
-    screen, B goes back to Settings."""
-    border_color = BUA_UNINSTALL_RED
-
-    def __init__(self):
-        super().__init__(t("uninstall_bua"), t("uninstall_bua_info").split("\n"))
-
-    def handle(self, events):
-        for e in events:
-            if e.type == pygame.QUIT:
-                clean_exit(0)
-            if e.type == pygame.KEYDOWN:
-                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
-                    push_screen(KonamiCodeScreen()); return
-                if e.key == pygame.K_ESCAPE:
-                    pop_screen(); return
-            if e.type == pygame.JOYBUTTONDOWN:
-                if e.button in (BTN_A, BTN_START):
-                    push_screen(KonamiCodeScreen()); return
-                if e.button == BTN_B:
-                    pop_screen(); return
-
-    def draw(self):
-        super().draw()
-        draw_hints_line(screen, f"A={t('hint_confirm')} | B={t('hint_return')}", FONT_SMALL, ACCENT, (40, 30))
-
-
-class KonamiCodeScreen(BaseScreen):
-    """The last step before uninstalling BUA: the Konami code within
-    KONAMI_SECONDS, or it goes back to the info screen. A wrong button
-    starts the code over (a wrong Up counts as the first step); the time
-    keeps running."""
-    def __init__(self):
-        self.progress = 0
-        self.started_at = pygame.time.get_ticks()
-        self.finished = False
-
-    def _presses(self, events) -> List[str]:
-        presses = []
-        analog_v, analog_h = process_analog_navigation(events)
-        if analog_v:
-            presses.append("UP" if analog_v == -1 else "DOWN")
-        if analog_h:
-            presses.append("LEFT" if analog_h == -1 else "RIGHT")
-        keys = {
-            pygame.K_UP: "UP", pygame.K_DOWN: "DOWN", pygame.K_LEFT: "LEFT", pygame.K_RIGHT: "RIGHT",
-            # Keyboard B/A/Start as the app shows them (Esc/Enter/Space), or the letters
-            pygame.K_ESCAPE: "B", pygame.K_b: "B",
-            pygame.K_RETURN: "A", pygame.K_KP_ENTER: "A", pygame.K_a: "A",
-            pygame.K_SPACE: "START",
-        }
-        for e in events:
-            if e.type == pygame.QUIT:
-                clean_exit(0)
-            if e.type == pygame.KEYDOWN:
-                presses.append(keys.get(e.key, "OTHER"))
-            if e.type == pygame.JOYHATMOTION:
-                x, y = e.value
-                if y == 1:
-                    presses.append("UP")
-                elif y == -1:
-                    presses.append("DOWN")
-                elif x == -1:
-                    presses.append("LEFT")
-                elif x == 1:
-                    presses.append("RIGHT")
-            if e.type == pygame.JOYBUTTONDOWN:
-                if e.button == BTN_A:
-                    presses.append("A")
-                elif e.button == BTN_B:
-                    presses.append("B")
-                elif e.button == BTN_START:
-                    presses.append("START")
-                else:
-                    presses.append("OTHER")
-        return presses
-
-    def handle(self, events):
-        for press in self._presses(events):
-            if press == KONAMI_CODE[self.progress]:
-                self.progress += 1
-                if self.progress == len(KONAMI_CODE):
-                    self.finished = True
-                    pop_screen()  # this screen
-                    pop_screen()  # the info screen
-                    push_screen(BuaUninstallRunScreen())
-                    return
-            else:
-                self.progress = 1 if press == KONAMI_CODE[0] else 0
-
-    def seconds_left(self) -> int:
-        elapsed = pygame.time.get_ticks() - self.started_at
-        return max(0, KONAMI_SECONDS - elapsed // 1000)
-
-    def update(self):
-        if self.finished:
-            return
-        if pygame.time.get_ticks() - self.started_at >= KONAMI_SECONDS * 1000:
-            self.finished = True
-            pop_screen()
-
-    def _step_surface(self, step: str, color) -> pygame.Surface:
-        """An arrow, or the B/A/Start button the way the app draws it for
-        the current controller (icon, keyboard key or text)."""
-        if step in KONAMI_ARROWS:
-            return FONT_BIG.render(KONAMI_ARROWS[step], True, color)
-        if PAD_STYLE == "keyboard":
-            return FONT.render(KEYBOARD_HINT_MAP.get(step, step), True, color)
-        mapped = STYLE_ICON_MAP.get(PAD_STYLE, STYLE_ICON_MAP["generic"]).get(step, step)
-        icon = BUTTON_ICONS.get(mapped) or BUTTON_ICONS.get(step)
-        if icon is not None:
-            h = FONT_BIG.get_height()
-            w = max(1, int(icon.get_width() * (h / (icon.get_height() or 1))))
-            return _scale_and_style_icon(icon, w, h)
-        return FONT.render(step.capitalize(), True, color)
-
-    def draw(self):
-        draw_background(screen)
-        overlay = pygame.Surface((W, H))
-        overlay.set_alpha(180)
-        overlay.fill(BG)
-        screen.blit(overlay, (0, 0))
-
-        dialog_w = min(W - S(120), S(900))
-        dialog_h = min(H - S(120), S(380))
-        dialog_x = (W - dialog_w) // 2
-        dialog_y = (H - dialog_h) // 2
-        dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h)
-        pygame.draw.rect(screen, CARD, dialog_rect, border_radius=15)
-        pygame.draw.rect(screen, BUA_UNINSTALL_RED, dialog_rect, width=3, border_radius=15)
-
-        draw_text(screen, t("uninstall_bua"), FONT_BIG, FG, (dialog_x + S(30), dialog_y + S(30)))
-        y = dialog_y + S(90)
-        for ln in wrap(t("uninstall_bua_code"), dialog_w - S(60), FONT):
-            draw_text(screen, ln, FONT, FG, (dialog_x + S(30), y))
-            y += S(30)
-
-        # The code, with the steps entered so far highlighted
-        steps = [self._step_surface(step, FG if i < self.progress else MUTED)
-                 for i, step in enumerate(KONAMI_CODE)]
-        gap = S(10)
-        row_h = max(s.get_height() for s in steps)
-        cells = [max(s.get_width() + S(12), row_h) for s in steps]
-        x = dialog_x + (dialog_w - sum(cells) - gap * (len(steps) - 1)) // 2
-        y += S(30)
-        for i, (surf, cell_w) in enumerate(zip(steps, cells)):
-            if i < self.progress:
-                box = pygame.Rect(x, y - S(4), cell_w, row_h + S(8))
-                pygame.draw.rect(screen, ACCENT, box, border_radius=6)
-            screen.blit(surf, (x + (cell_w - surf.get_width()) // 2, y + (row_h - surf.get_height()) // 2))
-            x += cell_w + gap
-
-        left = t("uninstall_bua_time_left").format(seconds=self.seconds_left())
-        draw_text(screen, left, FONT, MUTED, (dialog_x + S(30), dialog_y + dialog_h - S(50)))
-
-
-class BuaUninstallRunScreen(RunListScreen):
-    """Runs the BUA uninstall, which can't be stopped or left while it runs.
-    When BUA is gone, BUA closes after OK. When the uninstall failed, it says
-    so; the log is on this screen (X), and B then goes back to Settings."""
-    def __init__(self):
-        super().__init__([("BUA (Uninstall)", BUA_UNINSTALL_CMD)], title=t("uninstall_bua"))
-        self.reported = False
-
-    def handle(self, events):
-        if self.all_finished:
-            return super().handle(events)
-        # Only the log view works while it runs; B does nothing, and Back
-        # doesn't open Settings here (see the main loop).
-        for e in events:
-            if e.type == pygame.QUIT:
-                clean_exit(0)
-            if (e.type == pygame.KEYDOWN and e.key == pygame.K_x) or \
-               (e.type == pygame.JOYBUTTONDOWN and e.button == BTN_X):
-                self.show_log = not self.show_log
-
-    def update(self):
-        super().update()
-        if self.all_finished and not self.reported:
-            self.reported = True
-            if any(os.path.exists(p) for p in BUA_UNINSTALL_CHECK):
-                push_screen(InfoDialog(t("uninstall_bua"), [t("uninstall_bua_failed")]))
-            else:
-                push_screen(InfoDialog(t("uninstall_bua"), [t("uninstall_bua_done")],
-                                       on_close=lambda: clean_exit(0)))
-
 
 GLOBAL_MANIFEST_PATH = Path(
     "/userdata/system/add-ons/bua/updater/catalog/global/"
@@ -9417,73 +8091,29 @@ GLOBAL_MANIFEST_BUILDER = Path(
 
 
 def get_live_apps_fingerprint() -> str:
-    """Fingerprint current official BUA applications and local entries."""
+    """
+    Return a stable fingerprint of the complete live BUA APPS catalog.
+
+    Any app addition, removal, rename, or installer-command change
+    changes this fingerprint.
+    """
     import hashlib
-    import urllib.request
-
-    url = (
-        "https://raw.githubusercontent.com/"
-        "batocera-unofficial-addons/batocera-unofficial-addons/"
-        "main/app/apps_x86.json"
-    )
-
-    request = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent": "BUA-Global-Updater-Catalog-Sync/1",
-            "Cache-Control": "no-cache",
-        },
-    )
-
-    with urllib.request.urlopen(request, timeout=25) as response:
-        raw = response.read(2 * 1024 * 1024 + 1)
-
-    if len(raw) > 2 * 1024 * 1024:
-        raise ValueError("Official BUA catalog exceeds size limit")
-
-    catalog = json.loads(raw.decode("utf-8"))
-    if not isinstance(catalog, dict):
-        raise ValueError("Invalid official BUA catalog")
-
-    entries = catalog.get("apps")
-    if not isinstance(entries, list) or not entries:
-        raise ValueError("Official BUA applications missing")
-
-    official = {}
-    for entry in entries:
-        if not isinstance(entry, dict):
-            raise ValueError("Malformed official application entry")
-
-        name = entry.get("name")
-        command = entry.get("install")
-
-        if not isinstance(name, str) or not name.strip():
-            raise ValueError("Official application name missing")
-
-        if not isinstance(command, str) or not command.strip():
-            raise ValueError("Official installer command missing")
-
-        name = name.strip()
-        if name in official:
-            raise ValueError("Duplicate official application: " + name)
-
-        official[name] = command
-
-    effective = {
-        str(name): str(command)
-        for name, command in APPS.items()
-    }
-    effective = dict(official)
 
     payload = json.dumps(
-        sorted(effective.items()),
+        sorted(
+            (
+                str(app),
+                str(command),
+            )
+            for app, command in APPS.items()
+        ),
         ensure_ascii=False,
         separators=(",", ":"),
     ).encode("utf-8")
 
-    return hashlib.sha256(payload).hexdigest()
-
-
+    return hashlib.sha256(
+        payload
+    ).hexdigest()
 
 
 def ensure_global_manifest_current() -> Dict:
@@ -9500,14 +8130,9 @@ def ensure_global_manifest_current() -> Dict:
         "error": None,
     }
 
-    try:
-        live_fingerprint = get_live_apps_fingerprint()
-    except Exception as exc:
-        result["error"] = (
-            "Official BUA catalog unavailable; "
-            "existing manifest preserved: " + str(exc)
-        )
-        return result
+    live_fingerprint = (
+        get_live_apps_fingerprint()
+    )
 
     saved_fingerprint = ""
 
@@ -9543,7 +8168,6 @@ def ensure_global_manifest_current() -> Dict:
                 sys.executable,
                 str(GLOBAL_MANIFEST_BUILDER),
             ],
-            env=dict(os.environ, BUA_REQUIRE_OFFICIAL_JSON="1"),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -9898,6 +8522,7 @@ class UpdaterScreen(BaseScreen):
                 app_status = (
                     get_app_version_status(app)
                 )
+                BUA_SCANNED_RELEASES[app] = _bua_release_fingerprint(app_status)
 
                 app_state = (
                     app_status.get("status")
@@ -9928,7 +8553,7 @@ class UpdaterScreen(BaseScreen):
                         update_error,
                     ) = (
                         build_parent_update_command(
-                            app
+                            app, app_status
                         )
                     )
 
@@ -10256,17 +8881,9 @@ class UpdaterScreen(BaseScreen):
                         and self.items
                     ):
                         self.uninstall_app()
-                if e.button in (BTN_LB, BTN_RB):  # LB+RB -> uninstall, ignoring warnings
-                    other = BTN_RB if e.button == BTN_LB else BTN_LB
-                    try:
-                        held = pygame.joystick.Joystick(e.joy).get_button(other)
-                    except Exception:
-                        held = False
-                    if held and not self.loading and self.items:
-                        self.uninstall_app(ignore_warnings=True)
 
 
-    def uninstall_app(self, ignore_warnings: bool = False):
+    def uninstall_app(self):
         """
         Uninstall the currently highlighted app inline.
         """
@@ -10297,10 +8914,6 @@ class UpdaterScreen(BaseScreen):
                 )
             )
             return
-        # Only the repo's own uninstallers (curl ... | bash) get the option;
-        # ones that don't support it ignore their arguments
-        if ignore_warnings and uninstall_cmd.rstrip().endswith("| bash"):
-            uninstall_cmd = f"{uninstall_cmd} -s -- --ignore-warning"
 
         self.uninstalling_app = app
         self.runner = Runner()
@@ -10342,9 +8955,14 @@ class UpdaterScreen(BaseScreen):
         unavailable = []
 
         for app in selected_apps:
+            current_status = get_app_version_status(app)
+            scanned = BUA_SCANNED_RELEASES.get(app)
+            if scanned is None or scanned != _bua_release_fingerprint(current_status):
+                unavailable.append(f"{app}: release changed; rescan before updating")
+                continue
             cmd, error = (
                 build_parent_update_command(
-                    app
+                    app, current_status
                 )
             )
 
@@ -10495,9 +9113,6 @@ class UpdaterScreen(BaseScreen):
                 f"Y={t('hint_uninstall')}"
             )
 
-            hint_parts.append(
-                f"LB+RB={t('hint_uninstall_ignore')}"
-            )
             hint_parts.append(
                 "Start=Update Selected"
             )
@@ -10958,20 +9573,14 @@ SCREENS: List[BaseScreen] = []
 INSTALL_QUEUE: List[Tuple[str, str]] = []  # Global queue for installs
 SELECTED_APPS: Dict[str, bool] = {}  # Global selections that persist across category navigation
 
-def get_settings_items() -> List[Tuple[str, str]]:
-    """Settings items with current language translations"""
-    return [
-        (t("controller_layout"), t("controller_layout_desc")),
-        (t("configure_buttons"), t("configure_buttons_desc")),
-        (t("language"), t("language_desc")),
-        (t("cards_per_page"), t("cards_per_page_desc")),
-        (t("uninstall_bua"), t("uninstall_bua_desc")),
-    ]
-
-
 class SettingsScreen(BaseScreen):
     def __init__(self):
-        self.items = get_settings_items()
+        self.items = [
+            (t("controller_layout"), t("controller_layout_desc")),
+            (t("configure_buttons"), t("configure_buttons_desc")),
+            (t("language"), t("language_desc")),
+            (t("cards_per_page"), t("cards_per_page_desc")),
+        ]
         self.idx = 0
 
     def handle(self, events):
@@ -11018,8 +9627,6 @@ class SettingsScreen(BaseScreen):
             push_screen(LanguageScreen())
         elif name == t("cards_per_page"):
             push_screen(CardsPerPageScreen())
-        elif name == t("uninstall_bua"):
-            push_screen(BuaUninstallInfoScreen())
 
     def draw(self):
         draw_background(screen)
@@ -11034,15 +9641,14 @@ class SettingsScreen(BaseScreen):
         gap = S(6)
         spacing = S(12)
         for i, (name, desc) in enumerate(self.items):
-            danger = name == t("uninstall_bua")
-            name_img = FONT.render(name, True, BUA_UNINSTALL_RED if danger else FG)
+            name_img = FONT.render(name, True, FG)
             desc_img = FONT_SMALL.render(desc, True, MUTED) if desc else None
             content_h = name_img.get_height() + ((gap + desc_img.get_height()) if desc_img else 0)
             rect_h = max(S(60), content_h + pad_y * 2)
             rect = pygame.Rect(card_x, y, card_w, rect_h)
             pygame.draw.rect(screen, CARD, rect, border_radius=10)
             if i == self.idx:
-                pygame.draw.rect(screen, BUA_UNINSTALL_RED if danger else SELECT, rect, width=3, border_radius=10)
+                pygame.draw.rect(screen, SELECT, rect, width=3, border_radius=10)
             nx = rect.x + S(14)
             ny = rect.y + pad_y
             screen.blit(name_img, (nx, ny))
@@ -11203,7 +9809,12 @@ class LanguageScreen(BaseScreen):
                     screen.stats = screen.calculate_stats()
             elif isinstance(screen, SettingsScreen):
                 # Refresh settings items with new translations
-                screen.items = get_settings_items()
+                screen.items = [
+                    (t("controller_layout"), t("controller_layout_desc")),
+                    (t("configure_buttons"), t("configure_buttons_desc")),
+                    (t("language"), t("language_desc")),
+                    (t("resolution"), t("resolution_desc")),
+                ]
 
         msg = [f"{t('language')}: {native}"]
         push_screen(InfoDialog(t("settings_title"), msg))
@@ -11519,33 +10130,19 @@ def pop_screen():
 def main():
     push_screen(MenuScreen(t("main_title"), TOP_LEVEL))
 
-    # Always show updater rollback failures before other startup prompts.
-    if globals().get("BUA_UPDATER_STARTUP_STATUS") == "rolled_back":
-        push_screen(InfoDialog(
-            "BUA Updater Installation Failed",
-            [
-                "The new updater could not be installed.",
-                "BUA is using the previous verified updater.",
-                "Your installed applications and data were preserved.",
-                "Press OK to continue using BUA.",
-            ],
-        ))
-    else:
-        # Check for controller mapping before showing changelog
-        if not _apply_saved_button_map_if_any():
-            try:
-                _auto = os.environ.get(
-                    "BUA_AUTOMAP_ON_FIRST_RUN", "1"
-                ).strip() in ("1", "true", "yes")
-                if pygame.joystick.get_count() > 0 and _auto:
-                    run_manual_button_mapper()
-            except Exception:
-                pass
+    # Check for controller mapping before showing changelog
+    if not _apply_saved_button_map_if_any():
+        try:
+            _auto = os.environ.get("BUA_AUTOMAP_ON_FIRST_RUN", "1").strip() in ("1","true","yes")
+            if pygame.joystick.get_count() > 0 and _auto:
+                run_manual_button_mapper()
+        except Exception:
+            pass
 
-        if should_show_changelog():
-            push_screen(ChangelogDialog())
+    # Show changelog if there's new content
+    if should_show_changelog():
+        push_screen(ChangelogDialog())
 
-    # Startup prompts handled above.
     while True:
         events = pygame.event.get()
         # Handle window resize for windowed mode
@@ -11603,8 +10200,7 @@ def main():
         if open_settings:
             try:
                 top = SCREENS[-1] if SCREENS else None
-                # Not over Settings itself, or over a running BUA uninstall
-                if not isinstance(top, (SettingsScreen, ControllerLayoutScreen, BuaUninstallRunScreen)):
+                if not isinstance(top, (SettingsScreen, ControllerLayoutScreen)):
                     push_screen(SettingsScreen())
                 # Filter out Back button events so Settings doesn't immediately close
                 events = [e for e in events if not (
@@ -11988,46 +10584,10 @@ def repair_optional_integrations():
             )
 
 
-def show_bua_updater_startup_error():
-    """Show a blocking error without opening the normal BUA menu."""
-    print("[BUA] ERROR: No verified updater is available")
-
-    push_screen(InfoDialog(
-        "BUA Updater Installation Failed",
-        [
-            "The updater could not be installed or verified.",
-            "BUA cannot safely start without its updater.",
-            "Your installed applications and saved data remain untouched.",
-            "Press OK to close BUA.",
-        ],
-    ))
-
-    while SCREENS:
-        events = pygame.event.get()
-        current = SCREENS[-1]
-        current.handle(events)
-
-        if not SCREENS:
-            break
-
-        current = SCREENS[-1]
-        current.update()
-        current.draw()
-        pygame.display.flip()
-        clock.tick(60)
-
-
 if __name__ == "__main__":
     try:
         # Run live update block before anything else
-        updater_status = live_update_block()
-        BUA_UPDATER_STARTUP_STATUS = updater_status
-        if updater_status not in ("ready", "rolled_back"):
-            show_bua_updater_startup_error()
-            raise SystemExit(1)
-
-        # Populate registration mappings only after backend verification.
-        refresh_dev_registration_adapters()
+        live_update_block()
 
         # Reapply optional BUA integrations that upstream app updates
         # or reinstalls may have replaced.
