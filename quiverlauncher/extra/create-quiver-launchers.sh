@@ -136,11 +136,19 @@ export DISPLAY=:0.0
 {run}
 """
 
-def keys_text(exe):
+def folder_pattern(folder):
+    """pkill -f pattern for any process started from the folder. An AppImage
+    runs its program as a separate process, so killing the AppImage alone
+    leaves the app open. The [/] keeps the pattern from matching the shell
+    that runs pkill."""
+    escaped = re.sub(r"([.^$*+?()\[\]{}|\\])", r"\\\1", folder.rstrip("/") + "/")
+    return "[/]" + escaped[1:] if escaped.startswith("/") else escaped
+
+def keys_text(exe, game_path):
     if exe.lower().endswith(".exe"):
         target = "batocera-wine windows stop"
     else:
-        target = "pkill -f " + sh_quote(exe)
+        target = "pkill -f " + sh_quote(folder_pattern(game_path))
     return json.dumps({"actions_player1": [{
         "trigger": ["hotkey", "start"], "type": "exec",
         "target": target, "description": "Close app"}]}, indent=4) + "\n"
@@ -187,7 +195,7 @@ for app in library.get("apps", []):
     sh_path = os.path.join(roms, sh_name)
     if write_if_changed(sh_path, launcher_text(folder, exe), 0o755):
         print(f"Launcher for {name}: {exe}")
-    write_if_changed(sh_path + ".keys", keys_text(exe))
+    write_if_changed(sh_path + ".keys", keys_text(exe, game_path))
 
     # Image from the app's icon URL, downloaded once
     image = None

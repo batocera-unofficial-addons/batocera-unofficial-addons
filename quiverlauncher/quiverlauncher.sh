@@ -46,6 +46,26 @@ if [ -z "$appimage_url" ]; then
     exit 1
 fi
 
+# Batocera 44 replaced emulatorlauncher with batocera-launch; the ES system
+# has to call whichever one this Batocera has
+batocera_version=$(batocera-version 2>/dev/null)
+batocera_major=$(echo "$batocera_version" | grep -o '^[0-9]*')
+echo "Batocera version: ${batocera_version:-unknown}"
+if [ -z "$batocera_major" ]; then
+    echo "Could not read the Batocera version. Exiting."
+    exit 1
+fi
+if [ "$batocera_major" -ge 44 ]; then
+    launcher="batocera-launch"
+else
+    launcher="emulatorlauncher"
+fi
+if ! command -v "$launcher" >/dev/null; then
+    echo "Batocera $batocera_major should have $launcher, but it is missing. Exiting."
+    exit 1
+fi
+echo "Launcher: $launcher"
+
 # Step 2: Download the AppImage
 # Quiver keeps its library (apps.json, settings.json, Apps/, Cache/) beside the
 # AppImage, so reinstalling only replaces the AppImage and keeps the library.
@@ -97,6 +117,9 @@ echo "Downloading EmulationStation config..."
 mkdir -p "$ES_CONFIG_DIR"
 wget -q --show-progress -O "$ES_CONFIG_DIR/es_systems_quiver.cfg" "${SCRIPTS_BASE_URL}/es_systems_quiver.cfg"
 wget -q --show-progress -O "$ES_CONFIG_DIR/es_features_quiver.cfg" "${SCRIPTS_BASE_URL}/es_features_quiver.cfg"
+if [ "$launcher" = "batocera-launch" ]; then
+    sed -i 's|<command>emulatorlauncher |<command>batocera-launch |' "$ES_CONFIG_DIR/es_systems_quiver.cfg"
+fi
 
 # Use sh emulator so .sh launchers run through configgen (enables videomode, etc.)
 sed -i '/^quiver\.emulator=/d; /^quiver\.core=/d' "$BATOCERA_CONF" 2>/dev/null || true

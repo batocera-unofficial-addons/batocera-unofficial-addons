@@ -18,7 +18,8 @@ main() {
     rm -rf "${ROMS_DIR:?}"
     rm -f "${ES_CONFIG_DIR}/es_systems_quiver.cfg" "${ES_CONFIG_DIR}/es_features_quiver.cfg"
     rm -f "${LOGS_DIR}/${APP_NAME,,}.log"
-    sed -i '/^quiver\.emulator=/d; /^quiver\.core=/d' "${BATOCERA_CONF}" 2>/dev/null || true
+    # System settings (quiver.x) and per-game ones Batocera adds (quiver["Game.sh"].x)
+    sed -i '/^quiver\./d; /^quiver\[/d' "${BATOCERA_CONF}" 2>/dev/null || true
 
     echo "${APP_NAME} has been removed."
 
