@@ -23,8 +23,16 @@ if [ -d "$target" ]; then
     fi
 fi
 
-extra_flags=()
-grep -q AuthenticAMD /proc/cpuinfo && extra_flags+=(--amd-cpu)
+# The settings saved in Kyty's launcher window (F1 > Applications), passed the
+# way the launcher passes them; none until the launcher has been opened once
+kyty_args=()
+[ -f "$install_dir/kyty-args.py" ] && mapfile -d '' kyty_args < <(python3 "$install_dir/kyty-args.py" "$target")
+
+# Always fullscreen from ES; AMD CPUs need --amd-cpu
+extra_flags=(--fullscreen)
+if grep -q AuthenticAMD /proc/cpuinfo && [[ " ${kyty_args[*]} " != *" --amd-cpu "* ]]; then
+    extra_flags+=(--amd-cpu)
+fi
 
 # exec keeps Kyty in the foreground so the launcher waits for it
-exec "$install_dir/kyty_emulator" --game "$game_path" --fullscreen "${extra_flags[@]}" > /userdata/system/logs/kyty.log 2>&1
+exec "$install_dir/kyty_emulator" --game "$game_path" "${kyty_args[@]}" "${extra_flags[@]}" > /userdata/system/logs/kyty.log 2>&1

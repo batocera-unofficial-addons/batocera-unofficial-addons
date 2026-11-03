@@ -137,6 +137,7 @@ else
 fi
 wget -q --show-progress -O "$install_dir/kyty.sh" "$base_url/extra/kyty.sh"
 wget -q --show-progress -O "$install_dir/kyty-launcher.sh" "$base_url/extra/kyty-launcher.sh"
+wget -q --show-progress -O "$install_dir/kyty-args.py" "$base_url/extra/kyty-args.py"
 chmod +x "$install_dir/kyty.sh" "$install_dir/kyty-launcher.sh"
 wget -q --show-progress -O "$install_dir/kytyps5-logo.png" "$base_url/extra/kytyps5-logo.png"
 
