@@ -38,6 +38,12 @@
 
   "hint_open": "Открыть",
   "hint_search": "Поиск",
+  "search_placeholder": "Введите название дополнения",
+  "search_try_again": "Попробуйте более короткое или другое слово.",
+  "hint_search_again": "Искать снова",
+  "hint_type": "Ввод",
+  "hint_delete": "Удалить",
+  "key_space": "Пробел",
   "hint_toggle": "переключить",
   "hint_add": "добавить",
   "hint_queue": "очередь",

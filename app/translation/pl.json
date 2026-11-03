@@ -38,6 +38,12 @@
 
   "hint_open": "Otwórz",
   "hint_search": "Szukaj",
+  "search_placeholder": "Wpisz nazwę dodatku",
+  "search_try_again": "Spróbuj krótszego lub innego słowa.",
+  "hint_search_again": "Szukaj ponownie",
+  "hint_type": "Pisz",
+  "hint_delete": "Usuń",
+  "key_space": "Spacja",
   "hint_toggle": "Przełącz",
   "hint_add": "Dodaj",
   "hint_queue": "Kolejkuj",

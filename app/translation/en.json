@@ -38,6 +38,12 @@
 
   "hint_open": "Open",
   "hint_search": "Search",
+  "search_placeholder": "Type an add-on name",
+  "search_try_again": "Try a shorter or different word.",
+  "hint_search_again": "Search again",
+  "hint_type": "Type",
+  "hint_delete": "Delete",
+  "key_space": "Space",
   "hint_toggle": "toggle",
   "hint_add": "add",
   "hint_queue": "queue",

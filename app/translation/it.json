@@ -38,6 +38,12 @@
 
   "hint_open": "Apri",
   "hint_search": "Cerca",
+  "search_placeholder": "Digita il nome da cercare",
+  "search_try_again": "Prova una parola più corta o diversa.",
+  "hint_search_again": "Cerca di nuovo",
+  "hint_type": "Digita",
+  "hint_delete": "Cancella",
+  "key_space": "Spazio",
   "hint_toggle": "attiva/disattiva",
   "hint_add": "aggiungi",
   "hint_queue": "coda",

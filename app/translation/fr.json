@@ -38,6 +38,12 @@
 
   "hint_open": "Ouvrir",
   "hint_search": "Rechercher",
+  "search_placeholder": "Tapez le nom d'un module",
+  "search_try_again": "Essayez un mot plus court ou différent.",
+  "hint_search_again": "Rechercher à nouveau",
+  "hint_type": "Taper",
+  "hint_delete": "Effacer",
+  "key_space": "Espace",
   "hint_toggle": "basculer",
   "hint_add": "ajouter",
   "hint_queue": "file",
