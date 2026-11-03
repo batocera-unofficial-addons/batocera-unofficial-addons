@@ -36,6 +36,12 @@
 
   "hint_open": "Öffnen",
   "hint_search": "Suchen",
+  "search_placeholder": "Name eines Add-ons eingeben",
+  "search_try_again": "Versuche ein kürzeres oder anderes Wort.",
+  "hint_search_again": "Erneut suchen",
+  "hint_type": "Tippen",
+  "hint_delete": "Löschen",
+  "key_space": "Leertaste",
   "hint_toggle": "Umschalten",
   "hint_add": "hinzufügen",
   "hint_queue": "Warteschlange",

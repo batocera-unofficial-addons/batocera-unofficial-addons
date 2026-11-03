@@ -38,6 +38,12 @@
 
   "hint_open": "Abrir",
   "hint_search": "Buscar",
+  "search_placeholder": "Escribe el nombre de un complemento",
+  "search_try_again": "Prueba con una palabra más corta o diferente.",
+  "hint_search_again": "Buscar de nuevo",
+  "hint_type": "Escribir",
+  "hint_delete": "Borrar",
+  "key_space": "Espacio",
   "hint_toggle": "cambiar",
   "hint_add": "añadir",
   "hint_queue": "cola",

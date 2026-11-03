@@ -2142,6 +2142,16 @@ def draw_icon(surf, kind: str, center, size: int, color):
         for dx in (-0.12, 0.12):
             px = cx + int(size * dx)
             pygame.draw.line(surf, color, (px, can.top + int(size * 0.12)), (px, can.bottom - int(size * 0.12)), w)
+    elif kind == "search":
+        radius = int(size * 0.3)
+        lens = (int(cx - size * 0.1), int(cy - size * 0.1))
+        pygame.draw.circle(surf, color, lens, radius, w)
+        pygame.draw.line(surf, color, (lens[0] + radius * 0.72, lens[1] + radius * 0.72), P(0.46, 0.46), w + 1)
+    elif kind == "backspace":
+        body = [P(-0.62, 0), P(-0.24, -0.4), P(0.6, -0.4), P(0.6, 0.4), P(-0.24, 0.4)]
+        pygame.draw.polygon(surf, color, body, w)
+        pygame.draw.line(surf, color, P(-0.02, -0.16), P(0.32, 0.16), w)
+        pygame.draw.line(surf, color, P(-0.02, 0.16), P(0.32, -0.16), w)
     else:
         pygame.draw.circle(surf, color, (cx, cy), int(size * 0.35), w)
 
@@ -2564,6 +2574,14 @@ class BaseScreen:
         pass
 
 
+def search_apps(query: str) -> List[str]:
+    """Add-ons whose name or description contains the query, sorted."""
+    q = query.lower().strip()
+    if not q:
+        return []
+    return sorted(k for k in APPS if q in k.lower() or q in DESCRIPTIONS.get(k, "").lower())
+
+
 class MenuScreen(BaseScreen):
     def __init__(self, title: str, items: List[Tuple[str, str]]):
         self.title = title
@@ -2612,13 +2630,7 @@ class MenuScreen(BaseScreen):
                     q = self.search_query.lower().strip()
                     self.search_mode = False
                     if q:
-                        # Gather matches across all categories/apps
-                        def matches(k: str) -> bool:
-                            if q in k.lower():
-                                return True
-                            return q in DESCRIPTIONS.get(k, "").lower()
-                        all_keys = sorted(APPS.keys())
-                        results = [k for k in all_keys if matches(k)]
+                        results = search_apps(q)
                         if results:
                             push_screen(GlobalSearchScreen(query=self.search_query, app_keys=results))
                         else:
@@ -2753,12 +2765,6 @@ class MenuScreen(BaseScreen):
                 done.w = max(bar.h, int(bar.w * inst / total))
                 pygame.draw.rect(screen, SUCCESS, done, border_radius=bar.h // 2)
 
-        # Search overlay when typing
-        if self.search_mode:
-            # The keyboard draws its own input box
-            self.keyboard.draw(screen, self.search_query)
-            return
-
         # Create reverse mapping from translated to English category names
         category_map = {
             t("games"): "Games",
@@ -2840,6 +2846,10 @@ class MenuScreen(BaseScreen):
 
         draw_footer(screen, f"A={t('hint_open')} | X={t('hint_search')} | Back={t('hint_back_settings')}",
                     f"{t('input')}: {input_style_label()}")
+
+        # Search keyboard over the dimmed home screen
+        if self.search_mode:
+            self.keyboard.draw(screen, self.search_query)
 
 
 class ConfirmDialog(BaseScreen):
@@ -3822,8 +3832,18 @@ class GlobalSearchScreen(BaseScreen):
                 pts = [(cx - a // 2, cy - a), (cx + a // 2, cy), (cx - a // 2, cy + a)] if cat in self.collapsed \
                     else [(cx - a, cy - a // 2), (cx, cy + a // 2), (cx + a, cy - a // 2)]
                 pygame.draw.lines(screen, ACCENT, False, pts, max(2, S(3)))
-                draw_text(screen, f"{cat}  ({count})", f["tile"], FG if selected else MUTED,
-                          (rect.x + S(48), rect.centery - f["tile"].get_height() // 2))
+                label = f["tile"].render(cat, True, FG if selected else MUTED)
+                lx = rect.x + S(48)
+                screen.blit(label, (lx, rect.centery - label.get_height() // 2))
+                # Count badge, then a line to the right edge
+                img = f["small"].render(str(count), True, FG)
+                chip = pygame.Rect(0, 0, max(img.get_width() + S(16), img.get_height() + S(8)), img.get_height() + S(8))
+                chip.midleft = (lx + label.get_width() + S(12), rect.centery)
+                pygame.draw.rect(screen, ACCENT if selected else CARD_HI, chip, border_radius=chip.h // 2)
+                screen.blit(img, img.get_rect(center=chip.center))
+                if chip.right + S(16) < rect.right - S(20):
+                    pygame.draw.line(screen, (44, 58, 74), (chip.right + S(16), rect.centery),
+                                     (rect.right - S(20), rect.centery), max(1, S(1)))
                 continue
             key = item[1]
             rect = pygame.Rect(margin, y, W - 2 * margin, row_h)
@@ -3839,17 +3859,36 @@ class NoResultsScreen(BaseScreen):
             if e.type == pygame.QUIT:
                 clean_exit(0)
             if e.type == pygame.KEYDOWN:
-                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_ESCAPE):
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    self.search_again(); return
+                if e.key == pygame.K_ESCAPE:
                     pop_screen(); return
             if e.type == pygame.JOYBUTTONDOWN:
-                if e.button in (BTN_A, BTN_B, BTN_BACK, BTN_START):
+                if e.button in (BTN_A, BTN_START):
+                    self.search_again(); return
+                if e.button in (BTN_B, BTN_BACK):
                     pop_screen(); return
+
+    def search_again(self):
+        """Back to the screen the search came from, with the keyboard open on the same text."""
+        pop_screen()
+        if SCREENS and isinstance(SCREENS[-1], MenuScreen):
+            SCREENS[-1].search_mode = True
+            SCREENS[-1].search_query = self.query
 
     def draw(self):
         draw_background(screen)
-        top = draw_screen_header(t("search_results"))
-        draw_text(screen, f"{t('no_addons_found')} '{self.query}'.", UI_FONTS["body"], MUTED, (S(48), top))
-        draw_footer(screen, f"B={t('hint_return')}")
+        f = UI_FONTS
+        draw_screen_header(t("search_results"))
+        footer_h = S(54)
+        mid = (H - footer_h) // 2
+        draw_icon(screen, "search", (W // 2, mid - S(70)), S(84), (92, 108, 126))
+        title = fit_text(f"{t('no_addons_found')} '{self.query}'", f["hero"], W - S(96))
+        img = f["hero"].render(title, True, FG)
+        screen.blit(img, img.get_rect(midtop=(W // 2, mid)))
+        tip = f["body"].render(t("search_try_again"), True, MUTED)
+        screen.blit(tip, tip.get_rect(midtop=(W // 2, mid + img.get_height() + S(12))))
+        draw_footer(screen, f"A={t('hint_search_again')} | B={t('hint_return')}")
 
 class QueueScreen(BaseScreen):
     def __init__(self):
@@ -4980,20 +5019,26 @@ class UpdaterScreen(BaseScreen):
 
 
 class OnScreenKeyboard:
+    """Search box and on-screen keyboard, drawn over the dimmed home screen.
+    handle() returns a typed character, or BACKSPACE, ENTER or EXIT."""
+
+    ROWS = [
+        "1 2 3 4 5 6 7 8 9 0",
+        "Q W E R T Y U I O P",
+        "A S D F G H J K L",
+        "Z X C V B N M",
+        "SPACE BACKSPACE ENTER",
+    ]
+    # Width of the bottom row's keys, in letter keys
+    WIDE = {"SPACE": 5, "BACKSPACE": 2, "ENTER": 3}
+
     def __init__(self):
-        # Use space-separated rows so each character is an individual key
-        self.keys = [
-            "Q W E R T Y U I O P",
-            "A S D F G H J K L",
-            "Z X C V B N M",
-            "SPACE BACKSPACE",
-            "ENTER EXIT",
-        ]
-        self.key_width = S(80)
-        self.key_height = S(60)
-        self.margin = S(10)
-        self.selected_row = 0
-        self.selected_col = 0
+        self.keys = [key for row in self.ROWS for key in row.split()]
+        self.selected = self.keys.index("Q")
+        self.rects = []  # key positions from the last draw, for navigation
+
+    def move(self, dx: int, dy: int):
+        self.selected = grid_move(self.rects, self.selected, dx, dy)
 
     def handle(self, events):
         for e in events:
@@ -5011,123 +5056,119 @@ class OnScreenKeyboard:
                     return "ENTER"
                 if e.key == pygame.K_ESCAPE:
                     return "EXIT"
-
-                # Navigate OSK with arrows; select with A
-                if e.key == pygame.K_DOWN:
-                    self.selected_row = min(self.selected_row + 1, len(self.keys) - 1)
-                    self.selected_col = min(self.selected_col, len(self.keys[self.selected_row].split()) - 1)
-                if e.key == pygame.K_UP:
-                    self.selected_row = max(self.selected_row - 1, 0)
-                    self.selected_col = min(self.selected_col, len(self.keys[self.selected_row].split()) - 1)
-                if e.key == pygame.K_RIGHT:
-                    self.selected_col = min(self.selected_col + 1, len(self.keys[self.selected_row].split()) - 1)
-                if e.key == pygame.K_LEFT:
-                    self.selected_col = max(self.selected_col - 1, 0)
-                if e.key == pygame.K_a:
-                    return self.select_key()
+                arrows = {pygame.K_UP: (0, -1), pygame.K_DOWN: (0, 1), pygame.K_LEFT: (-1, 0), pygame.K_RIGHT: (1, 0)}
+                if e.key in arrows:
+                    self.move(*arrows[e.key])
             if e.type == pygame.JOYHATMOTION:
                 x, y = e.value
-                if y == -1:
-                    self.selected_row = min(self.selected_row + 1, len(self.keys) - 1)
-                    self.selected_col = min(self.selected_col, len(self.keys[self.selected_row].split()) - 1)
-                elif y == 1:
-                    self.selected_row = max(self.selected_row - 1, 0)
-                    self.selected_col = min(self.selected_col, len(self.keys[self.selected_row].split()) - 1)
-                if x == 1:
-                    self.selected_col = min(self.selected_col + 1, len(self.keys[self.selected_row].split()) - 1)
-                elif x == -1:
-                    self.selected_col = max(self.selected_col - 1, 0)
+                if x or y:
+                    self.move(x, -y)
             if e.type == pygame.JOYBUTTONDOWN:
-                if e.button in (BTN_A, BTN_START):  # A or Start -> select
+                if e.button == BTN_A:
                     return self.select_key()
-                if e.button in (BTN_B, BTN_BACK):  # B/Back -> exit keyboard
+                if e.button == BTN_Y:
+                    return "BACKSPACE"
+                if e.button == BTN_START:
+                    return "ENTER"
+                if e.button in (BTN_B, BTN_BACK):
                     return "EXIT"
         return None
 
     def select_key(self):
-        row = self.keys[self.selected_row].split()
-        key = row[self.selected_col]
-        if key == "SPACE":
-            return " "
-        elif key == "BACKSPACE":
-            return "BACKSPACE"
-        elif key == "ENTER":
-            return "ENTER"
-        elif key == "EXIT":
-            return "EXIT"
-        else:
-            return key
+        key = self.keys[self.selected]
+        return " " if key == "SPACE" else key
 
     def draw(self, surf, current_text: str = ""):
-        # Draw semi-transparent overlay
-        overlay = pygame.Surface((W, H))
-        overlay.set_alpha(180)
-        overlay.fill(BG)
-        surf.blit(overlay, (0, 0))
+        f = UI_FONTS
+        shade = pygame.Surface((W, H), pygame.SRCALPHA)
+        shade.fill((0, 0, 0, 165))
+        surf.blit(shade, (0, 0))
 
-        # Compute dynamic box size to fully cover keys (with variable widths)
-        padding = S(40)
-        total_rows = len(self.keys)
+        key_w, key_h, gap, pad = S(64), S(54), S(10), S(32)
+        cols = max(len(row.split()) for row in self.ROWS)
+        keys_w = cols * key_w + (cols - 1) * gap
+        field_h = S(64)
+        title_h = f["hero"].get_height()
+        panel_w = keys_w + 2 * pad
+        panel_h = pad + title_h + S(18) + field_h + S(24) + len(self.ROWS) * key_h + (len(self.ROWS) - 1) * gap + pad
+        footer_h = S(54)
+        panel = pygame.Rect(0, 0, panel_w, panel_h)
+        panel.center = (W // 2, max(S(16) + panel_h // 2, (H - footer_h) // 2))
+        draw_dialog_panel(panel)
 
-        def key_w(k: str) -> int:
-            # Uniform sizing: all letters use key_width;
-            # SPACE, BACKSPACE, ENTER, EXIT use the same wider width
-            if k in ("SPACE", "BACKSPACE", "ENTER", "EXIT"):
-                return self.key_width * 2
-            return self.key_width
+        # Title, and how many add-ons the text matches so far
+        x, y = panel.x + pad, panel.y + pad
+        isz = S(30)
+        draw_icon(surf, "search", (x + isz // 2, y + title_h // 2), isz, ACCENT)
+        draw_text(surf, t("search"), f["hero"], FG, (x + isz + S(14), y))
+        if current_text.strip():
+            count = len(search_apps(current_text))
+            img = f["body"].render(f"{t('found')}: {count}", True, FG)
+            chip = pygame.Rect(0, 0, img.get_width() + S(28), img.get_height() + S(12))
+            chip.midright = (panel.right - pad, y + title_h // 2)
+            pygame.draw.rect(surf, SUCCESS if count else CARD_HI, chip, border_radius=chip.h // 2)
+            surf.blit(img, img.get_rect(center=chip.center))
+        y += title_h + S(18)
 
-        # Width of each row using variable key widths
-        row_widths = []
-        for row in self.keys:
-            cols = row.split()
-            w = sum(key_w(k) for k in cols) + max(0, len(cols) - 1) * self.margin
-            row_widths.append(w)
-        keys_block_width = max(row_widths) if row_widths else 0
-        keys_height = total_rows * self.key_height + max(0, total_rows - 1) * self.margin
+        # Search box with a blinking cursor
+        field = pygame.Rect(x, y, keys_w, field_h)
+        pygame.draw.rect(surf, (14, 19, 26), field, border_radius=S(14))
+        pygame.draw.rect(surf, ACCENT, field, width=max(2, S(2)), border_radius=S(14))
+        fisz = S(26)
+        draw_icon(surf, "search", (field.x + S(22) + fisz // 2, field.centery), fisz, MUTED)
+        tx = field.x + S(22) + fisz + S(16)
+        text_w = field.right - S(22) - tx
+        if current_text:
+            shown = current_text
+            while shown and f["hero"].size(shown)[0] > text_w - S(12):
+                shown = shown[1:]  # keep the end of a long text in view
+            img = f["hero"].render(shown, True, FG)
+        else:
+            img = f["hero"].render(fit_text(t("search_placeholder"), f["hero"], text_w), True, (92, 108, 126))
+        surf.blit(img, (tx, field.centery - img.get_height() // 2))
+        if pygame.time.get_ticks() // 530 % 2 == 0:
+            cx = tx + (img.get_width() + S(3) if current_text else 0)
+            ch = f["hero"].get_height()
+            pygame.draw.line(surf, ACCENT, (cx, field.centery - ch // 2), (cx, field.centery + ch // 2), max(2, S(2)))
+        y += field_h + S(24)
 
-        # Include input field and spacing inside the box height
-        input_h = S(50)
-        input_spacing = S(20)
-        box_width = keys_block_width + 2 * padding
-        box_height = input_h + input_spacing + keys_height + 2 * padding
-        box_x = (W - box_width) // 2
-        box_y = (H - box_height) // 2
-        pygame.draw.rect(surf, CARD, (box_x, box_y, box_width, box_height), border_radius=15)
-        pygame.draw.rect(surf, ACCENT, (box_x, box_y, box_width, box_height), width=3, border_radius=15)
+        # Keys, each row centred; the bottom row fills the width
+        self.rects = []
+        for row in self.ROWS:
+            row_keys = row.split()
+            widths = [self.WIDE.get(k, 1) * key_w + (self.WIDE.get(k, 1) - 1) * gap for k in row_keys]
+            kx = x + (keys_w - sum(widths) - (len(row_keys) - 1) * gap) // 2
+            for w in widths:
+                self.rects.append(pygame.Rect(kx, y, w, key_h))
+                kx += w + gap
+            y += key_h + gap
+        order = [i for i in range(len(self.keys)) if i != self.selected] + [self.selected]
+        for i in order:
+            key, rect = self.keys[i], self.rects[i]
+            selected = i == self.selected
+            if selected:
+                rect = rect.inflate(S(6), S(6))
+            if key == "ENTER":
+                draw_tile(surf, rect, selected, radius=S(10), fill=ACCENT, accent=FG)
+            else:
+                draw_tile(surf, rect, selected, radius=S(10))
+            if key == "BACKSPACE":
+                draw_icon(surf, "backspace", rect.center, S(30), ACCENT if selected else FG)
+                continue
+            if key == "ENTER":
+                isz = S(22)
+                label = f["tile"].render(t("search"), True, FG)
+                lx = rect.centerx - (isz + S(10) + label.get_width()) // 2
+                draw_icon(surf, "search", (lx + isz // 2, rect.centery), isz, FG)
+                surf.blit(label, (lx + isz + S(10), rect.centery - label.get_height() // 2))
+                continue
+            text = t("key_space") if key == "SPACE" else key
+            label = f["tile"].render(text, True, ACCENT if selected else FG)
+            surf.blit(label, label.get_rect(center=rect.center))
 
-        # Text input field at the top of the keyboard box
-        input_rect = pygame.Rect(box_x + S(20), box_y + S(20), box_width - S(40), input_h)
-        pygame.draw.rect(surf, (17, 23, 31), input_rect, border_radius=8)
-        pygame.draw.rect(surf, ACCENT, input_rect, width=2, border_radius=8)
-        draw_text(surf, f"{t('search')}: {current_text}_", FONT, FG, (input_rect.x + S(12), input_rect.y + S(10)))
-
-        # Draw keys centered per row inside box
-        x_start = box_x + padding
-        y_start = input_rect.bottom + input_spacing
-        for row_idx, row in enumerate(self.keys):
-            cols = row.split()
-            row_width = sum(key_w(k) for k in cols) + max(0, len(cols) - 1) * self.margin
-            row_x_offset = (keys_block_width - row_width) // 2
-            cx = x_start + row_x_offset
-            for col_idx, key in enumerate(cols):
-                w = key_w(key)
-                rect = pygame.Rect(
-                    cx,
-                    y_start + row_idx * (self.key_height + self.margin),
-                    w,
-                    self.key_height,
-                )
-                # Draw key background
-                pygame.draw.rect(surf, CARD, rect, border_radius=8)
-                # Draw selection border if selected
-                if row_idx == self.selected_row and col_idx == self.selected_col:
-                    pygame.draw.rect(surf, SELECT, rect, width=3, border_radius=8)
-                # Center the key label
-                label = FONT.render(key, True, FG)
-                lx = rect.x + (rect.w - label.get_width()) // 2
-                ly = rect.y + (rect.h - label.get_height()) // 2
-                surf.blit(label, (lx, ly))
-                cx += w + self.margin
+        # Cover the home screen's own button bar, then show the keyboard's
+        pygame.draw.rect(surf, FOOTER_BG, (0, H - footer_h, W, footer_h))
+        draw_footer(surf, f"A={t('hint_type')} | Y={t('hint_delete')} | Start={t('hint_search')} | B={t('hint_cancel')}")
 
 
 # ------------------------------
