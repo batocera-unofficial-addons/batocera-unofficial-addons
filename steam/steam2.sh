@@ -84,6 +84,15 @@ mkdir -p /userdata/system/configs/emulationstation
 wget --show-progress -qO "/userdata/system/configs/emulationstation/es_systems_steam.cfg" "${SCRIPTS_BASE_URL}/es_systems_steam.cfg"
 wget --show-progress -qO "/userdata/system/configs/emulationstation/es_features_steam.cfg" "${SCRIPTS_BASE_URL}/es_features_steam.cfg"
 
+# Batocera 44 replaced emulatorlauncher with batocera-launch. Batocera 44 also
+# has its own steam system, which this file replaces, so with emulatorlauncher
+# no steam game would launch at all.
+batocera_major=$(batocera-version 2>/dev/null | grep -o '^[0-9]*')
+echo "Batocera version: $(batocera-version 2>/dev/null || echo unknown)"
+if [ -n "$batocera_major" ] && [ "$batocera_major" -ge 44 ]; then
+    sed -i 's|<command>emulatorlauncher |<command>batocera-launch |' "/userdata/system/configs/emulationstation/es_systems_steam.cfg"
+fi
+
 # Use sh emulator so .sh launchers run through configgen (enables videomode, etc.)
 BATOCERA_CONF="/userdata/system/batocera.conf"
 sed -i '/^steam\.emulator=/d; /^steam\.core=/d' "$BATOCERA_CONF" 2>/dev/null || true
