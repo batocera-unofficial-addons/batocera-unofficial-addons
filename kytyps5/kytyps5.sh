@@ -2,6 +2,8 @@
 # Installer for KytyPS5, an experimental PS5 emulator.
 # Installs the latest official Linux build to /userdata/system/add-ons/kytyps5
 # and adds a PlayStation 5 system to EmulationStation (Hotkey+Start exits).
+# Kyty's own launcher window (settings, input mapping) opens from
+# F1 > Applications.
 # Games go in /userdata/roms/ps5.
 # Batocera 44 replaced configgen/emulatorlauncher with batocera-launch, which
 # finds emulators through Python entry points, so the installer reads the
@@ -108,7 +110,13 @@ mkdir -p "$install_dir"
 cp -a "$(dirname "$emulator")"/. "$install_dir"/ || fail "Failed to copy KytyPS5 to $install_dir."
 rm -rf "$work_dir"
 chmod +x "$install_dir/kyty_emulator"
-[ -f "$install_dir/launcher" ] && chmod +x "$install_dir/launcher"
+[ -f "$install_dir/kyty_launcher" ] && chmod +x "$install_dir/kyty_launcher"
+# The launcher window needs Brotli, which neither Batocera nor the KytyPS5
+# download has (the emulator itself does not)
+mkdir -p "$install_dir/lib"
+for lib in libbrotlicommon.so.1 libbrotlidec.so.1; do
+    [ -f "$install_dir/lib/$lib" ] || wget -q -O "$install_dir/lib/$lib" "$base_url/extra/lib/$lib"
+done
 
 # Download the launcher for this Batocera and the launch wrapper
 if [ "$launcher" = "batocera-launch" ]; then
@@ -128,7 +136,10 @@ else
     wget -q --show-progress -O "$install_dir/generator/kyty/kytyGenerator.py" "$base_url/generator/kyty/kytyGenerator.py"
 fi
 wget -q --show-progress -O "$install_dir/kyty.sh" "$base_url/extra/kyty.sh"
-chmod +x "$install_dir/kyty.sh"
+wget -q --show-progress -O "$install_dir/kyty-launcher.sh" "$base_url/extra/kyty-launcher.sh"
+wget -q --show-progress -O "$install_dir/kyty-args.py" "$base_url/extra/kyty-args.py"
+chmod +x "$install_dir/kyty.sh" "$install_dir/kyty-launcher.sh"
+wget -q --show-progress -O "$install_dir/kytyps5-logo.png" "$base_url/extra/kytyps5-logo.png"
 
 # Download and deploy ES system
 echo "Downloading ES config..."
@@ -139,6 +150,40 @@ wget -q --show-progress -O "$es_config_dir/es_systems_ps5.cfg" "$base_url/extra/
 if [ "$launcher" = "batocera-launch" ]; then
     sed -i 's|<command>emulatorlauncher |<command>batocera-launch |' "$es_config_dir/es_systems_ps5.cfg"
 fi
+
+# F1 > Applications entry for Kyty's launcher window. /usr/share/applications
+# is reset at boot, so a copy is kept in /userdata and put back by custom.sh.
+echo "Creating desktop entry..."
+desktop_file="/usr/share/applications/KytyPS5.desktop"
+persistent_desktop="/userdata/system/configs/kytyps5/KytyPS5.desktop"
+restore_script="/userdata/system/configs/kytyps5/restore_desktop_entry.sh"
+mkdir -p /userdata/system/configs/kytyps5
+cat > "$persistent_desktop" <<DESKTOP
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=KytyPS5
+Exec=$install_dir/kyty-launcher.sh
+Icon=$install_dir/kytyps5-logo.png
+Terminal=false
+Categories=Game;batocera.linux;
+DESKTOP
+chmod +x "$persistent_desktop"
+cp -f "$persistent_desktop" "$desktop_file"
+chmod +x "$desktop_file"
+cat > "$restore_script" <<RESTORE
+#!/bin/bash
+if [ ! -f "$desktop_file" ]; then
+    cp "$persistent_desktop" "$desktop_file"
+    chmod +x "$desktop_file"
+fi
+RESTORE
+chmod +x "$restore_script"
+touch /userdata/system/custom.sh
+if ! grep -q "$restore_script" /userdata/system/custom.sh; then
+    echo "bash \"$restore_script\" &" >> /userdata/system/custom.sh
+fi
+chmod +x /userdata/system/custom.sh
 
 # Batocera has no default emulator for ps5, so set it (without this:
 # "emulator missing"). Bezels have no per-system menu for PS5, so turn them off.
