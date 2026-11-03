@@ -111,6 +111,12 @@ cp -a "$(dirname "$emulator")"/. "$install_dir"/ || fail "Failed to copy KytyPS5
 rm -rf "$work_dir"
 chmod +x "$install_dir/kyty_emulator"
 [ -f "$install_dir/kyty_launcher" ] && chmod +x "$install_dir/kyty_launcher"
+# The launcher window needs Brotli, which neither Batocera nor the KytyPS5
+# download has (the emulator itself does not)
+mkdir -p "$install_dir/lib"
+for lib in libbrotlicommon.so.1 libbrotlidec.so.1; do
+    [ -f "$install_dir/lib/$lib" ] || wget -q -O "$install_dir/lib/$lib" "$base_url/extra/lib/$lib"
+done
 
 # Download the launcher for this Batocera and the launch wrapper
 if [ "$launcher" = "batocera-launch" ]; then
