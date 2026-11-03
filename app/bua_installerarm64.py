@@ -2382,7 +2382,14 @@ def draw_app_details(surf, panel, key: str):
     if is_installed(key):
         draw_text(surf, fit_text(f"{t('last_installed')} {get_last_install_date(key)}", f["small"], inner_w),
                   f["small"], MUTED, (x, y))
-        y += f["small"].get_height() + S(14)
+        y += f["small"].get_height() + S(6)
+    # When the add-on's script last changed, so an older install can be spotted
+    updated = script_date(key)
+    if updated:
+        draw_text(surf, fit_text(f"{t('script_updated')}: {updated}", f["small"], inner_w), f["small"], MUTED, (x, y))
+        y += f["small"].get_height() + S(6)
+    if is_installed(key) or updated:
+        y += S(8)
 
     # Description, as many lines as fit
     line_h = f["body"].get_height() + S(4)
@@ -4048,6 +4055,19 @@ class QueueScreen(BaseScreen):
                 self.idx = new_idx
 
 
+UNINSTALL_SUFFIX = " (Uninstall)"  # the Updater's uninstall jobs are named "<App> (Uninstall)"
+
+
+def job_label(name: str) -> str:
+    """A job's app name, without the suffix of an uninstall job."""
+    return name[:-len(UNINSTALL_SUFFIX)] if name.endswith(UNINSTALL_SUFFIX) else name
+
+
+def job_verb(name: str) -> str:
+    """'Uninstalling' for an uninstall job, 'Installing' for the rest."""
+    return t("uninstalling") if name.endswith(UNINSTALL_SUFFIX) else t("installing")
+
+
 class RunListScreen(BaseScreen):
     def __init__(self, jobs: List[Tuple[str, str]], title: str = None):
         self.jobs = jobs
@@ -4413,9 +4433,14 @@ export -f desktop
         success_count = sum(self.job_results) if self.job_results else 0
         fail_count = completed - success_count
         if self.started and not self.runner.done:
-            status_text = f"{t('installing')} {completed + 1} / {total_jobs}: {self.jobs[self.current][0]}"
+            name = self.jobs[self.current][0]
+            status_text = f"{job_verb(name)} {completed + 1} / {total_jobs}: {job_label(name)}"
         elif self.all_finished:
-            status_text = t("all_complete")
+            # "All installations complete!" is wrong after uninstalls
+            if all(name.endswith(UNINSTALL_SUFFIX) for name, _cmd in self.jobs):
+                status_text = t("completed")
+            else:
+                status_text = t("all_complete")
         else:
             status_text = t("preparing")
         top = draw_screen_header(self.title, status_text)
@@ -4472,7 +4497,7 @@ export -f desktop
                 (draw_check_badge if ok else draw_cross_badge)(screen, badge, badge_r, status_color)
             elif i == self.current and self.started:
                 status_color = (240, 184, 80)
-                status = t("installing")
+                status = job_verb(name)
                 draw_tile(screen, rect, True, radius=S(12), accent=status_color)
                 draw_spinner(screen, badge, badge_r, status_color)
                 # Show that the job is moving: its percentage while it prints
@@ -4495,7 +4520,7 @@ export -f desktop
                 pygame.draw.circle(screen, MUTED, badge, badge_r, max(2, S(2)))
             x = badge[0] + badge_r + S(18)
             y = rect.centery - (f["tile"].get_height() + f["small"].get_height() + S(2)) // 2
-            draw_text(screen, fit_text(name, f["tile"], text_right - x), f["tile"], FG, (x, y))
+            draw_text(screen, fit_text(job_label(name), f["tile"], text_right - x), f["tile"], FG, (x, y))
             draw_text(screen, fit_text(status, f["small"], text_right - x), f["small"], status_color,
                       (x, y + f["tile"].get_height() + S(2)))
 
@@ -4590,6 +4615,23 @@ def get_script_dates() -> Dict[str, str]:
         pass
 
     return _SCRIPT_DATES_CACHE
+
+
+_script_dates_thread: threading.Thread | None = None
+
+
+def script_date(app: str) -> str:
+    """The date the app's install script last changed (from SCRIPT_DATES.md),
+    or "" when it's unknown. The list is fetched in the background the first
+    time, so drawing never waits for it."""
+    global _script_dates_thread
+    if _SCRIPT_DATES_CACHE is None:
+        if _script_dates_thread is None:
+            _script_dates_thread = threading.Thread(target=get_script_dates, daemon=True)
+            _script_dates_thread.start()
+        return ""
+    parsed = parse_github_raw_url(APPS.get(app, ""))
+    return _SCRIPT_DATES_CACHE.get(parsed[3], "")[:10] if parsed else ""
 
 
 def github_latest_commit_date(owner: str, repo: str, branch: str, path: str) -> float | None:
