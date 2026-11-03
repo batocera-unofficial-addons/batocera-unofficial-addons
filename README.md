@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="app/extra/batocera-unofficial-addons.png" alt="Batocera Unofficial Add-ons logo" width="320">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="app/extra/batocera-unofficial-addons-light.png">
+    <img src="app/extra/batocera-unofficial-addons.png" alt="Batocera Unofficial Add-ons logo" width="320">
+  </picture>
 </p>
 
 # Unofficial Add-ons for Batocera
