@@ -568,6 +568,10 @@ def build_app_tables(app_list: dict):
 APP_LIST = load_app_list()
 CHANGELOG = str(APP_LIST.get("changelog", "")).strip()
 APPS, DESCRIPTIONS, CATEGORIES, UNINSTALL = build_app_tables(APP_LIST)
+# Logos named in the app list ("logo": image URL), for add-ons whose
+# installer and files live outside this repo
+LOGO_URLS: Dict[str, str] = {e["name"]: e["logo"] for e in APP_LIST.get("apps", [])
+                             if isinstance(e, dict) and e.get("name") and e.get("logo")}
 
 def get_top_level() -> List[Tuple[str, str]]:
     """Generate top-level menu items with current language translations"""
@@ -1768,8 +1772,9 @@ def draw_monogram(surf, rect, name: str, font):
 # ------------------------------
 # App logos
 # ------------------------------
-# BUA guesses each app's logo: an image its installer downloads, otherwise
-# the best-named image in its folder of the repo. Logos download in the
+# BUA finds each app's logo: the one the app list names ("logo"), else an
+# image its installer downloads, else the best-named image in its folder of
+# the repo. Logos download in the
 # background and are kept in LOGO_DIR; until one arrives, the app shows its
 # monogram.
 
@@ -1832,6 +1837,11 @@ def _logo_score(path: str) -> int:
     """How much an image path looks like a logo; 0 means not at all."""
     low = path.lower()
     return 3 if "logo" in low else 2 if "icon" in low else 1 if "thumb" in low else 0
+
+
+def _listed_logo_url(app: str) -> str | None:
+    """The logo the app list names for the app, if any."""
+    return LOGO_URLS.get(app)
 
 
 def _installer_logo_url(app: str) -> str | None:
@@ -1919,9 +1929,9 @@ def _download_logo(url: str) -> str:
 
 def _find_logo(app: str) -> str:
     """Download the app's logo and return its file, or "" when there is none.
-    A logo the installer names that turns out missing or not an image falls
-    back to the folder guess."""
-    for finder in (_installer_logo_url, _repo_logo_url):
+    A logo the app list or installer names that turns out missing or not an
+    image falls back to the next way of finding one."""
+    for finder in (_listed_logo_url, _installer_logo_url, _repo_logo_url):
         url = finder(app)
         if not url:
             continue

@@ -278,7 +278,8 @@
         "Game Utilities"
       ],
       "install": "curl -L bit.ly/rgsx-install | sh",
-      "uninstall": null
+      "uninstall": null,
+      "logo": "https://raw.githubusercontent.com/RetroGameSets/RGSX/main/ports/images/RGSX.png"
     },
     {
       "name": "RunImage Desktop",
