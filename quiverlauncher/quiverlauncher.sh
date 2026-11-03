@@ -6,7 +6,9 @@ DISPLAY_NAME="Quiver Launcher"
 REPO="tgeorgiadis/quiver-launcher"
 AMD_SUFFIX="linux-x64.AppImage"
 ARM_SUFFIX="linux-arm64.AppImage"
-LOGO_URL="https://raw.githubusercontent.com/tgeorgiadis/quiver-launcher/main/Assets/quiver-icon.png"
+# Quiver's official icon, linked from its repo at a fixed commit (its trademark
+# terms don't allow copying it into this repo; the file moved once already)
+LOGO_URL="https://raw.githubusercontent.com/tgeorgiadis/quiver-launcher/93b2dcbdd0a5cc8a8fb30171b4484a7f733e635c/apps/launcher/src-tauri/icons/icon.png"
 SCRIPTS_BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/quiverlauncher/extra"
 
 # -----------------------------------------------------------------------------------------------------------------
@@ -125,6 +127,9 @@ fi
 sed -i '/^quiver\.emulator=/d; /^quiver\.core=/d' "$BATOCERA_CONF" 2>/dev/null || true
 echo "quiver.emulator=sh" >> "$BATOCERA_CONF"
 echo "quiver.core=sh" >> "$BATOCERA_CONF"
+# No bezel by default: otherwise Batocera puts its default bezel around
+# Quiver and its apps. A bezel setting already chosen in ES is kept.
+grep -q "^quiver\.bezel=" "$BATOCERA_CONF" 2>/dev/null || echo "quiver.bezel=none" >> "$BATOCERA_CONF"
 
 # Step 6: Quiver Launcher entry in the quiver system
 echo "Creating $DISPLAY_NAME launcher..."
