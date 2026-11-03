@@ -98,6 +98,9 @@ BATOCERA_CONF="/userdata/system/batocera.conf"
 sed -i '/^steam\.emulator=/d; /^steam\.core=/d' "$BATOCERA_CONF" 2>/dev/null || true
 echo "steam.emulator=sh" >> "$BATOCERA_CONF"
 echo "steam.core=sh" >> "$BATOCERA_CONF"
+# No bezel by default: otherwise Batocera puts its default bezel around
+# Steam games. A bezel setting already chosen in ES is kept.
+grep -q "^steam\.bezel=" "$BATOCERA_CONF" 2>/dev/null || echo "steam.bezel=none" >> "$BATOCERA_CONF"
 
 echo "Downloading icon..."
 wget --show-progress -qO "${INSTALL_DIR}/extra/icon.png" "$ICON_URL"
