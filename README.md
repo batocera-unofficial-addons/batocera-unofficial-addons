@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="app/extra/batocera-unofficial-addons.png" alt="Batocera Unofficial Add-ons logo" width="320">
+</p>
+
 # Unofficial Add-ons for Batocera
 
 <img alt="Discord" src="https://img.shields.io/discord/1322750191756906638?style=for-the-badge&label=Discord&link=https%3A%2F%2Fdiscord.batoaddons.app"> <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/batocera-unofficial-addons/batocera-unofficial-addons?style=for-the-badge"> <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/batocera-unofficial-addons/batocera-unofficial-addons?style=for-the-badge"> <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/batocera-unofficial-addons/batocera-unofficial-addons?style=for-the-badge">
