@@ -138,6 +138,13 @@ mkdir -p /userdata/system/configs/emulationstation
 wget --show-progress -qO "/userdata/system/configs/emulationstation/es_systems_lutris.cfg" "${SCRIPTS_BASE_URL}/es_systems_lutris.cfg"
 wget --show-progress -qO "/userdata/system/configs/emulationstation/es_features_lutris.cfg" "${SCRIPTS_BASE_URL}/es_features_lutris.cfg"
 
+# Batocera 44 replaced emulatorlauncher with batocera-launch
+batocera_major=$(batocera-version 2>/dev/null | grep -o '^[0-9]*')
+echo "Batocera version: $(batocera-version 2>/dev/null || echo unknown)"
+if [ -n "$batocera_major" ] && [ "$batocera_major" -ge 44 ]; then
+    sed -i 's|<command>emulatorlauncher |<command>batocera-launch |' "/userdata/system/configs/emulationstation/es_systems_lutris.cfg"
+fi
+
 echo "Downloading icon..."
 wget --show-progress -qO "${INSTALL_DIR}/extra/icon.png" "$ICON_URL"
 
