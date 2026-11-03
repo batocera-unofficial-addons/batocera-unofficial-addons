@@ -29,4 +29,13 @@ else
     exit 1
 fi
 
+# Batocera 44 replaced emulatorlauncher with batocera-launch. Batocera 44 also
+# has its own ps4 system, which this file replaces, so with emulatorlauncher
+# no ps4 game would launch at all.
+batocera_major=$(batocera-version 2>/dev/null | grep -o '^[0-9]*')
+echo "Batocera version: $(batocera-version 2>/dev/null || echo unknown)"
+if [ -n "$batocera_major" ] && [ "$batocera_major" -ge 44 ]; then
+    sed -i 's|<command>emulatorlauncher |<command>batocera-launch |' "$emulationstation_config_dir/es_systems_ps4.cfg"
+fi
+
 echo "All files downloaded and configured successfully."
