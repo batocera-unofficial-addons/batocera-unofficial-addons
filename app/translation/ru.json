@@ -89,6 +89,7 @@
   "succeeded": "успешно",
   "failed": "ошибка",
   "installing": "Установка",
+  "uninstalling": "Удаление",
   "queued": "В очереди",
   "preparing": "Подготовка...",
 
@@ -121,6 +122,7 @@
   "reinstall_confirmation": "Подтверждение переустановки",
   "previously_installed": "был установлен ранее.",
   "last_installed": "Последняя установка:",
+  "script_updated": "Скрипт обновлён",
   "install_again": "Установить снова?",
   "install_them_again": "Установить их снова?",
   "selected_installed": "выбранные элементы уже установлены.",
