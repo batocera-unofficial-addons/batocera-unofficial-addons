@@ -1435,6 +1435,24 @@ def draw_text(surf, text, font, color, pos):
     surf.blit(img, pos)
 
 
+def split_long_word(word: str, width: int, font) -> List[str]:
+    """Pieces of a word too wide for one line (a path, a URL), split after a
+    slash where possible, else wherever the line is full."""
+    pieces = []
+    while word and font.size(word)[0] > width:
+        cut = 1
+        while cut < len(word) and font.size(word[:cut + 1])[0] <= width:
+            cut += 1
+        slash = word.rfind("/", 0, cut)
+        if slash > 0:
+            cut = slash + 1
+        pieces.append(word[:cut])
+        word = word[cut:]
+    if word:
+        pieces.append(word)
+    return pieces
+
+
 def wrap(text: str, width: int, font) -> List[str]:
     words = text.split()
     lines, line = [], ""
@@ -1443,8 +1461,11 @@ def wrap(text: str, width: int, font) -> List[str]:
         if font.size(test)[0] <= width:
             line = test
         else:
-            lines.append(line)
-            line = w
+            if line:
+                lines.append(line)
+            pieces = split_long_word(w, width, font)
+            lines.extend(pieces[:-1])
+            line = pieces[-1] if pieces else ""
     if line:
         lines.append(line)
     return lines
@@ -2924,21 +2945,28 @@ class ConfirmDialog(BaseScreen):
         dialog_w = min(W - S(80), S(760))
         line_h = f["body"].get_height() + S(6)
         button_h = S(50)
-        dialog_h = min(H - S(80), S(28) + f["hero"].get_height() + S(18) + line_h * len(self.message)
+        # Wrap the message rather than cut it off; empty lines stay as gaps
+        lines = []
+        for line in self.message:
+            lines.extend(wrap(line, dialog_w - S(60), f["body"]) or [""])
+        dialog_h = min(H - S(80), S(28) + f["hero"].get_height() + S(18) + line_h * len(lines)
                        + S(24) + button_h + S(28))
         dialog_x = (W - dialog_w) // 2
         dialog_y = (H - dialog_h) // 2
         draw_dialog_panel(pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h))
         draw_text(screen, fit_text(self.title, f["hero"], dialog_w - S(60)), f["hero"], FG, (dialog_x + S(30), dialog_y + S(28)))
 
-        msg_y = dialog_y + S(28) + f["hero"].get_height() + S(18)
-        for line in self.message:
-            draw_text(screen, fit_text(line, f["body"], dialog_w - S(60)), f["body"], (196, 206, 218), (dialog_x + S(30), msg_y))
-            msg_y += line_h
-
         # Yes and No buttons
         button_w = S(170)
         button_y = dialog_y + dialog_h - button_h - S(28)
+
+        msg_y = dialog_y + S(28) + f["hero"].get_height() + S(18)
+        for line in lines:
+            if msg_y + line_h > button_y - S(12):
+                break  # only on a screen too small for the whole message
+            draw_text(screen, line, f["body"], (196, 206, 218), (dialog_x + S(30), msg_y))
+            msg_y += line_h
+
         for n, (label, color) in enumerate(((t("yes"), ACCENT), (t("no"), (220, 90, 90)))):
             rect = pygame.Rect(0, button_y, button_w, button_h)
             rect.centerx = dialog_x + dialog_w // 2 + (2 * n - 1) * (button_w // 2 + S(12))
@@ -2986,7 +3014,8 @@ class InfoDialog(BaseScreen):
         dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h)
         draw_dialog_panel(dialog_rect, self.border_color)
 
-        draw_text(screen, self.title, UI_FONTS["hero"], FG, (dialog_x + S(30), dialog_y + S(28)))
+        draw_text(screen, fit_text(self.title, UI_FONTS["hero"], dialog_w - S(60)), UI_FONTS["hero"], FG,
+                  (dialog_x + S(30), dialog_y + S(28)))
 
         # Message box area
         msg_rect = pygame.Rect(dialog_x + S(30), dialog_y + S(90), dialog_w - S(60), dialog_h - S(160))
@@ -3184,7 +3213,8 @@ class InteractiveDialog(BaseScreen):
         draw_dialog_panel(dialog_rect)
 
         # Title
-        draw_text(screen, self.title, UI_FONTS["hero"], FG, (dialog_x + S(30), dialog_y + S(28)))
+        draw_text(screen, fit_text(self.title, UI_FONTS["hero"], dialog_w - S(60)), UI_FONTS["hero"], FG,
+                  (dialog_x + S(30), dialog_y + S(28)))
 
         # Message box area: grows with the message (e.g. a warning that lists
         # apps), leaving room for up to 3 options below it
@@ -3355,7 +3385,8 @@ class MenuSelectionDialog(BaseScreen):
         draw_dialog_panel(dialog_rect)
 
         # Title
-        draw_text(screen, self.title, UI_FONTS["hero"], FG, (dialog_x + S(30), dialog_y + S(28)))
+        draw_text(screen, fit_text(self.title, UI_FONTS["hero"], dialog_w - S(60)), UI_FONTS["hero"], FG,
+                  (dialog_x + S(30), dialog_y + S(28)))
 
         # Hints
         hint = f"A={t('hint_select')} | B={t('hint_return')}"
@@ -4645,11 +4676,20 @@ export -f desktop
             log_rect = pygame.Rect(margin, top, W - 2 * margin, H - S(54) - S(16) - top)
             draw_tile(screen, log_rect, radius=S(14), fill=(14, 19, 26))
             line_h = f["small"].get_height() + S(4)
+            rows = max(1, (log_rect.h - S(24)) // line_h)
             with self.runner.lock:
-                view = self.runner.lines[-max(1, (log_rect.h - S(24)) // line_h):]
+                recent = self.runner.lines[-rows:]
+            # Wrap long lines (errors, paths) instead of cutting them off,
+            # and show the newest rows that fit
+            view = []
+            for ln in recent:
+                if f["small"].size(ln)[0] <= log_rect.w - S(32):
+                    view.append(ln)
+                else:
+                    view.extend(wrap(ln, log_rect.w - S(32), f["small"]))
             y = log_rect.y + S(12)
-            for ln in view:
-                draw_text(screen, fit_text(ln, f["small"], log_rect.w - S(32)), f["small"], (196, 206, 218), (log_rect.x + S(16), y))
+            for ln in view[-rows:]:
+                draw_text(screen, ln, f["small"], (196, 206, 218), (log_rect.x + S(16), y))
                 y += line_h
             return
 
