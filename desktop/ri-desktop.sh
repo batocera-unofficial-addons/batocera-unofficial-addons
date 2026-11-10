@@ -18,10 +18,13 @@ case "$arch" in
         echo "    Architecture: ARM64/aarch64 detected"
         OVERLAY_PACKAGE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/ri-desktop-arm64.tar.xz"
         ;;
+    x86_64|amd64)
+        echo "    Architecture: x86_64 detected"
+        OVERLAY_PACKAGE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/ri-desktop-x86_64.tar.xz"
+        ;;
     *)
-        echo "[!] Error: This installer currently only supports ARM64/aarch64 architecture"
-        echo "    Detected architecture: $arch"
-        echo "    Support for other architectures coming soon!"
+        echo "[!] Error: Unsupported architecture: $arch"
+        echo "    Supported: x86_64, aarch64"
         exit 1
         ;;
 esac
@@ -146,7 +149,10 @@ LaunchUnpacked() {
     echo "RUNTIME_DIR=${RUNTIME_DIR}"
     echo "-------------------------------------------------------------"
 
+    # uruntime >= 0.5 reads RUNIMAGE_*; older builds read URUNTIME_TARGET_DIR.
     env \
+      RUNIMAGE_TARGET_DIR="${RUNTIME_DIR}" \
+      RUNIMAGE_EXTRACT_AND_RUN=1 \
       URUNTIME_TARGET_DIR="${RUNTIME_DIR}" \
       TMPDIR="${RUNTIME_DIR}" \
       RUNTIME_EXTRACT_AND_RUN=1 \
