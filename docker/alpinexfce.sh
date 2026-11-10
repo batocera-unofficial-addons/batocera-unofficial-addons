@@ -12,7 +12,7 @@ is_port_in_use() {
 }
 
 find_available_port() {
-    local start_port=3000
+    local start_port=3001
     local port=$start_port
 
     # Get a list of all host ports used by Docker (running or not)
@@ -54,8 +54,8 @@ docker run -d \
   -e PUID=$(id -u) \
   -e PGID=$(id -g) \
   -e TZ=$(cat /etc/timezone) \
-  -e SUBFOLDER=/ \   
-  -p ${HOST_PORT}:3000 \
+  -e SUBFOLDER=/ \
+  -p ${HOST_PORT}:3001 \
   -v "$data_dir:/config" \
   -v "$data_dir/home:/home/ubuntu" \
   --shm-size="2gb" \
@@ -64,7 +64,7 @@ docker run -d \
 
 # Final message
 if docker ps -q -f name=alpine-xfce &> /dev/null; then
-    MSG="${APPNAME} container has been started successfully.\n\nAccess it via: http://<your-ip>:${HOST_PORT}"
+    MSG="${APPNAME} container has been started successfully.\n\nAccess it via: https://<your-ip>:${HOST_PORT}\n\nHTTPS is required (plain HTTP no longer works).\nYour browser will warn about a self-signed certificate - accept it to continue."
 else
     MSG="Failed to start ${APPNAME}. Please check Docker logs for troubleshooting."
 fi

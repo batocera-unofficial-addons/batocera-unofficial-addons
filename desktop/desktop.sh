@@ -132,6 +132,7 @@ docker run -d \
   -e TITLE="Webtop ($distro $env)" \
   -v /userdata:/config/ \
   -p 3000:3000 \
+  -p 3001:3001 \
   --shm-size="$shm_size" \
   --restart unless-stopped \
   lscr.io/linuxserver/webtop:$tag
@@ -160,7 +161,9 @@ echo "Creating Desktop launcher in Ports..."
 cat << EOF > /userdata/roms/ports/BatoDesktop.sh
 #!/bin/bash
 batocera-mouse show
-QT_SCALE_FACTOR="1" GDK_SCALE="1" DISPLAY=:0.0 "$bin_path" --no-sandbox
+# Webtop (Selkies) needs a secure context: http://127.0.0.1 counts as one,
+# the LAN IP the AppImage defaults to does not. URL is read from argv[2].
+QT_SCALE_FACTOR="1" GDK_SCALE="1" DISPLAY=:0.0 "$bin_path" --no-sandbox http://127.0.0.1:3000
 EOF
 chmod +x /userdata/roms/ports/BatoDesktop.sh
 
@@ -219,4 +222,5 @@ awk -v entry="$xml_entry" '
 ' "$gamelist_file" > "$tmp_file" && mv "$tmp_file" "$gamelist_file"
 
 echo "✅ BatoDesktop installed and added to Ports menu!"
+echo "Remote browser access: https://<your-ip>:3001 (self-signed certificate, accept the warning)"
 sleep 5
