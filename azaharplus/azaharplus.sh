@@ -1,14 +1,46 @@
 #!/bin/bash
+# Installer for AzaharPlus, a 3DS emulator offered as an alternative to Azahar
+# in the 3ds system's emulator list.
+# Batocera 44 replaced configgen/emulatorlauncher with batocera-launch, which
+# finds emulators through Python entry points, so the installer reads the
+# Batocera version and installs the matching launcher.
 
 # Variables
 install_dir="/userdata/system/add-ons/azaharplus"
 es_config_dir="/userdata/system/configs/emulationstation"
-user_site="/userdata/system/.local/lib/$(python3 -c 'import sys; print(f"python{sys.version_info.major}.{sys.version_info.minor}")')/site-packages"
+# Python's per-user site-packages, as seen by EmulationStation (HOME=/userdata/system)
+user_site=$(HOME=/userdata/system python3 -c 'import site; print(site.getusersitepackages())')
 base_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/azaharplus"
 bua_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app"
 
-# Ensure BUA Python hook is present
-if [ ! -f "$user_site/usercustomize.py" ]; then
+fail() {
+    echo "$1"
+    exit 1
+}
+
+# Pick the launcher by Batocera version: 44 and later use batocera-launch,
+# 43 and earlier use configgen's emulatorlauncher.
+batocera_version=$(batocera-version 2>/dev/null)
+major=$(echo "$batocera_version" | grep -o '^[0-9]*')
+echo "Batocera version: ${batocera_version:-unknown}"
+[ -n "$major" ] || fail "Could not read the Batocera version."
+if [ "$major" -ge 44 ]; then
+    launcher="batocera-launch"
+    package="batocera_launch.emulators.azahar"
+else
+    launcher="emulatorlauncher"
+    package="configgen.generators"
+fi
+# Make sure that launcher is really there (early Batocera 44 test builds still
+# had configgen). -I keeps the per-user folders and the current directory out,
+# so only the system's own packages count. On 44 the emulator builds on
+# Batocera's own Azahar emulator, so check for that too.
+python3 -I -c "import $package" 2>/dev/null \
+    || fail "Batocera $major should have $launcher, but $package is missing. AzaharPlus was not installed."
+echo "Launcher: $launcher"
+
+# Ensure BUA Python hook is present (it lets emulatorlauncher find the generator)
+if [ "$launcher" = "emulatorlauncher" ] && [ ! -f "$user_site/usercustomize.py" ]; then
     echo "Installing BUA Python hook..."
     mkdir -p "$user_site"
     wget -q --show-progress -O "$user_site/usercustomize.py" "$bua_url/usercustomize.py"
@@ -17,7 +49,6 @@ fi
 # Prepare installation directory
 echo "Setting up installation directory at $install_dir..."
 rm -rf "$install_dir"
-mkdir -p "$install_dir/generator/azaharplus"
 mkdir -p "$es_config_dir"
 
 # Get latest AzaharPlus AppImage release URL
@@ -42,15 +73,38 @@ fi
 
 chmod +x "$install_dir/azahar.AppImage"
 
-# Download generator
-echo "Downloading generator..."
-wget -q --show-progress -O "$install_dir/generator/azaharplus/__init__.py" "$base_url/generator/azaharplus/__init__.py"
-wget -q --show-progress -O "$install_dir/generator/azaharplus/azaharplusGenerator.py" "$base_url/generator/azaharplus/azaharplusGenerator.py"
+# Download the launcher for this Batocera
+if [ "$launcher" = "batocera-launch" ]; then
+    # A package plus the dist-info that registers it as the "azaharplus" emulator
+    echo "Downloading batocera-launch emulator..."
+    plugin_dir="$user_site/batocera_launch_azaharplus"
+    dist_info="$user_site/batocera_launch_azaharplus-1.0.dist-info"
+    mkdir -p "$plugin_dir" "$dist_info"
+    wget -q --show-progress -O "$plugin_dir/__init__.py" "$base_url/launch/batocera_launch_azaharplus/__init__.py" \
+        || fail "Failed to download the batocera-launch emulator."
+    printf 'Metadata-Version: 2.1\nName: batocera-launch-azaharplus\nVersion: 1.0\n' > "$dist_info/METADATA"
+    printf '[batocera_launch.emulators]\nazaharplus = batocera_launch_azaharplus:AzaharPlus\n' > "$dist_info/entry_points.txt"
+else
+    echo "Downloading generator..."
+    mkdir -p "$install_dir/generator/azaharplus"
+    wget -q --show-progress -O "$install_dir/generator/azaharplus/__init__.py" "$base_url/generator/azaharplus/__init__.py"
+    wget -q --show-progress -O "$install_dir/generator/azaharplus/azaharplusGenerator.py" "$base_url/generator/azaharplus/azaharplusGenerator.py"
+fi
 
 # Download and deploy ES config files
 echo "Downloading ES configs..."
 wget -q --show-progress -O "$es_config_dir/es_systems_3ds.cfg" "$base_url/extra/es_systems_3ds.cfg"
 wget -q --show-progress -O "$es_config_dir/es_features_azaharplus.cfg" "$base_url/extra/es_features_azaharplus.cfg"
+
+# Controller-to-mouse mapping (right stick moves the touch-screen pointer, R3
+# clicks). evmapy looks it up by emulator name, and Batocera only ships it as
+# 3ds.azahar.keys, so give AzaharPlus its own copy. Keep a user-edited one.
+evmapy_keys="/userdata/system/configs/evmapy/azaharplus.keys"
+if [ -f /usr/share/evmapy/3ds.azahar.keys ] && [ ! -f "$evmapy_keys" ]; then
+    echo "Adding controller mapping..."
+    mkdir -p "$(dirname "$evmapy_keys")"
+    cp /usr/share/evmapy/3ds.azahar.keys "$evmapy_keys"
+fi
 
 # Extract icon from AppImage
 echo "Extracting icon..."

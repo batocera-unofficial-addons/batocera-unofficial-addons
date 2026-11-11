@@ -11,6 +11,17 @@ if [ -d "/userdata/system/add-ons/azaharplus" ]; then
     rm -rf "/userdata/system/add-ons/azaharplus"
 fi
 
+# Batocera 44+: the batocera-launch emulator, under any Python version's folder
+rm -rf /userdata/system/.local/lib/python3*/site-packages/batocera_launch_azaharplus \
+       /userdata/system/.local/lib/python3*/site-packages/batocera_launch_azaharplus-*.dist-info
+
+# Controller mapping, unless the user changed it
+evmapy_keys="/userdata/system/configs/evmapy/azaharplus.keys"
+if [ -f "$evmapy_keys" ] && cmp -s "$evmapy_keys" /usr/share/evmapy/3ds.azahar.keys; then
+    echo "Removing controller mapping"
+    rm -f "$evmapy_keys"
+fi
+
 # Remove ES config files
 if [ -f "/userdata/system/configs/emulationstation/es_systems_3ds.cfg" ]; then
     echo "Removing es_systems_3ds.cfg"
