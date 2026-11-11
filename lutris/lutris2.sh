@@ -132,6 +132,9 @@ BATOCERA_CONF="/userdata/system/batocera.conf"
 sed -i '/^lutris\.emulator=/d; /^lutris\.core=/d' "$BATOCERA_CONF" 2>/dev/null || true
 echo "lutris.emulator=sh" >> "$BATOCERA_CONF"
 echo "lutris.core=sh" >> "$BATOCERA_CONF"
+# No bezel by default: otherwise Batocera puts its default bezel around
+# Lutris and its games. A bezel setting already chosen in ES is kept.
+grep -q "^lutris\.bezel=" "$BATOCERA_CONF" 2>/dev/null || echo "lutris.bezel=none" >> "$BATOCERA_CONF"
 
 echo "Downloading EmulationStation config..."
 mkdir -p /userdata/system/configs/emulationstation
