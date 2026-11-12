@@ -58,10 +58,11 @@
 | `armagetron/armagetron_uninstall.sh` | 2026-10-18 16:06:36 -0400 |
 | `assaultcube/assaultcube.sh` | 2026-04-17 14:03:29 +0100 |
 | `assaultcube/assaultcube_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `azaharplus/azaharplus.sh` | 2026-08-18 18:46:22 +0100 |
-| `azaharplus/azaharplus_uninstall.sh` | 2026-05-10 23:34:28 +0100 |
+| `azaharplus/azaharplus.sh` | 2026-11-11 19:54:20 +0000 |
+| `azaharplus/azaharplus_uninstall.sh` | 2026-11-11 19:54:20 +0000 |
 | `azaharplus/generator/azaharplus/__init__.py` | 2026-05-10 23:34:28 +0100 |
 | `azaharplus/generator/azaharplus/azaharplusGenerator.py` | 2026-05-10 23:34:28 +0100 |
+| `azaharplus/launch/batocera_launch_azaharplus/__init__.py` | 2026-11-11 19:54:20 +0000 |
 | `bottles/bottles.sh` | 2025-11-25 15:20:38 +0000 |
 | `bottles/bottles_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `brave/brave.sh` | 2025-05-22 17:22:11 +0100 |
@@ -190,7 +191,7 @@
 | `luanti/luanti_uninstall.sh` | 2026-10-24 09:05:41 -0400 |
 | `lutris/extra/create-lutris-launchers.sh` | 2026-05-04 21:46:58 +0100 |
 | `lutris/lutris.sh` | 2025-11-20 16:56:24 +0000 |
-| `lutris/lutris2.sh` | 2026-10-28 18:31:14 -0400 |
+| `lutris/lutris2.sh` | 2026-11-11 19:54:20 +0000 |
 | `lutris/lutris2_uninstall.sh` | 2026-05-04 21:46:58 +0100 |
 | `lutris/lutris_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `minecraft/bedrock.sh` | 2026-04-17 14:32:22 +0100 |
