@@ -165,5 +165,32 @@
   "resolution_desc": "Zmień rozdzielczość interfejsu",
 
   "cards_per_page": "Karty na stronie",
-  "cards_per_page_desc": "Ustaw liczbę kart wyświetlanych w menu (Auto/3/4/5/6/7/8/10)"
+  "cards_per_page_desc": "Ustaw liczbę kart wyświetlanych w menu (Auto/3/4/5/6/7/8/10)",
+
+  "updater_choose_scan": "Wybierz zainstalowane aplikacje do sprawdzenia (wybrano {selected}/{total})",
+  "updater_results_summary": "Dostępne aktualizacje: {updates}, wybrane: {selected}",
+  "hint_select_all": "Zaznacz wszystko",
+  "hint_deselect_all": "Odznacz wszystko",
+  "hint_scan_selected": "Sprawdź wybrane",
+  "hint_update_selected": "Aktualizuj wybrane",
+  "updater_scanning_selected": "Sprawdzanie wybranych aplikacji ({count})...",
+  "updater_scan_starting": "Rozpoczynanie sprawdzania...",
+  "updater_refreshing_catalog": "Odświeżanie katalogu aktualizacji...",
+  "updater_refreshing_catalog_progress": "Odświeżanie katalogu aktualizacji ({done}/{total})",
+  "updater_checking_app": "Sprawdzanie: {app} ({number}/{total})",
+  "updater_waiting_to_scan": "Oczekuje na sprawdzenie",
+  "updater_select_one": "Wybierz co najmniej jedną zainstalowaną aplikację do sprawdzenia.",
+  "uninstall_confirm": "Odinstalować {app}?",
+  "uninstall_confirm_skip_warnings": "Jej ostrzeżenia zostaną pominięte.",
+  "updater_blocked_source": "Źródło zablokowane",
+  "updater_source_unavailable": "Wymagane źródło jest niedostępne",
+  "updater_recipe_unavailable": "Przepis aktualizacji niedostępny",
+  "updater_version_unknown": "Nieznana wersja aplikacji",
+  "updater_latest_version": "Najnowsza: {version}",
+  "updater_version": "Wersja: {version}",
+  "updater_installed_version": "Zainstalowana: {version}",
+  "switch_component_out_of_date": "{name}: nieaktualne",
+  "switch_component_unavailable": "{name}: źródło niedostępne ({reason})",
+  "switch_component_not_installed": "{name}: nie zainstalowano",
+  "switch_other_components_current": "Pozostałe emulatory są aktualne"
 }

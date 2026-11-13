@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "backend_api_version": 1,
+  "supported_frontend_api_versions": [
+    1
+  ],
+  "required_files": [
+    "bua_installerx86.py",
+    "catalog/build_global_update_manifest.py",
+    "catalog/global/app-update-recipes.json",
+    "integrations/apply_switch_nextendo.py"
+  ],
+  "manifest_schema": {
+    "apps": "list"
+  },
+  "recipe_schema": {
+    "apps": "object"
+  }
+}

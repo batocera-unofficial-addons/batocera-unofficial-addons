@@ -165,5 +165,32 @@
   "resolution_desc": "Изменить разрешение интерфейса",
 
   "cards_per_page": "Карточек на Странице",
-  "cards_per_page_desc": "Установить количество карточек в меню (Авто/3/4/5/6/7/8/10)"
+  "cards_per_page_desc": "Установить количество карточек в меню (Авто/3/4/5/6/7/8/10)",
+
+  "updater_choose_scan": "Выберите установленные приложения для проверки (выбрано {selected}/{total})",
+  "updater_results_summary": "Доступно обновлений: {updates}, выбрано: {selected}",
+  "hint_select_all": "Выбрать всё",
+  "hint_deselect_all": "Снять выбор",
+  "hint_scan_selected": "Проверить выбранное",
+  "hint_update_selected": "Обновить выбранное",
+  "updater_scanning_selected": "Проверка выбранных приложений ({count})...",
+  "updater_scan_starting": "Запуск проверки...",
+  "updater_refreshing_catalog": "Обновление каталога обновлений...",
+  "updater_refreshing_catalog_progress": "Обновление каталога обновлений ({done}/{total})",
+  "updater_checking_app": "Проверка: {app} ({number}/{total})",
+  "updater_waiting_to_scan": "Ожидает проверки",
+  "updater_select_one": "Выберите хотя бы одно установленное приложение для проверки.",
+  "uninstall_confirm": "Удалить {app}?",
+  "uninstall_confirm_skip_warnings": "Его предупреждения будут пропущены.",
+  "updater_blocked_source": "Источник заблокирован",
+  "updater_source_unavailable": "Нужный источник недоступен",
+  "updater_recipe_unavailable": "Рецепт обновления недоступен",
+  "updater_version_unknown": "Версия приложения неизвестна",
+  "updater_latest_version": "Последняя: {version}",
+  "updater_version": "Версия: {version}",
+  "updater_installed_version": "Установлена: {version}",
+  "switch_component_out_of_date": "{name}: устарел",
+  "switch_component_unavailable": "{name}: источник недоступен ({reason})",
+  "switch_component_not_installed": "{name}: не установлен",
+  "switch_other_components_current": "Остальные эмуляторы актуальны"
 }
