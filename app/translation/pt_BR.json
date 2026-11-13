@@ -165,5 +165,32 @@
   "resolution_desc": "Alterar a resolução da interface",
 
   "cards_per_page": "Cartões por Página",
-  "cards_per_page_desc": "Definir quantos cartões mostrar nos menus (Auto/3/4/5/6/7/8/10)"
+  "cards_per_page_desc": "Definir quantos cartões mostrar nos menus (Auto/3/4/5/6/7/8/10)",
+
+  "updater_choose_scan": "Escolha os apps instalados para verificar ({selected}/{total} selecionados)",
+  "updater_results_summary": "Atualizações disponíveis: {updates}, selecionadas: {selected}",
+  "hint_select_all": "Selecionar todos",
+  "hint_deselect_all": "Desmarcar todos",
+  "hint_scan_selected": "Verificar selecionados",
+  "hint_update_selected": "Atualizar selecionados",
+  "updater_scanning_selected": "Verificando aplicativos selecionados ({count})...",
+  "updater_scan_starting": "Iniciando verificação...",
+  "updater_refreshing_catalog": "Atualizando catálogo de atualizações...",
+  "updater_refreshing_catalog_progress": "Atualizando catálogo de atualizações ({done}/{total})",
+  "updater_checking_app": "Verificando {app} ({number}/{total})",
+  "updater_waiting_to_scan": "Aguardando verificação",
+  "updater_select_one": "Selecione pelo menos um aplicativo instalado para verificar.",
+  "uninstall_confirm": "Desinstalar {app}?",
+  "uninstall_confirm_skip_warnings": "Os avisos dele serão ignorados.",
+  "updater_blocked_source": "Fonte bloqueada",
+  "updater_source_unavailable": "A fonte necessária não está disponível",
+  "updater_recipe_unavailable": "Receita de atualização indisponível",
+  "updater_version_unknown": "Versão do app desconhecida",
+  "updater_latest_version": "Mais recente {version}",
+  "updater_version": "Versão {version}",
+  "updater_installed_version": "Instalada {version}",
+  "switch_component_out_of_date": "{name} desatualizado",
+  "switch_component_unavailable": "{name}: fonte indisponível ({reason})",
+  "switch_component_not_installed": "{name} não instalado",
+  "switch_other_components_current": "Os outros emuladores estão atualizados"
 }

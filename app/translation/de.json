@@ -163,5 +163,32 @@
   "resolution_desc": "Auflösung der Benutzeroberfläche ändern",
 
   "cards_per_page": "Kacheln pro Seite",
-  "cards_per_page_desc": "Anzahl der anzuzeigenden Kacheln in Menüs festlegen (Auto/3/4/5/6/7/8/10)"
+  "cards_per_page_desc": "Anzahl der anzuzeigenden Kacheln in Menüs festlegen (Auto/3/4/5/6/7/8/10)",
+
+  "updater_choose_scan": "Installierte Apps zum Prüfen auswählen ({selected}/{total} ausgewählt)",
+  "updater_results_summary": "Updates verfügbar: {updates}, ausgewählt: {selected}",
+  "hint_select_all": "Alle auswählen",
+  "hint_deselect_all": "Auswahl aufheben",
+  "hint_scan_selected": "Auswahl prüfen",
+  "hint_update_selected": "Auswahl aktualisieren",
+  "updater_scanning_selected": "Ausgewählte Anwendungen werden geprüft ({count})...",
+  "updater_scan_starting": "Prüfung startet...",
+  "updater_refreshing_catalog": "Update-Katalog wird aktualisiert...",
+  "updater_refreshing_catalog_progress": "Update-Katalog wird aktualisiert ({done}/{total})",
+  "updater_checking_app": "{app} wird geprüft ({number}/{total})",
+  "updater_waiting_to_scan": "Wartet auf Prüfung",
+  "updater_select_one": "Wähle mindestens eine installierte Anwendung zum Prüfen aus.",
+  "uninstall_confirm": "{app} deinstallieren?",
+  "uninstall_confirm_skip_warnings": "Die Warnungen werden übersprungen.",
+  "updater_blocked_source": "Quelle gesperrt",
+  "updater_source_unavailable": "Benötigte Quelle ist nicht verfügbar",
+  "updater_recipe_unavailable": "Update-Rezept nicht verfügbar",
+  "updater_version_unknown": "App-Version unbekannt",
+  "updater_latest_version": "Neueste {version}",
+  "updater_version": "Version {version}",
+  "updater_installed_version": "Installiert {version}",
+  "switch_component_out_of_date": "{name} veraltet",
+  "switch_component_unavailable": "{name}: Quelle nicht verfügbar ({reason})",
+  "switch_component_not_installed": "{name} nicht installiert",
+  "switch_other_components_current": "Andere Emulatoren aktuell"
 }

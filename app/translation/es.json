@@ -164,5 +164,32 @@
   "resolution_desc": "Cambiar resolución de la interfaz",
 
   "cards_per_page": "Tarjetas por Página",
-  "cards_per_page_desc": "Establece cuántas tarjetas mostrar en los menús (Auto/3/4/5/6/7/8/10)"
+  "cards_per_page_desc": "Establece cuántas tarjetas mostrar en los menús (Auto/3/4/5/6/7/8/10)",
+
+  "updater_choose_scan": "Elige las aplicaciones instaladas que quieres escanear ({selected}/{total} seleccionadas)",
+  "updater_results_summary": "Actualizaciones disponibles: {updates}, seleccionadas: {selected}",
+  "hint_select_all": "Seleccionar todo",
+  "hint_deselect_all": "Deseleccionar todo",
+  "hint_scan_selected": "Escanear selección",
+  "hint_update_selected": "Actualizar selección",
+  "updater_scanning_selected": "Escaneando aplicaciones seleccionadas ({count})...",
+  "updater_scan_starting": "Iniciando escaneo...",
+  "updater_refreshing_catalog": "Actualizando catálogo de actualizaciones...",
+  "updater_refreshing_catalog_progress": "Actualizando catálogo de actualizaciones ({done}/{total})",
+  "updater_checking_app": "Comprobando {app} ({number}/{total})",
+  "updater_waiting_to_scan": "Esperando escaneo",
+  "updater_select_one": "Selecciona al menos una aplicación instalada para escanear.",
+  "uninstall_confirm": "¿Desinstalar {app}?",
+  "uninstall_confirm_skip_warnings": "Se omitirán sus advertencias.",
+  "updater_blocked_source": "Fuente bloqueada",
+  "updater_source_unavailable": "La fuente necesaria no está disponible",
+  "updater_recipe_unavailable": "Receta de actualización no disponible",
+  "updater_version_unknown": "Versión de la aplicación desconocida",
+  "updater_latest_version": "Última {version}",
+  "updater_version": "Versión {version}",
+  "updater_installed_version": "Instalada {version}",
+  "switch_component_out_of_date": "{name} desactualizado",
+  "switch_component_unavailable": "{name}: fuente no disponible ({reason})",
+  "switch_component_not_installed": "{name} no instalado",
+  "switch_other_components_current": "Los demás emuladores están actualizados"
 }

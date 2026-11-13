@@ -164,5 +164,32 @@
   "resolution_desc": "Modifier la résolution de l'interface",
 
   "cards_per_page": "Cartes par Page",
-  "cards_per_page_desc": "Définir le nombre de cartes à afficher dans les menus (Auto/3/4/5/6/7/8/10)"
+  "cards_per_page_desc": "Définir le nombre de cartes à afficher dans les menus (Auto/3/4/5/6/7/8/10)",
+
+  "updater_choose_scan": "Choisissez les applications installées à analyser ({selected}/{total} sélectionnées)",
+  "updater_results_summary": "Mises à jour disponibles : {updates}, sélectionnées : {selected}",
+  "hint_select_all": "Tout sélectionner",
+  "hint_deselect_all": "Tout désélectionner",
+  "hint_scan_selected": "Analyser la sélection",
+  "hint_update_selected": "Mettre à jour la sélection",
+  "updater_scanning_selected": "Analyse des applications sélectionnées ({count})...",
+  "updater_scan_starting": "Démarrage de l'analyse...",
+  "updater_refreshing_catalog": "Actualisation du catalogue de mises à jour...",
+  "updater_refreshing_catalog_progress": "Actualisation du catalogue de mises à jour ({done}/{total})",
+  "updater_checking_app": "Vérification de {app} ({number}/{total})",
+  "updater_waiting_to_scan": "En attente d'analyse",
+  "updater_select_one": "Sélectionnez au moins une application installée à analyser.",
+  "uninstall_confirm": "Désinstaller {app} ?",
+  "uninstall_confirm_skip_warnings": "Ses avertissements seront ignorés.",
+  "updater_blocked_source": "Source bloquée",
+  "updater_source_unavailable": "La source requise est indisponible",
+  "updater_recipe_unavailable": "Recette de mise à jour indisponible",
+  "updater_version_unknown": "Version de l'application inconnue",
+  "updater_latest_version": "Dernière {version}",
+  "updater_version": "Version {version}",
+  "updater_installed_version": "Installée {version}",
+  "switch_component_out_of_date": "{name} n'est pas à jour",
+  "switch_component_unavailable": "{name} : source indisponible ({reason})",
+  "switch_component_not_installed": "{name} non installé",
+  "switch_other_components_current": "Les autres émulateurs sont à jour"
 }

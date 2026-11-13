@@ -160,5 +160,32 @@
   "resolution_desc": "Cambia la risoluzione dell'interfaccia",
 
   "cards_per_page": "Schede per Pagina",
-  "cards_per_page_desc": "Imposta quante schede mostrare nei menu (Auto/3/4/5/6/7/8/10)"
+  "cards_per_page_desc": "Imposta quante schede mostrare nei menu (Auto/3/4/5/6/7/8/10)",
+
+  "updater_choose_scan": "Scegli le app installate da analizzare ({selected}/{total} selezionate)",
+  "updater_results_summary": "Aggiornamenti disponibili: {updates}, selezionati: {selected}",
+  "hint_select_all": "Seleziona tutto",
+  "hint_deselect_all": "Deseleziona tutto",
+  "hint_scan_selected": "Analizza selezione",
+  "hint_update_selected": "Aggiorna selezione",
+  "updater_scanning_selected": "Analisi delle applicazioni selezionate ({count})...",
+  "updater_scan_starting": "Avvio dell'analisi...",
+  "updater_refreshing_catalog": "Aggiornamento del catalogo aggiornamenti...",
+  "updater_refreshing_catalog_progress": "Aggiornamento del catalogo aggiornamenti ({done}/{total})",
+  "updater_checking_app": "Controllo di {app} ({number}/{total})",
+  "updater_waiting_to_scan": "In attesa di analisi",
+  "updater_select_one": "Seleziona almeno un'applicazione installata da analizzare.",
+  "uninstall_confirm": "Disinstallare {app}?",
+  "uninstall_confirm_skip_warnings": "I suoi avvisi verranno ignorati.",
+  "updater_blocked_source": "Fonte bloccata",
+  "updater_source_unavailable": "La fonte richiesta non è disponibile",
+  "updater_recipe_unavailable": "Ricetta di aggiornamento non disponibile",
+  "updater_version_unknown": "Versione dell'app sconosciuta",
+  "updater_latest_version": "Ultima {version}",
+  "updater_version": "Versione {version}",
+  "updater_installed_version": "Installata {version}",
+  "switch_component_out_of_date": "{name} non aggiornato",
+  "switch_component_unavailable": "{name}: fonte non disponibile ({reason})",
+  "switch_component_not_installed": "{name} non installato",
+  "switch_other_components_current": "Gli altri emulatori sono aggiornati"
 }

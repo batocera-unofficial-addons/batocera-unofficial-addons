@@ -1,0 +1,1274 @@
+{
+  "apps": {
+    "7zip": {
+      "archive_format": "bsdtar",
+      "archive_subpath": "",
+      "executable": false,
+      "notes": "Replace only the 7-Zip application payload directory from the current official x64 installer. Preserve BUA desktop shortcut, icon, startup script, and integration.",
+      "source_family": "vendor_web",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/7zip/7zip",
+      "update_type": "replace_archive"
+    },
+    "Amazon Luna": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Ambermoon": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Android": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Arcade Manager": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Armagetron": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": true,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_appimage",
+      "status": "target_verified",
+      "target": "/userdata/system/add-ons/armagetron/ArmagetronAdvanced.AppImage",
+      "update_type": "replace_file"
+    },
+    "Assault Cube": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "AzaharPlus": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Bottles": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "flathub",
+      "status": "classified",
+      "target": null,
+      "update_type": "flatpak_update"
+    },
+    "Brave": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "other_api",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Bridge": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "CLI Tools": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "CS Portable": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_archive",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Celeste 64": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Chiaki": {
+      "archive_subpath": null,
+      "asset_pattern": "chiaki-ng.AppImage_x86_64",
+      "executable": true,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/chiaki/Chiaki.AppImage",
+      "update_type": "replace_file"
+    },
+    "Chrome": {
+      "archive_subpath": null,
+      "asset_pattern": "*Google-Chrome-stable*x86_64.AppImage",
+      "executable": true,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/google-chrome/GoogleChrome.AppImage",
+      "update_type": "replace_file"
+    },
+    "Clone Hero": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Conty": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Crunchyroll": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_web",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Custom Wine": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "nested_bua",
+      "status": "classified",
+      "target": null,
+      "update_type": "nested_payload"
+    },
+    "Dark Mode": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_archive",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Desktop": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Desktop For Batocera": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Disney Plus": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_web",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Docker": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "EGGNOGG+": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Endless Sky": {
+      "archive_subpath": null,
+      "asset_pattern": "Endless_Sky-*-x86_64.AppImage",
+      "executable": true,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/endless-sky/EndlessSky.AppImage",
+      "update_type": "replace_file"
+    },
+    "Everest": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "flathub",
+      "status": "classified",
+      "target": null,
+      "update_type": "flatpak_update"
+    },
+    "Extras": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "direct_web",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "F1": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Fightcade": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "FileZilla": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_archive",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Firefox": {
+      "archive_subpath": null,
+      "asset_pattern": "*x86_64.AppImage",
+      "executable": true,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/firefox/Firefox.AppImage",
+      "update_type": "replace_file"
+    },
+    "Flathub": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "flathub",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Free Droid RPG": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_web",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "FreeTube": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "other_api",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Freej2me": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "GParted": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Gamescope": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "direct_archive",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Greenlight": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "HBO Max": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_web",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Heroic": {
+      "archive_subpath": null,
+      "asset_exclude_pattern": "*.zsync",
+      "asset_pattern": "Heroic-*-linux-x86_64.AppImage",
+      "executable": true,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/heroic/heroic.AppImage",
+      "update_type": "replace_file"
+    },
+    "IPTV Nator": {
+      "archive_subpath": null,
+      "asset_exclude_pattern": "*arm*",
+      "asset_pattern": "*.AppImage",
+      "executable": true,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/iptvnator/IPTVNator.AppImage",
+      "update_type": "replace_file"
+    },
+    "ITGMania": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Input Leap": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "flathub",
+      "status": "classified",
+      "target": null,
+      "update_type": "flatpak_update"
+    },
+    "Itch.io": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "flathub",
+      "status": "classified",
+      "target": null,
+      "update_type": "flatpak_update"
+    },
+    "JDownloader": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_archive",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Java Runtime": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "unknown",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Jellyfin Player": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Luanti": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Lutris": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Minecraft": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_appimage",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Moonlight": {
+      "archive_subpath": null,
+      "asset_pattern": "*.AppImage",
+      "executable": true,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/moonlight/moonlight.AppImage",
+      "update_type": "replace_file"
+    },
+    "Mubi": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_web",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "NVIDIA Clocker": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "direct_archive",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "NVIDIA Patcher": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "unknown",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Nazi Zombies Portable": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Netflix": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_web",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "OBS": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "OpenRA": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "OpenRGB": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "OpenTTD": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_web",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Overlay Remove": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "unknown",
+      "status": "excluded",
+      "target": null,
+      "update_type": "not_app"
+    },
+    "Parsec": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "flathub",
+      "status": "classified",
+      "target": null,
+      "update_type": "flatpak_update"
+    },
+    "PeaZip": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Plex": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "flathub",
+      "status": "classified",
+      "target": null,
+      "update_type": "flatpak_update"
+    },
+    "PortMaster": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Prime Video": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_web",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Prism Launcher": {
+      "archive_subpath": null,
+      "asset_pattern": "PrismLauncher-Linux-x86_64.AppImage",
+      "executable": true,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/prismlauncher/prismlauncher.AppImage",
+      "update_type": "replace_file"
+    },
+    "QEMU GA": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_archive",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "RGSX": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "unknown",
+      "status": "blocked",
+      "target": null,
+      "update_type": "source_missing"
+    },
+    "Raspberry Pi Imager": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Sandtrix": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_archive",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "ShadPS4": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "bundle_members": [
+        "shadps4plus.AppImage"
+      ],
+      "executable": true,
+      "notes": [
+        "Replace only the ShadPS4Plus AppImage payload.",
+        "Preserve BUA launchers, monitor scripts, desktop integration, images, and configuration."
+      ],
+      "source_family": "github_filtered_release",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/shadps4",
+      "update_type": "replace_bundle"
+    },
+    "Soar": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Spotify": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_web",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Steam": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Stremio": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "flathub",
+      "status": "classified",
+      "target": null,
+      "update_type": "flatpak_update"
+    },
+    "Sunshine": {
+      "archive_subpath": null,
+      "asset_pattern": "*.AppImage",
+      "executable": true,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/sunshine/sunshine.AppImage",
+      "update_type": "replace_file"
+    },
+    "Super Mario X": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_archive",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "SuperTux": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "SuperTuxKart": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Switch": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "components": [
+        {
+          "executable": true,
+          "name": "Citron",
+          "target": "/userdata/system/switch/appimages/citron-emu.AppImage",
+          "type": "replace_file",
+          "url": "https://github.com/NextendoNetwork/citron-nextendo/releases/download/nightly-linux/citron_nightly-209bc6345-linux-x86_64_v3.AppImage"
+        },
+        {
+          "executable": true,
+          "name": "Eden",
+          "target": "/userdata/system/switch/appimages/eden-emu.AppImage",
+          "type": "replace_file",
+          "url": "https://stable.eden-emu.dev/v0.2.1/Eden-Linux-v0.2.1-amd64-gcc-standard.AppImage"
+        },
+        {
+          "executable": true,
+          "name": "Eden PGO",
+          "target": "/userdata/system/switch/appimages/eden-pgo.AppImage",
+          "type": "replace_file",
+          "url": "https://stable.eden-emu.dev/v0.2.1/Eden-Linux-v0.2.1-amd64-clang-pgo.AppImage"
+        },
+        {
+          "executable": true,
+          "name": "Eden Nightly",
+          "target": "/userdata/system/switch/appimages/eden-nightly.AppImage",
+          "type": "replace_file",
+          "url": "https://nightly.eden-emu.dev/v1790541552.815325ccec/Eden-Linux-815325ccec-amd64-gcc-standard.AppImage"
+        },
+        {
+          "executable": false,
+          "name": "Ryujinx-Nextendo",
+          "target": "/userdata/system/switch/appimages/ryujinx-nextendo.tar.gz",
+          "type": "replace_file",
+          "url": "https://github.com/NextendoNetwork/Ryujinx-Nextendo/releases/download/v1.8.12/Nextendo-1.8.12-linux-x64.tar.gz"
+        }
+      ],
+      "executable": false,
+      "notes": [
+        "Generic multi-component application payload update.",
+        "Does not execute newswitch.sh or appimage_updater.sh.",
+        "Preserves Switch configs, saves, firmware, generators, ports, services, controller configuration, and integration."
+      ],
+      "source_family": "multi_parent",
+      "status": "recipe_ready",
+      "target": "/userdata/system/switch/appimages",
+      "update_type": "multi_component"
+    },
+    "Tailscale": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "bundle_members": [
+        "tailscale",
+        "tailscaled"
+      ],
+      "executable": true,
+      "notes": [
+        "Replace only Tailscale executable payload members.",
+        "Preserve state, profile-data, files, logs, and BUA service integration."
+      ],
+      "source_family": "vendor_api",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/tailscale",
+      "update_type": "replace_bundle"
+    },
+    "Telegraf": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Tidal": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Twitch": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_web",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "UltraStar": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "VClean": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "unknown",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "VLC": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Vesktop": {
+      "archive_subpath": null,
+      "asset_exclude_pattern": "*arm64*",
+      "asset_pattern": "Vesktop-*.AppImage",
+      "executable": true,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/vesktop/Vesktop.AppImage",
+      "update_type": "replace_file"
+    },
+    "Warzone 2100": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "Winconfig (Windows Game Fix)": {
+      "archive_format": "squashfs",
+      "archive_subpath": "usr/bin",
+      "asset_pattern": null,
+      "bundle_members": [
+        "antimicrox",
+        "redist-winetricks-en",
+        "redist-winetricks-es",
+        "redist-winetricks-fr",
+        "redist-winetricks-it",
+        "redist-winetricks-pt",
+        "winconfig-redist-en",
+        "winconfig-redist-es",
+        "winconfig-redist-fr",
+        "winconfig-redist-it",
+        "winconfig-redist-lang",
+        "winconfig-redist-pt",
+        "winetricks",
+        "zenity"
+      ],
+      "executable": true,
+      "notes": [
+        "Extract current parent SquashFS payload.",
+        "Replace only usr/bin payload files.",
+        "Preserve ports launchers, userdata configs, AntiMicroX settings, and all BUA integration."
+      ],
+      "source_family": "github_release",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/winconfig/bin",
+      "update_type": "replace_bundle"
+    },
+    "Wine Dependencies x64": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_bundle"
+    },
+    "Wine Dependencies x86": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_bundle"
+    },
+    "Wine Manager": {
+      "archive_format": "zip",
+      "archive_subpath": "",
+      "asset_pattern": "batocera_wine_manager.zip",
+      "executable": false,
+      "notes": "Replace only the Wine Manager application payload. Preserve BUA Ports launcher, artwork, and integration.",
+      "source_family": "github_release",
+      "status": "recipe_ready",
+      "target": "/userdata/system/wine_manager",
+      "update_type": "replace_archive"
+    },
+    "X11VNC": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_archive",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "Xonotic": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "direct_web",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "YARG": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "YouTube": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_download",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_file"
+    },
+    "npsget": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "direct_web",
+      "status": "classified",
+      "target": null,
+      "update_type": "remote_script_payload"
+    },
+    "ps3i": {
+      "archive_subpath": null,
+      "asset_pattern": null,
+      "executable": false,
+      "notes": [],
+      "source_family": "direct_archive",
+      "status": "classified",
+      "target": null,
+      "update_type": "replace_archive"
+    },
+    "qBittorrent": {
+      "archive_subpath": null,
+      "asset_pattern": "qBittorrent-Enhanced-Edition-x86_64.AppImage",
+      "executable": true,
+      "notes": [
+        "Initial installer deletes/rebuilds add-on path; updater must replace payload only."
+      ],
+      "source_family": "github_release_api",
+      "status": "recipe_ready",
+      "target": "/userdata/system/add-ons/qbittorrent/qbittorrent.AppImage",
+      "update_type": "replace_file"
+    }
+  },
+  "schema": 1
+}

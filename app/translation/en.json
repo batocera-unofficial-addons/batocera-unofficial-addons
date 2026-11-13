@@ -165,5 +165,32 @@
   "resolution_desc": "Change the resolution of the interface",
 
   "cards_per_page": "Cards Per Page",
-  "cards_per_page_desc": "Set how many cards to show in menus (Auto/3/4/5/6/7/8/10)"
+  "cards_per_page_desc": "Set how many cards to show in menus (Auto/3/4/5/6/7/8/10)",
+
+  "updater_choose_scan": "Choose installed apps to scan ({selected}/{total} selected)",
+  "updater_results_summary": "{updates} update(s) available, {selected} selected",
+  "hint_select_all": "Select All",
+  "hint_deselect_all": "Deselect All",
+  "hint_scan_selected": "Scan Selected",
+  "hint_update_selected": "Update Selected",
+  "updater_scanning_selected": "Scanning selected applications ({count})...",
+  "updater_scan_starting": "Starting scan...",
+  "updater_refreshing_catalog": "Refreshing update catalog...",
+  "updater_refreshing_catalog_progress": "Refreshing update catalog ({done}/{total})",
+  "updater_checking_app": "Checking {app} ({number}/{total})",
+  "updater_waiting_to_scan": "Waiting to scan",
+  "updater_select_one": "Select at least one installed application to scan.",
+  "uninstall_confirm": "Uninstall {app}?",
+  "uninstall_confirm_skip_warnings": "Its warnings will be skipped.",
+  "updater_blocked_source": "Blocked source",
+  "updater_source_unavailable": "Required source is unavailable",
+  "updater_recipe_unavailable": "Update recipe unavailable",
+  "updater_version_unknown": "App version unknown",
+  "updater_latest_version": "Latest {version}",
+  "updater_version": "Version {version}",
+  "updater_installed_version": "Installed {version}",
+  "switch_component_out_of_date": "{name} out of date",
+  "switch_component_unavailable": "{name} source unavailable ({reason})",
+  "switch_component_not_installed": "{name} not installed",
+  "switch_other_components_current": "Other emulators up to date"
 }
