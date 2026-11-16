@@ -2,7 +2,7 @@
 # Game Content Manager (GCM) for Batocera: update and DLC management in the game menu.
 # Developer preview for Batocera 44 (x86_64). Source: https://github.com/klova5/Game-Content-Manager-GCM-for-Batocera
 
-release_url="https://github.com/klova5/Game-Content-Manager-GCM-for-Batocera/releases/download/v3.6-preview/gcm-v3.6-preview-batocera44-x86_64.zip"
+release_url="https://github.com/klova5/Game-Content-Manager-GCM-for-Batocera/releases/download/v3.6-preview-2/gcm-v3.6-preview-2-batocera44-x86_64.zip"
 work_dir="/userdata/system/add-ons/game-content-manager/release"
 
 if [ "$(uname -m)" != "x86_64" ]; then
