@@ -1295,6 +1295,15 @@
       ],
       "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/zerok.sh | bash",
       "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/windows/zerok_uninstall.sh | bash"
+    },
+    {
+      "name": "Game Content Manager (GCM)",
+      "description": "Developer preview: manage game updates and DLC (Switch, PS4 and more) from the game menu. Batocera 44 x86_64.",
+      "categories": [
+        "Game Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/gcm/gcm.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/gcm/gcm_uninstall.sh | bash"
     }
   ]
 }
