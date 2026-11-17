@@ -348,9 +348,9 @@
 | `wine-custom/wine-ge.sh` | 2025-11-27 06:31:35 +0000 |
 | `wine-custom/wine.sh` | 2025-11-14 02:14:03 +0000 |
 | `wine-custom/wine_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `winemanager/install_redist_dependencies32.sh` | 2025-01-07 21:03:20 -0300 |
+| `winemanager/install_redist_dependencies32.sh` | 2026-11-17 19:55:31 +0000 |
 | `winemanager/install_redist_dependencies32_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `winemanager/install_redist_dependencies64.sh` | 2025-01-07 21:03:20 -0300 |
+| `winemanager/install_redist_dependencies64.sh` | 2026-11-17 19:55:31 +0000 |
 | `winemanager/winemanager.sh` | 2025-01-07 21:03:20 -0300 |
 | `wps-office/wps-office.sh` | 2026-05-04 21:46:58 +0100 |
 | `wps-office/wps-office_uninstall.sh` | 2026-05-04 21:46:58 +0100 |
