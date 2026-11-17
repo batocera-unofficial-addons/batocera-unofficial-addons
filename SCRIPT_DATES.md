@@ -16,6 +16,7 @@
 | `Freej2me/Install_j2me.sh` | 2026-05-04 21:46:58 +0100 |
 | `Freej2me/Install_j2me_uninstall.sh` | 2026-10-18 16:20:52 -0400 |
 | `Winconfig_Windows_Game_Fix/Install_Winconfig.sh` | 2026-11-17 19:59:42 +0000 |
+| `Winconfig_Windows_Game_Fix/Install_Winconfig_uninstall.sh` | 2026-11-17 15:00:30 -0500 |
 | `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config - old.sh` | 2025-05-14 19:17:39 -0300 |
 | `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config.sh` | 2026-11-17 19:59:42 +0000 |
 | `amazonluna/amazonluna-arm64.sh` | 2025-05-22 17:11:10 +0100 |
@@ -30,8 +31,8 @@
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2026-07-02 16:31:40 -0300 |
 | `app/bua_cli.py` | 2026-10-24 14:00:37 -0400 |
-| `app/bua_installerarm64.py` | 2026-11-03 15:59:16 -0500 |
-| `app/bua_installerx86.py` | 2026-11-03 15:59:16 -0500 |
+| `app/bua_installerarm64.py` | 2026-11-17 15:04:59 -0500 |
+| `app/bua_installerx86.py` | 2026-11-17 15:04:59 -0500 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -61,7 +62,7 @@
 | `azaharplus/azaharplus.sh` | 2026-11-17 19:43:06 +0000 |
 | `azaharplus/azaharplus_uninstall.sh` | 2026-11-11 19:54:20 +0000 |
 | `azaharplus/generator/azaharplus/__init__.py` | 2026-05-10 23:34:28 +0100 |
-| `azaharplus/generator/azaharplus/azaharplusGenerator.py` | 2026-05-10 23:34:28 +0100 |
+| `azaharplus/generator/azaharplus/azaharplusGenerator.py` | 2026-11-17 20:29:48 +0000 |
 | `azaharplus/launch/batocera_launch_azaharplus/__init__.py` | 2026-11-11 19:54:20 +0000 |
 | `bottles/bottles.sh` | 2025-11-25 15:20:38 +0000 |
 | `bottles/bottles_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -145,6 +146,8 @@
 | `freetube/freetube_uninstall.sh` | 2026-10-23 12:37:46 -0400 |
 | `gamescope/gamescope.sh` | 2025-12-09 23:14:24 +0000 |
 | `gamescope/gamescope_uninstall.sh` | 2026-10-26 23:57:27 -0400 |
+| `gcm/gcm.sh` | 2026-11-17 13:07:53 -0700 |
+| `gcm/gcm_uninstall.sh` | 2026-11-17 13:07:53 -0700 |
 | `gparted/gparted.sh` | 2025-12-11 02:16:04 +0000 |
 | `gparted/gparted_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `greenlight/greenlight.sh` | 2026-04-17 14:03:29 +0100 |
@@ -225,6 +228,7 @@
 | `openttd/openttd.sh` | 2025-05-22 18:06:33 +0100 |
 | `openttd/openttd_uninstall.sh` | 2026-10-24 09:06:32 -0400 |
 | `overlay-remove/overlay-remove.sh` | 2026-05-04 21:46:58 +0100 |
+| `overlay-remove/overlay-remove_uninstall.sh` | 2026-11-17 14:58:31 -0500 |
 | `parsec/parsec.sh` | 2025-04-08 18:16:38 +0100 |
 | `parsec/parsec_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `peazip/peazip.sh` | 2025-05-22 18:07:10 +0100 |
@@ -245,7 +249,9 @@
 | `quiverlauncher/quiverlauncher.sh` | 2026-11-03 14:18:33 -0500 |
 | `quiverlauncher/quiverlauncher_uninstall.sh` | 2026-10-28 18:19:11 -0400 |
 | `rpi/rpi.sh` | 2025-11-24 21:18:47 +0000 |
+| `rpi/rpi_uninstall.sh` | 2026-11-17 14:58:50 -0500 |
 | `sandtrix/sandtrix.sh` | 2025-11-21 02:44:08 +0000 |
+| `sandtrix/sandtrix_uninstall.sh` | 2026-11-17 14:59:32 -0500 |
 | `shadps4plus/create_game_launchers.sh` | 2025-11-11 02:26:59 +0000 |
 | `shadps4plus/es_ps4/es_ps4_install.sh` | 2026-10-28 18:31:03 -0400 |
 | `shadps4plus/monitor_shadps4.sh` | 2025-11-11 02:26:59 +0000 |
@@ -267,8 +273,9 @@
 | `stremio/stremio-arm64.sh` | 2025-05-22 18:14:23 +0100 |
 | `stremio/stremio-arm64_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `stremio/stremio.sh` | 2025-11-25 15:20:38 +0000 |
+| `stremio/stremio_uninstall.sh` | 2026-11-17 15:00:09 -0500 |
 | `sunshine/sunshine-arm64.sh` | 2026-10-13 16:19:18 -0400 |
-| `sunshine/sunshine.sh` | 2026-10-18 16:24:57 -0400 |
+| `sunshine/sunshine.sh` | 2026-11-17 15:05:37 -0500 |
 | `sunshine/sunshine_uninstall.sh` | 2026-10-13 16:19:18 -0400 |
 | `supermariox/supermariox.sh` | 2025-11-27 22:20:19 +0000 |
 | `supermariox/supermariox_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -352,6 +359,7 @@
 | `winemanager/install_redist_dependencies32_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `winemanager/install_redist_dependencies64.sh` | 2026-11-17 19:55:29 +0000 |
 | `winemanager/winemanager.sh` | 2025-01-07 21:03:20 -0300 |
+| `winemanager/winemanager_uninstall.sh` | 2026-11-17 15:05:19 -0500 |
 | `wps-office/wps-office.sh` | 2026-05-04 21:46:58 +0100 |
 | `wps-office/wps-office_uninstall.sh` | 2026-05-04 21:46:58 +0100 |
 | `x11vnc/x11vnc.sh` | 2026-10-25 22:40:48 +0000 |

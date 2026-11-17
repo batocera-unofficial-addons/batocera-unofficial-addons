@@ -194,10 +194,10 @@ class AzaharplusGenerator(Generator):
         if controller := Controller.find_player_number(playersControllers, 1):
             for x in azaharButtons:
                 azaharConfig.set("Controls", f"profiles\\1\\{x}", f'"{AzaharplusGenerator.setButton(azaharButtons[x], controller.guid, controller.inputs)}"')
-                azaharConfig.set("Controls", r"profiles\\1\\{x}\default", "false")
+                azaharConfig.set("Controls", f"profiles\\1\\{x}\\default", "false")
             for x in azaharAxis:
                 azaharConfig.set("Controls", f"profiles\\1\\{x}", f'"{AzaharplusGenerator.setAxis(azaharAxis[x], controller.guid, controller.inputs)}"')
-                azaharConfig.set("Controls", r"profiles\\1\\{x}\default", "false")
+                azaharConfig.set("Controls", f"profiles\\1\\{x}\\default", "false")
 
         with ensure_parents_and_open(azaharConfigFile, 'w') as configfile:
             azaharConfig.write(configfile)
@@ -207,11 +207,11 @@ class AzaharplusGenerator(Generator):
         if key in padInputs:
             input = padInputs[key]
             if input.type == "button":
-                return f"button:{input.id},guid:{padGuid},engine:sdl"
+                return f"api:controller,button:{input.id},engine:sdl,guid:{padGuid},port:0"
             if input.type == "hat":
-                return f"engine:sdl,guid:{padGuid},hat:{input.id},direction:{AzaharplusGenerator.hatdirectionvalue(input.value)}"
+                return f"direction:{AzaharplusGenerator.hatdirectionvalue(input.value)},engine:sdl,guid:{padGuid},hat:{input.id},port:0"
             if input.type == "axis":
-                return f"engine:sdl,guid:{padGuid},axis:{input.id},direction:+,threshold:0.5"
+                return f"api:controller,axis:{input.id},direction:+,engine:sdl,guid:{padGuid},port:0,threshold:0.500000"
         return None
 
     @staticmethod
@@ -228,7 +228,7 @@ class AzaharplusGenerator(Generator):
             inputy = padInputs["joystick2up"]
         if inputx is None or inputy is None:
             return ""
-        return f"axis_x:{inputx.id},guid:{padGuid},axis_y:{inputy.id},engine:sdl"
+        return f"api:controller,axis_x:{inputx.id},axis_y:{inputy.id},deadzone:0.000000,engine:sdl,guid:{padGuid},port:0"
 
     @staticmethod
     def hatdirectionvalue(value: str) -> str:
