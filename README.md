@@ -85,8 +85,14 @@ Special thanks to:
 This is a community project and is not affiliated with the official Batocera team.  
 Use at your own discretion. For help, join the community Discord.
 
-[![Stargazers](https://reporoster.com/stars/dark/batocera-unofficial-addons/batocera-unofficial-addons)](https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/stargazers)
-[![Stargazers over time](https://starchart.cc/batocera-unofficial-addons/batocera-unofficial-addons.svg?variant=dark)](https://starchart.cc/batocera-unofficial-addons/batocera-unofficial-addons)
+## Star History
+<a href="https://www.star-history.com/?repos=hippos-linux%2Fhippos-linux%2Cbatocera-unofficial-addons%2Fbatocera-unofficial-addons&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=hippos-linux/hippos-linux%2Cbatocera-unofficial-addons/batocera-unofficial-addons&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=hippos-linux/hippos-linux%2Cbatocera-unofficial-addons/batocera-unofficial-addons&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=hippos-linux/hippos-linux%2Cbatocera-unofficial-addons/batocera-unofficial-addons&type=date&legend=top-left" />
+ </picture>
+</a>
 
 
                     
