@@ -9,15 +9,15 @@
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Android/Install_Android.sh` | 2026-05-04 21:46:58 +0100 |
 | `Android/Install_Android_uninstall.sh` | 2026-10-26 23:57:00 -0400 |
-| `Desktop_for_Batocera/Install_Desktop.sh` | 2026-11-17 19:57:43 +0000 |
+| `Desktop_for_Batocera/Install_Desktop.sh` | 2026-11-17 19:57:42 +0000 |
 | `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2026-05-11 11:35:15 +0100 |
 | `Freej2me/Install_j2me-old .sh` | 2025-03-29 15:06:00 -0300 |
 | `Freej2me/Install_j2me-old _uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Freej2me/Install_j2me.sh` | 2026-05-04 21:46:58 +0100 |
 | `Freej2me/Install_j2me_uninstall.sh` | 2026-10-18 16:20:52 -0400 |
-| `Winconfig_Windows_Game_Fix/Install_Winconfig.sh` | 2026-05-04 21:46:58 +0100 |
+| `Winconfig_Windows_Game_Fix/Install_Winconfig.sh` | 2026-11-17 19:59:42 +0000 |
 | `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config - old.sh` | 2025-05-14 19:17:39 -0300 |
-| `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config.sh` | 2025-05-27 17:37:55 -0300 |
+| `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config.sh` | 2026-11-17 19:59:42 +0000 |
 | `amazonluna/amazonluna-arm64.sh` | 2025-05-22 17:11:10 +0100 |
 | `amazonluna/amazonluna.sh` | 2026-10-27 03:20:22 +0000 |
 | `amazonluna/amazonluna_uninstall.sh` | 2026-10-27 03:20:22 +0000 |

@@ -13,38 +13,17 @@ readonly TEMP_FILE=$(mktemp) || { echo "Erro ao criar arquivo temporário."; }
 ####################################################################################################
 ####################################################################################################
 
-# comando para remover inforações antigas do "gamelist.xml"
+# Remove any existing WinConfig entry from gamelist.xml by path.
 limpargamelist() {
-FULL_PATH="${GAMELIST_FILE_PATH}"
-# Verifica se o arquivo existe
-if [ ! -f "$FULL_PATH" ]; then
-    echo "Erro: O arquivo '$TARGET_FILE' não foi encontrado."
-    # exit 1
-fi
-
-# Verifica se as linhas específicas existem
-if grep -q "<game>" "$FULL_PATH" && grep -q "       <path>./- Windows Game Fix.sh</path>" "$FULL_PATH"; then
-    echo "As linhas de verificação foram encontradas. Iniciando a remoção de 52 linhas..."
-
-    # Encontra o número da linha onde começa a primeira ocorrência de "<game>"
-    # que é seguida por "<path>./- Windows Game Fix.sh</path>"
-    START_LINE=$(grep -n -A 1 "<game>" "$FULL_PATH" | grep -B 1 "       <path>./- Windows Game Fix.sh</path>" | head -n 1 | cut -d: -f 1)
-
-    if [ -z "$START_LINE" ]; then
-        echo "Não foi possível determinar a linha inicial para a remoção."
-        # exit 1
+    local gamelist="${GAMELIST_FILE_PATH}"
+    if [ ! -f "$gamelist" ]; then
+        echo "Gamelist not found, skipping cleanup."
+        return 0
     fi
-
-    END_LINE=$((START_LINE + 51)) # 50 linhas abaixo da primeira, totalizando 52
-
-    echo "Removendo linhas de $START_LINE a $END_LINE..."
-
-    # Usa sed para excluir as linhas
-    sed -i "${START_LINE},${END_LINE}d" "$FULL_PATH"
-    echo "As linhas foram removidas com sucesso de '$TARGET_FILE'."
-else
-    echo "As linhas de verificação não foram encontradas. Nenhuma ação será tomada."
-fi
+    xmlstarlet ed -d "/gameList/game[path='./- Windows Game Fix.sh']" \
+        "$gamelist" > "$gamelist.tmp" \
+        && mv "$gamelist.tmp" "$gamelist" \
+        || echo "Warning: failed to edit gamelist.xml"
 }
 
 # Comando para instalar o idioma em Portugês Brasil
@@ -86,9 +65,6 @@ EOF
 
 # Comando para instalar o idioma em Inglês
 ingles() {
-# --- Início da Lógica ---
-aplicargamelist
-
     # Caminho do arquivo de idioma
     local drl_file="/userdata/roms/ports/- Windows Game Fix.sh"
 

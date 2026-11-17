@@ -163,20 +163,14 @@ echo "Installation completed successfully."
 # Script para baixar, renomear, configurar permissões e mover um arquivo
 # para o diretório do sistema
 
-echo "Iniciando o processo de download e instalação..."
+echo "Downloading gamelist config..."
+wget -O /tmp/gamelistconfig.sh \
+    "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config.sh"
 
-# Download do arquivo
-echo "Baixando o arquivo..."
-wget -O /tmp/gamelistconfig.sh https://github.com/DRLEdition19/DRLEdition_Interface/raw/refs/heads/main/extra/Winconfig_gamelist_config.sh
-echo "Download concluído com sucesso."
+chmod 755 /tmp/gamelistconfig.sh
 
-# Configura as permissões
-echo "Configurando permissões (chmod 777)..."
-chmod 777 /tmp/gamelistconfig.sh
-
-# Inicia a ferramenta para configurar o Idioma
 xterm -fs 14 -fg white -bg black -fa "Monospace" -en UTF-8 -sb -rightbar -e bash -c "PS1='[\u@\h \$PWD]# ' /bin/bash /tmp/gamelistconfig.sh"
 
-rm -r -f /tmp/gamelistconfig.sh
+rm -f /tmp/gamelistconfig.sh
 
 exit 0
