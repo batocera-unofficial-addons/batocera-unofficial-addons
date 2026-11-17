@@ -86,13 +86,13 @@ This is a community project and is not affiliated with the official Batocera tea
 Use at your own discretion. For help, join the community Discord.
 
 ## Star History
-<a href="https://www.star-history.com/?repos=hippos-linux%2Fhippos-linux%2Cbatocera-unofficial-addons%2Fbatocera-unofficial-addons&type=date&legend=top-left">
+
+<a href="https://www.star-history.com/?repos=batocera-unofficial-addons%2Fbatocera-unofficial-addons&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=hippos-linux/hippos-linux%2Cbatocera-unofficial-addons/batocera-unofficial-addons&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=hippos-linux/hippos-linux%2Cbatocera-unofficial-addons/batocera-unofficial-addons&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=hippos-linux/hippos-linux%2Cbatocera-unofficial-addons/batocera-unofficial-addons&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=batocera-unofficial-addons/batocera-unofficial-addons&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=batocera-unofficial-addons/batocera-unofficial-addons&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=batocera-unofficial-addons/batocera-unofficial-addons&type=date&legend=top-left" />
  </picture>
 </a>
-
 
                     
