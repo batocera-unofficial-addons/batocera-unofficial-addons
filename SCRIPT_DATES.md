@@ -9,7 +9,7 @@
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Android/Install_Android.sh` | 2026-05-04 21:46:58 +0100 |
 | `Android/Install_Android_uninstall.sh` | 2026-10-26 23:57:00 -0400 |
-| `Desktop_for_Batocera/Install_Desktop.sh` | 2026-05-09 21:26:19 +0100 |
+| `Desktop_for_Batocera/Install_Desktop.sh` | 2026-11-17 19:57:43 +0000 |
 | `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2026-05-11 11:35:15 +0100 |
 | `Freej2me/Install_j2me-old .sh` | 2025-03-29 15:06:00 -0300 |
 | `Freej2me/Install_j2me-old _uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -348,9 +348,9 @@
 | `wine-custom/wine-ge.sh` | 2025-11-27 06:31:35 +0000 |
 | `wine-custom/wine.sh` | 2025-11-14 02:14:03 +0000 |
 | `wine-custom/wine_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `winemanager/install_redist_dependencies32.sh` | 2026-11-17 19:55:31 +0000 |
+| `winemanager/install_redist_dependencies32.sh` | 2026-11-17 19:55:29 +0000 |
 | `winemanager/install_redist_dependencies32_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `winemanager/install_redist_dependencies64.sh` | 2026-11-17 19:55:31 +0000 |
+| `winemanager/install_redist_dependencies64.sh` | 2026-11-17 19:55:29 +0000 |
 | `winemanager/winemanager.sh` | 2025-01-07 21:03:20 -0300 |
 | `wps-office/wps-office.sh` | 2026-05-04 21:46:58 +0100 |
 | `wps-office/wps-office_uninstall.sh` | 2026-05-04 21:46:58 +0100 |

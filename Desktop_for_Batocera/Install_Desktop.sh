@@ -21,10 +21,18 @@ case "$ARCH" in
         exit 1
         ;;
 esac
+antimicrox_in_use() {
+    for addon in f1 android-bua winconfig freej2me; do
+        [ -d "/userdata/system/add-ons/$addon" ] && return 0
+    done
+    return 1
+}
+
 cleanup_drl_rootfs_remnants() {
     echo "Cleaning up DRL rootfs remnants..."
 
-    rm -f /usr/bin/antimicrox /usr/bin/zenity
+    antimicrox_in_use || rm -f /usr/bin/antimicrox
+    rm -f /usr/bin/zenity
 
     # Remove DRL overlay lib files by exact name via /overlay/overlay/.
     # Using wildcards through the merged /usr/lib path would create whiteouts for
@@ -124,9 +132,9 @@ if [ -f "$DRL_REMOVER" ]; then
         rm -rf /userdata/system/Desktop
         rm -rf /userdata/system/configs/bat-drl/Desktop
         rm -rf /userdata/system/configs/bat-drl/tint2
-        rm -rf /userdata/system/configs/bat-drl/AntiMicroX
+        antimicrox_in_use || rm -rf /userdata/system/configs/bat-drl/AntiMicroX
         rm -rf /userdata/system/configs/bat-drl/FP_Atalho
-        rm -f /userdata/system/configs/bat-drl/Nav_Redist2.joystick.amgp
+        antimicrox_in_use || rm -f /userdata/system/configs/bat-drl/Nav_Redist2.joystick.amgp
         rm -rf /userdata/userdata
         rm -rf /userdata/system/add-ons/desktop_drl
         rm -f /userdata/system/services/desktop_drl
