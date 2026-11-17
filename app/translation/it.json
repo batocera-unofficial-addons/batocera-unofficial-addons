@@ -88,6 +88,7 @@
   "succeeded": "riuscito",
   "failed": "fallito",
   "installing": "Installazione",
+  "uninstalling": "Disinstallazione",
   "queued": "In Coda",
   "preparing": "Preparazione...",
 
@@ -120,6 +121,7 @@
   "reinstall_confirmation": "Conferma Reinstallazione",
   "previously_installed": "era installato in precedenza.",
   "last_installed": "Ultima installazione:",
+  "script_updated": "Script aggiornato",
   "install_again": "Installare di nuovo?",
   "selected_installed": "elementi selezionati sono già installati.",
   "add_to_queue": "Aggiungi alla Coda",

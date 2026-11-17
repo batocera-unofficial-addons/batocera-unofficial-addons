@@ -89,6 +89,7 @@
   "succeeded": "exitoso",
   "failed": "fallido",
   "installing": "Instalando",
+  "uninstalling": "Desinstalando",
   "queued": "En cola",
   "preparing": "Preparando...",
 
@@ -121,6 +122,7 @@
   "reinstall_confirmation": "Confirmación de Reinstalación",
   "previously_installed": "fue instalado previamente.",
   "last_installed": "Última instalación:",
+  "script_updated": "Script actualizado",
   "install_again": "¿Instalar de nuevo?",
   "install_them_again": "Install them again?",
   "selected_installed": "los elementos seleccionados ya están instalados.",
