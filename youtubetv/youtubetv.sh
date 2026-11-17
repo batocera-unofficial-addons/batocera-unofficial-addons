@@ -1,105 +1,89 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# Variables
+APPNAME="YouTube TV"
+APPDIR="/userdata/system/add-ons/google-chrome"
+APPPATH="$APPDIR/GoogleChrome.AppImage"
+CHROME_INSTALLER_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/chrome/chrome.sh"
+PORT_SCRIPT="/userdata/roms/ports/YouTubeTV.sh"
+ICON_PATH="/userdata/roms/ports/images/youtubetv-logo.jpg"
+KEYS_PATH="/userdata/roms/ports/YoutubeTV.sh.keys"
+LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/youtubetv/extra/youtubetv-logo.jpg"
+KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/extra/YoutubeTV.sh.keys"
+GAMELIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 1: Detect system architecture
 echo "Detecting system architecture..."
 arch=$(uname -m)
-
-app_dir="/userdata/system/add-ons/youtube-tv"
-app_bin="${app_dir}/YouTubeonTV"
-
-if [ "$arch" == "x86_64" ]; then
-    echo "Architecture: x86_64 detected."
-    app_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/yttv.tar.xz"
-elif [ "$arch" == "aarch64" ]; then
-    echo "Architecture: ARM64 detected."
-    app_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/yttv-arm64.tar.xz"
-else
+if [ "$arch" != "x86_64" ] && [ "$arch" != "aarch64" ]; then
     echo "Unsupported architecture: $arch. Exiting."
     exit 1
 fi
 
-# Step 2: Download the archive
-echo "Cleaning previous install at $app_dir..."
-rm -rf "$app_dir"
-mkdir -p "$app_dir"
-echo "⬇Downloading YouTube TV from $app_url..."
-archive_path="$app_dir/yttv.tar.xz"
-wget -q --show-progress -O "$archive_path" "$app_url"
+# Step 2: Show dialog to confirm
+dialog --title "Install $APPNAME" \
+  --yesno "This app requires you to install Google Chrome first.\nProceed with the setup?" 10 50
 
-if [ $? -ne 0 ]; then
-    echo "Failed to download YouTube TV archive."
-    exit 1
+if [[ $? -ne 0 ]]; then
+  echo "Installation canceled by user."
+  exit 1
 fi
 
-# Step 3: Extract the downloaded archive
-echo "Extracting files..."
-tar -xf "$archive_path" -C "$app_dir" --strip-components=1
-rm -f "$archive_path"
+clear
 
-# Step 4: Make executable
-chmod +x "$app_bin"
+# Step 3: Check if Chrome is installed
+if [[ ! -f $APPPATH ]]; then
+  echo "Google Chrome is not installed. Downloading and installing..."
+  mkdir -p "$APPDIR"
+  curl -L -o "$APPDIR/chrome.sh" "$CHROME_INSTALLER_URL"
+  chmod +x "$APPDIR/chrome.sh"
+  echo "Running the Google Chrome installer..."
+  bash "$APPDIR/chrome.sh"
+  if [[ ! -f $APPPATH ]]; then
+    echo "Google Chrome installation failed. Exiting."
+    exit 1
+  fi
+fi
 
-echo "YouTube TV installed to $app_dir"
+# Remove leftovers from the old Electron-based YouTube TV client
+rm -rf "/userdata/system/add-ons/youtube-tv"
 
-# Step 5: Create a launcher script using the original command
-echo "Creating YouTube TV script in Ports..."
-ports_dir="/userdata/roms/ports"
-mkdir -p "$ports_dir"
-cat << EOF > "$ports_dir/YouTubeTV.sh"
+# Step 4: Create the ports script
+mkdir -p "$(dirname "$PORT_SCRIPT")"
+mkdir -p "$(dirname "$ICON_PATH")"
+
+cat << EOF > $PORT_SCRIPT
 #!/bin/bash
-batocera-mouse show
-QT_SCALE_FACTOR="1"
-GDK_SCALE="1"
-DISPLAY=:0.0
-"$app_bin" --no-sandbox "\$@"
+DISPLAY=:0.0 $APPPATH --no-sandbox --test-type --start-fullscreen \\
+  --user-agent="Mozilla/5.0 (SMART-TV; Linux; Tizen 5.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/5.0 TV Safari/538.1" \\
+  'https://www.youtube.com/tv'
 EOF
 
-chmod +x "$ports_dir/YouTubeTV.sh"
+chmod +x $PORT_SCRIPT
 
-# Step 6: Download keys file
-echo "Downloading keys file..."
-keys_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/youtubetv/extra/YoutubeTV.sh.keys"
-keys_file="$ports_dir/YoutubeTV.sh.keys"
-curl -L -o "$keys_file" "$keys_url"
+# Step 5: Download the icon
+echo "Downloading YouTube TV logo..."
+curl -fL -o "$ICON_PATH" "$LOGO_URL"
 
-if [ $? -ne 0 ]; then
-    echo "Failed to download keys file."
-    exit 1
+# Step 6: Download the key mapping file
+echo "Downloading key mapping file..."
+curl -fL -o "$KEYS_PATH" "$KEYS_URL"
+
+# Step 7: Add YouTube TV entry to gamelist.xml (replace any old entry)
+echo "Updating gamelist.xml..."
+if [[ ! -f "$GAMELIST" ]]; then
+    echo '<?xml version="1.0" encoding="UTF-8"?><gameList></gameList>' > "$GAMELIST"
 fi
 
-echo "Keys file downloaded to $keys_file."
+xmlstarlet ed -d "/gameList/game[path='./YouTubeTV.sh']" \
+  -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./YouTubeTV.sh" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "$APPNAME" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/youtubetv-logo.jpg" \
+  "$GAMELIST" > "${GAMELIST}.tmp" && mv "${GAMELIST}.tmp" "$GAMELIST"
 
-# Step 7: Refresh the Ports menu
+# Step 8: Refresh the Ports menu
 echo "Refreshing Ports menu..."
 curl http://127.0.0.1:1234/reloadgames
 
-# Step 8: Add an entry to gamelist.xml
-echo "Adding YouTube TV entry to gamelist.xml..."
-gamelist_file="$ports_dir/gamelist.xml"
-logo_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/youtubetv/extra/youtubetv-logo.jpg"
-logo_path="$ports_dir/images/youtubetv-logo.jpg"
-
-# Ensure the logo directory exists and download the logo
-mkdir -p "$(dirname "$logo_path")"
-curl -L -o "$logo_path" "$logo_url"
-
-# Ensure the gamelist.xml exists
-if [ ! -f "$gamelist_file" ]; then
-    echo '<?xml version="1.0" encoding="UTF-8"?><gameList></gameList>' > "$gamelist_file"
-fi
-
-curl http://127.0.0.1:1234/reloadgames
-
-# Add the YouTube TV entry
-xmlstarlet ed -L \
-    -s "/gameList" -t elem -n "game" -v "" \
-    -s "/gameList/game[last()]" -t elem -n "path" -v "./YouTubeTV.sh" \
-    -s "/gameList/game[last()]" -t elem -n "name" -v "YouTube TV" \
-    -s "/gameList/game[last()]" -t elem -n "image" -v "./images/youtubetv-logo.jpg" \
-    "$gamelist_file"
-
-# Refresh the Ports menu
-curl http://127.0.0.1:1234/reloadgames
-
-echo
-echo "Installation complete! You can now launch YouTube TV from the Ports menu."
+echo "$APPNAME port setup completed. You can now access YouTube TV through Ports!"

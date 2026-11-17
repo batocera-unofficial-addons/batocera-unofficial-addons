@@ -26,7 +26,7 @@ if [ -f "/userdata/roms/ports/images/youtubetv-logo.jpg" ]; then
     rm -f "/userdata/roms/ports/images/youtubetv-logo.jpg"
 fi
 
-# Remove created directories (deepest first)
+# Remove old Electron-based install directory (upgrade compatibility)
 if [ -d "/userdata/system/add-ons/youtube-tv" ]; then
     echo "Removing directory: /userdata/system/add-ons/youtube-tv"
     rm -rf "/userdata/system/add-ons/youtube-tv"
