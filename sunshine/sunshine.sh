@@ -8,7 +8,8 @@ mkdir -p /userdata/system/add-ons/sunshine
 
 # Fetch latest AppImage URL and download it
 # Releases carry one AppImage per architecture, so pick the one for this machine
-APPIMAGE_URL=$(curl -s https://api.github.com/repos/LizardByte/Sunshine/releases/latest | grep browser_download_url | grep AppImage | cut -d '"' -f 4 | grep "$(uname -m)" | head -n 1)
+# Sunshine moved from LizardByte to SunshineStream in Nov 2026; -L follows any future move
+APPIMAGE_URL=$(curl -sL https://api.github.com/repos/SunshineStream/Sunshine/releases/latest | grep browser_download_url | grep AppImage | cut -d '"' -f 4 | grep "$(uname -m)" | head -n 1)
 
 if [ -n "$APPIMAGE_URL" ]; then
     # Download next to the old copy and only swap it in once the download succeeded
