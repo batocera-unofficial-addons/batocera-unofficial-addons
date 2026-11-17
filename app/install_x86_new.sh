@@ -196,4 +196,49 @@ curl -fLs -o "$USERCUSTOMIZE_DIR/usercustomize.py" \
     "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/usercustomize.py"
 
 echo
+# BUA updater package: the version-aware Updater screen. It is a release
+# asset, checked against this SHA256 before anything is installed; BUA
+# works the same without it.
+BUA_UPDATER_URL="${BUA_UPDATER_URL:-https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/updater-v1/bua-updater-x86_64.tar.gz}"
+BUA_UPDATER_SHA256="2ccfc0205be2611d43f21b35978e17a25b42b029ababf8e0f34afe5d4c7af148"
+BUA_UPDATER_DIR="/userdata/system/add-ons/bua/updater"
+
+install_bua_updater() {
+    local tmp
+    tmp="$(mktemp -d)" || return 1
+    if ! curl -fLs --retry 3 -o "$tmp/updater.tar.gz" "$BUA_UPDATER_URL"; then
+        echo "Could not download the BUA updater package."
+    elif ! echo "$BUA_UPDATER_SHA256  $tmp/updater.tar.gz" | sha256sum -c --status; then
+        echo "BUA updater package failed its checksum; not installed."
+    elif ! python3 - "$tmp/updater.tar.gz" "$tmp/x" <<'BUA_EXTRACT'
+import os, sys, tarfile
+# Regular files and folders under updater/ only: no links, devices or ../
+with tarfile.open(sys.argv[1]) as tar:
+    for m in tar.getmembers():
+        parts = m.name.split("/")
+        if parts[0] != "updater" or m.name.startswith("/") or ".." in parts or not (m.isfile() or m.isdir()):
+            sys.exit(f"unsafe entry: {m.name}")
+    tar.extractall(sys.argv[2])
+BUA_EXTRACT
+    then
+        echo "BUA updater package could not be extracted."
+    else
+        mkdir -p "$(dirname "$BUA_UPDATER_DIR")"
+        rm -rf "$BUA_UPDATER_DIR.previous"
+        if [ -d "$BUA_UPDATER_DIR" ]; then mv "$BUA_UPDATER_DIR" "$BUA_UPDATER_DIR.previous"; fi
+        if mv "$tmp/x/updater" "$BUA_UPDATER_DIR"; then
+            rm -rf "$BUA_UPDATER_DIR.previous" "$tmp"
+            python3 "$BUA_UPDATER_DIR/install.py" || echo "Warning: BUA updater post-install step failed."
+            echo "BUA updater package installed."
+            return 0
+        fi
+        [ -d "$BUA_UPDATER_DIR.previous" ] && mv "$BUA_UPDATER_DIR.previous" "$BUA_UPDATER_DIR"
+    fi
+    rm -rf "$tmp"
+    return 1
+}
+
+echo "Installing the BUA updater package..."
+install_bua_updater || echo "Continuing without the BUA updater package."
+
 echo "Installation complete! You can now launch Batocera Unofficial Add-Ons from the Ports menu."
