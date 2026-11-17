@@ -49,7 +49,7 @@ fi
 # Prepare installation directory
 echo "Setting up installation directory at $install_dir..."
 rm -rf "$install_dir"
-mkdir -p "$es_config_dir"
+mkdir -p "$install_dir" "$es_config_dir"
 
 # Get latest AzaharPlus AppImage release URL
 echo "Fetching latest AzaharPlus release..."

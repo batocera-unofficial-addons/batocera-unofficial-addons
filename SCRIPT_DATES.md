@@ -58,7 +58,7 @@
 | `armagetron/armagetron_uninstall.sh` | 2026-10-18 16:06:36 -0400 |
 | `assaultcube/assaultcube.sh` | 2026-04-17 14:03:29 +0100 |
 | `assaultcube/assaultcube_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `azaharplus/azaharplus.sh` | 2026-11-11 19:54:20 +0000 |
+| `azaharplus/azaharplus.sh` | 2026-11-17 19:43:06 +0000 |
 | `azaharplus/azaharplus_uninstall.sh` | 2026-11-11 19:54:20 +0000 |
 | `azaharplus/generator/azaharplus/__init__.py` | 2026-05-10 23:34:28 +0100 |
 | `azaharplus/generator/azaharplus/azaharplusGenerator.py` | 2026-05-10 23:34:28 +0100 |
