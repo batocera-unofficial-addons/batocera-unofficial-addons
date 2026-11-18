@@ -4533,6 +4533,8 @@ export -f desktop
         # Uninstall jobs end with the uninstaller's exit code, so a cancelled
         # or failed uninstall is shown as failed and stays in the history
         exit_rc = "; exit $bua_rc" if "(Uninstall)" in name else ""
+        # Optional updater package: may add shell setup or swap the command
+        cmd, hook_wrap = run_wrap_install_hooks(name, cmd)
 
         # Special handling for curl | bash commands - inject wrappers into the piped script
         if "curl" in cmd and "|" in cmd and "bash" in cmd:
@@ -4543,7 +4545,7 @@ export -f desktop
                 curl_part = parts[0].strip()
                 # Arguments for the script: curl ... | bash -s -- <args>
                 script_args = re.sub(r"^\s*bash(\s+-s)?(\s+--)?", "", parts[1]).strip()
-                wrapper_code = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}"
+                wrapper_code = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{hook_wrap}"
                 cmd = (
                     f"{debug_start}"
                     f"TMPSCRIPT=$(mktemp); "
@@ -4553,9 +4555,9 @@ export -f desktop
                     f"{debug_end}{exit_rc}"
                 )
             else:
-                cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{debug_start}{cmd}; bua_rc=$?{debug_end}{exit_rc}"
+                cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{hook_wrap}{debug_start}{cmd}; bua_rc=$?{debug_end}{exit_rc}"
         else:
-            cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{debug_start}{cmd}; bua_rc=$?{debug_end}{exit_rc}"
+            cmd = f"{dialog_wrap}{es_wrap}{overlay_wrap}{interactive_wrap}{system_wrap}{hook_wrap}{debug_start}{cmd}; bua_rc=$?{debug_end}{exit_rc}"
 
         self.runner.run(cmd)
         self.started = True
@@ -4671,6 +4673,7 @@ export -f desktop
                 else:
                     # Regular install - mark as installed
                     mark_installed(job_name, success)
+                run_hooks("job_finished", job_name, success)
                 # If the installer emitted a dialog message, show it as an in-app message box
                 if self.runner.last_dialog_title or self.runner.last_dialog_text:
                     title = self.runner.last_dialog_title or job_name
@@ -6431,10 +6434,63 @@ def check_symlink_manager_and_warn():
         pygame.display.flip()
         clock.tick(60)
 
+# ------------------------------
+# Optional updater package
+# ------------------------------
+# The BUA updater package (installed by install_x86_new.sh from a release
+# asset) adds the version-aware Updater screen. It is loaded into this
+# module and registers functions here; BUA runs unchanged without it.
+UPDATER_PACKAGE = "/userdata/system/add-ons/bua/updater/bua_updater_overlay.py"
+BUA_HOOKS = {"wrap_install": [], "job_finished": [], "startup": []}
+
+
+def run_hooks(event: str, *args):
+    for hook in BUA_HOOKS.get(event, []):
+        try:
+            hook(*args)
+        except Exception as exc:
+            print(f"[BUA] {event} hook failed: {exc}")
+
+
+def run_wrap_install_hooks(name: str, cmd: str):
+    """Returns (cmd, extra shell setup) after the wrap_install hooks."""
+    extra = ""
+    for hook in BUA_HOOKS.get("wrap_install", []):
+        try:
+            cmd, setup = hook(name, cmd)
+            extra += setup or ""
+        except Exception as exc:
+            print(f"[BUA] wrap_install hook failed: {exc}")
+    return cmd, extra
+
+
+def load_updater_package(path: str = UPDATER_PACKAGE) -> bool:
+    """Load the updater package if it is installed. If it fails to load,
+    everything it changed is put back."""
+    if not os.path.isfile(path):
+        return False
+    saved = dict(globals())
+    saved_hooks = {k: list(v) for k, v in BUA_HOOKS.items()}
+    try:
+        with open(path, encoding="utf-8") as fh:
+            code = compile(fh.read(), path, "exec")
+        exec(code, globals())
+    except Exception as exc:
+        print(f"[BUA] Updater package not loaded: {exc}")
+        globals().clear()
+        globals().update(saved)
+        BUA_HOOKS.clear()
+        BUA_HOOKS.update(saved_hooks)
+        return False
+    run_hooks("startup")
+    return True
+
+
 if __name__ == "__main__":
     try:
         # Run live update block before anything else
         live_update_block()
+        load_updater_package()
 
         play_splash_and_load()
         main()
