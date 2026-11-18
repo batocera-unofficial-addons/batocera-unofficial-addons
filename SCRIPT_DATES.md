@@ -368,6 +368,6 @@
 | `xonotic/xonotic_uninstall.sh` | 2026-10-24 09:10:15 -0400 |
 | `yarg/yarg.sh` | 2026-10-27 03:20:22 +0000 |
 | `yarg/yarg_uninstall.sh` | 2026-10-24 09:10:28 -0400 |
-| `youtubetv/youtubetv.sh` | 2026-11-17 20:39:52 +0000 |
-| `youtubetv/youtubetv_uninstall.sh` | 2026-11-17 20:39:52 +0000 |
+| `youtubetv/youtubetv.sh` | 2026-11-17 20:39:50 +0000 |
+| `youtubetv/youtubetv_uninstall.sh` | 2026-11-17 20:39:50 +0000 |
 | `zenity/zenity.sh` | 2025-05-22 13:01:58 -0400 |
