@@ -6441,6 +6441,89 @@ def check_symlink_manager_and_warn():
 # asset) adds the version-aware Updater screen. It is loaded into this
 # module and registers functions here; BUA runs unchanged without it.
 UPDATER_PACKAGE = "/userdata/system/add-ons/bua/updater/bua_updater_overlay.py"
+# Keep these in step with BUA_UPDATER_URL / BUA_UPDATER_SHA256 in
+# install_x86_new.sh. BUA keeps the installed package on this release.
+UPDATER_PACKAGE_URL = (
+    "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons"
+    "/releases/download/updater-v2/bua-updater-x86_64.tar.gz"
+)
+UPDATER_PACKAGE_SHA256 = "a44959b31520e6667a5ca011b572d3a529532e7489dc59a74b38c52b135e04a3"
+UPDATER_PACKAGE_MARKER = ".package-sha256"
+
+
+def update_updater_package(
+    url: str = UPDATER_PACKAGE_URL,
+    sha256: str = UPDATER_PACKAGE_SHA256,
+    package_dir: str = os.path.dirname(UPDATER_PACKAGE),
+) -> bool:
+    """Install the pinned updater package when the installed one differs.
+
+    Downloads it only when the recorded hash differs, checks it against
+    the pinned SHA256, extracts regular files under updater/ only, and
+    swaps it in, keeping the old copy until the new one is in place. If
+    anything fails, BUA keeps the package it has (or runs without one).
+    Returns True when a new package was installed.
+    """
+    marker = os.path.join(package_dir, UPDATER_PACKAGE_MARKER)
+    try:
+        with open(marker, encoding="utf-8") as fh:
+            if fh.read().strip() == sha256:
+                return False
+    except OSError:
+        pass
+    import shutil
+    import tarfile
+    import tempfile
+
+    parent = os.path.dirname(package_dir)
+    previous = package_dir + ".previous"
+    try:
+        os.makedirs(parent, exist_ok=True)
+        tmp = tempfile.mkdtemp(prefix=".bua-updater-", dir=parent)
+    except OSError as exc:
+        print(f"[BUA] Updater package not updated: {exc}")
+        return False
+    try:
+        archive = os.path.join(tmp, "updater.tar.gz")
+        with urllib.request.urlopen(url, timeout=15) as resp, open(archive, "wb") as out:
+            shutil.copyfileobj(resp, out)
+        digest = hashlib.sha256()
+        with open(archive, "rb") as fh:
+            for block in iter(lambda: fh.read(1 << 20), b""):
+                digest.update(block)
+        if digest.hexdigest() != sha256:
+            raise ValueError("checksum mismatch")
+        extract = os.path.join(tmp, "x")
+        with tarfile.open(archive) as tar:
+            for member in tar.getmembers():
+                parts = member.name.split("/")
+                if (parts[0] != "updater" or member.name.startswith("/") or ".." in parts
+                        or not (member.isfile() or member.isdir())):
+                    raise ValueError(f"unsafe entry: {member.name}")
+            tar.extractall(extract)
+        with open(os.path.join(extract, "updater", UPDATER_PACKAGE_MARKER), "w", encoding="utf-8") as fh:
+            fh.write(sha256 + "\n")
+        shutil.rmtree(previous, ignore_errors=True)
+        if os.path.isdir(package_dir):
+            os.rename(package_dir, previous)
+        try:
+            os.rename(os.path.join(extract, "updater"), package_dir)
+        except OSError:
+            if os.path.isdir(previous) and not os.path.exists(package_dir):
+                os.rename(previous, package_dir)
+            raise
+        shutil.rmtree(previous, ignore_errors=True)
+        setup = os.path.join(package_dir, "install.py")
+        if os.path.isfile(setup):
+            subprocess.run([sys.executable, setup], timeout=120, check=False)
+        print("[BUA] Updater package updated.")
+        return True
+    except Exception as exc:
+        print(f"[BUA] Updater package not updated: {exc}")
+        return False
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
 BUA_HOOKS = {"wrap_install": [], "job_finished": [], "startup": []}
 
 
@@ -6490,6 +6573,7 @@ if __name__ == "__main__":
     try:
         # Run live update block before anything else
         live_update_block()
+        update_updater_package()
         load_updater_package()
 
         play_splash_and_load()
