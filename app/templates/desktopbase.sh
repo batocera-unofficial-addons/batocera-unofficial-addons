@@ -3,7 +3,7 @@
 APPNAME=""
 DESKTOP_FILE="/usr/share/applications/${APPNAME}.desktop"
 PERSISTENT_DESKTOP="/userdata/system/configs/${APPNAME,,}/${APPNAME}.desktop"
-ICON_URL="https://github.com/DTJW92/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
+ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/${APPNAME,,}/extra/icon.png"
 
 mkdir -p "/userdata/system/configs/${APPNAME,,}"
 mkdir -p "/userdata/system/add-ons/${APPNAME,,}/extra"
