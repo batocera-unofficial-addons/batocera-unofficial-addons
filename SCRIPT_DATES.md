@@ -3,7 +3,8 @@
 | File | Last Commit Date |
 |------|------------------|
 | `.dep/mousemove.sh` | 2025-05-22 18:53:29 +0100 |
-| `.github/scripts/check_apps_json.py` | 2026-10-27 01:34:21 +0000 |
+| `.github/contribkit/build.sh` | 2026-11-20 20:43:12 +0000 |
+| `.github/scripts/check_apps_json.py` | 2026-11-20 20:45:26 +0000 |
 | `.github/scripts/update_script_dates.py` | 2025-11-27 21:41:34 +0000 |
 | `7zip/7zip.sh` | 2025-05-22 17:09:18 +0100 |
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -32,7 +33,7 @@
 | `app/batocera-unofficial-addons.sh` | 2026-07-02 16:31:40 -0300 |
 | `app/bua_cli.py` | 2026-10-24 14:00:37 -0400 |
 | `app/bua_installerarm64.py` | 2026-11-17 15:04:59 -0500 |
-| `app/bua_installerx86.py` | 2026-11-17 15:04:59 -0500 |
+| `app/bua_installerx86.py` | 2026-11-20 11:24:56 -0700 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
@@ -40,7 +41,7 @@
 | `app/install_arm64_new.sh` | 2026-10-18 16:05:09 -0400 |
 | `app/install_new.sh` | 2025-11-20 03:09:00 +0000 |
 | `app/install_x86.sh` | 2025-05-22 17:17:37 +0100 |
-| `app/install_x86_new.sh` | 2026-10-18 16:05:09 -0400 |
+| `app/install_x86_new.sh` | 2026-11-20 11:24:56 -0700 |
 | `app/rd.sh` | 2025-04-01 03:36:47 +0100 |
 | `app/symlinks.sh` | 2025-12-11 02:28:52 +0000 |
 | `app/templates/desktop_template.sh` | 2025-01-06 01:25:01 +0000 |
@@ -146,8 +147,8 @@
 | `freetube/freetube_uninstall.sh` | 2026-10-23 12:37:46 -0400 |
 | `gamescope/gamescope.sh` | 2025-12-09 23:14:24 +0000 |
 | `gamescope/gamescope_uninstall.sh` | 2026-10-26 23:57:27 -0400 |
-| `gcm/gcm.sh` | 2026-11-17 13:07:53 -0700 |
-| `gcm/gcm_uninstall.sh` | 2026-11-17 13:07:53 -0700 |
+| `gcm/gcm.sh` | 2026-11-19 08:28:32 -0700 |
+| `gcm/gcm_uninstall.sh` | 2026-11-19 08:28:32 -0700 |
 | `gparted/gparted.sh` | 2025-12-11 02:16:04 +0000 |
 | `gparted/gparted_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `greenlight/greenlight.sh` | 2026-04-17 14:03:29 +0100 |
