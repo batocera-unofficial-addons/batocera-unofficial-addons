@@ -80,6 +80,28 @@ Special thanks to:
 ☕ **And you** — for keeping the flame of retro gaming alive with style.
 
 ---
+## 💖 Supporters
+
+Batocera Unofficial Add-ons is free and open source. If you find it useful, consider supporting development.
+
+<p align="center">
+  <a href="https://github.com/sponsors/batocera-unofficial-addons"><img src="https://img.shields.io/badge/sponsor-batocera--unofficial--addons-ea4aaa?style=for-the-badge&logo=github-sponsors" alt="Sponsor on GitHub" /></a>
+</p>
+
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/batocera-unofficial-addons/batocera-unofficial-addons@contributors/sponsors.svg" alt="Sponsors" />
+</p>
+
+---
+## 👥 Contributors
+
+Thank you to everyone who has helped make Batocera Unofficial Add-ons better!
+
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/batocera-unofficial-addons/batocera-unofficial-addons@contributors/github.svg" alt="GitHub contributors" />
+</p>
+
+---
 ## 💬 Disclaimer
 
 This is a community project and is not affiliated with the official Batocera team.  

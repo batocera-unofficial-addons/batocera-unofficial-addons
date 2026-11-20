@@ -1,0 +1,11 @@
+{
+  "name": "bua-contributors",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bash build.sh"
+  },
+  "dependencies": {
+    "@lizardbyte/contribkit": "2026.1008.151600"
+  }
+}
