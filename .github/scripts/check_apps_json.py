@@ -37,25 +37,15 @@ KNOWN_MISSING_UNINSTALL = {
     "app/apps_x86.json": {
         # No uninstall script in the repo
         "AM2R",
-        "Android",
-        "EGGNOGG+",
-        "Gamescope",
-        "Heroic",
-        "Overlay Remove",
-        "Raspberry Pi Imager",
-        "Sandtrix",
         "SCP Containment Breach",
         "Secret Maryo Chronicles",
         "SHRUBNAUT",
         "Sonic 3D in 2D",
         "Sonic Time Twisted",
         "Streets of Rage Remake",
-        "Stremio",
         "Super Crate Box",
         "Unreal Tournament",
-        "Winconfig (Windows Game Fix)",
         "Wine Dependencies x64",
-        "Wine Manager",
         "Zero-K",
         # Only an uninstaller for an older installer exists
         "F1",
@@ -69,8 +59,6 @@ KNOWN_MISSING_UNINSTALL = {
     },
     "app/apps_arm64.json": {
         # No uninstall script in the repo
-        "Overlay Remove",
-        "Raspberry Pi Imager",
         # Points at an -arm64 name; the add-on's uninstaller has another name
         "Amazon Luna",
         "Greenlight",
