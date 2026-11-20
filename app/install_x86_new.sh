@@ -199,8 +199,8 @@ echo
 # BUA updater package: the version-aware Updater screen. It is a release
 # asset, checked against this SHA256 before anything is installed; BUA
 # works the same without it.
-BUA_UPDATER_URL="${BUA_UPDATER_URL:-https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/updater-v1/bua-updater-x86_64.tar.gz}"
-BUA_UPDATER_SHA256="2ccfc0205be2611d43f21b35978e17a25b42b029ababf8e0f34afe5d4c7af148"
+BUA_UPDATER_URL="${BUA_UPDATER_URL:-https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/updater-v2/bua-updater-x86_64.tar.gz}"
+BUA_UPDATER_SHA256="a44959b31520e6667a5ca011b572d3a529532e7489dc59a74b38c52b135e04a3"
 BUA_UPDATER_DIR="/userdata/system/add-ons/bua/updater"
 
 install_bua_updater() {
