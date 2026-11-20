@@ -198,7 +198,9 @@ curl -fLs -o "$USERCUSTOMIZE_DIR/usercustomize.py" \
 echo
 # BUA updater package: the version-aware Updater screen. It is a release
 # asset, checked against this SHA256 before anything is installed; BUA
-# works the same without it.
+# works the same without it. Keep the URL and SHA256 in step with
+# UPDATER_PACKAGE_URL / UPDATER_PACKAGE_SHA256 in bua_installerx86.py,
+# which updates installed copies when BUA opens.
 BUA_UPDATER_URL="${BUA_UPDATER_URL:-https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/updater-v2/bua-updater-x86_64.tar.gz}"
 BUA_UPDATER_SHA256="a44959b31520e6667a5ca011b572d3a529532e7489dc59a74b38c52b135e04a3"
 BUA_UPDATER_DIR="/userdata/system/add-ons/bua/updater"
@@ -227,6 +229,8 @@ BUA_EXTRACT
         rm -rf "$BUA_UPDATER_DIR.previous"
         if [ -d "$BUA_UPDATER_DIR" ]; then mv "$BUA_UPDATER_DIR" "$BUA_UPDATER_DIR.previous"; fi
         if mv "$tmp/x/updater" "$BUA_UPDATER_DIR"; then
+            # Lets BUA see this package is current (update_updater_package)
+            echo "$BUA_UPDATER_SHA256" > "$BUA_UPDATER_DIR/.package-sha256"
             rm -rf "$BUA_UPDATER_DIR.previous" "$tmp"
             python3 "$BUA_UPDATER_DIR/install.py" || echo "Warning: BUA updater post-install step failed."
             echo "BUA updater package installed."
