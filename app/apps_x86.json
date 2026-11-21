@@ -1,5 +1,5 @@
 {
-  "changelog": "- Added RunImage Desktop for x86_64 - XFCE desktop with Firefox in a RunImage container (Ports)\n- Desktop: fixed blank/insecure-connection screen with newer Webtop images\n- Docker Webtops (Arch KDE, Ubuntu MATE, Alpine XFCE): now served over HTTPS (port 3001+), fixed Alpine XFCE port mapping\n- Added Quiver Launcher - installs Windows and Linux apps and games and adds each to a Quiver system in EmulationStation (Batocera 43 and 44)\n- Added KytyPS5 - experimental PS5 emulator, adds a PlayStation 5 system (Batocera 43 and 44)\n- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format\n- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added ps3i - Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added AzaharPlus - selectable 3DS emulator option alongside Azahar\n- Replaced StepMania with ITGMania - ITG-focused rhythm game with bundled songs\n- Desktop: wallpaper and icon layout now preserved on update\n- Desktop: improved DRL migration and palette support\n- NVIDIAPatch: fixed GLX chain on host\n- Amazon Luna: now runs in Google Chrome with controller support (fixes failed install)\n- YARG: fixed missing Ports logo",
+  "changelog": "- Added uninstall scripts and logos for chdress, iso2zar and npsget\n- Added RunImage Desktop for x86_64 - XFCE desktop with Firefox in a RunImage container (Ports)\n- Desktop: fixed blank/insecure-connection screen with newer Webtop images\n- Docker Webtops (Arch KDE, Ubuntu MATE, Alpine XFCE): now served over HTTPS (port 3001+), fixed Alpine XFCE port mapping\n- Added Quiver Launcher - installs Windows and Linux apps and games and adds each to a Quiver system in EmulationStation (Batocera 43 and 44)\n- Added KytyPS5 - experimental PS5 emulator, adds a PlayStation 5 system (Batocera 43 and 44)\n- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format\n- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added ps3i - Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added AzaharPlus - selectable 3DS emulator option alongside Azahar\n- Replaced StepMania with ITGMania - ITG-focused rhythm game with bundled songs\n- Desktop: wallpaper and icon layout now preserved on update\n- Desktop: improved DRL migration and palette support\n- NVIDIAPatch: fixed GLX chain on host\n- Amazon Luna: now runs in Google Chrome with controller support (fixes failed install)\n- YARG: fixed missing Ports logo",
   "apps": [
     {
       "name": "7zip",
@@ -179,7 +179,8 @@
         "Game Utilities"
       ],
       "install": "curl -fsSL https://chdress.8101987.xyz/install.sh | sh",
-      "uninstall": "curl -Ls https://chdress.8101987.xyz/install_uninstall.sh | bash"
+      "uninstall": "curl -fsSL https://chdress.8101987.xyz/uninstall.sh | sh",
+      "logo": "https://codeberg.org/NeverAnswers/chdress/raw/branch/main/assets/chdress-logo.png"
     },
     {
       "name": "Chiaki",
@@ -501,7 +502,8 @@
         "Game Utilities"
       ],
       "install": "curl -fsSL https://iso2zar.8101987.xyz | sh",
-      "uninstall": null
+      "uninstall": "curl -fsSL https://iso2zar.8101987.xyz/uninstall | sh",
+      "logo": "https://codeberg.org/NeverAnswers/iso2zar/raw/branch/main/assets/iso2zar-logo.png"
     },
     {
       "name": "Itch.io",
@@ -663,7 +665,8 @@
         "Game Utilities"
       ],
       "install": "curl -fsSL https://npsget.8101987.xyz | sh",
-      "uninstall": null
+      "uninstall": "curl -fsSL https://npsget.8101987.xyz/uninstall | sh",
+      "logo": "https://codeberg.org/NeverAnswers/npsget/raw/branch/main/assets/npsget-icon.png"
     },
     {
       "name": "NVIDIA Clocker",
