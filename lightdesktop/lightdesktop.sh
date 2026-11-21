@@ -4,9 +4,9 @@
 # from Ports > Light Desktop.
 #
 # It runs a second copy of labwc, Batocera's own compositor, full screen,
-# with a taskbar, an app menu (F1 > Applications and BUA add-ons), a
-# wallpaper, and windows that can be moved, minimized and maximized. Everything
-# it uses is already part of Batocera (labwc, swaybg, GTK, PCManFM, xterm), so
+# with a taskbar, an app menu (F1 > Applications and BUA add-ons), icons on
+# the wallpaper (/userdata/system/Desktop), dark mode, and windows that can be moved, minimized and maximized. Everything
+# it uses is already part of Batocera (labwc, GTK, PCManFM, xterm), so
 # the add-on itself is under 1 MB and nothing else is downloaded.
 #
 # F1 opens whichever desktop was installed last: installing this one takes F1
@@ -33,8 +33,8 @@ echo "Installing $APPNAME..."
 mkdir -p "$install_dir/config"
 
 echo "Downloading $APPNAME..."
-for f in lightdesktop-launch.sh lightdesktop-session.sh lightdesktop-wallpaper.sh lightdesktop-exit.sh \
-         lightdesktop-panel.py lightdesktop-service lightdesktop-logo.png wallpaper.png; do
+for f in lightdesktop-launch.sh lightdesktop-session.sh lightdesktop-exit.sh \
+         lightdesktop-panel.py lightdesktop-desktop.py lightdesktop-service lightdesktop-logo.png wallpaper.png; do
     wget -q --show-progress -O "$install_dir/$f.tmp" "$base_url/extra/$f" || fail "Failed to download $f."
     mv -f "$install_dir/$f.tmp" "$install_dir/$f"
 done
@@ -42,7 +42,8 @@ for f in rc.xml menu.xml themerc-override autostart; do
     wget -q --show-progress -O "$install_dir/config/$f.tmp" "$base_url/extra/config/$f" || fail "Failed to download config/$f."
     mv -f "$install_dir/config/$f.tmp" "$install_dir/config/$f"
 done
-chmod +x "$install_dir"/*.sh "$install_dir/lightdesktop-panel.py" "$install_dir/lightdesktop-service" "$install_dir/config/autostart"
+rm -f "$install_dir/lightdesktop-wallpaper.sh"  # older versions drew the wallpaper with swaybg
+chmod +x "$install_dir"/*.sh "$install_dir"/*.py "$install_dir/lightdesktop-service" "$install_dir/config/autostart"
 
 # F1 opens the Light Desktop: a Batocera service, enabled at boot. The last
 # desktop installed gets F1, so KDE Plasma Desktop's service is stopped and

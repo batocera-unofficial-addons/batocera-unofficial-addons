@@ -9,6 +9,9 @@ Batocera. Open windows come from `wlrctl toplevel`.
 
   lightdesktop-panel.py              run the panel
   lightdesktop-panel.py --wallpaper  choose a wallpaper (desktop menu)
+
+Right-click an app in the app menu to pin it to the taskbar or add it to the
+desktop.
 """
 import os
 import re
@@ -32,6 +35,7 @@ from gi.repository import Gdk, Gio, GLib, Gtk, GtkLayerShell  # noqa: E402
 INSTALL = os.path.dirname(os.path.abspath(__file__))
 CONF = "/userdata/system/configs/lightdesktop"
 PINNED_FILE = os.path.join(CONF, "pinned")
+DESKTOP = "/userdata/system/Desktop"  # the icons on the wallpaper (lightdesktop-desktop.py)
 DEFAULT_PINS = ["pcmanfm.desktop", "Firefox.desktop", "xterm.desktop"]
 # Entries that do nothing useful here (X11-only tools, PCManFM's X11 desktop)
 HIDDEN = {
@@ -187,7 +191,7 @@ class App:
         m = re.fullmatch(r"([a-z0-9-]+?)(-emu)?-config", name)
         if m:
             return " ".join(w.capitalize() for w in m.group(1).split("-")) + " settings"
-        return name
+        return {"File Manager PCManFM": "File Manager"}.get(name, name)
 
     def launch(self):
         cmd = self.info.get_commandline() or ""
@@ -226,6 +230,15 @@ def load_apps():
                 if info and info.should_show():
                     apps[f] = App(info, os.path.join(folder, f))
     return apps
+
+
+def add_to_desktop(app):
+    """An icon on the desktop: a link to the app's entry, in the Desktop
+    folder that lightdesktop-desktop.py shows."""
+    os.makedirs(DESKTOP, exist_ok=True)
+    link = os.path.join(DESKTOP, app.id)
+    if not os.path.lexists(link):
+        os.symlink(app.path, link)
 
 
 def read_pins():
@@ -418,6 +431,14 @@ class AppMenu(Popup):
         menu = Gtk.Menu()
         item = Gtk.MenuItem(label="Unpin from the taskbar" if app.id in pins else "Pin to the taskbar")
         item.connect("activate", lambda *_: self.panel.toggle_pin(app.id))
+        menu.append(item)
+        link = os.path.join(DESKTOP, app.id)
+        if os.path.lexists(link):
+            item = Gtk.MenuItem(label="Remove from the desktop")
+            item.connect("activate", lambda *_: os.remove(link))
+        else:
+            item = Gtk.MenuItem(label="Add to the desktop")
+            item.connect("activate", lambda *_: add_to_desktop(app))
         menu.append(item)
         menu.show_all()
         menu.attach_to_widget(button, None)
@@ -753,7 +774,7 @@ def choose_wallpaper():
     if response == Gtk.ResponseType.OK and chosen:
         ext = os.path.splitext(chosen)[1].lower() or ".png"
         shutil.copyfile(chosen, os.path.join(CONF, "wallpaper" + ext))
-    spawn([os.path.join(INSTALL, "lightdesktop-wallpaper.sh")])
+    # lightdesktop-desktop.py watches CONF and shows the new wallpaper
 
 
 def main():

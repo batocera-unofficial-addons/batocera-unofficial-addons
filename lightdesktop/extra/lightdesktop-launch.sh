@@ -44,6 +44,9 @@ export XDG_CURRENT_DESKTOP=labwc:wlroots
 export XDG_MENU_PREFIX=batocera-
 export XDG_CACHE_HOME=/tmp/xdg_cache   # PCManFM on an exFAT /userdata, like F1's file manager
 export LIGHTDESKTOP=1
+# Dark mode for the file manager, text editor and other GTK apps (only
+# inside the desktop; F1's file manager elsewhere keeps its look)
+export GTK_THEME=Adwaita:dark
 
 # Batocera hides the mouse cursor for EmulationStation; show it while the
 # desktop is open, like F1's file manager does

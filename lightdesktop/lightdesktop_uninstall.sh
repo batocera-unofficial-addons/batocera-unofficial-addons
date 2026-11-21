@@ -3,7 +3,8 @@
 # Closes it if it is open, gives F1 back (to KDE Plasma Desktop if that is
 # installed, otherwise to the file manager) and removes the add-on and its
 # Ports entry. Your wallpaper and pinned apps
-# (/userdata/system/configs/lightdesktop) are removed too.
+# (/userdata/system/configs/lightdesktop) are removed too; the Desktop folder
+# (/userdata/system/Desktop) and what is in it are kept.
 
 APP_NAME="Light Desktop"
 install_dir="/userdata/system/add-ons/lightdesktop"
