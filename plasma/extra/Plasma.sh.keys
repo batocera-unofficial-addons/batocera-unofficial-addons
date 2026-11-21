@@ -1,0 +1,74 @@
+{
+    "actions_player1": [
+        {
+            "trigger": [
+                "hotkey",
+                "start"
+            ],
+            "type": "exec",
+            "target": "/userdata/system/add-ons/plasma/plasma-exit.sh &",
+            "description": "Log out of Plasma"
+        },
+        {
+            "trigger": "joystick1",
+            "type": "mouse",
+            "description": "Mouse pointer"
+        },
+        {
+            "trigger": "a",
+            "type": "key",
+            "target": "BTN_LEFT",
+            "description": "Left click"
+        },
+        {
+            "trigger": "b",
+            "type": "key",
+            "target": "BTN_RIGHT",
+            "description": "Right click"
+        },
+        {
+            "trigger": "x",
+            "type": "key",
+            "target": "KEY_LEFTMETA",
+            "description": "App launcher"
+        },
+        {
+            "trigger": "y",
+            "type": "key",
+            "target": "KEY_ENTER",
+            "description": "Enter"
+        },
+        {
+            "trigger": "up",
+            "type": "key",
+            "target": "KEY_UP"
+        },
+        {
+            "trigger": "down",
+            "type": "key",
+            "target": "KEY_DOWN"
+        },
+        {
+            "trigger": "left",
+            "type": "key",
+            "target": "KEY_LEFT"
+        },
+        {
+            "trigger": "right",
+            "type": "key",
+            "target": "KEY_RIGHT"
+        },
+        {
+            "trigger": "pageup",
+            "type": "key",
+            "target": "KEY_PAGEUP",
+            "description": "Scroll up (L1)"
+        },
+        {
+            "trigger": "pagedown",
+            "type": "key",
+            "target": "KEY_PAGEDOWN",
+            "description": "Scroll down (R1)"
+        }
+    ]
+}
