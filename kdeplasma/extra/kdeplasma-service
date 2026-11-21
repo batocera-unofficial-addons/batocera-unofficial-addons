@@ -1,0 +1,29 @@
+#!/bin/bash
+# Batocera service for the KDE Plasma Desktop add-on: F1 in EmulationStation
+# opens Plasma instead of the file manager. EmulationStation runs
+# /usr/bin/filemanagerlauncher on F1, so Plasma's launcher is bind-mounted
+# over it. Batocera's own file stays untouched underneath: stopping the
+# service (System Settings > Services, or batocera-services stop kdeplasma)
+# brings the file manager back.
+
+launcher=/userdata/system/add-ons/kdeplasma/kdeplasma-launch.sh
+target=/usr/bin/filemanagerlauncher
+
+is_bound() { awk -v m="$target" '$2==m {f=1} END {exit !f}' /proc/mounts; }
+
+case "$1" in
+    start)
+        [ -x "$launcher" ] || { echo "kdeplasma: $launcher is missing"; exit 1; }
+        is_bound || mount --bind "$launcher" "$target"
+        ;;
+    stop)
+        while is_bound; do umount "$target" || break; done
+        ;;
+    status)
+        is_bound && echo "kdeplasma: F1 opens KDE Plasma" || echo "kdeplasma: F1 opens the file manager"
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status}"
+        exit 1
+        ;;
+esac

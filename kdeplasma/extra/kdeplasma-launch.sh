@@ -1,11 +1,21 @@
 #!/bin/bash
-# Proof of concept: run KDE Plasma from the Arch container inside Batocera's
-# labwc. KWin runs nested as a full-screen window; logging out of Plasma
-# returns to EmulationStation.
-root=/userdata/system/add-ons/plasma/rootfs
-log=/userdata/system/logs/plasma.log
+# Starts the KDE Plasma Desktop add-on (F1 in EmulationStation, or Ports).
+# Plasma runs from its Arch Linux container inside Batocera's labwc: KWin
+# runs nested as a full-screen window, and logging out of Plasma (or
+# Hotkey+Start from Ports) returns to EmulationStation.
+root=/userdata/system/add-ons/kdeplasma/rootfs
+log=/userdata/system/logs/kdeplasma.log
 exec > "$log" 2>&1
 echo "== $(date) Plasma start"
+
+if [ ! -x "$root/usr/bin/startplasma-wayland" ]; then
+    echo "Plasma is not installed in $root. Reinstall KDE Plasma Desktop from BUA."
+    exit 1
+fi
+if ! pgrep -x labwc >/dev/null || [ ! -S /run/wayland-0 ]; then
+    echo "KDE Plasma Desktop needs Batocera's Wayland desktop (labwc)."
+    exit 1
+fi
 
 # Already running (F1 pressed twice): do nothing
 if pgrep -f '^/usr/bin/startplasma-waylan[d]' >/dev/null; then

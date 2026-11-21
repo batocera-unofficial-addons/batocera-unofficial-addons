@@ -6,7 +6,7 @@
                 "start"
             ],
             "type": "exec",
-            "target": "/userdata/system/add-ons/plasma/plasma-exit.sh &",
+            "target": "/userdata/system/add-ons/kdeplasma/kdeplasma-exit.sh &",
             "description": "Log out of Plasma"
         },
         {
