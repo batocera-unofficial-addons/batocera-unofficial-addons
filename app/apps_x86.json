@@ -285,7 +285,7 @@
         "System Utilities"
       ],
       "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/Desktop_for_Batocera/Install_Desktop.sh | bash",
-      "uninstall": "/userdata/system/configs/bat-drl/Remover_Desktop.sh"
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/Desktop_for_Batocera/Install_Desktop_uninstall.sh | bash"
     },
     {
       "name": "Disney Plus",
