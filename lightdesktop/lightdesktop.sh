@@ -1,13 +1,16 @@
 #!/bin/bash
-# Installer for the Light Desktop: a light desktop for Batocera 44 and later
-# (Wayland), opened with F1 in EmulationStation like the old desktop, and
-# from Ports > Light Desktop.
+# Installer for the Light Desktop: Desktop for Batocera on Batocera 44 and
+# later (Wayland). It has no BUA entry of its own: "Desktop For Batocera"
+# (Desktop_for_Batocera/Install_Desktop.sh) runs this when Batocera's Wayland
+# desktop (labwc) is running, and its uninstaller runs lightdesktop_uninstall.sh.
 #
 # It runs a second copy of labwc, Batocera's own compositor, full screen,
 # with a taskbar, an app menu (F1 > Applications and BUA add-ons), icons on
-# the wallpaper (/userdata/system/Desktop), dark mode, and windows that can be moved, minimized and maximized. Everything
-# it uses is already part of Batocera (labwc, GTK, PCManFM, xterm), so
-# the add-on itself is under 1 MB and nothing else is downloaded.
+# the wallpaper (/userdata/system/Desktop), dark mode, and windows that can
+# be moved, minimized and maximized. It opens with F1 in EmulationStation like
+# the old desktop, and from Ports > Light Desktop. Everything it uses is
+# already part of Batocera (labwc, GTK, PCManFM, xterm), so the add-on itself
+# is under 1 MB and nothing else is downloaded.
 #
 # F1 opens whichever desktop was installed last: installing this one takes F1
 # over from KDE Plasma Desktop, and installing Plasma again gives it back.
@@ -26,7 +29,7 @@ fail() {
 
 # Batocera 44 or later, running its Wayland desktop (labwc)
 major=$(batocera-version 2>/dev/null | grep -o '^[0-9]*')
-[ -n "$major" ] && [ "$major" -ge 44 ] || fail "The Light Desktop needs Batocera 44 or later. On older versions, use Desktop for Batocera."
+[ -n "$major" ] && [ "$major" -ge 44 ] || fail "The Light Desktop needs Batocera 44 or later."
 pgrep -x labwc >/dev/null || fail "The Light Desktop needs Batocera's Wayland desktop (labwc), which is not running."
 
 echo "Installing $APPNAME..."

@@ -26,6 +26,21 @@ echo "Uninstalling: Desktop for Batocera"
 echo "========================================="
 echo ""
 
+# On Batocera's Wayland desktop (labwc), Install_Desktop.sh installs the
+# Light Desktop instead; remove it
+LIGHT_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/lightdesktop"
+if [ -d /userdata/system/add-ons/lightdesktop ] || [ -f /userdata/system/services/lightdesktop ]; then
+    echo "Removing the Light Desktop..."
+    curl -fsSL "$LIGHT_URL/lightdesktop_uninstall.sh" | bash
+    echo ""
+fi
+# Nothing of the X11 desktop left (the usual case on Wayland): done
+if [ ! -d "$ROOTFS" ] && [ ! -f "$SERVICE_PATH" ] && [ ! -f "$DRL_REMOVER" ] \
+    && [ ! -f /etc/openbox/rc.xml.es ] && [ ! -L /usr/bin/filemanagerlauncher ]; then
+    echo "Desktop for Batocera has been removed."
+    exit 0
+fi
+
 # 1. Leave desktop mode if it is running
 echo "Closing desktop mode..."
 for proc in tint2 jgmenu picom xcompmgr; do
