@@ -77,6 +77,7 @@ inroot pacman -Syu --noconfirm --needed \
     plasma-desktop kwin plasma-workspace breeze breeze-gtk kde-gtk-config \
     plasma-pa plasma-nm powerdevil kscreen systemsettings \
     konsole dolphin kate ark spectacle gwenview \
+    unrar 7zip zip unzip \
     discover flatpak flatpak-kcm \
     xorg-xwayland mesa vulkan-radeon vulkan-intel libva-mesa-driver intel-media-driver \
     pipewire pipewire-pulse wireplumber \
