@@ -12,7 +12,7 @@
 | `Android/Install_Android_uninstall.sh` | 2026-10-26 23:57:00 -0400 |
 | `Desktop_for_Batocera/Install_Desktop.sh` | 2026-11-17 19:57:42 +0000 |
 | `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2026-05-11 11:35:15 +0100 |
-| `Freej2me/Install_j2me-old .sh` | 2025-03-29 15:06:00 -0300 |
+| `Freej2me/Install_j2me-old .sh` | 2026-11-20 21:00:36 +0000 |
 | `Freej2me/Install_j2me-old _uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Freej2me/Install_j2me.sh` | 2026-05-04 21:46:58 +0100 |
 | `Freej2me/Install_j2me_uninstall.sh` | 2026-10-18 16:20:52 -0400 |
@@ -45,11 +45,11 @@
 | `app/rd.sh` | 2025-04-01 03:36:47 +0100 |
 | `app/symlinks.sh` | 2025-12-11 02:28:52 +0000 |
 | `app/templates/desktop_template.sh` | 2025-01-06 01:25:01 +0000 |
-| `app/templates/desktopbase.sh` | 2025-02-11 15:38:19 +0000 |
+| `app/templates/desktopbase.sh` | 2026-11-20 21:00:36 +0000 |
 | `app/templates/flatpak-template.sh` | 2025-11-25 15:20:38 +0000 |
 | `app/templates/github_desktop.sh` | 2025-01-06 00:44:55 +0000 |
 | `app/templates/linux_template.sh` | 2025-11-25 02:39:23 +0000 |
-| `app/templates/local_template.sh` | 2025-01-06 02:39:18 +0000 |
+| `app/templates/local_template.sh` | 2026-11-20 21:00:36 +0000 |
 | `app/templates/template.sh` | 2025-01-06 02:39:00 +0000 |
 | `app/uninstall.sh` | 2026-10-18 16:05:09 -0400 |
 | `app/updater.sh` | 2025-05-22 17:18:32 +0100 |
