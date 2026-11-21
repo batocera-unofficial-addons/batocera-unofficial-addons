@@ -17,4 +17,14 @@
 #                           game launchers that don't go full screen alone
 # Lines starting with # are comments. Verify each rule on a labwc box first.
 
-firefox*        maximize
+# Tested on Batocera 44 (labwc) 2026-11-21. Already full screen on their own,
+# no rule needed: Lutris, Plex HTPC, Jellyfin Player.
+firefox*                maximize
+Brave-browser*          maximize
+vlc                     maximize
+freetube                maximize
+Moonlight               fullscreen
+stremio                 fullscreen
+heroic                  fullscreen
+# Not yet seen past its first-run terms dialog
+google-chrome*          maximize

@@ -88,7 +88,7 @@ create_launcher() {
     cat << EOF > "${LAUNCHER}"
 #!/bin/bash
 export QTWEBENGINE_DISABLE_SANDBOX=1
-flatpak run com.stremio.Stremio --no-sandbox
+flatpak run com.stremio.Stremio
 EOF
     chmod +x "${LAUNCHER}"
     echo "Launcher created at ${LAUNCHER}."

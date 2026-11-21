@@ -36,10 +36,13 @@ apply_rules() {
             fullscreen) decoration=no;  action=ToggleFullscreen ;;
             *) echo "$(date): unknown mode '$mode' for $id, skipped" >> "$LOG"; continue ;;
         esac
-        # Replace any earlier rule for the same window, then add this one
+        # Replace any earlier rule for the same window, then add this one.
+        # type=normal: only main windows, so an app's dialogs (same
+        # identifier) are not maximized or made full screen.
         edits+=(-d "/labwc_config/windowRules/windowRule[@identifier='$id']"
                 -s /labwc_config/windowRules -t elem -n windowRule -v ""
                 -s "$last" -t attr -n identifier -v "$id"
+                -s "$last" -t attr -n type -v normal
                 -s "$last" -t attr -n serverDecoration -v "$decoration"
                 -s "$last" -t elem -n action -v ""
                 -s "$last/action" -t attr -n name -v "$action")
