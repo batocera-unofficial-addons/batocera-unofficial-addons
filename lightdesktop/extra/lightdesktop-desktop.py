@@ -2,18 +2,20 @@
 """The Light Desktop's desktop: the wallpaper, with icons on it for what is
 in the Desktop folder (/userdata/system/Desktop): apps, folders and files.
 
-Double-click an icon to open it; right-click an icon or the wallpaper for
-more. Apps are added from the app menu (right-click > Add to the desktop) or
-by putting a .desktop file or a link in the folder. The first time, the
-folder gets links to ROMs, BIOS, Saves and Screenshots and a few apps.
+Double-click an icon to open it, and drag it to move it (it snaps to a grid
+and stays there, saved in icons.json); right-click an icon or the wallpaper
+for more. Apps are added from the app menu (right-click > Add to the
+desktop) or by putting a .desktop file or a link in the folder. The first
+time, the folder gets links to ROMs, BIOS, Saves and Screenshots and a few
+apps.
 
 Runs inside the Light Desktop's labwc (lightdesktop-session.sh), on
 gtk-layer-shell's background layer, behind every window.
 """
+import json
 import os
 import re
 import shlex
-import shutil
 import subprocess
 import sys
 import warnings
@@ -29,15 +31,18 @@ INSTALL = os.path.dirname(os.path.abspath(__file__))
 CONF = "/userdata/system/configs/lightdesktop"
 DESKTOP = "/userdata/system/Desktop"
 DEFAULT_WALLPAPER = os.path.join(INSTALL, "wallpaper.png")
+POSITIONS = os.path.join(CONF, "icons.json")  # where each icon was dragged to
 PANEL_ROOM = 80          # the panel along the bottom
 ITEM_W, ITEM_H = 104, 104
+CELL_W, CELL_H = ITEM_W + 8, ITEM_H + 8  # one space of the icon grid
+MARGIN = 16
+DRAG_START = 8           # pixels the mouse moves before a press becomes a drag
 TERMINAL = ["xterm", "-fs", "14", "-fg", "white", "-bg", "black", "-fa", "Monospace", "-en", "UTF-8", "-sb", "-rightbar"]
 
 CSS = b"""
-.ld-desktop flowbox, .ld-desktop flowboxchild { background: transparent; }
-.ld-desktop flowboxchild { border-radius: 10px; padding: 6px 2px; }
-.ld-desktop flowboxchild:hover { background: rgba(255, 255, 255, 0.10); }
-.ld-desktop flowboxchild:selected { background: rgba(79, 155, 255, 0.35); }
+.ld-icon { background: transparent; border-radius: 10px; }
+.ld-icon.ld-hover { background: rgba(255, 255, 255, 0.10); }
+.ld-icon.ld-selected { background: rgba(79, 155, 255, 0.35); }
 .ld-desktop label {
   color: #ffffff; font-size: 10pt;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.9);
@@ -152,6 +157,10 @@ def pretty_name(name):
 
 
 class Desktop(Gtk.Window):
+    """The wallpaper with the icons on a grid. Icons can be dragged to any
+    space on it; they snap into the nearest one, and the places are saved
+    in POSITIONS. New icons take the first free space down the left."""
+
     def __init__(self):
         super().__init__(title="Light Desktop wallpaper")
         self.get_style_context().add_class("ld-desktop")
@@ -168,22 +177,20 @@ class Desktop(Gtk.Window):
         self.background = Gtk.Image()
         overlay.add(self.background)
 
-        self.grid = Gtk.FlowBox(orientation=Gtk.Orientation.VERTICAL, homogeneous=True,
-                                selection_mode=Gtk.SelectionMode.SINGLE, activate_on_single_click=False,
-                                row_spacing=4, column_spacing=4, valign=Gtk.Align.START, halign=Gtk.Align.START)
-        self.grid.set_margin_top(16)
-        self.grid.set_margin_start(16)
-        self.grid.connect("child-activated", lambda _g, child: child.item.open())
-        overlay.add_overlay(self.grid)
-
-        # Clicks on the empty wallpaper (the grid only covers its icons)
+        # The icons sit in a Gtk.Fixed; clicks on empty space reach the
+        # EventBox around it (the wallpaper)
         events = Gtk.EventBox(visible_window=False)
         events.connect("button-press-event", self.on_wallpaper_click)
+        self.fixed = Gtk.Fixed()
+        events.add(self.fixed)
         overlay.add_overlay(events)
-        overlay.reorder_overlay(events, 0)
-        self.grid.connect("button-press-event", self.on_grid_click)
 
+        self.icons = {}         # file name -> icon widget
+        self.cells = {}         # file name -> (column, row)
+        self.selected = None
+        self.drag = None        # the icon being pressed or dragged
         self.size = (0, 0)
+        self.cols = self.rows = 1
         self.connect("size-allocate", self.on_size)
         self.monitors = []
         for folder in (DESKTOP, CONF):
@@ -193,26 +200,25 @@ class Desktop(Gtk.Window):
             mon.connect("changed", self.on_folder_changed)
             self.monitors.append(mon)
         self.reload_pending = False
-        self.fill()
         self.connect("destroy", Gtk.main_quit)
 
-    # Wallpaper, scaled to cover the screen like swaybg's "fill"
+    # Size: the grid's columns and rows, and the wallpaper
     def on_size(self, _w, alloc):
         size = (alloc.width, alloc.height)
         if size != self.size:
             self.size = size
-            rows = max(1, (alloc.height - PANEL_ROOM - 16) // (ITEM_H + 4))
-            self.grid.set_max_children_per_line(rows)
-            self.grid.set_min_children_per_line(rows)
+            self.cols = max(1, (alloc.width - MARGIN) // CELL_W)
+            self.rows = max(1, (alloc.height - PANEL_ROOM - MARGIN) // CELL_H)
             GLib.idle_add(self.set_wallpaper)
+            GLib.idle_add(self.fill)
 
+    # Wallpaper, scaled to cover the screen like swaybg's "fill"
     def set_wallpaper(self):
         w, h = self.size
         if not w or not h:
             return False
-        path = wallpaper_path()
         try:
-            pix = GdkPixbuf.Pixbuf.new_from_file(path)
+            pix = GdkPixbuf.Pixbuf.new_from_file(wallpaper_path())
         except GLib.Error:
             pix = GdkPixbuf.Pixbuf.new_from_file(DEFAULT_WALLPAPER)
         scale = max(w / pix.get_width(), h / pix.get_height())
@@ -222,7 +228,11 @@ class Desktop(Gtk.Window):
         self.background.set_from_pixbuf(pix)
         return False
 
-    def on_folder_changed(self, _mon, _f, _other, _event):
+    def on_folder_changed(self, _mon, changed, _other, _event):
+        # The icon places are saved in CONF too: that is this program's own
+        # write, not a new wallpaper (reloading would save again, and again)
+        if changed and (changed.get_basename() or "").startswith(os.path.basename(POSITIONS)):
+            return
         # Several changes come at once; reload once they settle
         if not self.reload_pending:
             self.reload_pending = True
@@ -256,36 +266,134 @@ class Desktop(Gtk.Window):
             return (0 if (i.app is None and os.path.isdir(i.path)) else 1 if i.app else 2, i.name.lower())
         return sorted(items, key=order)
 
-    def fill(self):
-        for child in self.grid.get_children():
-            self.grid.remove(child)
-        for item in self.items():
-            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-            box.set_size_request(ITEM_W, ITEM_H - 12)
-            pix = icon_pixbuf(item.gicon, 48)
-            box.pack_start(Gtk.Image.new_from_pixbuf(pix) if pix else Gtk.Image(), False, False, 0)
-            label = Gtk.Label(label=item.name, max_width_chars=12, justify=Gtk.Justification.CENTER)
-            label.set_line_wrap(True)
-            label.set_lines(2)
-            label.set_ellipsize(3)
-            box.pack_start(label, False, False, 0)
-            child = Gtk.FlowBoxChild()
-            child.add(box)
-            child.item = item
-            child.set_tooltip_text(item.name)
-            self.grid.add(child)
-        self.grid.show_all()
-        # Nothing selected until clicked (GTK selects the first one by itself)
-        GLib.idle_add(lambda: self.grid.unselect_all() or False)
+    @staticmethod
+    def cell_xy(cell):
+        col, row = cell
+        return MARGIN + col * CELL_W, MARGIN + row * CELL_H
 
-    def on_grid_click(self, _grid, event):
-        if event.button != 3:
+    def free_cell(self, taken):
+        # Down the left first, like a new desktop
+        for col in range(self.cols):
+            for row in range(self.rows):
+                if (col, row) not in taken:
+                    return (col, row)
+        return (self.cols - 1, self.rows - 1)
+
+    def fill(self, arrange=False):
+        if not self.size[0]:
             return False
-        child = self.grid.get_child_at_pos(int(event.x), int(event.y))
-        if child is None:
-            return self.on_wallpaper_click(None, event)
-        self.grid.select_child(child)
-        item = child.item
+        saved = {} if arrange else load_positions()
+        for widget in self.icons.values():
+            self.fixed.remove(widget)
+        self.icons, self.cells = {}, {}
+        self.selected = self.drag = None
+        items = self.items()
+        taken = set()
+        # Icons with a saved place keep it (if it is still on screen and free)
+        for item in items:
+            name = os.path.basename(item.path)
+            cell = saved.get(name)
+            if cell and 0 <= cell[0] < self.cols and 0 <= cell[1] < self.rows and tuple(cell) not in taken:
+                self.cells[name] = tuple(cell)
+                taken.add(tuple(cell))
+        for item in items:
+            name = os.path.basename(item.path)
+            if name not in self.cells:
+                self.cells[name] = self.free_cell(taken)
+                taken.add(self.cells[name])
+            widget = self.make_icon(item)
+            self.icons[name] = widget
+            self.fixed.put(widget, *self.cell_xy(self.cells[name]))
+        self.fixed.show_all()
+        if self.cells != saved:
+            save_positions(self.cells)
+        return False
+
+    def make_icon(self, item):
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        box.set_size_request(ITEM_W, ITEM_H)
+        pix = icon_pixbuf(item.gicon, 48)
+        image = Gtk.Image.new_from_pixbuf(pix) if pix else Gtk.Image()
+        image.set_margin_top(8)
+        box.pack_start(image, False, False, 0)
+        label = Gtk.Label(label=item.name, max_width_chars=12, justify=Gtk.Justification.CENTER)
+        label.set_line_wrap(True)
+        label.set_lines(2)
+        label.set_ellipsize(3)
+        box.pack_start(label, False, False, 0)
+        widget = Gtk.EventBox()  # a window of its own, so it can be styled and dragged
+        widget.get_style_context().add_class("ld-icon")
+        widget.add(box)
+        widget.item = item
+        widget.set_tooltip_text(item.name)
+        widget.add_events(Gdk.EventMask.POINTER_MOTION_MASK | Gdk.EventMask.BUTTON_RELEASE_MASK
+                          | Gdk.EventMask.ENTER_NOTIFY_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK)
+        widget.connect("button-press-event", self.on_icon_press)
+        widget.connect("motion-notify-event", self.on_icon_motion)
+        widget.connect("button-release-event", self.on_icon_release)
+        widget.connect("enter-notify-event", lambda w, _e: w.get_style_context().add_class("ld-hover"))
+        widget.connect("leave-notify-event", lambda w, _e: w.get_style_context().remove_class("ld-hover"))
+        return widget
+
+    def select(self, widget):
+        if self.selected is not None:
+            self.selected.get_style_context().remove_class("ld-selected")
+        self.selected = widget
+        if widget is not None:
+            widget.get_style_context().add_class("ld-selected")
+
+    def on_icon_press(self, widget, event):
+        if event.type == Gdk.EventType._2BUTTON_PRESS and event.button == 1:
+            self.drag = None
+            widget.item.open()
+            return True
+        if event.type != Gdk.EventType.BUTTON_PRESS:
+            return True
+        self.select(widget)
+        if event.button == 3:
+            self.icon_menu(widget, event)
+        elif event.button == 1:
+            name = os.path.basename(widget.item.path)
+            self.drag = {"widget": widget, "name": name, "x": event.x_root, "y": event.y_root,
+                         "start": self.cell_xy(self.cells[name]), "moving": False}
+        return True
+
+    def on_icon_motion(self, _widget, event):
+        d = self.drag
+        if not d:
+            return False
+        dx, dy = event.x_root - d["x"], event.y_root - d["y"]
+        # Only a real move starts a drag, so a shaky double-click still opens
+        if not d["moving"] and abs(dx) < DRAG_START and abs(dy) < DRAG_START:
+            return True
+        d["moving"] = True
+        w, h = self.size
+        x = min(max(0, d["start"][0] + dx), w - ITEM_W)
+        y = min(max(0, d["start"][1] + dy), h - ITEM_H)
+        self.fixed.move(d["widget"], int(x), int(y))
+        return True
+
+    def on_icon_release(self, _widget, event):
+        d, self.drag = self.drag, None
+        if not d or not d["moving"]:
+            return True
+        # Snap to the nearest space; an icon already there swaps places
+        x = d["start"][0] + event.x_root - d["x"]
+        y = d["start"][1] + event.y_root - d["y"]
+        col = min(max(0, round((x - MARGIN) / CELL_W)), self.cols - 1)
+        row = min(max(0, round((y - MARGIN) / CELL_H)), self.rows - 1)
+        old = self.cells[d["name"]]
+        other = next((n for n, c in self.cells.items() if c == (col, row) and n != d["name"]), None)
+        if other:
+            self.cells[other] = old
+            self.fixed.move(self.icons[other], *self.cell_xy(old))
+        self.cells[d["name"]] = (col, row)
+        self.fixed.move(d["widget"], *self.cell_xy((col, row)))
+        save_positions(self.cells)
+        return True
+
+    def icon_menu(self, widget, event):
+        item = widget.item
         entries = [("Open", item.open)]
         if item.app is None:
             entries.append(("Show in the File Manager",
@@ -293,10 +401,9 @@ class Desktop(Gtk.Window):
         if item.removable:
             entries.append(("Remove from the desktop", lambda: os.remove(item.path)))
         self.popup(entries, event)
-        return True
 
     def on_wallpaper_click(self, _w, event):
-        self.grid.unselect_all()
+        self.select(None)
         if event.button != 3:
             return False
         self.popup([
@@ -304,6 +411,7 @@ class Desktop(Gtk.Window):
             ("File Manager", lambda: spawn(["pcmanfm", "/userdata"])),
             ("Terminal", lambda: spawn(TERMINAL)),
             ("Open the Desktop folder", lambda: spawn(["pcmanfm", DESKTOP])),
+            ("Arrange icons", lambda: self.fill(arrange=True)),
             None,
             ("Change wallpaper", lambda: spawn(["python3", os.path.join(INSTALL, "lightdesktop-panel.py"), "--wallpaper"])),
             None,
@@ -324,6 +432,26 @@ class Desktop(Gtk.Window):
         menu.show_all()
         menu.attach_to_widget(self, None)
         menu.popup_at_pointer(event)
+
+
+def load_positions():
+    try:
+        with open(POSITIONS) as f:
+            return {k: tuple(v) for k, v in json.load(f).items()
+                    if isinstance(v, list) and len(v) == 2 and all(isinstance(n, int) for n in v)}
+    except (OSError, ValueError, AttributeError):
+        return {}
+
+
+def save_positions(cells):
+    try:
+        os.makedirs(CONF, exist_ok=True)
+        tmp = POSITIONS + ".tmp"
+        with open(tmp, "w") as f:
+            json.dump({k: list(v) for k, v in sorted(cells.items())}, f, indent=1)
+        os.replace(tmp, POSITIONS)
+    except OSError as e:
+        print(f"desktop: could not save icon places: {e}", file=sys.stderr)
 
 
 def main():
