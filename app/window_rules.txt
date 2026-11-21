@@ -1,0 +1,20 @@
+# BUA window rules for Batocera's Wayland desktop (labwc, Batocera 44+).
+#
+# On X11, Batocera's Openbox makes every window full screen. labwc does not:
+# it takes the title bar off every window and leaves apps it has no rule for
+# as small floating windows. The bua_window_rules service adds these rules
+# to labwc at every boot. On Openbox it does nothing, so add-ons behave as
+# before there.
+#
+# One rule per line: <window identifier> <mode>
+#   identifier  labwc's identifier: the Wayland app_id, or for X11 apps the
+#               WM_CLASS. * matches anything ("firefox*"). Find it with
+#               "wlrctl toplevel list" while the app is open (Wayland apps),
+#               or "xdotool search --name <title> getwindowclassname".
+#   mode        maximize    title bar (minimize, maximize, close), maximized:
+#                           for desktop apps (browsers, tools)
+#               fullscreen  full screen, no title bar: for TV, media and
+#                           game launchers that don't go full screen alone
+# Lines starting with # are comments. Verify each rule on a labwc box first.
+
+firefox*        maximize

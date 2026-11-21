@@ -1,0 +1,82 @@
+#!/bin/bash
+# BUA window rules: makes add-on windows behave on Batocera's Wayland
+# desktop (labwc, Batocera 44+) the way they do on X11.
+#
+# Batocera's Openbox (X11) makes every window full screen. labwc takes the
+# title bar off every window and leaves apps it has no rule for as small
+# floating windows, so add-ons open stuck in a corner with no buttons. This
+# service adds BUA's rules (window_rules.txt) to labwc's config at every
+# boot (Batocera rewrites that file each boot) and reloads labwc.
+#
+# On Openbox it does nothing at all.
+# Installed and kept up to date by the BUA app (live_update_block).
+
+RULES="/userdata/system/add-ons/bua/window_rules.txt"
+LABWC_RC="/userdata/system/.config/labwc/rc.xml"
+LOG="/userdata/system/logs/bua_window_rules.log"
+
+apply_rules() {
+    # Not Batocera's Wayland desktop: nothing to do
+    [ -f /usr/share/labwc/rc.xml ] || return 0
+    [ -f "$RULES" ] || return 0
+    # labwc's config is copied into place early at boot; wait for it briefly
+    for _ in $(seq 30); do
+        [ -f "$LABWC_RC" ] && break
+        sleep 1
+    done
+    [ -f "$LABWC_RC" ] || { echo "$(date): no $LABWC_RC" >> "$LOG"; return 0; }
+
+    local id mode decoration action count=0
+    local edits=()
+    local last="/labwc_config/windowRules/windowRule[last()]"
+    while read -r id mode _; do
+        case "$id" in ""|\#*) continue ;; esac
+        case "$mode" in
+            maximize)   decoration=yes; action=Maximize ;;
+            fullscreen) decoration=no;  action=ToggleFullscreen ;;
+            *) echo "$(date): unknown mode '$mode' for $id, skipped" >> "$LOG"; continue ;;
+        esac
+        # Replace any earlier rule for the same window, then add this one
+        edits+=(-d "/labwc_config/windowRules/windowRule[@identifier='$id']"
+                -s /labwc_config/windowRules -t elem -n windowRule -v ""
+                -s "$last" -t attr -n identifier -v "$id"
+                -s "$last" -t attr -n serverDecoration -v "$decoration"
+                -s "$last" -t elem -n action -v ""
+                -s "$last/action" -t attr -n name -v "$action")
+        count=$((count + 1))
+    done < "$RULES"
+    [ "$count" -gt 0 ] || return 0
+
+    if xmlstarlet ed -L "${edits[@]}" "$LABWC_RC"; then
+        echo "$(date): applied $count window rules" >> "$LOG"
+    else
+        echo "$(date): xmlstarlet failed, labwc config unchanged" >> "$LOG"
+        return 0
+    fi
+    # Reload labwc if it is already running (otherwise it reads them at start)
+    local pid
+    pid=$(pgrep -o -x labwc) && LABWC_PID="$pid" labwc --reconfigure >/dev/null 2>&1
+    return 0
+}
+
+case "$1" in
+    start)
+        apply_rules
+        ;;
+    stop)
+        # Rules disappear at the next boot, when Batocera rewrites the file
+        ;;
+    status)
+        if [ ! -f /usr/share/labwc/rc.xml ]; then
+            echo "bua_window_rules: not needed (no labwc on this Batocera)"
+        elif [ -f "$LOG" ]; then
+            tail -n 1 "$LOG"
+        else
+            echo "bua_window_rules: not run yet"
+        fi
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status}"
+        exit 1
+        ;;
+esac

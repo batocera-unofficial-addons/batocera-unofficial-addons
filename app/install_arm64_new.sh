@@ -50,6 +50,22 @@ batocera-services enable symlink_manager
 echo "Starting batocera-unofficial-addons-symlinks service..."
 batocera-services start symlink_manager &>/dev/null &
 
+# Batocera's Wayland desktop (labwc, Batocera 44+): window rules so add-ons
+# open full screen or with a title bar, as they do on X11/Openbox. Not
+# needed (and not installed) on Openbox. The BUA app keeps them up to date.
+if [ -f /usr/share/labwc/rc.xml ]; then
+    echo "Setting up window rules for Batocera's Wayland desktop..."
+    BUA_RAW="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app"
+    mkdir -p /userdata/system/services /userdata/system/add-ons/bua
+    if curl -fsL -o /userdata/system/services/bua_window_rules "$BUA_RAW/bua_window_rules"         && curl -fsL -o /userdata/system/add-ons/bua/window_rules.txt "$BUA_RAW/window_rules.txt"; then
+        chmod +x /userdata/system/services/bua_window_rules
+        batocera-services enable bua_window_rules
+        batocera-services start bua_window_rules &>/dev/null &
+    else
+        echo "Could not download the window rules; the BUA app will add them later."
+    fi
+fi
+
 # Step 6: Download batocera-unofficial-addons.sh
 echo "Downloading Batocera Unofficial Add-Ons Launcher from $BATOCERA_ADDONS_URL..."
 curl -fLs -o "$BATOCERA_ADDONS_PATH" "$BATOCERA_ADDONS_URL"
