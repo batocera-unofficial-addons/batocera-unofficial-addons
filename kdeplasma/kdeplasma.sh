@@ -94,4 +94,4 @@ curl -s http://127.0.0.1:1234/reloadgames >/dev/null
 echo ""
 echo "$APPNAME is installed."
 echo "Press F1 in EmulationStation, or open Ports > KDE Plasma."
-echo "Log out of Plasma to return to EmulationStation."
+echo "Press EmulationStation in Plasma's taskbar, or log out, to return to EmulationStation."

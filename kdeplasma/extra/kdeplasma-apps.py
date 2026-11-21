@@ -15,6 +15,10 @@ which the Plasma container cannot see. So:
       window shown inside Plasma (KWin's Wayland and Xwayland). Only apps in
       F1's list can be started, never an arbitrary command.
 
+Also adds "EmulationStation" (Return to EmulationStation) to the app menu
+and, once, to the start of the taskbar: it ends the Plasma session straight
+away, like logging out without the confirmation.
+
 Root terminals (xterm, and entries that open one) are left out: anything
 running in Plasma could ask for one, or type into it, and so get root on
 Batocera. To have them anyway, create the file
@@ -38,6 +42,16 @@ LOG = "/userdata/system/logs/kdeplasma-apps.log"
 # Inside the container
 CLIENT = "/usr/local/bin/batocera-app"
 FIFO_IN_CONTAINER = "/host-run/kdeplasma-apps.fifo"
+# "EmulationStation" button: commands inside the container, its menu entry,
+# Batocera's logo as its icon (Breeze's game controller if it is missing),
+# and the files in plasma's home that keep it pinned only once
+ES_EXIT = "/usr/local/bin/return-to-emulationstation"
+ES_PIN = "/usr/local/bin/kdeplasma-pin-es-button"
+ES_DESKTOP = "batocera-emulationstation.desktop"
+ES_LOGOS = ["/usr/share/emulationstation/resources/services/logo-tri.png"]
+ES_ICON = ".local/share/icons/batocera-emulationstation.png"
+ES_PINNED = ".config/kdeplasma-es-button-pinned"
+ES_AUTOSTART = ".config/autostart/kdeplasma-pin-es-button.desktop"
 # Batocera side: tool wrappers for the apps started here
 HOST_BIN = "/run/kdeplasma-hostbin"
 ALLOW_ROOT_TERMINAL = "/userdata/system/configs/kdeplasma/allow-root-terminal"
@@ -145,6 +159,88 @@ def make_menu(home):
                 "    <Include><Category>X-Batocera</Category></Include>\n  </Menu>\n</Menu>\n")
 
 
+def make_es_button(home):
+    """The EmulationStation entry, and (until it has been pinned once) the
+    autostart entry that pins it to the taskbar."""
+    icon = "input-gaming"
+    for logo in ES_LOGOS:
+        if not os.path.isfile(logo):
+            continue
+        os.makedirs(os.path.join(home, os.path.dirname(ES_ICON)), exist_ok=True)
+        target = os.path.join(home, ES_ICON)
+        try:  # the logo is large; a smaller copy loads faster
+            from PIL import Image
+            with Image.open(logo) as im:
+                im.thumbnail((256, 256))
+                im.save(target, "PNG")
+        except Exception:
+            shutil.copyfile(logo, target)
+        icon = "/home/plasma/" + ES_ICON
+        break
+    apps_dir = os.path.join(home, ".local/share/applications")
+    os.makedirs(apps_dir, exist_ok=True)
+    with open(os.path.join(apps_dir, ES_DESKTOP), "w") as f:
+        f.write("[Desktop Entry]\nType=Application\nName=EmulationStation\n"
+                "GenericName=Return to EmulationStation\n"
+                "Comment=Return to EmulationStation\n"
+                f"Icon={icon}\nExec={ES_EXIT}\nTerminal=false\n"
+                "Categories=X-Batocera;Game;\n")
+    autostart = os.path.join(home, ES_AUTOSTART)
+    if os.path.exists(os.path.join(home, ES_PINNED)):
+        if os.path.exists(autostart):
+            os.unlink(autostart)
+        return
+    os.makedirs(os.path.dirname(autostart), exist_ok=True)
+    with open(autostart, "w") as f:
+        f.write("[Desktop Entry]\nType=Application\nName=Pin EmulationStation to the taskbar\n"
+                f"Exec={ES_PIN}\nNoDisplay=true\nX-KDE-autostart-phase=2\n")
+
+
+# Plasma script: EmulationStation first in every task manager on the
+# panels. Prints how many it changed.
+PIN_SCRIPT = """var E = "applications:%s", n = 0;
+panels().forEach(function (panel) {
+    panel.widgets().forEach(function (w) {
+        if (w.type != "org.kde.plasma.icontasks" && w.type != "org.kde.plasma.taskmanager") return;
+        w.currentConfigGroup = ["General"];
+        var l = w.readConfig("launchers", []);
+        if (typeof l == "string") l = l ? l.split(",") : [];
+        l = l.filter(function (x) { return x != E; });
+        l.unshift(E);
+        w.writeConfig("launchers", l);
+        n++;
+    });
+});
+print(n);""" % ES_DESKTOP
+
+
+def make_es_commands(root):
+    """Inside the container: the button's command, and the one that pins it."""
+    with open(root + ES_EXIT, "w") as f:
+        f.write("#!/bin/sh\n"
+                "# \"EmulationStation\" in Plasma's taskbar: ends the session straight away,\n"
+                "# like logging out without the confirmation. kdeplasma-launch.sh then\n"
+                "# cleans up and EmulationStation returns.\n"
+                "qdbus6 org.kde.Shutdown /Shutdown org.kde.Shutdown.logout 2>/dev/null \\\n"
+                "    || pkill -TERM -f '^/usr/bin/startplasma-waylan[d]'\n")
+    os.chmod(root + ES_EXIT, 0o755)
+    with open(root + ES_PIN, "w") as f:
+        f.write("#!/bin/sh\n"
+                "# Pins \"EmulationStation\" at the start of Plasma's taskbar, once: run at\n"
+                "# login (autostart) until it has worked. Unpinned later, it stays unpinned.\n"
+                f'marker="$HOME/{ES_PINNED}"\n'
+                '[ -e "$marker" ] && exit 0\n'
+                f"script='{PIN_SCRIPT}'\n"
+                "for _ in $(seq 1 30); do\n"
+                '    n=$(qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$script" 2>/dev/null)\n'
+                '    if [ "${n:-0}" -gt 0 ] 2>/dev/null; then\n'
+                f'        touch "$marker"; rm -f "$HOME/{ES_AUTOSTART}"; exit 0\n'
+                "    fi\n"
+                "    sleep 2\n"
+                "done\n")
+    os.chmod(root + ES_PIN, 0o755)
+
+
 def make_client(root):
     """The command the menu entries run inside the container."""
     path = root + CLIENT
@@ -223,7 +319,9 @@ def serve(fifo, root):
 if __name__ == "__main__":
     if sys.argv[1] == "menu":
         home = sys.argv[2]
-        make_client(os.path.dirname(os.path.dirname(home.rstrip("/"))))
+        root = os.path.dirname(os.path.dirname(home.rstrip("/")))
+        make_client(root)
+        make_es_commands(root)
         # The menu goes in plasma's home: write it as plasma, never as root,
         # so a link a program in Plasma put there cannot redirect the writes.
         # Relative paths: plasma cannot reach its home through the add-on's
@@ -234,5 +332,6 @@ if __name__ == "__main__":
             os.setgid(1000)
             os.setuid(1000)
         make_menu(".")
+        make_es_button(".")
     elif sys.argv[1] == "serve":
         serve(sys.argv[2], sys.argv[3])
