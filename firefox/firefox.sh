@@ -52,6 +52,23 @@ mkdir -p "${log_dir}"
 exec &> >(tee -a "$log_file")
 echo "$(date): Launching Firefox"
 
+# Wayland (labwc, Batocera 44 and later): Batocera's window rules remove the
+# title bar from every app, which leaves Firefox with only a close button.
+# Give Firefox labwc's title bar (minimize, maximize, close) and open it
+# maximized. Batocera rewrites rc.xml at every boot, so this runs each launch.
+labwc_rc="/userdata/system/.config/labwc/rc.xml"
+if [ -f "${labwc_rc}" ] && pgrep -x labwc >/dev/null \
+    && ! grep -q 'identifier="firefox\*"' "${labwc_rc}"; then
+    xmlstarlet ed -L \
+        -s "/labwc_config/windowRules" -t elem -n "windowRule" -v "" \
+        -s "/labwc_config/windowRules/windowRule[last()]" -t attr -n "identifier" -v "firefox*" \
+        -s "/labwc_config/windowRules/windowRule[last()]" -t attr -n "serverDecoration" -v "yes" \
+        -s "/labwc_config/windowRules/windowRule[last()]" -t elem -n "action" -v "" \
+        -s "/labwc_config/windowRules/windowRule[last()]/action" -t attr -n "name" -v "Maximize" \
+        "${labwc_rc}" \
+        && LABWC_PID=$(pgrep -o -x labwc) labwc --reconfigure
+fi
+
 # Launch Firefox AppImage
 if [ -x "${app_image}" ]; then
     cd "${app_dir}"
