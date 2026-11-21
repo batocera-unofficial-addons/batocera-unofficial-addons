@@ -78,7 +78,8 @@ if [ -L /usr/bin/filemanagerlauncher ] && [ ! -e /usr/bin/filemanagerlauncher ];
     rm -f /usr/bin/filemanagerlauncher
 fi
 if [ ! -e /usr/bin/filemanagerlauncher ]; then
-    for layer in /overlay_root/base /overlay_root/base2; do
+    # Batocera's read-only system image (where it is visible differs by version)
+    for layer in /overlay/base /overlay/base2 /overlay_root/base /overlay_root/base2; do
         if [ -f "$layer/usr/bin/filemanagerlauncher" ]; then
             cp -a "$layer/usr/bin/filemanagerlauncher" /usr/bin/filemanagerlauncher
             break
@@ -89,7 +90,8 @@ fi
 # 5. Openbox (X11): the add-on replaced Batocera's rc.xml with its own
 #    (it keeps Batocera's as rc.xml.es, so that file marks it)
 if [ -f /etc/openbox/rc.xml.es ]; then
-    for layer in /overlay_root/base /overlay_root/base2; do
+    # Batocera's read-only system image (where it is visible differs by version)
+    for layer in /overlay/base /overlay/base2 /overlay_root/base /overlay_root/base2; do
         if [ -f "$layer/etc/openbox/rc.xml" ]; then
             echo "Restoring Batocera's Openbox settings..."
             cp -f "$layer/etc/openbox/rc.xml" /etc/openbox/rc.xml
@@ -124,6 +126,9 @@ for f in Choose_Browser CoreKeyboard ES FileManagerES Install_WPS_Office \
     rm -f "/userdata/system/Desktop/$f.desktop"
 done
 rmdir /userdata/system/Desktop 2>/dev/null
+# Its shortcut to Steam's games folder (only the link, never the games;
+# a real folder of that name is left alone)
+[ -L "/userdata/Steam Games Folder" ] && rm -f "/userdata/Steam Games Folder"
 rm -f "$SERVICE_LOG" /userdata/system/logs/tint2.log /userdata/system/logs/picom.log
 
 echo ""
