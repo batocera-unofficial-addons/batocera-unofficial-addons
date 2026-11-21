@@ -14,6 +14,7 @@ Usage: kdeplasma-enter.py <rootfs> <nsfile> <command> [args...]
 """
 import ctypes
 import os
+import re
 import subprocess
 import sys
 
@@ -127,6 +128,32 @@ if subprocess.run(["mount", "--bind", "-o", "X-mount.idmap=b:0:1000:1 b:1000:0:1
 system = os.path.join(userdata, "system")
 run("mount", "--bind", system, system)
 run("mount", "-o", "remount,bind,ro", system)
+
+# Other drives Batocera mounted under /media (USB drives, a second disk,
+# another operating system). All of them visible, read-only first; then
+# drives that hold files are made writable, with their own owners (so a
+# uid-1000 user's files on them, e.g. SteamOS's "deck", are plasma's).
+# Another system's EFI, boot, root and var partitions stay read-only, so
+# nothing in Plasma can break that system. Drives plugged in while Plasma
+# runs show up too (rslave).
+SYSTEM_PARTITION = re.compile(r"^(esp|efi|boot|rootfs|root|var|batocera|share)(_\d+)?$", re.I)
+if os.path.isdir("/media"):
+    media = in_root("/media")
+    os.makedirs(media, exist_ok=True)
+    run("mount", "--rbind", "/media", media)
+    run("mount", "--make-rslave", media)
+    mounts = []
+    with open("/proc/self/mountinfo") as f:
+        for line in f:
+            point = line.split()[4].replace("\\040", " ")
+            if point == media or point.startswith(media + "/"):
+                mounts.append(point)
+    for point in mounts:
+        subprocess.run(["mount", "-o", "remount,bind,ro", point], stderr=subprocess.DEVNULL)
+    for point in mounts:
+        rel = os.path.relpath(point, media)
+        if "/" not in rel and rel != "." and not SYSTEM_PARTITION.match(rel):
+            subprocess.run(["mount", "-o", "remount,bind,rw", point], stderr=subprocess.DEVNULL)
 
 # Tell the launcher which mount namespace is the container's
 with open(nsfile, "w") as f:

@@ -28,6 +28,7 @@ dolphinrc = os.path.join(home, ".config/dolphinrc")
 PLACES = [
     ("/userdata", "Userdata", "drive-harddisk"),
     ("/userdata/roms", "ROMs", "folder-games"),
+    ("/media", "Drives", "drive-removable-media"),
     ("/userdata/bios", "BIOS", "folder-system"),
     ("/userdata/saves", "Saves", "folder-document"),
     ("/userdata/screenshots", "Screenshots", "folder-pictures"),
