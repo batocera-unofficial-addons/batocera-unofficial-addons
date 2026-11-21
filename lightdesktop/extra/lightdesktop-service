@@ -1,0 +1,31 @@
+#!/bin/bash
+# Batocera service for the Light Desktop add-on: F1 in EmulationStation opens
+# the Light Desktop instead of the file manager. EmulationStation runs
+# /usr/bin/filemanagerlauncher on F1, so the desktop's launcher is
+# bind-mounted over it. Batocera's own file stays untouched underneath:
+# stopping the service (System Settings > Services, or batocera-services stop
+# lightdesktop) brings the file manager back.
+
+launcher=/userdata/system/add-ons/lightdesktop/lightdesktop-launch.sh
+target=/usr/bin/filemanagerlauncher
+
+is_bound() { awk -v m="$target" '$2==m {f=1} END {exit !f}' /proc/mounts; }
+
+case "$1" in
+    start)
+        [ -x "$launcher" ] || { echo "lightdesktop: $launcher is missing"; exit 1; }
+        is_bound || mount --bind "$launcher" "$target"
+        ;;
+    stop)
+        while is_bound; do umount "$target" || break; done
+        ;;
+    status)
+        # -ef: the file F1 runs is this launcher (another desktop may hold F1)
+        if is_bound && [ "$target" -ef "$launcher" ]; then echo "lightdesktop: F1 opens the Light Desktop"
+        else echo "lightdesktop: F1 does not open the Light Desktop"; fi
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status}"
+        exit 1
+        ;;
+esac

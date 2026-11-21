@@ -1,5 +1,5 @@
 {
-  "changelog": "- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format\n- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added Jellyfin Player - native media player client with controller support",
+  "changelog": "- Added Light Desktop - a light desktop for Batocera 44+ (Wayland) with a taskbar and app menu, opens with F1\n- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format\n- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added Jellyfin Player - native media player client with controller support",
   "apps": [
     {
       "name": "Alpine XFCE (Webtop)",
@@ -198,6 +198,16 @@
       ],
       "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/jellyfin-client/jellyfin-client.sh | bash",
       "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/jellyfin-client/jellyfin-client_uninstall.sh | bash"
+    },
+    {
+      "name": "Light Desktop",
+      "description": "A light desktop for Batocera 44+ (Wayland) with a taskbar, app menu and file manager. Opens with F1 like the old desktop, and from Ports. Under 1 MB.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/lightdesktop/lightdesktop.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/lightdesktop/lightdesktop_uninstall.sh | bash",
+      "logo": "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/lightdesktop/extra/lightdesktop-logo.png"
     },
     {
       "name": "Luanti",

@@ -1,0 +1,27 @@
+# Colors for the Light Desktop's window title bars and menus
+border.width: 1
+padding.height: 6
+window.active.border.color: #c7cfdb
+window.inactive.border.color: #d7dce5
+window.active.title.bg.color: #e6eaf1
+window.inactive.title.bg.color: #d7dce5
+window.active.label.text.color: #1d2430
+window.inactive.label.text.color: #5a6475
+window.label.text.justify: center
+window.active.button.unpressed.image.color: #1d2430
+window.inactive.button.unpressed.image.color: #5a6475
+window.active.button.hover.image.color: #4f9bff
+menu.overlap.x: 0
+menu.width.min: 200
+menu.border.width: 1
+menu.border.color: #2a3446
+menu.items.bg.color: #182030
+menu.items.text.color: #e8edf5
+menu.items.active.bg.color: #4f9bff
+menu.items.active.text.color: #ffffff
+menu.items.padding.y: 6
+menu.separator.color: #2a3446
+osd.bg.color: #182030
+osd.border.color: #2a3446
+osd.label.text.color: #e8edf5
+osd.window-switcher.style-classic.item.active.border.color: #4f9bff

@@ -26,11 +26,18 @@ for pid in $(ls /proc | grep -E '^[0-9]+$'); do
 done
 rm -f /run/kdeplasma.mntns
 
-# F1 back to the file manager
+# F1 back to the file manager...
 if [ -f "$service_file" ]; then
     bash "$service_file" stop
     batocera-services disable kdeplasma >/dev/null 2>&1
     rm -f "$service_file"
+fi
+# ...and back to the Light Desktop if that is installed
+f1="the file manager"
+if [ -f /userdata/system/services/lightdesktop ] && [ -x /userdata/system/add-ons/lightdesktop/lightdesktop-launch.sh ]; then
+    batocera-services enable lightdesktop >/dev/null 2>&1
+    batocera-services start lightdesktop >/dev/null 2>&1 || bash /userdata/system/services/lightdesktop start
+    f1="the Light Desktop"
 fi
 
 # Unmount everything inside the container (including its view of /userdata)
@@ -66,4 +73,4 @@ fi
 
 curl -s http://127.0.0.1:1234/reloadgames >/dev/null
 
-echo "${APP_NAME} has been removed. F1 opens the file manager again."
+echo "${APP_NAME} has been removed. F1 opens ${f1} again."

@@ -53,8 +53,15 @@ echo "Building the Plasma system. This takes a while, depending on your internet
 bash "$install_dir/kdeplasma-build.sh" 2>&1 | tee "$log_file"
 [ "${PIPESTATUS[0]}" -eq 0 ] || fail "Installing Plasma failed. See $log_file"
 
-# F1 opens Plasma: a Batocera service, enabled at boot
+# F1 opens Plasma: a Batocera service, enabled at boot. The last desktop
+# installed gets F1, so the Light Desktop's service is stopped and switched
+# off (the Light Desktop itself stays installed and opens from Ports).
 echo "Setting up F1..."
+if [ -f /userdata/system/services/lightdesktop ]; then
+    bash /userdata/system/services/lightdesktop stop >/dev/null 2>&1
+    batocera-services disable lightdesktop >/dev/null 2>&1
+    echo "F1 now opens KDE Plasma instead of the Light Desktop (the Light Desktop is still in Ports)."
+fi
 mkdir -p /userdata/system/services
 cp -f "$install_dir/kdeplasma-service" "$service_file"
 chmod +x "$service_file"

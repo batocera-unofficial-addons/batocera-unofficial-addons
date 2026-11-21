@@ -1,5 +1,5 @@
 {
-  "changelog": "- Added KDE Plasma Desktop - full KDE Plasma 6 desktop for Batocera 44+ (Wayland), opens with F1\n- Added RunImage Desktop for x86_64 - XFCE desktop with Firefox in a RunImage container (Ports)\n- Desktop: fixed blank/insecure-connection screen with newer Webtop images\n- Docker Webtops (Arch KDE, Ubuntu MATE, Alpine XFCE): now served over HTTPS (port 3001+), fixed Alpine XFCE port mapping\n- Added Quiver Launcher - installs Windows and Linux apps and games and adds each to a Quiver system in EmulationStation (Batocera 43 and 44)\n- Added KytyPS5 - experimental PS5 emulator, adds a PlayStation 5 system (Batocera 43 and 44)\n- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format\n- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added ps3i - Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added AzaharPlus - selectable 3DS emulator option alongside Azahar\n- Replaced StepMania with ITGMania - ITG-focused rhythm game with bundled songs\n- Desktop: wallpaper and icon layout now preserved on update\n- Desktop: improved DRL migration and palette support\n- NVIDIAPatch: fixed GLX chain on host\n- Amazon Luna: now runs in Google Chrome with controller support (fixes failed install)\n- YARG: fixed missing Ports logo",
+  "changelog": "- Added Light Desktop - a light desktop for Batocera 44+ (Wayland) with a taskbar and app menu, opens with F1\n- Added KDE Plasma Desktop - full KDE Plasma 6 desktop for Batocera 44+ (Wayland), opens with F1\n- Added RunImage Desktop for x86_64 - XFCE desktop with Firefox in a RunImage container (Ports)\n- Desktop: fixed blank/insecure-connection screen with newer Webtop images\n- Docker Webtops (Arch KDE, Ubuntu MATE, Alpine XFCE): now served over HTTPS (port 3001+), fixed Alpine XFCE port mapping\n- Added Quiver Launcher - installs Windows and Linux apps and games and adds each to a Quiver system in EmulationStation (Batocera 43 and 44)\n- Added KytyPS5 - experimental PS5 emulator, adds a PlayStation 5 system (Batocera 43 and 44)\n- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format\n- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added ps3i - Installer for .pkg PS3 games into RPCS3 with automatic shortcut creation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added AzaharPlus - selectable 3DS emulator option alongside Azahar\n- Replaced StepMania with ITGMania - ITG-focused rhythm game with bundled songs\n- Desktop: wallpaper and icon layout now preserved on update\n- Desktop: improved DRL migration and palette support\n- NVIDIAPatch: fixed GLX chain on host\n- Amazon Luna: now runs in Google Chrome with controller support (fixes failed install)\n- YARG: fixed missing Ports logo",
   "apps": [
     {
       "name": "7zip",
@@ -575,6 +575,16 @@
       ],
       "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/kytyps5/kytyps5.sh | bash",
       "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/kytyps5/kytyps5_uninstall.sh | bash"
+    },
+    {
+      "name": "Light Desktop",
+      "description": "A light desktop for Batocera 44+ (Wayland) with a taskbar, app menu and file manager. Opens with F1 like the old desktop, and from Ports. Under 1 MB.",
+      "categories": [
+        "System Utilities"
+      ],
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/lightdesktop/lightdesktop.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/lightdesktop/lightdesktop_uninstall.sh | bash",
+      "logo": "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/lightdesktop/extra/lightdesktop-logo.png"
     },
     {
       "name": "Luanti",

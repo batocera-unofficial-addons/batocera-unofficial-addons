@@ -20,7 +20,9 @@ case "$1" in
         while is_bound; do umount "$target" || break; done
         ;;
     status)
-        is_bound && echo "kdeplasma: F1 opens KDE Plasma" || echo "kdeplasma: F1 opens the file manager"
+        # -ef: the file F1 runs is this launcher (another desktop may hold F1)
+        if is_bound && [ "$target" -ef "$launcher" ]; then echo "kdeplasma: F1 opens KDE Plasma"
+        else echo "kdeplasma: F1 does not open KDE Plasma"; fi
         ;;
     *)
         echo "Usage: $0 {start|stop|status}"
