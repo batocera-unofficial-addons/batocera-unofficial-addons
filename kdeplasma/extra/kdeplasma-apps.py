@@ -15,6 +15,12 @@ which the Plasma container cannot see. So:
       window shown inside Plasma (KWin's Wayland and Xwayland). Only apps in
       F1's list can be started, never an arbitrary command.
 
+Root terminals (xterm, and entries that open one) are left out: anything
+running in Plasma could ask for one, or type into it, and so get root on
+Batocera. To have them anyway, create the file
+/userdata/system/configs/kdeplasma/allow-root-terminal (Plasma itself cannot:
+/userdata/system is read-only inside it).
+
 Runs with Batocera's python, from kdeplasma-launch.sh.
 """
 import configparser
@@ -34,10 +40,27 @@ CLIENT = "/usr/local/bin/batocera-app"
 FIFO_IN_CONTAINER = "/host-run/kdeplasma-apps.fifo"
 # Batocera side: tool wrappers for the apps started here
 HOST_BIN = "/run/kdeplasma-hostbin"
+ALLOW_ROOT_TERMINAL = "/userdata/system/configs/kdeplasma/allow-root-terminal"
+TERMINALS = {"xterm", "uxterm", "urxvt", "rxvt", "lxterminal", "xfce4-terminal",
+             "konsole", "gnome-terminal", "alacritty", "kitty", "foot", "st"}
+
+
+def opens_root_terminal(desktop, entry):
+    """True for a terminal (a root shell, as these apps run as root)."""
+    if desktop == "xterm.desktop" or "TerminalEmulator" in entry.get("Categories", "").split(";"):
+        return True
+    if entry.get("Terminal", "").lower() == "true":
+        return True
+    try:
+        args = shlex.split(entry["Exec"])
+    except ValueError:
+        return True
+    return any(os.path.basename(a) in TERMINALS for a in args)
 
 
 def read_entry(path):
-    """The [Desktop Entry] of a .desktop file, or None if it is not an F1 app."""
+    """The [Desktop Entry] of a .desktop file, or None if it is not an F1 app
+    that Plasma may start."""
     parser = configparser.RawConfigParser(strict=False, interpolation=None)
     parser.optionxform = str
     try:
@@ -49,6 +72,8 @@ def read_entry(path):
     if CATEGORY not in categories or entry.get("NoDisplay", "").lower() == "true":
         return None
     if entry.get("Type", "Application") != "Application" or not entry.get("Exec"):
+        return None
+    if opens_root_terminal(os.path.basename(path), entry) and not os.path.exists(ALLOW_ROOT_TERMINAL):
         return None
     return entry
 
@@ -138,7 +163,7 @@ def newest(pattern):
 def start_app(desktop, root, log):
     entry = read_entry(os.path.join(APPS_DIR, desktop))
     if not entry:
-        print(f"refused: {desktop} is not in F1 > Applications", file=log, flush=True)
+        print(f"refused: {desktop} is not in F1 > Applications (or is a root terminal)", file=log, flush=True)
         return
     # Field codes (%f, %U...) are for files; F1 starts the apps without any
     args = [a for a in shlex.split(entry["Exec"]) if not re.fullmatch(r"%[a-zA-Z%]", a)]
@@ -198,7 +223,16 @@ def serve(fifo, root):
 if __name__ == "__main__":
     if sys.argv[1] == "menu":
         home = sys.argv[2]
-        make_menu(home)
         make_client(os.path.dirname(os.path.dirname(home.rstrip("/"))))
+        # The menu goes in plasma's home: write it as plasma, never as root,
+        # so a link a program in Plasma put there cannot redirect the writes.
+        # Relative paths: plasma cannot reach its home through the add-on's
+        # folder, which only root may open.
+        os.chdir(home)
+        if os.getuid() == 0:
+            os.setgroups([])
+            os.setgid(1000)
+            os.setuid(1000)
+        make_menu(".")
     elif sys.argv[1] == "serve":
         serve(sys.argv[2], sys.argv[3])

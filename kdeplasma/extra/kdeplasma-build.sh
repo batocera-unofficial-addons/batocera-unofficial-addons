@@ -81,7 +81,7 @@ inroot pacman -Syu --noconfirm --needed \
     discover flatpak flatpak-kcm \
     xorg-xwayland mesa vulkan-radeon vulkan-intel libva-mesa-driver intel-media-driver \
     pipewire pipewire-pulse wireplumber \
-    noto-fonts ttf-dejavu sudo
+    noto-fonts ttf-dejavu
 inroot pacman -Scc --noconfirm >/dev/null 2>&1 || true
 rm -rf "$root/var/cache/pacman/pkg/"*
 
@@ -101,11 +101,13 @@ done
 inroot locale-gen >/dev/null
 echo "$lang" > "$install_dir/language"
 
-# A normal user: KDE apps refuse to run as root
+# A normal user: KDE apps refuse to run as root. No sudo: nothing run in
+# Plasma may become root (installing and updating is done from here).
 if ! inroot id plasma >/dev/null 2>&1; then
-    inroot useradd -m -u 1000 -G wheel,video,audio,input -s /bin/bash plasma
+    inroot useradd -m -u 1000 -G video,audio,input -s /bin/bash plasma
 fi
-echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > "$root/etc/sudoers.d/wheel"
+rm -f "$root/etc/sudoers.d/wheel"
+inroot gpasswd -d plasma wheel >/dev/null 2>&1 || true
 # Its runtime folder: /run/user must be reachable by the plasma user
 mkdir -p "$root/run/user/1000"
 chmod 0755 "$root/run/user"

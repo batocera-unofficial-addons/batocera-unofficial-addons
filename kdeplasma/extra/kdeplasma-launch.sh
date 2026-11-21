@@ -39,11 +39,30 @@ fi
 
 install_dir=/userdata/system/add-ons/kdeplasma
 nsfile=/run/kdeplasma.mntns
-# Runs a command inside the container: its own mounts (/dev, /sys, /proc,
-# Batocera's /run as /host-run, /userdata ID-mapped) and pivot_root, see
+# Runs a command inside the container: its own mounts (a few devices,
+# read-only /sys, Plasma's sockets from Batocera's /run as /host-run,
+# /userdata ID-mapped with /userdata/system read-only) and pivot_root, see
 # kdeplasma-enter.py. Never chroot into the container directly: without its
 # /dev mounted, writes to /dev/null would create a plain file there.
 enter() { python3 "$install_dir/kdeplasma-enter.py" "$root" "$nsfile" "$@"; }
+
+# Plasma's home belongs to the plasma user, so this script (root) changes
+# things in it as that user: a link placed there by a program in Plasma
+# then cannot redirect a write into Batocera's own files. Runs a command
+# in that home folder (use relative paths: the user cannot reach it
+# through the add-on's folder, which only root may open).
+home="$root/home/plasma"
+as_plasma() {
+    python3 -c 'import os, sys; os.chdir(sys.argv[1]); os.setgroups([]); os.setgid(1000); os.setuid(1000); os.execvp(sys.argv[2], sys.argv[2:])' "$home" "$@"
+}
+
+# No root inside the container: older versions gave the plasma user
+# password-free sudo. Installing and updating Plasma runs as root from
+# Batocera's side (kdeplasma-build.sh), not from inside.
+rm -f "$root/etc/sudoers.d/wheel"
+if grep -qE '^wheel:[^:]*:[^:]*:(.*,)?plasma(,|$)' "$root/etc/group"; then
+    enter /usr/bin/gpasswd -d plasma wheel >/dev/null
+fi
 
 cp -L /etc/resolv.conf "$root/etc/resolv.conf"
 # Batocera's time zone, so the clock matches
@@ -65,9 +84,7 @@ chown 1000:1000 "$rundir"
 chmod 0700 "$rundir"
 
 # Not started by systemd here, so Plasma has to start its services itself
-cfg="$root/home/plasma/.config"
-mkdir -p "$cfg"
-grep -q systemdBoot "$cfg/startkderc" 2>/dev/null || printf '[General]\nsystemdBoot=false\n' > "$cfg/startkderc"
+as_plasma sh -c 'mkdir -p .config; grep -q systemdBoot .config/startkderc 2>/dev/null || printf "[General]\nsystemdBoot=false\n" > .config/startkderc'
 
 # No lock screen and no screen dimming or switching off: this is a TV box,
 # and Batocera handles the screen. The plasma user has no password, so if
@@ -84,7 +101,7 @@ kcfg --file powerdevilrc --group AC --group SuspendAndShutdown --key AutoSuspend
 kcfg --file baloofilerc --group "Basic Settings" --key "Indexing-Enabled" false
 # ...and don't let the search's file plugin wake it up
 kcfg --file krunnerrc --group Plugins --key baloosearchEnabled false
-rm -rf "$root/home/plasma/.local/share/baloo"
+as_plasma rm -rf .local/share/baloo
 # Package downloads left by installing or updating something by hand
 rm -rf "$root/var/cache/pacman/pkg/"*
 
@@ -109,11 +126,10 @@ grep -q '^plasma::' "$root/etc/shadow" || enter /usr/bin/passwd -d plasma >/dev/
 # Discover: only Flathub and the KDE Store. Its PackageKit (Arch packages)
 # and firmware backends need a system D-Bus this setup doesn't have and only
 # show connection errors; Plasma itself is updated by reinstalling from BUA.
-apps_dir="$root/home/plasma/.local/share/applications"
 if [ -f "$root/usr/share/applications/org.kde.discover.desktop" ]; then
-    mkdir -p "$apps_dir"
     sed 's|^Exec=plasma-discover|Exec=plasma-discover --backends flatpak-backend,kns-backend|' \
-        "$root/usr/share/applications/org.kde.discover.desktop" > "$apps_dir/org.kde.discover.desktop"
+        "$root/usr/share/applications/org.kde.discover.desktop" \
+        | as_plasma sh -c 'mkdir -p .local/share/applications && cat > .local/share/applications/org.kde.discover.desktop'
 fi
 # Firefox-based Flatpaks (Firefox, Zen, LibreWolf...) draw only black on
 # Wayland inside this nested KWin; through X11 (KWin's Xwayland) they work.
@@ -122,10 +138,10 @@ fi
     flatpak --user override --socket=x11 --env=MOZ_ENABLE_WAYLAND=0 2>/dev/null
 
 # Batocera's folders in Dolphin's Places, and Dolphin starting in /userdata
-python3 "$install_dir/kdeplasma-places.py" "$root/home/plasma" || true
+# (both write there as the plasma user)
+python3 "$install_dir/kdeplasma-places.py" "$home" || true
 # F1 > Applications as a "Batocera" folder in Plasma's app menu
-python3 "$install_dir/kdeplasma-apps.py" menu "$root/home/plasma" || true
-chown -R 1000:1000 "$cfg" "$root/home/plasma/.local" 2>/dev/null
+python3 "$install_dir/kdeplasma-apps.py" menu "$home" || true
 
 # While Plasma runs, start those apps on Batocera's side when their menu
 # entries ask, with their windows shown inside Plasma

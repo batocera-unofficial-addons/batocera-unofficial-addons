@@ -12,7 +12,16 @@ import sys
 import time
 import xml.etree.ElementTree as ET
 
-home = sys.argv[1]
+# Write as the plasma user (it owns this home), never as root: a link a
+# program in Plasma put here then cannot redirect a write into Batocera.
+# Paths are relative to the home: plasma cannot reach it through the
+# add-on's folder, which only root may open.
+os.chdir(sys.argv[1])
+home = "."
+if os.getuid() == 0:
+    os.setgroups([])
+    os.setgid(1000)
+    os.setuid(1000)
 places_file = os.path.join(home, ".local/share/user-places.xbel")
 dolphinrc = os.path.join(home, ".config/dolphinrc")
 
