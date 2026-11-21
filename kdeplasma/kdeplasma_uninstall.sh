@@ -16,9 +16,15 @@ echo "Removing ${APP_NAME}..."
 # Log out of Plasma if it is running, and stop anything left in the container
 pkill -f '^/usr/bin/startplasma-waylan[d]' 2>/dev/null
 sleep 3
+ns=$(cat /run/kdeplasma.mntns 2>/dev/null)
 for pid in $(ls /proc | grep -E '^[0-9]+$'); do
-    [ "$(readlink /proc/$pid/root 2>/dev/null)" = "$root" ] && kill -9 "$pid" 2>/dev/null
+    # In the container's own mount namespace, or (older versions) chrooted into it
+    if { [ -n "$ns" ] && [ "$(readlink /proc/$pid/ns/mnt 2>/dev/null)" = "$ns" ]; } \
+        || [ "$(readlink /proc/$pid/root 2>/dev/null)" = "$root" ]; then
+        kill -9 "$pid" 2>/dev/null
+    fi
 done
+rm -f /run/kdeplasma.mntns
 
 # F1 back to the file manager
 if [ -f "$service_file" ]; then

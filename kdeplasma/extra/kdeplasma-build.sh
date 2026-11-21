@@ -62,6 +62,7 @@ inroot pacman -Syu --noconfirm --needed \
     plasma-desktop kwin plasma-workspace breeze breeze-gtk kde-gtk-config \
     plasma-pa plasma-nm powerdevil kscreen systemsettings \
     konsole dolphin kate ark spectacle gwenview \
+    discover flatpak flatpak-kcm \
     xorg-xwayland mesa vulkan-radeon vulkan-intel libva-mesa-driver intel-media-driver \
     pipewire pipewire-pulse wireplumber \
     noto-fonts ttf-dejavu sudo
@@ -75,5 +76,21 @@ echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > "$root/etc/sudoers.d/wheel"
 # Its runtime folder: /run/user must be reachable by the plasma user
 mkdir -p "$root/run/user/1000"
 chmod 0755 "$root/run/user"
+
+# Lock screen: Arch has no PAM "kde" service, which would refuse every
+# unlock; with it, Enter (empty password) unlocks
+[ -f "$root/etc/pam.d/kde" ] || printf '#%%PAM-1.0\nauth     include system-login\naccount  include system-login\npassword include system-login\nsession  include system-login\n' > "$root/etc/pam.d/kde"
+inroot passwd -d plasma >/dev/null
+
+# Discover installs apps from Flathub, per user (no root service needed).
+# Run through kdeplasma-enter.py rather than chroot: Flatpak's sandbox needs
+# user namespaces, which the kernel refuses inside a chroot.
+trap - EXIT
+cleanup
+python3 "$install_dir/kdeplasma-enter.py" "$root" /run/kdeplasma-build.mntns \
+    /usr/bin/runuser -u plasma -- /usr/bin/env -i HOME=/home/plasma PATH=/usr/bin \
+    flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo \
+    || echo "Could not add Flathub now; Discover can add it later."
+rm -f /run/kdeplasma-build.mntns
 
 echo "KDE Plasma is ready."

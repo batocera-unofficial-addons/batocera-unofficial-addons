@@ -43,7 +43,7 @@ mkdir -p "$install_dir" /userdata/system/logs
 
 # The add-on's own scripts
 echo "Downloading $APPNAME scripts..."
-for f in kdeplasma-build.sh kdeplasma-launch.sh kdeplasma-exit.sh kdeplasma-service kdeplasma-logo.png; do
+for f in kdeplasma-build.sh kdeplasma-launch.sh kdeplasma-enter.py kdeplasma-exit.sh kdeplasma-places.py kdeplasma-apps.py kdeplasma-service kdeplasma-logo.png; do
     wget -q --show-progress -O "$install_dir/$f" "$base_url/extra/$f" || fail "Failed to download $f."
 done
 chmod +x "$install_dir"/*.sh "$install_dir/kdeplasma-service"
