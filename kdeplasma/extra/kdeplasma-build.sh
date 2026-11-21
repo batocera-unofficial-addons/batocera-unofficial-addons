@@ -50,6 +50,21 @@ grep -q '^Server' "$root/etc/pacman.d/mirrorlist" || \
 sed -i 's/^#ParallelDownloads/ParallelDownloads/; s/^CheckSpace/#CheckSpace/' "$root/etc/pacman.conf"
 grep -q '^DisableSandbox' "$root/etc/pacman.conf" || sed -i '/^\[options\]/a DisableSandbox' "$root/etc/pacman.conf"
 
+# Batocera's language (set in EmulationStation), e.g. fr_FR; English if unset.
+# Plasma runs in it; only its translations and English are kept.
+lang=$(batocera-settings-get system.language 2>/dev/null || true)
+[ -n "$lang" ] || lang=en_US
+ll="${lang%%_*}"
+
+# Docs, man pages and help are never read on a TV box, and translations are
+# only needed for Batocera's language and English: tell pacman not to unpack
+# the rest (saves about 600 MB)
+sed -i '/^# BUA kdeplasma: start/,/^# BUA kdeplasma: end/d' "$root/etc/pacman.conf"
+sed -i "/^\[options\]/a # BUA kdeplasma: start\\
+NoExtract = usr/share/doc/* usr/share/man/* usr/share/info/* usr/share/help/* usr/share/gtk-doc/*\\
+NoExtract = usr/share/locale/* !usr/share/locale/locale.alias !usr/share/locale/en/* !usr/share/locale/en_* !usr/share/locale/${ll}/* !usr/share/locale/${ll}_* !usr/share/locale/${ll}@*\\
+# BUA kdeplasma: end" "$root/etc/pacman.conf"
+
 inroot() { chroot "$root" /usr/bin/env -i HOME=/root TERM=xterm PATH=/usr/bin:/usr/sbin "$@"; }
 if [ ! -f "$root/etc/pacman.d/gnupg/pubring.gpg" ] && [ ! -f "$root/etc/pacman.d/gnupg/pubring.kbx" ]; then
     echo "Setting up package signing keys..."
@@ -67,6 +82,23 @@ inroot pacman -Syu --noconfirm --needed \
     pipewire pipewire-pulse wireplumber \
     noto-fonts ttf-dejavu sudo
 inroot pacman -Scc --noconfirm >/dev/null 2>&1 || true
+rm -rf "$root/var/cache/pacman/pkg/"*
+
+# What an earlier install unpacked before the rules above (an update cleans
+# it up): docs, and translations other than English and Batocera's language
+for d in doc man info help gtk-doc; do
+    rm -rf "$root/usr/share/$d/"*
+done
+find "$root/usr/share/locale" -mindepth 1 -maxdepth 1 -type d \
+    ! -name en ! -name 'en_*' ! -name "$ll" ! -name "${ll}_*" ! -name "${ll}@*" \
+    -exec rm -rf {} +
+
+# Plasma in Batocera's language: generate its locale (and English)
+for l in en_US "$lang"; do
+    grep -q "^${l}.UTF-8 UTF-8" "$root/etc/locale.gen" || echo "${l}.UTF-8 UTF-8" >> "$root/etc/locale.gen"
+done
+inroot locale-gen >/dev/null
+echo "$lang" > "$install_dir/language"
 
 # A normal user: KDE apps refuse to run as root
 if ! inroot id plasma >/dev/null 2>&1; then

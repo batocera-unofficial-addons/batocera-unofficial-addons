@@ -79,6 +79,30 @@ kcfg --file kscreenlockerrc --group Daemon --key LockOnResume false
 kcfg --file powerdevilrc --group AC --group Display --key DimDisplayWhenIdle false
 kcfg --file powerdevilrc --group AC --group Display --key TurnOffDisplayWhenIdle false
 kcfg --file powerdevilrc --group AC --group SuspendAndShutdown --key AutoSuspendAction 0
+# No file indexer (Baloo): little to search on a TV box, and it costs CPU
+# and disk while it scans
+kcfg --file baloofilerc --group "Basic Settings" --key "Indexing-Enabled" false
+# ...and don't let the search's file plugin wake it up
+kcfg --file krunnerrc --group Plugins --key baloosearchEnabled false
+rm -rf "$root/home/plasma/.local/share/baloo"
+# Package downloads left by installing or updating something by hand
+rm -rf "$root/var/cache/pacman/pkg/"*
+
+# Plasma in Batocera's language (set in EmulationStation). Its translations
+# come with the install; after changing Batocera's language, reinstall KDE
+# Plasma Desktop from BUA to get the new ones.
+lang=$(batocera-settings-get system.language 2>/dev/null || true)
+[ -n "$lang" ] || lang=en_US
+if grep -q "^${lang}.UTF-8 UTF-8" "$root/etc/locale.gen" 2>/dev/null; then
+    plasma_lang="${lang}.UTF-8"
+else
+    plasma_lang="C.UTF-8"
+    echo "Batocera's language $lang is not set up in Plasma yet; reinstall KDE Plasma Desktop to add it."
+fi
+# Plasma takes its language from its own regional settings over LANG, so
+# keep those in step with Batocera
+kcfg --file plasma-localerc --group Formats --key LANG "$plasma_lang"
+kcfg --file plasma-localerc --group Translations --key LANGUAGE "${lang}:${lang%%_*}:en"
 [ -f "$root/etc/pam.d/kde" ] || printf '#%%PAM-1.0\nauth     include system-login\naccount  include system-login\npassword include system-login\nsession  include system-login\n' > "$root/etc/pam.d/kde"
 grep -q '^plasma::' "$root/etc/shadow" || enter /usr/bin/passwd -d plasma >/dev/null
 
@@ -117,7 +141,7 @@ batocera-mouse show
 enter /usr/bin/runuser -u plasma -- /usr/bin/env -i \
     HOME=/home/plasma USER=plasma LOGNAME=plasma SHELL=/bin/bash \
     PATH=/usr/local/bin:/usr/bin \
-    LANG=C.UTF-8 \
+    LANG="$plasma_lang" LANGUAGE="${lang}:${lang%%_*}:en" \
     XDG_RUNTIME_DIR=/run/user/1000 \
     XDG_SESSION_TYPE=wayland \
     XDG_DATA_DIRS=/home/plasma/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share \
