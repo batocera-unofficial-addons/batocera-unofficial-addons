@@ -125,7 +125,8 @@ if [[ -f "$SETUP_SCRIPT" ]]; then
 fi
 
 /userdata/system/add-ons/heroic/monitor_heroic.sh &
-unclutter-remote -s
+# Show the mouse cursor: unclutter-remote on X11, batocera-mouse on Wayland (labwc)
+command -v unclutter-remote >/dev/null && unclutter-remote -s || batocera-mouse show
 DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic.AppImage --no-sandbox "$@"
 EOL
 chmod a+x "$LAUNCHER"
@@ -145,7 +146,8 @@ fi
 # Process input file
 ID=$(cat "$1" | head -n 1)
 # Execute application
-unclutter-remote -s
+# Show the mouse cursor: unclutter-remote on X11, batocera-mouse on Wayland (labwc)
+command -v unclutter-remote >/dev/null && unclutter-remote -s || batocera-mouse show
 DISPLAY=:0.0 /userdata/system/add-ons/heroic/heroic.AppImage --no-sandbox --no-gui "heroic://launch/$ID"
 EOL
 chmod a+x "$SYSTEM_LAUNCHER"

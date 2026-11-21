@@ -1,0 +1,2 @@
+# Run by the Light Desktop's labwc when it starts: wallpaper and panel
+/userdata/system/add-ons/lightdesktop/lightdesktop-session.sh &
