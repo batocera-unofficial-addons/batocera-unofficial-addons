@@ -3,7 +3,7 @@
 # install_redist_dependencies64.sh.
 #
 # The installer puts the x64 Visual C++ redistributables and the DirectX
-# redistributable (directx.7z, extracted) in /userdata/system/wine/exe.
+# redistributable (directx_Jun2010_redist.exe) in /userdata/system/wine/exe.
 # On the next Windows game launch, Batocera's wine runner installs every .exe
 # found there into that game's bottle and moves the .exe to
 # /userdata/system/wine/installed.exe. Wine Manager's "disable redist
@@ -14,9 +14,9 @@
 # What was already installed into a game's Wine bottle stays there: it can
 # only be removed by deleting that bottle.
 #
-# The DirectX files are the same ones Wine Dependencies x86
-# (install_redist_dependencies32.sh) extracts. If its files are found, the
-# script asks before removing the DirectX files.
+# The DirectX installer is the same file Wine Dependencies x86
+# (install_redist_dependencies32.sh) downloads. If its files are found, the
+# script asks before removing it.
 #
 # Usage:
 #   curl -L <url> | bash
@@ -44,17 +44,9 @@ VCREDIST_FILES=(
     vcredist_x64_2005.exe
 )
 
-# What directx.7z extracts (the DirectX June 2010 redistributable):
-# DXSETUP.exe, its DLLs and installscript.vdf, plus one .cab per component
-# and release, named like Jun2010_d3dx11_43_x64.cab.
+# The DirectX June 2010 redistributable the installer downloads
 DIRECTX_FILES=(
-    DXSETUP.exe
-    DSETUP.dll
-    dsetup32.dll
-    installscript.vdf
-    dxdllreg_x86.cab
-    dxupdate.cab
-    "[A-Za-z][A-Za-z][A-Za-z]20[01][0-9]_*.cab"
+    directx_Jun2010_redist.exe
 )
 
 ignore_warning=false   # set to true by --ignore-warning in main
@@ -100,7 +92,7 @@ main() {
     remove_files "${VCREDIST_FILES[@]}"
     echo "Removed the x64 Visual C++ redistributables."
 
-    # The DirectX files are shared with Wine Dependencies x86.
+    # The DirectX installer is shared with Wine Dependencies x86.
     local dir x86_dirs=""
     for dir in "${WINE_EXE_DIR}" "${WINE_EXE_BAK_DIR}" "${WINE_INSTALLED_DIR}"; do
         if compgen -G "${dir}/vcredist_x86_*" >/dev/null; then
@@ -112,14 +104,14 @@ main() {
         remove_files "${DIRECTX_FILES[@]}"
         echo "Removed the DirectX redistributable."
     else
-        local text="The DirectX files in ${WINE_EXE_DIR} are also used by Wine Dependencies x86, which is still installed (its files are in:${x86_dirs}).\n\nRemove the DirectX files anyway?"
+        local text="The DirectX installer in ${WINE_EXE_DIR} is also used by Wine Dependencies x86, which is still installed (its files are in:${x86_dirs}).\n\nRemove the DirectX installer anyway?"
         echo -e "${text}"
-        if ask "Remove DirectX files?" "${text}"; then
-            [ "${ignore_warning}" = "true" ] && echo "--ignore-warning given: removing them anyway."
+        if ask "Remove DirectX installer?" "${text}"; then
+            [ "${ignore_warning}" = "true" ] && echo "--ignore-warning given: removing it anyway."
             remove_files "${DIRECTX_FILES[@]}"
             echo "Removed the DirectX redistributable."
         else
-            echo "Kept the DirectX files for Wine Dependencies x86."
+            echo "Kept the DirectX installer for Wine Dependencies x86."
         fi
     fi
 
