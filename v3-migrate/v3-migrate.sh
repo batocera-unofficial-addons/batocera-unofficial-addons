@@ -3,9 +3,9 @@
 # Moves a Batocera PC from the x86_64 image (Xorg) to the x86-64-v3 image (Wayland/LabWC)
 # and keeps custom setups working:  scan > backup > update > integrate.
 # Run it once before the update (scan + backup + prepare) and once after (integrate).
-# Source: https://github.com/klova5/batocera-v3-migrate - installs the tool from its latest release.
+# Source: https://github.com/klova5/batocera-wayland-v3-migrate - installs the tool from its latest release.
 
-repo="klova5/batocera-v3-migrate"
+repo="klova5/batocera-wayland-v3-migrate"
 fallback_url="https://github.com/$repo/releases/download/v2.0.1/batocera_v3_migrate.py"
 APP_DIR="/userdata/system/add-ons/v3-migrate"
 TOOL="$APP_DIR/batocera_v3_migrate.py"
