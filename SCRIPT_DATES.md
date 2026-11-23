@@ -4,7 +4,7 @@
 |------|------------------|
 | `.dep/mousemove.sh` | 2025-05-22 18:53:29 +0100 |
 | `.github/contribkit/build.sh` | 2026-11-20 20:43:12 +0000 |
-| `.github/scripts/check_apps_json.py` | 2026-11-20 20:45:26 +0000 |
+| `.github/scripts/check_apps_json.py` | 2026-11-22 21:51:20 -0500 |
 | `.github/scripts/update_script_dates.py` | 2025-11-27 21:41:34 +0000 |
 | `7zip/7zip.sh` | 2025-05-22 17:09:18 +0100 |
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
@@ -374,6 +374,7 @@
 | `winemanager/install_redist_dependencies32.sh` | 2026-11-17 19:55:29 +0000 |
 | `winemanager/install_redist_dependencies32_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `winemanager/install_redist_dependencies64.sh` | 2026-11-17 19:55:29 +0000 |
+| `winemanager/install_redist_dependencies64_uninstall.sh` | 2026-11-22 21:51:20 -0500 |
 | `winemanager/winemanager.sh` | 2025-01-07 21:03:20 -0300 |
 | `winemanager/winemanager_uninstall.sh` | 2026-11-17 15:05:19 -0500 |
 | `wps-office/wps-office.sh` | 2026-05-04 21:46:58 +0100 |
