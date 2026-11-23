@@ -2,7 +2,7 @@
 # Uninstall Game Content Manager (GCM). Games, saves and emulator settings are kept.
 
 repo="klova5/Game-Content-Manager-GCM-for-Batocera"
-fallback_url="https://github.com/$repo/releases/download/GCM-v3.6-preview-4/gcm-v3.6-preview-4-batocera44-x86_64.zip"
+fallback_url="https://github.com/$repo/releases/download/GCM-v4.0-preview-1/gcm-v4.0-preview-1-batocera44-x86_64.zip"
 work_dir="/userdata/system/add-ons/game-content-manager/release"
 
 uninstaller=$(ls -d "$work_dir"/*/uninstall.sh 2>/dev/null | head -1)
@@ -32,4 +32,5 @@ if [ -z "$uninstaller" ] || ! bash "$uninstaller"; then
 fi
 batocera-services disable GCMV36 >/dev/null 2>&1
 rm -rf "$work_dir"
+rm -f /userdata/system/add-ons/game-content-manager/bua-version.json
 echo "Game Content Manager removed. The standard frontend is in use."
