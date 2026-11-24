@@ -6,10 +6,51 @@
 # Source: https://github.com/klova5/batocera-wayland-v3-migrate - installs the tool from its latest release.
 
 repo="klova5/batocera-wayland-v3-migrate"
-fallback_url="https://github.com/$repo/releases/download/v2.1.0/batocera_v3_migrate.py"
+fallback_tag="v2.1.0"
+fallback_url="https://github.com/$repo/releases/download/$fallback_tag/batocera_v3_migrate.py"
 APP_DIR="/userdata/system/add-ons/v3-migrate"
 TOOL="$APP_DIR/batocera_v3_migrate.py"
 LOG="/userdata/system/logs/v3-migrate.log"
+version_file="$APP_DIR/bua-version.json"
+
+# The latest release: tag, a fingerprint of the release and its files (BUA's update identity), and the
+# tool's download URL. Prints nothing if GitHub cannot be asked.
+v3m_latest_release() {
+    curl -fsSL --max-time 20 "https://api.github.com/repos/$repo/releases/latest" 2>/dev/null | python3 -c '
+import hashlib, json, sys
+try:
+    release = json.load(sys.stdin)
+except ValueError:
+    sys.exit(0)
+tag = str(release.get("tag_name") or "").strip()
+assets = release.get("assets") or []
+url = next((a.get("browser_download_url", "") for a in assets
+            if a.get("browser_download_url", "").endswith("/batocera_v3_migrate.py")
+            and a.get("browser_download_url", "").startswith("https://github.com/")), "")
+if not tag or not url:
+    sys.exit(0)
+files = sorted((str(a.get("name")), str(a.get("id")), str(a.get("size")), str(a.get("updated_at"))) for a in assets)
+digest = hashlib.sha256(json.dumps([release.get("id"), files]).encode()).hexdigest()
+print(tag)
+print("github-release:%s:%s" % (release.get("id"), digest))
+print(url)
+'
+}
+
+# BUA updater: report the installed tool version (from bua-version.json) and the latest release.
+v3m_bua_register() {
+    declare -F bua_register >/dev/null 2>&1 || return 0
+    bua_register "$1" "github_release" "klova5" "batocera-wayland-v3-migrate" "reinstall" \
+        "json" "$version_file" "version" "$2"
+}
+
+# The BUA updater asks for the latest version this way; nothing is installed.
+if [ "${BUA_REGISTRATION_ONLY:-0}" = "1" ]; then
+    latest=$(v3m_latest_release)
+    [ -n "$latest" ] || { echo "Could not look up the latest migration tool release." >&2; exit 1; }
+    v3m_bua_register "$(echo "$latest" | sed -n 1p)" "$(echo "$latest" | sed -n 2p)"
+    exit $?
+fi
 
 echo "## BUA - x86-64-v3 Migration"
 
@@ -28,20 +69,14 @@ case "$BOARD" in
 esac
 
 # === Download the tool: the latest release; the known release if GitHub cannot be asked ===
-release_url=$(curl -fsSL --max-time 20 "https://api.github.com/repos/$repo/releases/latest" 2>/dev/null | python3 -c '
-import json, sys
-try:
-    assets = json.load(sys.stdin).get("assets", [])
-except ValueError:
-    sys.exit(0)
-for a in assets:
-    url = a.get("browser_download_url", "")
-    if url.endswith("/batocera_v3_migrate.py") and url.startswith("https://github.com/"):
-        print(url)
-        break
-')
+latest=$(v3m_latest_release)
+release_tag=$(echo "$latest" | sed -n 1p)
+release_identity=$(echo "$latest" | sed -n 2p)
+release_url=$(echo "$latest" | sed -n 3p)
 if [ -z "$release_url" ]; then
     echo "Could not look up the latest release; using the known release."
+    release_tag="$fallback_tag"
+    release_identity="$fallback_tag"
     release_url="$fallback_url"
 fi
 
@@ -54,7 +89,12 @@ if ! curl -fsSL "$release_url" -o "$TOOL.new" || ! python3 -m py_compile "$TOOL.
 fi
 mv -f "$TOOL.new" "$TOOL"
 chmod +x "$TOOL"
-echo "Installed $TOOL"
+echo "Installed $TOOL ($release_tag)"
+
+# Record the installed release for BUA's updater (shown as the app version).
+python3 -c 'import json, sys; json.dump({"version": sys.argv[1], "update_identity": sys.argv[2]}, open(sys.argv[3], "w"), indent=1)' \
+    "$release_tag" "$release_identity" "$version_file"
+v3m_bua_register "$release_tag" "$release_identity" || true
 
 # === Ports entry: "V3 Migration" opens a controller menu for every step (tool v2.1.0+) ===
 if python3 "$TOOL" launcher install >>"$LOG" 2>&1; then
