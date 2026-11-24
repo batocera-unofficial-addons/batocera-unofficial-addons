@@ -6,7 +6,7 @@
 # Source: https://github.com/klova5/batocera-wayland-v3-migrate - installs the tool from its latest release.
 
 repo="klova5/batocera-wayland-v3-migrate"
-fallback_url="https://github.com/$repo/releases/download/v2.0.1/batocera_v3_migrate.py"
+fallback_url="https://github.com/$repo/releases/download/v2.1.0/batocera_v3_migrate.py"
 APP_DIR="/userdata/system/add-ons/v3-migrate"
 TOOL="$APP_DIR/batocera_v3_migrate.py"
 LOG="/userdata/system/logs/v3-migrate.log"
@@ -56,6 +56,13 @@ mv -f "$TOOL.new" "$TOOL"
 chmod +x "$TOOL"
 echo "Installed $TOOL"
 
+# === Ports entry: "V3 Migration" opens a controller menu for every step (tool v2.1.0+) ===
+if python3 "$TOOL" launcher install >>"$LOG" 2>&1; then
+    PORTS_NOTE="\n\nTip: Ports > V3 Migration runs every step with a controller, and can cancel a step and put back what it changed."
+else
+    PORTS_NOTE=""
+fi
+
 # === Work out the next step ===
 PHASE="$(python3 - <<'PY'
 import json
@@ -76,14 +83,14 @@ if [ "$BOARD" = "x86-64-v3" ]; then
 else
     case "$PHASE" in
         prepared)
-            dialog --title "x86-64-v3 Migration" --msgbox "Ready for the update.\n\nStart the x86-64-v3 upgrade from Batocera's updates menu, reboot when it asks, then run this add-on again to integrate." 11 64
+            dialog --title "x86-64-v3 Migration" --msgbox "Ready for the update.\n\nStart the x86-64-v3 upgrade from Batocera's updates menu, reboot when it asks, then run this add-on again (or Ports > V3 Migration) to integrate." 12 64
             exit 0 ;;
         *)
             NEXT="SCAN the system for everything the update affects, BACK UP those things (plus the boot partition for rollback, about 5 GB on /userdata), then PREPARE for the update. The scan can take a few minutes." ;;
     esac
 fi
 
-if ! dialog --title "x86-64-v3 Migration" --yesno "Board: $BOARD\n\nNext step:\n$NEXT\n\nEvery file it changes is backed up first.\n\nRun it now?" 16 70; then
+if ! dialog --title "x86-64-v3 Migration" --yesno "Board: $BOARD\n\nNext step:\n$NEXT\n\nEvery file it changes is backed up first.$PORTS_NOTE\n\nRun it now?" 19 70; then
     echo "Nothing changed. Run this add-on again whenever you're ready."
     echo "Advanced (SSH): python3 $TOOL --help"
     exit 0
