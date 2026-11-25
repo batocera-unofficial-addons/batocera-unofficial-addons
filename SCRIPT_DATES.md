@@ -147,8 +147,8 @@
 | `freetube/freetube_uninstall.sh` | 2026-10-23 12:37:46 -0400 |
 | `gamescope/gamescope.sh` | 2025-12-09 23:14:24 +0000 |
 | `gamescope/gamescope_uninstall.sh` | 2026-10-26 23:57:27 -0400 |
-| `gcm/gcm.sh` | 2026-11-19 08:28:32 -0700 |
-| `gcm/gcm_uninstall.sh` | 2026-11-19 08:28:32 -0700 |
+| `gcm/gcm.sh` | 2026-11-24 09:55:38 -0700 |
+| `gcm/gcm_uninstall.sh` | 2026-11-24 09:55:38 -0700 |
 | `gparted/gparted.sh` | 2025-12-11 02:16:04 +0000 |
 | `gparted/gparted_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `greenlight/greenlight.sh` | 2026-04-17 14:03:29 +0100 |
@@ -311,6 +311,8 @@
 | `twitch/twitch_uninstall.sh` | 2026-10-24 09:12:00 -0400 |
 | `usdeluxe/usdeluxe.sh` | 2025-04-03 02:20:56 +0100 |
 | `usdeluxe/usdeluxe_uninstall.sh` | 2026-10-24 09:09:14 -0400 |
+| `v3-migrate/v3-migrate.sh` | 2026-11-24 16:07:59 -0700 |
+| `v3-migrate/v3-migrate_uninstall.sh` | 2026-11-24 16:07:59 -0700 |
 | `v40wine/v40wine.sh` | 2025-05-22 18:19:02 +0100 |
 | `vclean/vclean.sh` | 2025-11-13 21:54:58 +0000 |
 | `vclean/vclean_uninstall.sh` | 2025-11-13 22:29:18 +0000 |
