@@ -164,8 +164,43 @@ xmlstarlet ed -d "/gameList/game[path='./${APP_NAME}.sh']" \
 # Launchers for apps already in the library (reinstall)
 "$APP_DIR/create-quiver-launchers.sh" --once
 
+# Step 7: Desktop entry (F1 > Applications and the desktop's app menu). It runs
+# the same Launcher as the ES entry, so apps installed from there get their ES
+# launchers too. Kept on /userdata and put back at boot.
+echo "Creating desktop entry..."
+desktop_file="/usr/share/applications/QuiverLauncher.desktop"
+persistent_desktop="/userdata/system/configs/${APP_NAME,,}/QuiverLauncher.desktop"
+restore_script="/userdata/system/configs/${APP_NAME,,}/restore_desktop_entry.sh"
+mkdir -p "/userdata/system/configs/${APP_NAME,,}"
+cat <<DESKTOP > "$persistent_desktop"
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=$DISPLAY_NAME
+Exec=$APP_DIR/Launcher
+Icon=$LOGO_PATH
+Terminal=false
+Categories=Game;batocera.linux;
+DESKTOP
+chmod +x "$persistent_desktop"
+cp -f "$persistent_desktop" "$desktop_file"
+chmod +x "$desktop_file"
+cat <<RESTORE > "$restore_script"
+#!/bin/bash
+if [ ! -f "$desktop_file" ]; then
+    cp "$persistent_desktop" "$desktop_file"
+    chmod +x "$desktop_file"
+fi
+RESTORE
+chmod +x "$restore_script"
+touch /userdata/system/custom.sh
+if ! grep -q "$restore_script" /userdata/system/custom.sh; then
+    echo "bash \"$restore_script\" &" >> /userdata/system/custom.sh
+fi
+chmod +x /userdata/system/custom.sh
+
 dialog --title "$DISPLAY_NAME Installed" --msgbox \
-"$DISPLAY_NAME has been installed!\n\nOpen it from the Quiver Launcher system in EmulationStation.\n\nApps you install with it get their own entry in the same system after you close Quiver.\n\nHotkey + Start closes Quiver or a running app." \
+"$DISPLAY_NAME has been installed!\n\nOpen it from the Quiver Launcher system in EmulationStation, or from F1 > Applications.\n\nApps you install with it get their own entry in the same system after you close Quiver.\n\nHotkey + Start closes Quiver or a running app." \
 14 60
 
 # Finish: new system, EmulationStation must restart to show it

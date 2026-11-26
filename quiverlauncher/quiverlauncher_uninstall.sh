@@ -21,6 +21,15 @@ main() {
     # System settings (quiver.x) and per-game ones Batocera adds (quiver["Game.sh"].x)
     sed -i '/^quiver\./d; /^quiver\[/d' "${BATOCERA_CONF}" 2>/dev/null || true
 
+    # Desktop entry (F1 > Applications) and its boot-time restore
+    local conf_dir="/userdata/system/configs/${APP_NAME,,}"
+    rm -f /usr/share/applications/QuiverLauncher.desktop "${conf_dir}/QuiverLauncher.desktop"
+    if [ -f "${conf_dir}/restore_desktop_entry.sh" ]; then
+        [ -f /userdata/system/custom.sh ] && sed -i "\|${conf_dir}/restore_desktop_entry.sh|d" /userdata/system/custom.sh
+        rm -f "${conf_dir}/restore_desktop_entry.sh"
+    fi
+    rmdir "${conf_dir}" 2>/dev/null
+
     echo "${APP_NAME} has been removed."
 
     # The quiver system is gone; EmulationStation must restart to drop it
