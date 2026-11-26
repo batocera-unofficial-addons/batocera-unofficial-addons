@@ -24,6 +24,8 @@
   "custom_wine_desc": "Baixar versões do Wine/Proton",
   "updater": "Atualizador",
   "updater_desc": "Atualizar/Desinstalar complementos instalados",
+  "doctor": "BUA Doctor",
+  "doctor_desc": "Encontrar e corrigir problemas nos complementos instalados",
   "settings": "Configurações",
   "settings_desc": "Configurar mapeamento do controle e opções",
   "exit": "Sair",

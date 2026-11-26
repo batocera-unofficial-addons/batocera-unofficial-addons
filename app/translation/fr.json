@@ -24,6 +24,8 @@
   "custom_wine_desc": "Télécharger des versions Wine/Proton",
   "updater": "Mise à Jour",
   "updater_desc": "Mettre à jour/Désinstaller les modules installés",
+  "doctor": "BUA Doctor",
+  "doctor_desc": "Trouver et réparer les problèmes des modules installés",
   "settings": "Paramètres",
   "settings_desc": "Configurer la disposition du contrôleur et les options",
   "exit": "Quitter",

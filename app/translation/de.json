@@ -22,6 +22,8 @@
   "docker_menu_desc": "Docker-Container installieren",
   "updater": "Updater",
   "updater_desc": "Aktualisieren/Deinstallieren installierter Add-ons",
+  "doctor": "BUA Doctor",
+  "doctor_desc": "Probleme mit installierten Add-ons finden und beheben",
   "settings": "Einstellungen",
   "settings_desc": "Controller-Layout und Optionen konfigurieren",
   "exit": "Beenden",

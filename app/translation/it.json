@@ -24,6 +24,8 @@
   "custom_wine_desc": "Scarica versioni Wine/Proton",
   "updater": "Programma di aggiornamento",
   "updater_desc": "Aggiorna/Disinstalla componenti aggiuntivi installati",
+  "doctor": "BUA Doctor",
+  "doctor_desc": "Trova e risolvi i problemi dei componenti aggiuntivi installati",
   "settings": "Impostazioni",
   "settings_desc": "Configura layout controller e opzioni",
   "exit": "Esci",

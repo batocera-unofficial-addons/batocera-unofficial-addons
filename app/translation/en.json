@@ -24,6 +24,8 @@
   "custom_wine_desc": "Download Wine/Proton versions",
   "updater": "Updater",
   "updater_desc": "Update/Uninstall installed add-ons",
+  "doctor": "BUA Doctor",
+  "doctor_desc": "Find and fix problems with installed add-ons",
   "settings": "Settings",
   "settings_desc": "Configure controller layout and options",
   "exit": "Exit",

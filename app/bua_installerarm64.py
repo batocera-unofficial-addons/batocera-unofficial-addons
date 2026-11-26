@@ -583,12 +583,16 @@ def get_top_level() -> List[Tuple[str, str]]:
         (t("developer_tools"), t("developer_tools_desc")),
         (t("docker_menu"), t("docker_menu_desc")),
         (t("updater"), t("updater_desc")),
+        (t("doctor"), t("doctor_desc")),
         (t("settings"), t("settings_desc")),
         (t("exit"), t("exit_desc")),
     ]
 
 # TOP_LEVEL will be initialized after translations load in play_splash_and_load()
 TOP_LEVEL = None
+
+# BUA Doctor (main screen): downloads and runs the latest checks each time
+DOCTOR_CMD = "curl -fsSL https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/bua-doctor/bua-doctor.sh | bash"
 
 SPECIAL_TOPLEVEL_RUN: Dict[str, str] = {
     # "Windows Freeware" and "Docker Menu" integrated as categories in the UI
@@ -2151,6 +2155,11 @@ def draw_icon(surf, kind: str, center, size: int, color):
             pygame.draw.line(surf, color, p1, p2, w * 2)
         pygame.draw.circle(surf, color, (cx, cy), int(radius), w)
         pygame.draw.circle(surf, color, (cx, cy), max(2, int(radius * 0.4)), w)
+    elif kind == "doctor":
+        # medical cross
+        a, b = 0.24, 0.8
+        pts = [(-a, -b), (a, -b), (a, -a), (b, -a), (b, a), (a, a), (a, b), (-a, b), (-a, a), (-b, a), (-b, -a), (-a, -a)]
+        pygame.draw.polygon(surf, color, [P(x, y) for x, y in pts], w)
     elif kind == "power":
         r = pygame.Rect(0, 0, int(size * 0.76), int(size * 0.76))
         r.center = (cx, cy + int(size * 0.04))
@@ -2782,6 +2791,9 @@ class MenuScreen(BaseScreen):
         if name == t("updater"):
             push_screen(UpdaterScreen())
             return
+        if name == t("doctor"):
+            push_screen(RunListScreen([(name, DOCTOR_CMD)], title=name))
+            return
         # category -> check list screen
         english_name = category_map.get(name, name)
         if english_name in CATEGORIES:
@@ -2857,8 +2869,9 @@ class MenuScreen(BaseScreen):
         self.rects = rects
 
         icons = dict(HOME_ICONS)
-        icons.update({"Custom Wine": "wine", "Updater": "update", "Settings": "gear", "Exit": "power"})
-        special = {t("custom_wine"): "Custom Wine", t("updater"): "Updater", t("settings"): "Settings", t("exit"): "Exit"}
+        icons.update({"Custom Wine": "wine", "Updater": "update", "Doctor": "doctor", "Settings": "gear", "Exit": "power"})
+        special = {t("custom_wine"): "Custom Wine", t("updater"): "Updater", t("doctor"): "Doctor",
+                   t("settings"): "Settings", t("exit"): "Exit"}
 
         # Selected tile last, so its enlarged outline sits on top of its neighbours
         for i in [i for i in range(len(self.items)) if i != self.idx] + [self.idx]:
@@ -4405,8 +4418,9 @@ export -f desktop
                         # Extract app name (remove " (Uninstall)" suffix)
                         app_name = job_name.replace(" (Uninstall)", "")
                         mark_uninstalled(app_name)
-                else:
-                    # Regular install - mark as installed
+                elif job_name != t("doctor"):
+                    # Regular install - mark as installed (BUA Doctor is a
+                    # check-up run from the main screen, not an add-on)
                     mark_installed(job_name, success)
                 # If the installer emitted a dialog message, show it as an in-app message box
                 if self.runner.last_dialog_title or self.runner.last_dialog_text:
