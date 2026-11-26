@@ -515,7 +515,7 @@ def mark_uninstalled(app_name: str):
 # (and the changelog shown after an update) there, not here.
 
 # Base URL for BUA repository scripts
-BUA_BASE_URL = "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main"
+BUA_BASE_URL = "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main"
 
 APPS_JSON_URL = f"{BUA_BASE_URL}/app/apps_x86.json"
 
@@ -557,13 +557,34 @@ def build_app_tables(app_list: dict):
             uninstall[name] = entry["uninstall"]
     return apps, descriptions, categories, uninstall
 
-APP_LIST = load_app_list()
-CHANGELOG = str(APP_LIST.get("changelog", "")).strip()
-APPS, DESCRIPTIONS, CATEGORIES, UNINSTALL = build_app_tables(APP_LIST)
+# The app list is downloaded while the splash plays (load_app_tables), so a
+# slow network doesn't hold up the window opening. These stay the same
+# objects and are filled in place, so code holding them sees the list.
+APP_LIST: dict = {}
+CHANGELOG = ""
+APPS: Dict[str, str] = {}
+DESCRIPTIONS: Dict[str, str] = {}
+CATEGORIES: Dict[str, List[str]] = {}
+UNINSTALL: Dict[str, str] = {}
 # Logos named in the app list ("logo": image URL), for add-ons whose
 # installer and files live outside this repo
-LOGO_URLS: Dict[str, str] = {e["name"]: e["logo"] for e in APP_LIST.get("apps", [])
-                             if isinstance(e, dict) and e.get("name") and e.get("logo")}
+LOGO_URLS: Dict[str, str] = {}
+
+
+def load_app_tables():
+    """Download the app list and fill the tables the menu uses."""
+    global CHANGELOG
+    data = load_app_list()
+    apps, descriptions, categories, uninstall = build_app_tables(data)
+    APP_LIST.clear(); APP_LIST.update(data)
+    APPS.clear(); APPS.update(apps)
+    DESCRIPTIONS.clear(); DESCRIPTIONS.update(descriptions)
+    CATEGORIES.clear(); CATEGORIES.update(categories)
+    UNINSTALL.clear(); UNINSTALL.update(uninstall)
+    LOGO_URLS.clear()
+    LOGO_URLS.update({e["name"]: e["logo"] for e in data.get("apps", [])
+                      if isinstance(e, dict) and e.get("name") and e.get("logo")})
+    CHANGELOG = str(data.get("changelog", "")).strip()
 
 def get_top_level() -> List[Tuple[str, str]]:
     """Generate top-level menu items with current language translations"""
@@ -769,7 +790,7 @@ BUTTON_ICONS: Dict[str, pygame.Surface] = {}
 # You can point to hosted images via per-key envs (e.g. BUA_BTN_A_URL)
 # or set a common base URL via BUA_BTN_BASE_URL where files are named as below.
 DEFAULT_BUTTONS_BASE_URL = os.environ.get("BUA_BTN_BASE_URL") or \
-    "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app/extra"
+    "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/extra"
 
 # Controller style detection and mapping
 PAD_STYLE = "xbox"  # xbox | playstation | nintendo | generic | keyboard
@@ -991,21 +1012,100 @@ def _try_load(path: str):
         return None
 
 
+# UI images (logo, button icons) are kept on disk, so a launch loads them
+# from there instead of downloading each one again. They are refreshed in
+# the background, and a changed image shows from the next launch on.
+UI_CACHE_DIR = "/userdata/system/add-ons/bua_ui_cache"
+_ui_cache_hits: set = set()
+_ui_fresh: set = set()      # downloaded during this launch
+_ui_cache_lock = threading.Lock()
+
+
+def _ui_cache_path(url: str) -> str:
+    return os.path.join(UI_CACHE_DIR, hashlib.md5(url.encode("utf-8")).hexdigest())
+
+
+def _ui_download(url: str) -> bytes:
+    """Download a UI image and store it in the cache. Raises on failure."""
+    data = fetch_url_with_retry(
+        url,
+        headers={"User-Agent": "BUA-Icons"},
+        timeout=5,
+        retries=0  # No retries for icons - fail fast and try next fallback
+    )
+    path = _ui_cache_path(url)
+    try:
+        os.makedirs(UI_CACHE_DIR, exist_ok=True)
+        tmp = f"{path}.{threading.get_ident()}.tmp"
+        with open(tmp, "wb") as f:
+            f.write(data)
+        os.replace(tmp, path)  # readers see the old file or the new one, never half
+        with _ui_cache_lock:
+            _ui_fresh.add(url)
+    except OSError:
+        pass
+    return data
+
+
+def _ui_image_bytes(url: str) -> bytes:
+    """The cached copy of a UI image if there is one, else download it."""
+    try:
+        with open(_ui_cache_path(url), "rb") as f:
+            data = f.read()
+        if data:
+            with _ui_cache_lock:
+                _ui_cache_hits.add(url)
+            return data
+    except OSError:
+        pass
+    return _ui_download(url)
+
+
+def _ui_prefetch(urls: List[str]):
+    """Get the images the UI is known to use at once, in parallel, so loading
+    them one by one afterwards finds them on disk."""
+    missing = [u for u in urls if not os.path.exists(_ui_cache_path(u))]
+    if not missing:
+        return
+    from concurrent.futures import ThreadPoolExecutor
+
+    def get(u):
+        try:
+            _ui_download(u)
+        except Exception:
+            pass
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(get, missing))
+
+
+def _ui_refresh_cached():
+    """Download again, in the background, the images this launch took from
+    the cache, so changes in the repo reach the next launch."""
+    def worker():
+        with _ui_cache_lock:
+            urls = list(_ui_cache_hits - _ui_fresh)
+        from concurrent.futures import ThreadPoolExecutor
+
+        def get(u):
+            try:
+                _ui_download(u)
+            except Exception:
+                pass
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            list(pool.map(get, urls))
+    threading.Thread(target=worker, daemon=True).start()
+
+
 def _from_url(url: str | None, verbose: bool = False):
     """
-    Download image from URL.
+    Load an image from URL, using the on-disk UI cache.
     Set verbose=True to print error messages (useful for critical resources).
     By default, errors are silent since this is often used with fallback URLs.
     """
     if not url:
         return None
     try:
-        data = fetch_url_with_retry(
-            url,
-            headers={"User-Agent": "BUA-Icons"},
-            timeout=5,
-            retries=0  # No retries for icons - fail fast and try next fallback
-        )
+        data = _ui_image_bytes(url)
         if verbose:
             print(f"[BUA] Successfully downloaded: {url}")
         return pygame.image.load(io.BytesIO(data)).convert_alpha()
@@ -1018,6 +1118,14 @@ def init_assets():
     LOGO_SURF = None
     WHEEL_SURF = None
     BUTTON_ICONS = {}
+    if DEFAULT_BUTTONS_BASE_URL:
+        _base = DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/"
+        _ui_prefetch([_base + n for n in (
+            "batocera-unofficial-addons.png", "batocera-unofficial-addons-wheel.png",
+            "btn_A.png", "btn_B.png", "btn_X.png", "btn_Y.png",
+            "btn_cro.png", "btn_cir.png", "btn_squ.png", "btn_tri.png",
+            "play-button.png", "btn_sel.png", "btn_lb.png", "btn_rb.png",
+        )])
     # Preferred watermark/background logo (try hosted first)
     if DEFAULT_BUTTONS_BASE_URL:
         remote_logo = _from_url(DEFAULT_BUTTONS_BASE_URL.rstrip("/") + "/batocera-unofficial-addons.png")
@@ -1285,6 +1393,8 @@ def init_assets():
     for r in range(28, 0, -1):
         pygame.draw.circle(glow_small, (*ACCENT, int(5 * (28 - r) / 28) + 1), (8, 4), r)
     BACKGROUND_SURF.blit(pygame.transform.smoothscale(glow_small, (W, H)), (0, 0))
+
+    _ui_refresh_cached()
 
 def draw_background(surf):
     if BACKGROUND_SURF is not None:
@@ -6132,7 +6242,10 @@ def play_splash_and_load():
     loading_complete = threading.Event()
 
     def load_in_background():
-        """Load translations and assets in background."""
+        """Load the app list, translations and assets in background."""
+        # The app list downloads alongside the translations and assets
+        app_list_thread = threading.Thread(target=load_app_tables, daemon=True)
+        app_list_thread.start()
         try:
             # Load translations
             load_language()
@@ -6143,6 +6256,7 @@ def play_splash_and_load():
         except Exception as e:
             print(f"[BUA] Error loading assets: {e}")
         finally:
+            app_list_thread.join()
             loading_complete.set()
 
     print("[BUA] Loading assets in background...")
