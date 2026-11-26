@@ -33,7 +33,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import Callable
 
-VERSION = "1.3"
+VERSION = "1.5"
 ROOT = os.environ.get("BUA_DOCTOR_ROOT", "")
 REPO = "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main"
 
@@ -496,7 +496,8 @@ def check_orphan_services() -> list[Finding]:
     except OSError:
         return found
     for n in names:
-        if n in LEGACY_DESKTOP_SERVICES:
+        # Old desktops and BUA's own services have checks of their own
+        if n in LEGACY_DESKTOP_SERVICES or n in BUA_SERVICES or n == "custom_service_handler":
             continue
         gone = missing_addons(read(f"{SERVICES}/{n}"))
         if not gone:
@@ -1711,23 +1712,48 @@ def main() -> int:
         dialog("--title", "BUA Doctor", "--msgbox", "No problems found. Your add-ons look healthy.", "7", "55")
         return 0
     fixable = [f for f in found if f.fix]
-    report = "\n\n".join(f"* {f.title}\n{f.detail}" for f in found)
-    dialog("--title", f"BUA Doctor: {len(found)} problem(s)", "--msgbox", report, "24", "90")
+    info = [f for f in found if not f.fix]
+    info_text = ("Also found (nothing to fix automatically):\n" + "\n".join(f"- {f.title}" for f in info) + "\n\n") if info else ""
     if not fixable:
+        dialog("--title", f"BUA Doctor: {len(found)} problem(s)", "--msgbox",
+               "\n\n".join(f"{f.title}\n{f.detail}" for f in info), "20", "90")
         return 0
-    items = []
-    for i, f in enumerate(fixable):
-        items += [str(i + 1), f.title, "on" if f.on else "off"]
-    rc, out = dialog("--title", "BUA Doctor", "--checklist",
-                     "Fix these? Everything changed is backed up first, and can be undone from BUA Doctor.",
-                     "20", "90", str(len(fixable)), *items)
-    if rc != 0 or not out:
-        return 0
-    chosen = [fixable[int(t) - 1] for t in shlex.split(out) if t.isdigit() and 0 < int(t) <= len(fixable)]
-    dialog("--title", "BUA Doctor", "--infobox", "Fixing...", "5", "40")
+
+    # One list with a tick box per fix (safe fixes ticked), then a confirm
+    # screen that says what each ticked fix does. "No" goes back to the list.
+    ticked = {i for i, f in enumerate(fixable) if f.on}
+    while True:
+        items = []
+        for i, f in enumerate(fixable):
+            items += [str(i + 1), f.title, "on" if i in ticked else "off"]
+        rc, out = dialog("--title", f"BUA Doctor: {len(found)} problem(s)", "--checklist",
+                         info_text + "Tick the fixes to apply (the ticked ones are safe to fix). "
+                         "Everything changed is backed up and can be undone.",
+                         "22", "90", str(len(fixable)), *items)
+        if rc != 0:
+            return 0   # Cancel: nothing changed
+        ticked = {int(t) - 1 for t in shlex.split(out) if t.isdigit() and 0 < int(t) <= len(fixable)}
+        if not ticked:
+            dialog("--title", "BUA Doctor", "--msgbox", "Nothing was ticked, so nothing was changed.", "7", "55")
+            return 0
+        chosen = [fixable[i] for i in sorted(ticked)]
+        what = "\n\n".join(f"* {f.title}\n  {fix_summary(f)}" for f in chosen)
+        rc, _ = dialog("--title", f"BUA Doctor: apply {len(chosen)} fix(es)?", "--yesno",
+                       what + "\n\nYes applies them. No goes back to the list.", "24", "90")
+        if rc == 0:
+            break
+
+    dialog("--title", "BUA Doctor", "--infobox", f"Fixing {len(chosen)} problem(s)...", "5", "50")
     results = apply(chosen)
-    dialog("--title", "BUA Doctor: done", "--msgbox", "\n\n".join(results) + f"\n\nLog: {LOG}", "24", "90")
+    dialog("--title", "BUA Doctor: done", "--msgbox",
+           "\n\n".join(results) + f"\n\nAny fix can be undone from BUA Doctor.\nLog: {LOG}", "24", "90")
     return 0
+
+
+def fix_summary(f: Finding) -> str:
+    """What the fix does: the "Fix: ..." part of the detail, else the detail."""
+    i = f.detail.find("Fix: ")
+    return f.detail[i:] if i >= 0 else f.detail
 
 
 if __name__ == "__main__":
