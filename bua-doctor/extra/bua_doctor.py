@@ -33,7 +33,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import Callable
 
-VERSION = "1.2"
+VERSION = "1.3"
 ROOT = os.environ.get("BUA_DOCTOR_ROOT", "")
 REPO = "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main"
 
@@ -740,10 +740,40 @@ def check_es_configs() -> list[Finding]:
             wanted |= {e.get("name", "") for e in ET.parse(P(f"{ES_USER}/{f}")).iter("emulator")}
         except ET.ParseError:
             pass
-    ok = shipped | launchable_set(wanted - shipped, major)
+    # Systems that launch through their own command (e.g. foclabroc's Switch:
+    # python /userdata/system/switch/launch/run.py) start their emulators
+    # themselves; Batocera's launcher is never asked, so never judge those.
+    own_launcher = set()
+    for f in files:
+        if not f.startswith("es_systems_"):
+            continue
+        try:
+            for system in ET.parse(P(f"{ES_USER}/{f}")).iter("system"):
+                cmd = (system.findtext("command") or "").strip()
+                if cmd and "emulatorlauncher" not in cmd and "batocera-launch" not in cmd:
+                    own_launcher |= {e.get("name", "") for e in system.iter("emulator")}
+        except ET.ParseError:
+            pass
+    ok = shipped | own_launcher | launchable_set(wanted - shipped - own_launcher, major)
 
     def launchable(emu: str) -> bool:
         return emu in ok
+
+    def owner_present(cfg: str) -> bool:
+        """An add-on folder named like the file (es_features_quiver.cfg ->
+        quiver, quiver-launcher, quiverlauncher...) is still installed."""
+        m = re.match(r"es_(?:systems|features)_(.+)\.cfg$", cfg)
+        if not m:
+            return False
+        key = m.group(1).lower()
+        try:
+            addons = [a.lower() for a in os.listdir(P(ADDONS))]
+        except OSError:
+            addons = []
+        if key in ("switch",) and exists("/userdata/system/switch"):
+            return True
+        return any(a == key or a.replace("-", "").replace("_", "") == key.replace("-", "").replace("_", "")
+                   or a.startswith(key) for a in addons)
 
     for f in files:
         path = f"{ES_USER}/{f}"
@@ -752,7 +782,10 @@ def check_es_configs() -> list[Finding]:
                 emus = [e.get("name", "") for e in ET.parse(P(path)).iter("emulator")]
             except ET.ParseError:
                 continue
-            if emus and not any(launchable(e) for e in emus):
+            # Only when nothing can launch them AND the add-on it came with is
+            # gone: an installed add-on's options file is harmless even when it
+            # names an emulator its system does not use (Quiver's "quiver")
+            if emus and not any(launchable(e) for e in emus) and not owner_present(f):
                 def fix(b: Backup, path=path) -> str:
                     b.remove(path)
                     return f"removed {os.path.basename(path)}"
@@ -940,7 +973,9 @@ def check_old_python() -> list[Finding]:
             names = sorted(os.listdir(P(site)))
         except OSError:
             continue
-        bua = [n for n in names if n == "usercustomize.py" or n.startswith("batocera_launch_")]
+        major = batocera_major()
+        bua = [n for n in names if n.startswith("batocera_launch_")
+               or (n == "usercustomize.py" and major <= 43)]   # 44+ has no configgen: the hook is unused
         if not bua:
             continue
         addons = sorted({n[len("batocera_launch_"):] for n in bua
@@ -958,13 +993,14 @@ def check_old_python() -> list[Finding]:
                 b.remove(f"{site}/{n}")
             return "; ".join(results + [f"removed the {old} copies"])
 
+        steps = ([f"reinstall {', '.join(addons)}"] if addons else []) \
+            + (["move the BUA Python hook to the current Python"] if "usercustomize.py" in bua else [])
+        who = (f"the emulators of {', '.join(addons)}" if addons
+               else "add-on emulators (configgen cannot find them without the BUA hook)")
         found.append(Finding(f"oldpy-{old}", f"Add-on code left under the old Python ({old})",
-                             f"Batocera now uses {current.split('/')[-2]}, so what add-ons put under {old} is "
-                             f"ignored: {', '.join(bua)}. Emulators from "
-                             f"{', '.join(addons) if addons else 'BUA add-ons'} stop working. Fix: reinstall "
-                             f"{', '.join(addons) if addons else 'nothing'}"
-                             + (" and move the BUA Python hook" if "usercustomize.py" in bua else "")
-                             + f", then remove the {old} copies.", fix, restart_es=True))
+                             f"Batocera now uses {current.split('/')[-2]}, so what is under {old} is ignored: "
+                             f"{', '.join(bua)}. That stops {who} from starting. Fix: "
+                             f"{' and '.join(steps)}, then remove the {old} copies.", fix, restart_es=True))
     return found
 
 
