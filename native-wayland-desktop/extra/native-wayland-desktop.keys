@@ -6,7 +6,7 @@
                 "start"
             ],
             "type": "exec",
-            "target": "/userdata/system/add-ons/lightdesktop/lightdesktop-exit.sh &",
+            "target": "/userdata/system/add-ons/native-wayland-desktop/native-wayland-desktop-exit.sh &",
             "description": "Close the desktop"
         },
         {

@@ -1,0 +1,2 @@
+# Run by the Native Wayland Desktop's labwc when it starts: wallpaper and panel
+/userdata/system/add-ons/native-wayland-desktop/native-wayland-desktop-session.sh &

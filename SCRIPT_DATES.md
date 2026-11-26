@@ -10,8 +10,6 @@
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Android/Install_Android.sh` | 2026-11-26 16:35:27 +0000 |
 | `Android/Install_Android_uninstall.sh` | 2026-10-26 23:57:00 -0400 |
-| `Desktop_for_Batocera/Install_Desktop.sh` | 2026-11-26 16:44:23 +0000 |
-| `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2026-11-21 16:43:14 -0500 |
 | `Freej2me/Install_j2me-old .sh` | 2026-11-20 21:00:36 +0000 |
 | `Freej2me/Install_j2me-old _uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Freej2me/Install_j2me.sh` | 2026-11-26 16:35:27 +0000 |
@@ -30,7 +28,7 @@
 | `app/BatoceraUnofficialAddOns.sh` | 2025-05-22 17:15:09 +0100 |
 | `app/BatoceraUnofficialAddons_ARM64.sh` | 2025-05-22 17:15:31 +0100 |
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
-| `app/batocera-unofficial-addons.sh` | 2026-07-02 16:31:40 -0300 |
+| `app/batocera-unofficial-addons.sh` | 2026-11-26 16:59:09 +0000 |
 | `app/bua_cli.py` | 2026-10-24 14:00:37 -0400 |
 | `app/bua_installerarm64.py` | 2026-11-26 16:35:27 +0000 |
 | `app/bua_installerx86.py` | 2026-11-26 16:35:27 +0000 |
@@ -124,10 +122,10 @@
 | `everest/everest_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `extra/extra.sh` | 2025-05-22 17:48:53 +0100 |
 | `extra/extra_uninstall.sh` | 2026-10-18 16:11:28 -0400 |
-| `f1/f1-1.sh` | 2026-11-26 16:35:27 +0000 |
+| `f1/f1-1.sh` | 2026-11-26 16:59:09 +0000 |
 | `f1/f1-1_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `f1/f1-old1.sh` | 2026-11-26 16:35:27 +0000 |
-| `f1/f1.sh` | 2026-11-26 16:35:27 +0000 |
+| `f1/f1-old1.sh` | 2026-11-26 16:59:09 +0000 |
+| `f1/f1.sh` | 2026-11-26 16:59:09 +0000 |
 | `fightcade/fightcade.sh` | 2026-11-26 16:35:27 +0000 |
 | `fightcade/fightcade_uninstall.sh` | 2026-02-25 11:59:39 -0700 |
 | `fightcade/switchres_fightcade_wrap.template.sh` | 2026-05-11 08:22:49 -0600 |
@@ -188,8 +186,8 @@
 | `kdeplasma/extra/kdeplasma-exit.sh` | 2026-11-20 22:52:07 -0500 |
 | `kdeplasma/extra/kdeplasma-launch.sh` | 2026-11-21 03:14:39 -0500 |
 | `kdeplasma/extra/kdeplasma-places.py` | 2026-11-21 11:44:17 -0500 |
-| `kdeplasma/kdeplasma.sh` | 2026-11-26 16:44:24 +0000 |
-| `kdeplasma/kdeplasma_uninstall.sh` | 2026-11-26 16:35:27 +0000 |
+| `kdeplasma/kdeplasma.sh` | 2026-11-26 16:59:09 +0000 |
+| `kdeplasma/kdeplasma_uninstall.sh` | 2026-11-26 16:59:09 +0000 |
 | `kytyps5/extra/kyty-args.py` | 2026-11-03 14:50:54 -0500 |
 | `kytyps5/extra/kyty-launcher.sh` | 2026-11-03 14:38:42 -0500 |
 | `kytyps5/extra/kyty.sh` | 2026-11-03 14:50:54 -0500 |
@@ -199,13 +197,6 @@
 | `kytyps5/kytyps5_uninstall.sh` | 2026-11-03 14:38:42 -0500 |
 | `kytyps5/launch/batocera_launch_kyty/__init__.py` | 2026-10-28 17:09:05 -0400 |
 | `librewolf/librewolf.sh` | 2026-11-26 16:35:27 +0000 |
-| `lightdesktop/extra/lightdesktop-desktop.py` | 2026-11-21 16:33:43 -0500 |
-| `lightdesktop/extra/lightdesktop-exit.sh` | 2026-11-21 16:19:24 -0500 |
-| `lightdesktop/extra/lightdesktop-launch.sh` | 2026-11-26 16:44:24 +0000 |
-| `lightdesktop/extra/lightdesktop-panel.py` | 2026-11-21 16:26:48 -0500 |
-| `lightdesktop/extra/lightdesktop-session.sh` | 2026-11-21 16:26:48 -0500 |
-| `lightdesktop/lightdesktop.sh` | 2026-11-26 16:44:24 +0000 |
-| `lightdesktop/lightdesktop_uninstall.sh` | 2026-11-21 16:26:48 -0500 |
 | `luanti/luanti.sh` | 2026-11-26 16:35:27 +0000 |
 | `luanti/luanti_uninstall.sh` | 2026-10-24 09:05:41 -0400 |
 | `lutris/extra/create-lutris-launchers.sh` | 2026-05-04 21:46:58 +0100 |
@@ -222,6 +213,16 @@
 | `moonlight/moonlight_uninstall.sh` | 2026-11-21 00:22:26 -0500 |
 | `mubi/mubi.sh` | 2026-11-26 16:35:27 +0000 |
 | `mubi/mubi_uninstall.sh` | 2026-10-24 09:12:00 -0400 |
+| `native-desktop/native-desktop.sh` | 2026-11-26 16:59:09 +0000 |
+| `native-desktop/native-desktop_uninstall.sh` | 2026-11-26 16:59:09 +0000 |
+| `native-desktop/native-x11-desktop.sh` | 2026-11-26 16:59:09 +0000 |
+| `native-wayland-desktop/extra/native-wayland-desktop-desktop.py` | 2026-11-26 16:59:09 +0000 |
+| `native-wayland-desktop/extra/native-wayland-desktop-exit.sh` | 2026-11-26 16:59:09 +0000 |
+| `native-wayland-desktop/extra/native-wayland-desktop-launch.sh` | 2026-11-26 16:59:09 +0000 |
+| `native-wayland-desktop/extra/native-wayland-desktop-panel.py` | 2026-11-26 16:59:09 +0000 |
+| `native-wayland-desktop/extra/native-wayland-desktop-session.sh` | 2026-11-26 16:59:09 +0000 |
+| `native-wayland-desktop/native-wayland-desktop.sh` | 2026-11-26 16:59:09 +0000 |
+| `native-wayland-desktop/native-wayland-desktop_uninstall.sh` | 2026-11-26 16:59:09 +0000 |
 | `netflix/netflix.sh` | 2026-11-26 16:35:27 +0000 |
 | `netflix/netflix_uninstall.sh` | 2026-10-24 09:12:00 -0400 |
 | `netwatch/netwatch-service.sh` | 2026-10-18 16:03:25 -0400 |

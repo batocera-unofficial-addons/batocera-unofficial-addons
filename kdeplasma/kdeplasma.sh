@@ -25,7 +25,7 @@ fail() {
 
 # Checks: x86_64, running Wayland desktop (labwc)
 [ "$(uname -m)" = "x86_64" ] || fail "KDE Plasma Desktop is for x86_64 machines. This one is $(uname -m)."
-pgrep -x labwc >/dev/null || fail "KDE Plasma Desktop needs Batocera's Wayland desktop (labwc), which is not running."
+pgrep -x labwc >/dev/null || fail "KDE Plasma Desktop needs Batocera's Wayland desktop (labwc), which is not running.\n\nTry Native Desktop instead."
 free_kb=$(df -Pk /userdata | awk 'NR==2 {print $4}')
 if [ ! -d "$install_dir/rootfs/usr" ] && [ "${free_kb:-0}" -lt 8000000 ]; then
     fail "KDE Plasma Desktop needs about 8 GB of free space on /userdata to install."
@@ -52,13 +52,13 @@ bash "$install_dir/kdeplasma-build.sh" 2>&1 | tee "$log_file"
 [ "${PIPESTATUS[0]}" -eq 0 ] || fail "Installing Plasma failed. See $log_file"
 
 # F1 opens Plasma: a Batocera service, enabled at boot. The last desktop
-# installed gets F1, so the Light Desktop's service is stopped and switched
-# off (the Light Desktop itself stays installed and opens from Ports).
+# installed gets F1, so the Native Wayland Desktop's service is stopped and
+# switched off (the Native Wayland Desktop itself stays installed and opens from Ports).
 echo "Setting up F1..."
-if [ -f /userdata/system/services/lightdesktop ]; then
-    bash /userdata/system/services/lightdesktop stop >/dev/null 2>&1
-    batocera-services disable lightdesktop >/dev/null 2>&1
-    echo "F1 now opens KDE Plasma instead of the Light Desktop (the Light Desktop is still in Ports)."
+if [ -f /userdata/system/services/native-wayland-desktop ]; then
+    bash /userdata/system/services/native-wayland-desktop stop >/dev/null 2>&1
+    batocera-services disable native-wayland-desktop >/dev/null 2>&1
+    echo "F1 now opens KDE Plasma instead of the Native Wayland Desktop (the Native Wayland Desktop is still in Ports)."
 fi
 mkdir -p /userdata/system/services
 cp -f "$install_dir/kdeplasma-service" "$service_file"

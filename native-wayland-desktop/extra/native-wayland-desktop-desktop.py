@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Light Desktop's desktop: the wallpaper, with icons on it for what is
+"""The Native Wayland Desktop's desktop: the wallpaper, with icons on it for what is
 in the Desktop folder (/userdata/system/Desktop): apps, folders and files.
 
 Double-click an icon to open it, and drag it to move it (it snaps to a grid
@@ -9,7 +9,7 @@ desktop) or by putting a .desktop file or a link in the folder. The first
 time, the folder gets links to ROMs, BIOS, Saves and Screenshots and a few
 apps.
 
-Runs inside the Light Desktop's labwc (lightdesktop-session.sh), on
+Runs inside the Native Wayland Desktop's labwc (native-wayland-desktop-session.sh), on
 gtk-layer-shell's background layer, behind every window.
 """
 import json
@@ -28,7 +28,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 from gi.repository import Gdk, GdkPixbuf, Gio, GLib, Gtk, GtkLayerShell  # noqa: E402
 
 INSTALL = os.path.dirname(os.path.abspath(__file__))
-CONF = "/userdata/system/configs/lightdesktop"
+CONF = "/userdata/system/configs/native-wayland-desktop"
 DESKTOP = "/userdata/system/Desktop"
 DEFAULT_WALLPAPER = os.path.join(INSTALL, "wallpaper.png")
 POSITIONS = os.path.join(CONF, "icons.json")  # where each icon was dragged to
@@ -162,11 +162,11 @@ class Desktop(Gtk.Window):
     in POSITIONS. New icons take the first free space down the left."""
 
     def __init__(self):
-        super().__init__(title="Light Desktop wallpaper")
+        super().__init__(title="Native Wayland Desktop wallpaper")
         self.get_style_context().add_class("ld-desktop")
         GtkLayerShell.init_for_window(self)
         GtkLayerShell.set_layer(self, GtkLayerShell.Layer.BACKGROUND)
-        GtkLayerShell.set_namespace(self, "lightdesktop-desktop")
+        GtkLayerShell.set_namespace(self, "native-wayland-desktop-desktop")
         for edge in (GtkLayerShell.Edge.LEFT, GtkLayerShell.Edge.RIGHT,
                      GtkLayerShell.Edge.TOP, GtkLayerShell.Edge.BOTTOM):
             GtkLayerShell.set_anchor(self, edge, True)
@@ -407,13 +407,13 @@ class Desktop(Gtk.Window):
         if event.button != 3:
             return False
         self.popup([
-            ("Apps", lambda: spawn(["pkill", "-USR1", "-f", "lightdesktop-panel.p[y]"])),
+            ("Apps", lambda: spawn(["pkill", "-USR1", "-f", "native-wayland-desktop-panel.p[y]"])),
             ("File Manager", lambda: spawn(["pcmanfm", "/userdata"])),
             ("Terminal", lambda: spawn(TERMINAL)),
             ("Open the Desktop folder", lambda: spawn(["pcmanfm", DESKTOP])),
             ("Arrange icons", lambda: self.fill(arrange=True)),
             None,
-            ("Change wallpaper", lambda: spawn(["python3", os.path.join(INSTALL, "lightdesktop-panel.py"), "--wallpaper"])),
+            ("Change wallpaper", lambda: spawn(["python3", os.path.join(INSTALL, "native-wayland-desktop-panel.py"), "--wallpaper"])),
             None,
             ("Back to EmulationStation", lambda: spawn(["labwc", "--exit"])),
         ], event)

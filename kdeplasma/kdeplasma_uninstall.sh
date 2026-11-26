@@ -32,12 +32,12 @@ if [ -f "$service_file" ]; then
     batocera-services disable kdeplasma >/dev/null 2>&1
     rm -f "$service_file"
 fi
-# ...and back to the Light Desktop if that is installed
+# ...and back to the Native Wayland Desktop if that is installed
 f1="the file manager"
-if [ -f /userdata/system/services/lightdesktop ] && [ -x /userdata/system/add-ons/lightdesktop/lightdesktop-launch.sh ]; then
-    batocera-services enable lightdesktop >/dev/null 2>&1
-    batocera-services start lightdesktop >/dev/null 2>&1 || bash /userdata/system/services/lightdesktop start
-    f1="the Light Desktop"
+if [ -f /userdata/system/services/native-wayland-desktop ] && [ -x /userdata/system/add-ons/native-wayland-desktop/native-wayland-desktop-launch.sh ]; then
+    batocera-services enable native-wayland-desktop >/dev/null 2>&1
+    batocera-services start native-wayland-desktop >/dev/null 2>&1 || bash /userdata/system/services/native-wayland-desktop start
+    f1="the Native Wayland Desktop"
 fi
 
 # Unmount everything inside the container (including its view of /userdata)

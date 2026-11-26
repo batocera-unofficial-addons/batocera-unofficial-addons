@@ -1,4 +1,4 @@
-# Colors for the Light Desktop's window title bars and menus (dark)
+# Colors for the Native Wayland Desktop's window title bars and menus (dark)
 border.width: 1
 padding.height: 6
 window.active.border.color: #2f3a4d

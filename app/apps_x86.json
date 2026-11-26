@@ -279,13 +279,13 @@
       "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/desktop/desktop_uninstall.sh | bash"
     },
     {
-      "name": "Desktop For Batocera",
-      "description": "Desktop for batocera. (Native) On Batocera 44+ (Wayland) it installs the Light Desktop: taskbar, app menu, desktop icons, opens with F1.",
+      "name": "Native Desktop",
+      "description": "Native desktop for Batocera. Auto-detects X11 vs Wayland: on Batocera 44+ (Wayland) installs a taskbar, app menu, and desktop icons that open with F1; on older X11 builds installs the classic desktop.",
       "categories": [
         "System Utilities"
       ],
-      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/Desktop_for_Batocera/Install_Desktop.sh | bash",
-      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/Desktop_for_Batocera/Install_Desktop_uninstall.sh | bash"
+      "install": "curl -L https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/native-desktop/native-desktop.sh | bash",
+      "uninstall": "curl -Ls https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/native-desktop/native-desktop_uninstall.sh | bash"
     },
     {
       "name": "Disney Plus",

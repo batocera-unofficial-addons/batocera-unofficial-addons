@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""The Light Desktop's panel: the bar along the bottom of the screen with
+"""The Native Wayland Desktop's panel: the bar along the bottom of the screen with
 the app menu, pinned apps, open windows, volume, network, clock and a button
 back to EmulationStation.
 
-Runs inside the Light Desktop's own labwc (started by
-lightdesktop-session.sh), with GTK 3 and gtk-layer-shell, both part of
+Runs inside the Native Wayland Desktop's own labwc (started by
+native-wayland-desktop-session.sh), with GTK 3 and gtk-layer-shell, both part of
 Batocera. Open windows come from `wlrctl toplevel`.
 
-  lightdesktop-panel.py              run the panel
-  lightdesktop-panel.py --wallpaper  choose a wallpaper (desktop menu)
+  native-wayland-desktop-panel.py              run the panel
+  native-wayland-desktop-panel.py --wallpaper  choose a wallpaper (desktop menu)
 
 Right-click an app in the app menu to pin it to the taskbar or add it to the
 desktop.
@@ -33,9 +33,9 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 from gi.repository import Gdk, Gio, GLib, Gtk, GtkLayerShell  # noqa: E402
 
 INSTALL = os.path.dirname(os.path.abspath(__file__))
-CONF = "/userdata/system/configs/lightdesktop"
+CONF = "/userdata/system/configs/native-wayland-desktop"
 PINNED_FILE = os.path.join(CONF, "pinned")
-DESKTOP = "/userdata/system/Desktop"  # the icons on the wallpaper (lightdesktop-desktop.py)
+DESKTOP = "/userdata/system/Desktop"  # the icons on the wallpaper (native-wayland-desktop-desktop.py)
 DEFAULT_PINS = ["pcmanfm.desktop", "Firefox.desktop", "xterm.desktop"]
 # Entries that do nothing useful here (X11-only tools, PCManFM's X11 desktop)
 HIDDEN = {
@@ -222,7 +222,7 @@ def load_apps():
     configs = "/userdata/system/configs"
     for d in sorted(os.listdir(configs)) if os.path.isdir(configs) else []:
         folder = os.path.join(configs, d)
-        if d == "lightdesktop" or not os.path.isdir(folder):
+        if d == "native-wayland-desktop" or not os.path.isdir(folder):
             continue
         for f in os.listdir(folder):
             if f.endswith(".desktop") and f not in apps:
@@ -234,7 +234,7 @@ def load_apps():
 
 def add_to_desktop(app):
     """An icon on the desktop: a link to the app's entry, in the Desktop
-    folder that lightdesktop-desktop.py shows."""
+    folder that native-wayland-desktop-desktop.py shows."""
     os.makedirs(DESKTOP, exist_ok=True)
     link = os.path.join(DESKTOP, app.id)
     if not os.path.lexists(link):
@@ -307,7 +307,7 @@ class Popup(Gtk.Window):
 
 class AppMenu(Popup):
     def __init__(self, panel):
-        super().__init__(panel, "lightdesktop-menu", Gtk.Align.START)
+        super().__init__(panel, "native-wayland-desktop-menu", Gtk.Align.START)
         self.category = "All"
         self.apps = {}
         self.confirm = None
@@ -448,7 +448,7 @@ class AppMenu(Popup):
 
 class VolumePopup(Popup):
     def __init__(self, panel):
-        super().__init__(panel, "lightdesktop-volume", Gtk.Align.END)
+        super().__init__(panel, "native-wayland-desktop-volume", Gtk.Align.END)
         self.card.set_size_request(280, -1)
         self.card.set_margin_end(150)
         head = Gtk.Box(spacing=8)
@@ -501,8 +501,8 @@ def get_volume():
 
 class Panel(Gtk.Window):
     def __init__(self):
-        super().__init__(title="Light Desktop panel")
-        make_layer(self, GtkLayerShell.Layer.TOP, "lightdesktop-panel")
+        super().__init__(title="Native Wayland Desktop panel")
+        make_layer(self, GtkLayerShell.Layer.TOP, "native-wayland-desktop-panel")
         for edge in (GtkLayerShell.Edge.LEFT, GtkLayerShell.Edge.RIGHT, GtkLayerShell.Edge.BOTTOM):
             GtkLayerShell.set_anchor(self, edge, True)
             GtkLayerShell.set_margin(self, edge, 10)
@@ -774,7 +774,7 @@ def choose_wallpaper():
     if response == Gtk.ResponseType.OK and chosen:
         ext = os.path.splitext(chosen)[1].lower() or ".png"
         shutil.copyfile(chosen, os.path.join(CONF, "wallpaper" + ext))
-    # lightdesktop-desktop.py watches CONF and shows the new wallpaper
+    # native-wayland-desktop-desktop.py watches CONF and shows the new wallpaper
 
 
 def main():

@@ -1,8 +1,8 @@
 #!/bin/bash
-# Uninstaller for Desktop for Batocera (the native desktop, Install_Desktop.sh).
+# Uninstaller for Native Desktop (the X11 native desktop, native-desktop.sh).
 #
-# The add-on keeps a root file system in /userdata/system/add-ons/desktop/rootfs
-# and its "desktop" service symlinks those files over Batocera's own at every
+# The add-on keeps a root file system in /userdata/system/add-ons/native-x11-desktop/rootfs
+# and its "native-x11-desktop" service symlinks those files over Batocera's own at every
 # boot, renaming the originals to .bak. One of them is
 # /usr/bin/filemanagerlauncher, which F1 runs: the desktop's version closes
 # EmulationStation and starts Openbox, tint2 and pcmanfm, which cannot show
@@ -13,31 +13,31 @@
 # links left dangling) and on an older DRL install. Your own files are kept:
 # only the files the add-on shipped are removed.
 
-ADDON_NAME="desktop"
+ADDON_NAME="native-x11-desktop"
 ADDON_DIR="/userdata/system/add-ons/${ADDON_NAME}"
 ROOTFS="${ADDON_DIR}/rootfs"
 SERVICE_PATH="/userdata/system/services/${ADDON_NAME}"
 SERVICE_LOG="/userdata/system/logs/${ADDON_NAME}.log"
-TEMP_DIR="/userdata/tmp/Desktop_for_Batocera"
+TEMP_DIR="/userdata/tmp/native-desktop"
 DRL_REMOVER="/userdata/system/configs/bat-drl/Remover_Desktop.sh"
 
 echo "========================================="
-echo "Uninstalling: Desktop for Batocera"
+echo "Uninstalling: Native Desktop"
 echo "========================================="
 echo ""
 
-# On Batocera's Wayland desktop (labwc), Install_Desktop.sh installs the
-# Light Desktop instead; remove it
-LIGHT_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/lightdesktop"
-if [ -d /userdata/system/add-ons/lightdesktop ] || [ -f /userdata/system/services/lightdesktop ]; then
-    echo "Removing the Light Desktop..."
-    curl -fsSL "$LIGHT_URL/lightdesktop_uninstall.sh" | bash
+# On Batocera's Wayland desktop (labwc), native-desktop.sh installs the
+# Native Wayland Desktop instead; remove it
+LIGHT_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/native-wayland-desktop"
+if [ -d /userdata/system/add-ons/native-wayland-desktop ] || [ -f /userdata/system/services/native-wayland-desktop ]; then
+    echo "Removing Native Wayland Desktop..."
+    curl -fsSL "$LIGHT_URL/native-wayland-desktop_uninstall.sh" | bash
     echo ""
 fi
 # Nothing of the X11 desktop left (the usual case on Wayland): done
 if [ ! -d "$ROOTFS" ] && [ ! -f "$SERVICE_PATH" ] && [ ! -f "$DRL_REMOVER" ] \
     && [ ! -f /etc/openbox/rc.xml.es ] && [ ! -L /usr/bin/filemanagerlauncher ]; then
-    echo "Desktop for Batocera has been removed."
+    echo "Native Desktop has been removed."
     exit 0
 fi
 
@@ -148,7 +148,7 @@ rm -f "$SERVICE_LOG" /userdata/system/logs/tint2.log /userdata/system/logs/picom
 
 echo ""
 echo "========================================="
-echo "Desktop for Batocera has been removed."
+echo "Native Desktop has been removed."
 echo "F1 opens Batocera's file manager again."
 echo "Restart Batocera to reset any remaining icons and themes."
 echo "========================================="

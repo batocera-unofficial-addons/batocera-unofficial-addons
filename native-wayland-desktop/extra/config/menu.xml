@@ -3,7 +3,7 @@
 <openbox_menu>
   <menu id="root-menu" label="">
     <item label="Apps">
-      <action name="Execute" command="pkill -USR1 -f lightdesktop-panel.p[y]" />
+      <action name="Execute" command="pkill -USR1 -f native-wayland-desktop-panel.p[y]" />
     </item>
     <item label="File Manager">
       <action name="Execute" command="pcmanfm /userdata" />
@@ -13,7 +13,7 @@
     </item>
     <separator />
     <item label="Change wallpaper">
-      <action name="Execute" command="python3 /userdata/system/add-ons/lightdesktop/lightdesktop-panel.py --wallpaper" />
+      <action name="Execute" command="python3 /userdata/system/add-ons/native-wayland-desktop/native-wayland-desktop-panel.py --wallpaper" />
     </item>
     <separator />
     <item label="Back to EmulationStation">

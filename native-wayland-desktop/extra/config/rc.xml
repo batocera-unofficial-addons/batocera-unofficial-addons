@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- labwc settings for the Light Desktop (its own labwc, inside Batocera's) -->
+<!-- labwc settings for the Native Wayland Desktop (its own labwc, inside Batocera's) -->
 <labwc_config>
   <core>
     <decoration>server</decoration>
@@ -23,7 +23,7 @@
     <default />
     <!-- Super (X on a controller): the app menu -->
     <keybind key="Super_L" onRelease="yes">
-      <action name="Execute" command="pkill -USR1 -f lightdesktop-panel.p[y]" />
+      <action name="Execute" command="pkill -USR1 -f native-wayland-desktop-panel.p[y]" />
     </keybind>
     <keybind key="W-e">
       <action name="Execute" command="pcmanfm /userdata" />

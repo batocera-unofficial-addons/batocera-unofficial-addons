@@ -1,33 +1,27 @@
 #!/bin/bash
+# Native X11 Desktop — installs the X11 desktop (Openbox, tint2, pcmanfm,
+# picom) from a squashfs image. Called by native-desktop.sh when X11 is
+# detected, or directly.
 
-echo "Desktop for Batocera — Installer"
-echo "================================="
+echo "Native X11 Desktop — Installer"
+echo "==============================="
 
-TEMP_DIR="/userdata/tmp/Desktop_for_Batocera"
-SFS_FILE="$TEMP_DIR/Desktop_for_Batocera.squashfs"
+APPNAME="Native X11 Desktop"
+TEMP_DIR="/userdata/tmp/native-desktop"
+SFS_FILE="$TEMP_DIR/native-desktop.squashfs"
 EXTRACT_DIR="$TEMP_DIR/extracted"
-ADDON_NAME="desktop"
+ADDON_NAME="native-x11-desktop"
 ADDON_DIR="/userdata/system/add-ons/${ADDON_NAME}"
 DEST_DIR="${ADDON_DIR}/rootfs"
 DRL_REMOVER="/userdata/system/configs/bat-drl/Remover_Desktop.sh"
 BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages"
-
-# Desktop for Batocera is built on Batocera's X11 desktop (Openbox, tint2,
-# pcmanfm, picom). On Wayland (labwc), it installs the Light Desktop instead:
-# the same idea built on labwc. Install_Desktop_uninstall.sh removes either one.
-LIGHT_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/lightdesktop"
-if pgrep -x labwc >/dev/null 2>&1; then
-    dialog --title "Desktop for Batocera" --infobox "Wayland detected — installing Light Desktop (Wayland version)." 5 60
-    curl -fsSL "$LIGHT_URL/lightdesktop.sh" | bash
-    exit "${PIPESTATUS[1]}"
-fi
 
 ARCH=$(uname -m)
 case "$ARCH" in
     x86_64)  SFS_URL="$BASE_URL/Desktop_for_batocera_8.8.squashfs" ;;
     aarch64) SFS_URL="$BASE_URL/Desktop_for_batocera_8.8_arm64.squashfs" ;;
     *)
-        dialog --title "Desktop for Batocera" --msgbox "Unsupported architecture: $ARCH" 8 60
+        dialog --title "$APPNAME" --msgbox "Unsupported architecture: $ARCH" 8 60
         exit 1
         ;;
 esac
@@ -175,13 +169,13 @@ if [ -d "$ADDON_DIR/rootfs" ]; then
     [ -d /userdata/system/.config/jgmenu ]      && cp -r /userdata/system/.config/jgmenu      "$BACKUP_DIR/jgmenu"
     [ -f /userdata/system/.config/pcmanfm/default/desktop-items-0.conf ] && \
         cp /userdata/system/.config/pcmanfm/default/desktop-items-0.conf "$BACKUP_DIR/desktop-items-0.conf"
-    PALETTE_FILE="/userdata/system/add-ons/desktop/config/Desktop/theme/current.palette"
-    BAR_CONF_FILE="/userdata/system/add-ons/desktop/config/Desktop/theme/bar.conf"
+    PALETTE_FILE="/userdata/system/add-ons/native-x11-desktop/config/Desktop/theme/current.palette"
+    BAR_CONF_FILE="/userdata/system/add-ons/native-x11-desktop/config/Desktop/theme/bar.conf"
     [ -f "$PALETTE_FILE" ]  && cp "$PALETTE_FILE"  "$BACKUP_DIR/current.palette"
     [ -f "$BAR_CONF_FILE" ] && cp "$BAR_CONF_FILE" "$BACKUP_DIR/bar.conf"
 
     echo "Stopping desktop service..."
-    batocera-services stop desktop
+    batocera-services stop native-x11-desktop
 
     echo "Removing renamed/obsolete files from rootfs..."
     # Binaries renamed from Portuguese
@@ -202,7 +196,7 @@ echo "Downloading..."
 curl -L -o "$SFS_FILE" "$SFS_URL"
 
 if [ ! -f "$SFS_FILE" ]; then
-    dialog --title "Desktop for Batocera" --msgbox "Error: Download failed." 8 60
+    dialog --title "$APPNAME" --msgbox "Error: Download failed." 8 60
     exit 1
 fi
 
@@ -211,7 +205,7 @@ echo "Extracting..."
 unsquashfs -f -d "$EXTRACT_DIR" "$SFS_FILE"
 
 if [ $? -ne 0 ]; then
-    dialog --title "Desktop for Batocera" --msgbox "Error: Extraction failed." 8 60
+    dialog --title "$APPNAME" --msgbox "Error: Extraction failed." 8 60
     rm -rf "$TEMP_DIR"
     exit 1
 fi
@@ -255,10 +249,10 @@ rm -rf "$TEMP_DIR"
 # Write the desktop service script
 echo "Installing desktop service..."
 mkdir -p /userdata/system/services
-cat << 'SERVICEEOF' > /userdata/system/services/desktop
+cat << 'SERVICEEOF' > /userdata/system/services/native-x11-desktop
 #!/bin/bash
 
-ADDON_NAME="desktop"
+ADDON_NAME="native-x11-desktop"
 ADDON_DIR="/userdata/system/add-ons/${ADDON_NAME}"
 ROOTFS="${ADDON_DIR}/rootfs"
 ICONS_DIR="${ADDON_DIR}/icons"
@@ -463,7 +457,7 @@ case "$1" in
         ;;
     status)
         if [ ! -d "$ROOTFS" ]; then
-            echo "desktop: not installed (rootfs missing)."
+            echo "native-x11-desktop: not installed (rootfs missing)."
             exit 1
         fi
         missing=0
@@ -471,8 +465,8 @@ case "$1" in
             target="${src#${ROOTFS}}"
             [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ] || missing=$((missing+1))
         done < <(find "$ROOTFS" \( -type f -o -type l \))
-        [ "$missing" -eq 0 ] && echo "desktop: all symlinks active." \
-                              || echo "desktop: ${missing} symlink(s) missing or broken."
+        [ "$missing" -eq 0 ] && echo "native-x11-desktop: all symlinks active." \
+                              || echo "native-x11-desktop: ${missing} symlink(s) missing or broken."
         ;;
     *)
         echo "Usage: $0 {start|stop|status}"
@@ -481,15 +475,15 @@ case "$1" in
 esac
 SERVICEEOF
 
-chmod +x /userdata/system/services/desktop
+chmod +x /userdata/system/services/native-x11-desktop
 
 # Enable and start the service
-batocera-services enable desktop
-batocera-services start desktop
+batocera-services enable native-x11-desktop
+batocera-services start native-x11-desktop
 
 # Install our rc.xml as the base openbox config so it's active even outside desktop mode
-RC_DESKTOP="/userdata/system/add-ons/desktop/rc.xml.desktop"
-RC_ES="/userdata/system/add-ons/desktop/rc.xml.es"
+RC_DESKTOP="/userdata/system/add-ons/native-x11-desktop/rc.xml.desktop"
+RC_ES="/userdata/system/add-ons/native-x11-desktop/rc.xml.es"
 [ -f "$RC_DESKTOP" ] && cp "$RC_DESKTOP" /etc/openbox/rc.xml
 [ -f "$RC_ES" ]      && cp "$RC_ES"      /etc/openbox/rc.xml.es
 openbox --reconfigure >/dev/null 2>&1 || true
