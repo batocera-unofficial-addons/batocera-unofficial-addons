@@ -1,5 +1,5 @@
 {
-  "changelog": "- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format\n- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added Jellyfin Player - native media player client with controller support",
+  "changelog": "- Added uninstall scripts and logos for chdress, iso2zar and npsget\n- Added iso2zar - GUI tool to convert Xbox[360] .iso images directly into .zar format\n- Added chdress - GUI tool to convert any disc image to/from CHD format\n- Added npsget - Helper to download games, DLCs, updates, themes and avatars from NoPayStation\n- Added Prism Launcher - open source Minecraft launcher with mod management and multi-instance support\n- Added Jellyfin Player - native media player client with controller support",
   "apps": [
     {
       "name": "Alpine XFCE (Webtop)",
@@ -71,7 +71,8 @@
         "Game Utilities"
       ],
       "install": "curl -fsSL https://chdress.8101987.xyz/install.sh | sh",
-      "uninstall": "curl -Ls https://chdress.8101987.xyz/install_uninstall.sh | bash"
+      "uninstall": "curl -fsSL https://chdress.8101987.xyz/uninstall.sh | sh",
+      "logo": "https://codeberg.org/NeverAnswers/chdress/raw/branch/main/assets/chdress-logo.png"
     },
     {
       "name": "Chiaki",
@@ -179,7 +180,8 @@
         "Game Utilities"
       ],
       "install": "curl -fsSL https://iso2zar.8101987.xyz | sh",
-      "uninstall": null
+      "uninstall": "curl -fsSL https://iso2zar.8101987.xyz/uninstall | sh",
+      "logo": "https://codeberg.org/NeverAnswers/iso2zar/raw/branch/main/assets/iso2zar-logo.png"
     },
     {
       "name": "Jellyfin",
@@ -233,7 +235,8 @@
         "Game Utilities"
       ],
       "install": "curl -fsSL https://npsget.8101987.xyz | sh",
-      "uninstall": null
+      "uninstall": "curl -fsSL https://npsget.8101987.xyz/uninstall | sh",
+      "logo": "https://codeberg.org/NeverAnswers/npsget/raw/branch/main/assets/npsget-icon.png"
     },
     {
       "name": "Overlay Remove",

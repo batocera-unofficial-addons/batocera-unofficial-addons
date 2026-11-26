@@ -52,8 +52,6 @@ KNOWN_MISSING_UNINSTALL = {
         "Minecraft",
         "Steam",
         # Installed from outside the repo
-        "iso2zar",
-        "npsget",
         "RGSX",
     },
     "app/apps_arm64.json": {
@@ -65,8 +63,6 @@ KNOWN_MISSING_UNINSTALL = {
         # Only an uninstaller for an older installer exists
         "F1",
         # Installed from outside the repo
-        "iso2zar",
-        "npsget",
         "RGSX",
     },
 }
