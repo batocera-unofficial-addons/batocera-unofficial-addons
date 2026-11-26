@@ -4,16 +4,28 @@
 # runs /usr/bin/filemanagerlauncher on F1, so the desktop's launcher is
 # bind-mounted over it. Batocera's own file stays untouched underneath:
 # stopping the service (System Settings > Services, or batocera-services stop
-# native-x11-desktop) brings the file manager back.
+# native_x11_desktop) brings the file manager back.
 
 launcher=/userdata/system/add-ons/native-x11-desktop/native-x11-desktop-launch.sh
 target=/usr/bin/filemanagerlauncher
 
 is_bound() { awk -v m="$target" '$2==m {f=1} END {exit !f}' /proc/mounts; }
 
+# F1 is bound to an older copy of this launcher. Updating the add-on replaces
+# the launcher with a new file, but a bind mount keeps the file it was made
+# from, so F1 would keep running the deleted old copy until a reboot. The
+# mount's source then ends in "<launcher>//deleted". Another desktop's launcher
+# (KDE Plasma) never matches, so it keeps F1.
+is_stale() {
+    awk -v m="$target" -v f="/$(basename "$launcher")//deleted" \
+        '$5==m && substr($4, length($4)-length(f)+1)==f {s=1} END {exit !s}' /proc/self/mountinfo
+}
+
 case "$1" in
     start)
         [ -x "$launcher" ] || { echo "native-x11-desktop: $launcher is missing"; exit 1; }
+        # Lazy unmount: an open desktop keeps running from the old copy
+        while is_stale; do umount -l "$target" || break; done
         is_bound || mount --bind "$launcher" "$target"
         ;;
     stop)
