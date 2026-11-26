@@ -9,7 +9,6 @@
 APP_NAME="Native Wayland Desktop"
 install_dir="/userdata/system/add-ons/native-wayland-desktop"
 ports_dir="/userdata/roms/ports"
-service_file="/userdata/system/services/native-wayland-desktop"
 
 echo "Removing ${APP_NAME}..."
 
@@ -19,11 +18,14 @@ pid=$(cat /run/native-wayland-desktop.pid 2>/dev/null)
 rm -f /run/native-wayland-desktop.pid
 
 # F1: stop this desktop's service...
-if [ -f "$service_file" ]; then
-    bash "$service_file" stop
-    batocera-services disable native-wayland-desktop >/dev/null 2>&1
-    rm -f "$service_file"
-fi
+# (native-wayland-desktop is the old name, from before hyphens were dropped)
+for svc in native_wayland_desktop native-wayland-desktop; do
+    if [ -f "/userdata/system/services/$svc" ]; then
+        bash "/userdata/system/services/$svc" stop
+        batocera-services disable "$svc" >/dev/null 2>&1
+        rm -f "/userdata/system/services/$svc"
+    fi
+done
 # ...and give it back to KDE Plasma Desktop if that is installed
 if [ -f /userdata/system/services/kdeplasma ] && [ -x /userdata/system/add-ons/kdeplasma/kdeplasma-launch.sh ]; then
     batocera-services enable kdeplasma >/dev/null 2>&1

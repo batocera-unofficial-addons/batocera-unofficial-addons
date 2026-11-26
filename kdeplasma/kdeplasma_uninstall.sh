@@ -34,11 +34,15 @@ if [ -f "$service_file" ]; then
 fi
 # ...and back to the Native Wayland Desktop if that is installed
 f1="the file manager"
-if [ -f /userdata/system/services/native-wayland-desktop ] && [ -x /userdata/system/add-ons/native-wayland-desktop/native-wayland-desktop-launch.sh ]; then
-    batocera-services enable native-wayland-desktop >/dev/null 2>&1
-    batocera-services start native-wayland-desktop >/dev/null 2>&1 || bash /userdata/system/services/native-wayland-desktop start
-    f1="the Native Wayland Desktop"
-fi
+# (native-wayland-desktop is the old service name, from before hyphens were dropped)
+for svc in native_wayland_desktop native-wayland-desktop; do
+    if [ -f "/userdata/system/services/$svc" ] && [ -x /userdata/system/add-ons/native-wayland-desktop/native-wayland-desktop-launch.sh ]; then
+        batocera-services enable "$svc" >/dev/null 2>&1
+        batocera-services start "$svc" >/dev/null 2>&1 || bash "/userdata/system/services/$svc" start
+        f1="the Native Wayland Desktop"
+        break
+    fi
+done
 
 # Unmount everything inside the container (including its view of /userdata)
 for _ in 1 2 3 4 5 6 7 8; do

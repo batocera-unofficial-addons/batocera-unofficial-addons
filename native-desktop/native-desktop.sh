@@ -6,42 +6,17 @@
 REPO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main"
 
 # --- Cleanup old desktop installs ---
-
-# Old squashfs-based "desktop" service (DRL / Desktop for Batocera)
-if [ -f /userdata/system/services/desktop ]; then
-    echo "Removing old squashfs desktop service..."
-    batocera-services stop desktop 2>/dev/null
-    batocera-services disable desktop 2>/dev/null
-    rm -f /userdata/system/services/desktop
+# Light Desktop, Desktop for Batocera (squashfs / reworked DRL) and the
+# original DRL desktop. Shared with native-desktop_uninstall.sh; the Docker
+# "Desktop" add-on is never touched.
+cleanup_script=$(mktemp)
+if ! curl -fsSL -o "$cleanup_script" "$REPO_URL/native-desktop/native-desktop-legacy-cleanup.sh"; then
+    rm -f "$cleanup_script"
+    dialog --title "Native Desktop" --msgbox "Failed to download the cleanup for older desktops. Check your connection and try again." 10 60
+    exit 1
 fi
-
-# Old squashfs rootfs at /userdata/system/add-ons/desktop
-if [ -d /userdata/system/add-ons/desktop/rootfs ]; then
-    echo "Removing old squashfs desktop addon..."
-    rm -rf /userdata/system/add-ons/desktop
-fi
-
-# Old squashfs rootfs at native-x11-desktop (from the transitional commit)
-if [ -d /userdata/system/add-ons/native-x11-desktop/rootfs ]; then
-    echo "Removing old squashfs native-x11-desktop addon..."
-    batocera-services stop native-x11-desktop 2>/dev/null
-    batocera-services disable native-x11-desktop 2>/dev/null
-    rm -rf /userdata/system/add-ons/native-x11-desktop
-    rm -f /userdata/system/services/native-x11-desktop
-fi
-
-# Old DRL desktop
-if [ -d /userdata/system/add-ons/desktop_drl ]; then
-    echo "Removing old DRL desktop addon..."
-    rm -rf /userdata/system/add-ons/desktop_drl
-    rm -f /userdata/system/services/desktop_drl
-fi
-if [ -f /userdata/system/configs/bat-drl/Remover_Desktop.sh ]; then
-    echo "Running DRL desktop remover..."
-    function yad() { return 0; }; export -f yad
-    bash /userdata/system/configs/bat-drl/Remover_Desktop.sh 2>/dev/null
-    unset -f yad
-fi
+bash "$cleanup_script" install
+rm -f "$cleanup_script"
 
 # --- Route to the correct variant ---
 

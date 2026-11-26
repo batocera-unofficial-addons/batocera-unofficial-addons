@@ -17,7 +17,9 @@ APPNAME="Native Wayland Desktop"
 install_dir="/userdata/system/add-ons/native-wayland-desktop"
 ports_dir="/userdata/roms/ports"
 port_script="$ports_dir/Native Wayland Desktop.sh"
-service_file="/userdata/system/services/native-wayland-desktop"
+# Batocera service names cannot contain hyphens
+service_name="native_wayland_desktop"
+service_file="/userdata/system/services/$service_name"
 base_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/native-wayland-desktop"
 
 fail() {
@@ -55,6 +57,13 @@ chmod +x "$install_dir"/*.sh "$install_dir"/*.py "$install_dir/native-wayland-de
 # desktop installed gets F1, so KDE Plasma Desktop's service is stopped and
 # switched off (Plasma itself stays installed and opens from Ports).
 echo "Setting up F1..."
+# Older versions installed the service as native-wayland-desktop (hyphens are
+# not allowed in service names), so remove that one
+if [ -f /userdata/system/services/native-wayland-desktop ]; then
+    bash /userdata/system/services/native-wayland-desktop stop >/dev/null 2>&1
+    batocera-services disable native-wayland-desktop >/dev/null 2>&1
+    rm -f /userdata/system/services/native-wayland-desktop
+fi
 if [ -f /userdata/system/services/kdeplasma ]; then
     bash /userdata/system/services/kdeplasma stop >/dev/null 2>&1
     batocera-services disable kdeplasma >/dev/null 2>&1
@@ -63,8 +72,8 @@ fi
 mkdir -p /userdata/system/services
 cp -f "$install_dir/native-wayland-desktop-service" "$service_file"
 chmod +x "$service_file"
-batocera-services enable native-wayland-desktop >/dev/null 2>&1
-batocera-services start native-wayland-desktop >/dev/null 2>&1 || bash "$service_file" start
+batocera-services enable "$service_name" >/dev/null 2>&1
+batocera-services start "$service_name" >/dev/null 2>&1 || bash "$service_file" start
 
 # Ports entry, with a controller mapping (left stick is the mouse, A/B click,
 # X opens the app menu, Hotkey+Start closes the desktop)

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Uninstaller for Native Desktop — removes whichever variant is installed
-# (Native X11 Desktop, Native Wayland Desktop, or old squashfs desktop).
+# (Native X11 Desktop or Native Wayland Desktop) and any older desktop.
 
 echo "========================================="
 echo "Uninstalling: Native Desktop"
@@ -11,7 +11,7 @@ LIGHT_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-add
 f1="the file manager"
 
 # --- Remove Native Wayland Desktop if installed ---
-if [ -d /userdata/system/add-ons/native-wayland-desktop ] || [ -f /userdata/system/services/native-wayland-desktop ]; then
+if [ -d /userdata/system/add-ons/native-wayland-desktop ] || [ -f /userdata/system/services/native_wayland_desktop ] || [ -f /userdata/system/services/native-wayland-desktop ]; then
     echo "Removing Native Wayland Desktop..."
     curl -fsSL "$LIGHT_URL/native-wayland-desktop_uninstall.sh" | bash
     echo ""
@@ -30,11 +30,14 @@ if [ -d /userdata/system/add-ons/native-x11-desktop ] && [ ! -d /userdata/system
     rm -f /run/native-x11-desktop.pid
 
     # Stop and remove service
-    if [ -f /userdata/system/services/native-x11-desktop ]; then
-        bash /userdata/system/services/native-x11-desktop stop 2>/dev/null
-        batocera-services disable native-x11-desktop >/dev/null 2>&1
-        rm -f /userdata/system/services/native-x11-desktop
-    fi
+    # (native-x11-desktop is the old name, from before hyphens were dropped)
+    for svc in native_x11_desktop native-x11-desktop; do
+        if [ -f "/userdata/system/services/$svc" ]; then
+            bash "/userdata/system/services/$svc" stop 2>/dev/null
+            batocera-services disable "$svc" >/dev/null 2>&1
+            rm -f "/userdata/system/services/$svc"
+        fi
+    done
 
     # Restore Openbox config if desktop was active
     if [ -f /tmp/native-x11-desktop-rc-backup.xml ]; then
@@ -66,62 +69,24 @@ if [ -d /userdata/system/add-ons/native-x11-desktop ] && [ ! -d /userdata/system
     echo "Native X11 Desktop removed."
 fi
 
-# --- Remove old squashfs-based desktop if present ---
-DRL_REMOVER="/userdata/system/configs/bat-drl/Remover_Desktop.sh"
-OLD_ROOTFS="/userdata/system/add-ons/native-x11-desktop/rootfs"
-OLD_DESKTOP_ROOTFS="/userdata/system/add-ons/desktop/rootfs"
+# --- Remove older desktops ---
+# Light Desktop, Desktop for Batocera (squashfs / reworked DRL) and the
+# original DRL desktop. Shared with native-desktop.sh; the Docker "Desktop"
+# add-on is never touched.
+REPO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main"
+cleanup_script=$(mktemp)
+if curl -fsSL -o "$cleanup_script" "$REPO_URL/native-desktop/native-desktop-legacy-cleanup.sh"; then
+    bash "$cleanup_script" uninstall
+else
+    echo "Could not download the cleanup for older desktops; skipped."
+fi
+rm -f "$cleanup_script"
 
-if [ -d "$OLD_ROOTFS" ] || [ -d "$OLD_DESKTOP_ROOTFS" ] || [ -f "$DRL_REMOVER" ]; then
-    echo "Removing old squashfs desktop..."
-
-    # Kill old desktop processes
-    for proc in tint2 jgmenu picom xcompmgr; do
-        pkill -x "$proc" 2>/dev/null
-    done
-    pkill -f 'pcmanfm --deskto[p]' 2>/dev/null
-
-    # Run DRL remover if present
-    if [ -f "$DRL_REMOVER" ]; then
-        function yad() { return 0; }; export -f yad
-        bash "$DRL_REMOVER" </dev/null 2>/dev/null
-        unset -f yad
-        rm -f "$DRL_REMOVER"
-    fi
-
-    # Stop old services
-    for svc in desktop native-x11-desktop desktop_drl; do
-        if [ -f "/userdata/system/services/$svc" ]; then
-            bash "/userdata/system/services/$svc" stop >/dev/null 2>&1
-            batocera-services stop "$svc" >/dev/null 2>&1
-            batocera-services disable "$svc" >/dev/null 2>&1
-            rm -f "/userdata/system/services/$svc"
-        fi
-    done
-
-    # Remove old addon dirs
-    rm -rf /userdata/system/add-ons/desktop
-    rm -rf /userdata/system/add-ons/native-x11-desktop
-    rm -rf /userdata/system/add-ons/desktop_drl
-    rm -rf /userdata/tmp/native-desktop
-
-    # Restore Openbox config
-    if [ -f /etc/openbox/rc.xml.es ]; then
-        for layer in /overlay/base /overlay/base2 /overlay_root/base /overlay_root/base2; do
-            if [ -f "$layer/etc/openbox/rc.xml" ]; then
-                cp -f "$layer/etc/openbox/rc.xml" /etc/openbox/rc.xml
-                break
-            fi
-        done
-        rm -f /etc/openbox/rc.xml.es
-        pgrep -x openbox >/dev/null && openbox --reconfigure >/dev/null 2>&1
-    fi
-
-    # Clean up old desktop settings
-    rm -rf /userdata/system/.config/tint2 /userdata/system/.config/jgmenu \
-           /userdata/system/.config/sublime-text /userdata/system/.config/pcmanfm \
-           /userdata/system/.config/libfm
-
-    echo "Old squashfs desktop removed."
+# F1 back to KDE Plasma if it is installed (the file manager otherwise)
+if [ -f /userdata/system/services/kdeplasma ] && [ -x /userdata/system/add-ons/kdeplasma/kdeplasma-launch.sh ]; then
+    batocera-services enable kdeplasma >/dev/null 2>&1
+    batocera-services start kdeplasma >/dev/null 2>&1
+    f1="KDE Plasma"
 fi
 
 curl -s http://127.0.0.1:1234/reloadgames >/dev/null

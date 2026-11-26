@@ -15,7 +15,9 @@ APPNAME="Native X11 Desktop"
 install_dir="/userdata/system/add-ons/native-x11-desktop"
 ports_dir="/userdata/roms/ports"
 port_script="$ports_dir/Native X11 Desktop.sh"
-service_file="/userdata/system/services/native-x11-desktop"
+# Batocera service names cannot contain hyphens
+service_name="native_x11_desktop"
+service_file="/userdata/system/services/$service_name"
 base_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/native-desktop"
 
 fail() {
@@ -52,11 +54,20 @@ chmod +x "$install_dir"/*.sh "$install_dir"/*.py "$install_dir/native-x11-deskto
 # The last desktop installed gets F1, so competing desktop services are
 # stopped and switched off (the addons themselves stay installed).
 echo "Setting up F1..."
-if [ -f /userdata/system/services/native-wayland-desktop ]; then
-    bash /userdata/system/services/native-wayland-desktop stop >/dev/null 2>&1
-    batocera-services disable native-wayland-desktop >/dev/null 2>&1
-    echo "F1 now opens the Native X11 Desktop instead of Native Wayland Desktop."
+# Older versions installed the service as native-x11-desktop (hyphens are not
+# allowed in service names), so remove that one
+if [ -f /userdata/system/services/native-x11-desktop ]; then
+    bash /userdata/system/services/native-x11-desktop stop >/dev/null 2>&1
+    batocera-services disable native-x11-desktop >/dev/null 2>&1
+    rm -f /userdata/system/services/native-x11-desktop
 fi
+for svc in native_wayland_desktop native-wayland-desktop; do
+    if [ -f "/userdata/system/services/$svc" ]; then
+        bash "/userdata/system/services/$svc" stop >/dev/null 2>&1
+        batocera-services disable "$svc" >/dev/null 2>&1
+        echo "F1 now opens the Native X11 Desktop instead of Native Wayland Desktop."
+    fi
+done
 if [ -f /userdata/system/services/kdeplasma ]; then
     bash /userdata/system/services/kdeplasma stop >/dev/null 2>&1
     batocera-services disable kdeplasma >/dev/null 2>&1
@@ -65,8 +76,8 @@ fi
 mkdir -p /userdata/system/services
 cp -f "$install_dir/native-x11-desktop-service" "$service_file"
 chmod +x "$service_file"
-batocera-services enable native-x11-desktop >/dev/null 2>&1
-batocera-services start native-x11-desktop >/dev/null 2>&1 || bash "$service_file" start
+batocera-services enable "$service_name" >/dev/null 2>&1
+batocera-services start "$service_name" >/dev/null 2>&1 || bash "$service_file" start
 
 # Ports entry, with a controller mapping (left stick is the mouse, A/B click,
 # X opens the app menu, Hotkey+Start closes the desktop)

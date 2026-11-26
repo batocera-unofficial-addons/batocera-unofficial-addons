@@ -55,11 +55,14 @@ bash "$install_dir/kdeplasma-build.sh" 2>&1 | tee "$log_file"
 # installed gets F1, so the Native Wayland Desktop's service is stopped and
 # switched off (the Native Wayland Desktop itself stays installed and opens from Ports).
 echo "Setting up F1..."
-if [ -f /userdata/system/services/native-wayland-desktop ]; then
-    bash /userdata/system/services/native-wayland-desktop stop >/dev/null 2>&1
-    batocera-services disable native-wayland-desktop >/dev/null 2>&1
+# (native-wayland-desktop and lightdesktop are its older service names)
+for svc in native_wayland_desktop native-wayland-desktop lightdesktop; do
+  if [ -f "/userdata/system/services/$svc" ]; then
+    bash "/userdata/system/services/$svc" stop >/dev/null 2>&1
+    batocera-services disable "$svc" >/dev/null 2>&1
     echo "F1 now opens KDE Plasma instead of the Native Wayland Desktop (the Native Wayland Desktop is still in Ports)."
-fi
+  fi
+done
 mkdir -p /userdata/system/services
 cp -f "$install_dir/kdeplasma-service" "$service_file"
 chmod +x "$service_file"
