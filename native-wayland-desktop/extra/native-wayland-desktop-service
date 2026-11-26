@@ -29,7 +29,9 @@ case "$1" in
         is_bound || mount --bind "$launcher" "$target"
         ;;
     stop)
-        while is_bound; do umount "$target" || break; done
+        # umount fails while the desktop is open (its launcher is running):
+        # fall back to a lazy unmount, which frees F1 and leaves it open
+        while is_bound; do umount "$target" 2>/dev/null || umount -l "$target" || break; done
         ;;
     status)
         # -ef: the file F1 runs is this launcher (another desktop may hold F1)
