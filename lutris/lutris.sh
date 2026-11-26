@@ -8,7 +8,7 @@ if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
     appimage_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/"
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "Lutris" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -23,7 +23,7 @@ if ! command -v fusermount3 &> /dev/null; then
         echo "Updating BUA..."
         curl -L bit.ly/BUAinstaller | bash
     else
-        echo "Update declined. Exiting."
+        dialog --title "Lutris" --msgbox "Update declined. Exiting." 8 60
         exit 1
     fi
 fi
@@ -35,7 +35,7 @@ wget -q --show-progress -O /userdata/system/add-ons/lutris/lutris_part_aa "$appi
 wget -q --show-progress -O /userdata/system/add-ons/lutris/lutris_part_bb "$appimage_url/lutris_part_ab"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download Lutris parts."
+    dialog --title "Lutris" --msgbox "Failed to download Lutris parts." 8 60
     exit 1
 fi
 

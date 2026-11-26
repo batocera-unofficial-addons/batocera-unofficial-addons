@@ -12,7 +12,7 @@ case "$ARCH" in
         CONFIG_FILE_URL="https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/soar/extra/arm64_config.toml"
         ;;
     *)
-        echo "Unsupported architecture: $ARCH"
+        dialog --title "Soar" --msgbox "Unsupported architecture: $ARCH" 8 60
         exit 1
         ;;
 esac
@@ -29,7 +29,7 @@ mkdir -p "$SOAR_CONFIG_DIR"
 # Get latest release tag from GitHub API
 LATEST_TAG=$(curl -s https://api.github.com/repos/pkgforge/soar/releases/latest | grep '"tag_name":' | cut -d '"' -f 4)
 if [ -z "$LATEST_TAG" ]; then
-    echo "Failed to fetch the latest Soar release tag."
+    dialog --title "Soar" --msgbox "Failed to fetch the latest Soar release tag." 8 60
     exit 1
 fi
 

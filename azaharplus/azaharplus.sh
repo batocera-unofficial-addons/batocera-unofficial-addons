@@ -14,7 +14,7 @@ base_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addo
 bua_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/app"
 
 fail() {
-    echo "$1"
+    dialog --title "AzaharPlus" --msgbox "$1" 8 60
     exit 1
 }
 
@@ -60,14 +60,14 @@ azaharplus_url=$(curl -fsSL https://api.github.com/repos/AzaharPlus/AzaharPlus/r
     | cut -d '"' -f 4)
 
 if [ -z "$azaharplus_url" ]; then
-    echo "Failed to find an AzaharPlus AppImage in the latest release."
+    dialog --title "AzaharPlus" --msgbox "Failed to find an AzaharPlus AppImage in the latest release." 8 60
     exit 1
 fi
 
 # Download AppImage directly
 echo "Downloading AzaharPlus AppImage..."
 if ! wget -q --show-progress -O "$install_dir/azahar.AppImage" "$azaharplus_url"; then
-    echo "Failed to download AzaharPlus."
+    dialog --title "AzaharPlus" --msgbox "Failed to download AzaharPlus." 8 60
     exit 1
 fi
 

@@ -35,16 +35,16 @@ elif [ "$arch" == "aarch64" ]; then
     if [ -n "$ARM_SUFFIX" ]; then
         appimage_url=$(curl -s https://api.github.com/repos/$REPO/releases/latest | jq -r ".assets[] | select(.name | endswith(\"$ARM_SUFFIX\")) | .browser_download_url")
     else
-        echo "No ARM64 AppImage suffix provided. Skipping download. Exiting."
+        dialog --title "$DISPLAY_NAME" --msgbox "No ARM64 AppImage suffix provided. Skipping download. Exiting." 8 60
         exit 1
     fi
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "$DISPLAY_NAME" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
 if [ -z "$appimage_url" ]; then
-    echo "No suitable AppImage found for architecture: $arch. Exiting."
+    dialog --title "$DISPLAY_NAME" --msgbox "No suitable AppImage found for architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -54,7 +54,7 @@ batocera_version=$(batocera-version 2>/dev/null)
 batocera_major=$(echo "$batocera_version" | grep -o '^[0-9]*')
 echo "Batocera version: ${batocera_version:-unknown}"
 if [ -z "$batocera_major" ]; then
-    echo "Could not read the Batocera version. Exiting."
+    dialog --title "$DISPLAY_NAME" --msgbox "Could not read the Batocera version. Exiting." 8 60
     exit 1
 fi
 if [ "$batocera_major" -ge 44 ]; then
@@ -63,7 +63,7 @@ else
     launcher="emulatorlauncher"
 fi
 if ! command -v "$launcher" >/dev/null; then
-    echo "Batocera $batocera_major should have $launcher, but it is missing. Exiting."
+    dialog --title "$DISPLAY_NAME" --msgbox "Batocera $batocera_major should have $launcher, but it is missing. Exiting." 8 60
     exit 1
 fi
 echo "Launcher: $launcher"
@@ -76,7 +76,7 @@ mkdir -p "$APP_DIR"
 wget -q --show-progress -O "$APP_DIR/${APP_NAME,,}.AppImage.tmp" "$appimage_url"
 
 if [ $? -ne 0 ] || [ ! -s "$APP_DIR/${APP_NAME,,}.AppImage.tmp" ]; then
-    echo "Failed to download $DISPLAY_NAME AppImage."
+    dialog --title "$DISPLAY_NAME" --msgbox "Failed to download $DISPLAY_NAME AppImage." 8 60
     rm -f "$APP_DIR/${APP_NAME,,}.AppImage.tmp"
     exit 1
 fi

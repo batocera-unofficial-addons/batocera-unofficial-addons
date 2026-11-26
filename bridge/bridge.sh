@@ -27,11 +27,11 @@ case "$arch" in
         SUFFIX="AppImage"
         ;;
     aarch64)
-        echo "No ARM64 AppImage available for ${APPNAME}. Exiting."
+        dialog --title "$APPNAME" --msgbox "No ARM64 AppImage available for ${APPNAME}. Exiting." 8 60
         exit 1
         ;;
     *)
-        echo "Unsupported architecture: $arch. Exiting."
+        dialog --title "$APPNAME" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
         exit 1
         ;;
 esac
@@ -41,13 +41,13 @@ APPIMAGE_URL=$(curl -s "$REPO_API_URL" | grep "browser_download_url" | grep -i "
 
 # Validate the download URL
 if [[ -z "$APPIMAGE_URL" ]]; then
-    echo "❌ Could not find a valid AppImage URL for ${APPNAME}."
+    dialog --title "$APPNAME" --msgbox "Could not find a valid AppImage URL for ${APPNAME}." 8 60
     exit 1
 fi
 
 # Download the AppImage
 if ! wget -q --show-progress -O "$ADDONS_DIR/${APPNAME,,}/${APPNAME,,}.AppImage" "$APPIMAGE_URL"; then
-    echo "❌ Failed to download ${APPNAME} AppImage. Exiting."
+    dialog --title "$APPNAME" --msgbox "Failed to download ${APPNAME} AppImage. Exiting." 8 60
     exit 1
 fi
 chmod a+x "$ADDONS_DIR/${APPNAME,,}/${APPNAME,,}.AppImage"

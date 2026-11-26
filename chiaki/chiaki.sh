@@ -12,7 +12,7 @@ elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: ARM64 detected."
     appimage_url="https://github.com/streetpea/chiaki-ng/releases/download/${LATEST}/chiaki-ng.AppImage_arm64"
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "Chiaki" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -32,7 +32,7 @@ INSTALL_DIR="/userdata/system/add-ons/chiaki"
 echo "Downloading Chiaki AppImage..."
 wget -q --show-progress -O /userdata/system/add-ons/chiaki/Chiaki.AppImage "$appimage_url"
 if [ $? -ne 0 ]; then
-    echo "Failed to download Chiaki AppImage. Exiting."
+    dialog --title "Chiaki" --msgbox "Failed to download Chiaki AppImage. Exiting." 8 60
     exit 1
 fi
 

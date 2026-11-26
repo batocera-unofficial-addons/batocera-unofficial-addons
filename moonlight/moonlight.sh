@@ -3,7 +3,7 @@ echo "Fetching the latest Moonlight AppImage release..."
 latest_release_url=$(curl -s https://api.github.com/repos/moonlight-stream/moonlight-qt/releases/latest | grep "browser_download_url" | grep "AppImage" | cut -d '"' -f 4)
 
 if [ -z "$latest_release_url" ]; then
-    echo "Failed to retrieve the latest Moonlight release URL."
+    dialog --title "Moonlight" --msgbox "Failed to retrieve the latest Moonlight release URL." 8 60
     exit 1
 fi
 
@@ -13,7 +13,7 @@ mkdir -p /userdata/system/add-ons/moonlight
 wget -q -O /userdata/system/add-ons/moonlight/moonlight.AppImage "$latest_release_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download the Moonlight AppImage."
+    dialog --title "Moonlight" --msgbox "Failed to download the Moonlight AppImage." 8 60
     exit 1
 fi
 

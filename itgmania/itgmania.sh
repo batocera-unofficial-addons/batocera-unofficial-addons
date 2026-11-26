@@ -14,7 +14,7 @@ itgmania_url=$(curl -s https://api.github.com/repos/ITGmania/ITGmania/releases/l
     | cut -d '"' -f 4)
 
 if [ -z "$itgmania_url" ]; then
-    echo "Failed to fetch ITGMania release URL. Please check your internet connection."
+    dialog --title "ITGMania" --msgbox "Failed to fetch ITGMania release URL. Please check your internet connection." 8 60
     exit 1
 fi
 
@@ -28,7 +28,7 @@ echo "Downloading ITGMania..."
 wget -q --show-progress -O "$install_dir/itgmania.tar.gz" "$itgmania_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download ITGMania."
+    dialog --title "ITGMania" --msgbox "Failed to download ITGMania." 8 60
     exit 1
 fi
 

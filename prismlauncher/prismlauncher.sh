@@ -14,7 +14,7 @@ if [ "$arch" == "x86_64" ]; then
 elif [ "$arch" == "aarch64" ]; then
     APPIMAGE_PATTERN="PrismLauncher-Linux-aarch64.AppImage"
 else
-    echo "Unsupported architecture: $arch"
+    dialog --title "Prism Launcher" --msgbox "Unsupported architecture: $arch" 8 60
     exit 1
 fi
 
@@ -36,14 +36,14 @@ APPIMAGE_URL=$(curl -s https://api.github.com/repos/PrismLauncher/PrismLauncher/
     | head -1)
 
 if [ -z "$APPIMAGE_URL" ]; then
-    echo "Failed to fetch Prism Launcher release URL. Check your internet connection."
+    dialog --title "Prism Launcher" --msgbox "Failed to fetch Prism Launcher release URL. Check your internet connection." 8 60
     exit 1
 fi
 
 echo "Downloading Prism Launcher..."
 wget -q --show-progress -O "$INSTALL_DIR/prismlauncher.AppImage" "$APPIMAGE_URL"
 if [ $? -ne 0 ] || [ ! -s "$INSTALL_DIR/prismlauncher.AppImage" ]; then
-    echo "Download failed."
+    dialog --title "Prism Launcher" --msgbox "Download failed." 8 60
     exit 1
 fi
 chmod +x "$INSTALL_DIR/prismlauncher.AppImage"

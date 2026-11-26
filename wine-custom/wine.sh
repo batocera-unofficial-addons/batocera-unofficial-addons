@@ -10,7 +10,7 @@ CHOICE=$(dialog --stdout --title "Select Wine Version" --menu "Choose which Wine
     "v40" "V40 Stock Wine")
 
 if [ -z "$CHOICE" ]; then
-    echo "Installation cancelled."
+    dialog --title "Wine" --msgbox "Installation cancelled." 8 60
     exit 1
 fi
 

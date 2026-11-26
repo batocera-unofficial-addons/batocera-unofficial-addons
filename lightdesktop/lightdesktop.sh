@@ -23,7 +23,7 @@ service_file="/userdata/system/services/lightdesktop"
 base_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/lightdesktop"
 
 fail() {
-    echo "$1"
+    dialog --title "$APPNAME" --msgbox "$1" 10 60
     exit 1
 }
 

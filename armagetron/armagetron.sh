@@ -10,7 +10,7 @@ mkdir -p /userdata/system/add-ons/armagetron
 wget -q -O /userdata/system/add-ons/armagetron/ArmagetronAdvanced.AppImage "$appimage_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download the Armagetron Advanced AppImage."
+    dialog --title "Armagetron" --msgbox "Failed to download the Armagetron Advanced AppImage." 8 60
     exit 1
 fi
 

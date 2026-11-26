@@ -5,7 +5,7 @@ echo "Fetching the latest PortMaster release..."
 installer_url=$(curl -s https://api.github.com/repos/PortsMaster/PortMaster-GUI/releases/latest | grep "browser_download_url" | grep "Install.Full.PortMaster.sh" | cut -d '"' -f 4)
 
 if [ -z "$installer_url" ]; then
-    echo "Failed to retrieve the latest PortMaster installer URL."
+    dialog --title "PortMaster" --msgbox "Failed to retrieve the latest PortMaster installer URL." 8 60
     exit 1
 fi
 
@@ -17,7 +17,7 @@ mkdir -p /userdata/system/add-ons/portmaster
 wget -q --show-progress -O /userdata/system/add-ons/portmaster/Install.Full.PortMaster.sh "$installer_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download the PortMaster installer."
+    dialog --title "PortMaster" --msgbox "Failed to download the PortMaster installer." 8 60
     exit 1
 fi
 
@@ -33,7 +33,7 @@ export TERM=linux
 echo "A" | /userdata/system/add-ons/portmaster/Install.Full.PortMaster.sh
 
 if [ $? -ne 0 ]; then
-    echo "PortMaster installation failed."
+    dialog --title "PortMaster" --msgbox "PortMaster installation failed." 8 60
     exit 1
 fi
 

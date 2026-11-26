@@ -24,7 +24,7 @@ echo "Downloading $APP_NAME..."
 wget -q --show-progress -O "$TAR_FILE" "$FILE_URL"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download $APP_NAME. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Failed to download $APP_NAME. Exiting." 8 60
     exit 1
 fi
 
@@ -33,7 +33,7 @@ echo "Extracting $APP_NAME..."
 tar -xzvf "$TAR_FILE" -C "$ADDONS_DIR/${APP_NAME,,}"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to extract $APP_NAME. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Failed to extract $APP_NAME. Exiting." 8 60
     exit 1
 fi
 

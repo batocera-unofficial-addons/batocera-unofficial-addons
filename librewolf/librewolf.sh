@@ -11,7 +11,7 @@ elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: aarch64 detected."
     appimage_url=$(curl -s https://gitlab.com/api/v4/projects/24386000/releases | grep -o 'https://[^ "]*librewolf[^ "]*aarch64\.AppImage' | head -n 1)
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "LibreWolf" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -21,7 +21,7 @@ mkdir -p /userdata/system/add-ons/librewolf/extra
 wget -q --show-progress -O /userdata/system/add-ons/librewolf/LibreWolf.AppImage "$appimage_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download LibreWolf AppImage."
+    dialog --title "LibreWolf" --msgbox "Failed to download LibreWolf AppImage." 8 60
     exit 1
 fi
 

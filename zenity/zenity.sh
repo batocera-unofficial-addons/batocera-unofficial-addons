@@ -12,7 +12,7 @@ curl -s "$API_URL/lib" | grep '"download_url":' | cut -d '"' -f 4 > lib_list.txt
 
 # Check if any list is empty
 if [ ! -s bin_list.txt ] && [ ! -s lib_list.txt ]; then
-    echo "No files found in the zenity folder on GitHub. Exiting."
+    dialog --title "Zenity" --msgbox "No files found in the zenity folder on GitHub. Exiting." 8 60
     exit 1
 fi
 

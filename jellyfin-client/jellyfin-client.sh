@@ -23,7 +23,7 @@ case "$arch" in
     x86_64)  APPIMAGE_URL="${RELEASE_BASE}/JellyfinPlayer-x86_64.AppImage" ;;
     aarch64) APPIMAGE_URL="${RELEASE_BASE}/JellyfinPlayer-aarch64.AppImage" ;;
     *)
-        echo "Unsupported architecture: $arch. Exiting."
+        dialog --title "$APP_NAME" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
         exit 1
         ;;
 esac
@@ -35,7 +35,7 @@ mkdir -p "${LOGS_DIR}"
 # Download AppImage
 echo "Downloading ${APP_NAME} (${arch})..."
 if ! wget -q --show-progress -O "${APP_INSTALL_DIR}/JellyfinPlayer.AppImage" "${APPIMAGE_URL}"; then
-    echo "Failed to download ${APP_NAME}. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Failed to download ${APP_NAME}. Exiting." 8 60
     exit 1
 fi
 chmod +x "${APP_INSTALL_DIR}/JellyfinPlayer.AppImage"

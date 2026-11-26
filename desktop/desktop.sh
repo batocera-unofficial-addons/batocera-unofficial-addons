@@ -20,7 +20,7 @@ case "$arch" in
         url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/batocera-containers-aarch64"
         ;;
     *)
-        echo "Unsupported architecture: $arch. Exiting."
+        dialog --title "Desktop" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
         exit 1
         ;;
 esac

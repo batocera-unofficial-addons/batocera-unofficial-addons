@@ -57,7 +57,7 @@ echo "==== $(date): Starting telegraf.sh ===="
 # Dependency check
 for cmd in wget awk sed grep tee; do
     if ! command -v "$cmd" &>/dev/null; then
-        echo "Missing required command: $cmd"
+        dialog --title "Telegraf" --msgbox "Missing required command: $cmd" 8 60
         exit 1
     fi
 done
@@ -102,7 +102,7 @@ if command -v batocera-services &>/dev/null; then
     echo "Stopping Telegraf via batocera-services..."
     batocera-services stop "$SERVICE_NAME" || echo "Warning: failed to stop $SERVICE_NAME"
 else
-    echo "batocera-services not found. Please stop Telegraf manually."
+    dialog --title "Telegraf" --msgbox "batocera-services not found. Please stop Telegraf manually." 8 60
     exit 1
 fi
 
@@ -119,7 +119,7 @@ case "$ARCH" in
     FILE="${FILEBase}${FILEVersion}_linux_arm64.tar.gz"
     ;;
   *)
-    echo "Unsupported architecture: $ARCH"
+    dialog --title "Telegraf" --msgbox "Unsupported architecture: $ARCH" 8 60
     exit 1
     ;;
 esac

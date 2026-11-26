@@ -8,7 +8,7 @@ if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
     appimage_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/"
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "Lutris" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -103,7 +103,7 @@ rm -f "$lutris_file"
 wget -q --show-progress -O "$lutris_file" "$appimage_url/lutris.AppImage"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download Lutris."
+    dialog --title "Lutris" --msgbox "Failed to download Lutris." 8 60
     exit 1
 fi
 

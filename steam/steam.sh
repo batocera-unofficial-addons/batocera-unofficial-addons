@@ -8,7 +8,7 @@ if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
     appimage_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/"
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "Steam" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -23,7 +23,7 @@ if ! command -v fusermount3 &> /dev/null; then
         echo "Updating BUA..."
         curl -L bit.ly/BUAinstaller | bash
     else
-        echo "Update declined. Exiting."
+        dialog --title "Steam" --msgbox "Update declined. Exiting." 8 60
         exit 1
     fi
 fi
@@ -35,7 +35,7 @@ wget -q -c --show-progress -O /userdata/system/add-ons/steam/steam_part_aa "$app
 wget -q -c --show-progress -O /userdata/system/add-ons/steam/steam_part_ab "$appimage_url/steam_part_ab"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download Steam parts."
+    dialog --title "Steam" --msgbox "Failed to download Steam parts." 8 60
     exit 1
 fi
 
@@ -44,7 +44,7 @@ echo "Reassemble and extracting Steam..."
 cat /userdata/system/add-ons/steam/steam_part_* | tar -xvJf - -i -C /userdata/system/add-ons/steam
 
 if [ ! -f "/userdata/system/add-ons/steam/steam" ]; then
-    echo "Failed to reassemble and extract Steam."
+    dialog --title "Steam" --msgbox "Failed to reassemble and extract Steam." 8 60
     exit 1
 fi
 

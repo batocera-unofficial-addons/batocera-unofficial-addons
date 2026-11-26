@@ -16,11 +16,11 @@ echo "$COMMAND" > /userdata/system/add-ons/$APPNAME/extra/command
 
 # Download Necessary Files
 curl -s -Lo /userdata/system/add-ons/$APPNAME/extra/icon.png \
-    "${REPO_URL}/extra/icon.png" || { echo "Download failed! Exiting..."; exit 1; }
+    "${REPO_URL}/extra/icon.png" || { dialog --title "Java" --msgbox "Download failed! Exiting..." 8 60; exit 1; }
 
 # Check System Compatibility
-if ! uname -a | grep -q 'x86_64'; then 
-    echo "ERROR: SYSTEM NOT SUPPORTED. You need Batocera x86_64."
+if ! uname -a | grep -q 'x86_64'; then
+    dialog --title "Java" --msgbox "ERROR: SYSTEM NOT SUPPORTED. You need Batocera x86_64." 8 60
     exit 1
 fi
 
@@ -30,7 +30,7 @@ cd /userdata/system/add-ons/$APPNAME/extra/downloads
 
 for part in java.tar.bz2.partaa java.tar.bz2.partab; do
     curl -s --progress-bar --remote-name --location \
-        "${REPO_URL}/extra/${part}" || { echo "Download failed! Exiting..."; exit 1; }
+        "${REPO_URL}/extra/${part}" || { dialog --title "Java" --msgbox "Download failed! Exiting..." 8 60; exit 1; }
 done
 
 # Merge and Extract Java Files

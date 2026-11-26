@@ -26,7 +26,7 @@ curl -L -o $DRL_FILE "https://github.com/DRLEdition19/DRLEdition_Interface/relea
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
-    echo "Error: Failed to download DRL file"
+    dialog --title "F1" --msgbox "Error: Failed to download DRL file" 8 60
     exit 1
 fi
 
@@ -36,7 +36,7 @@ unsquashfs -f -d "$EXTRACT_DIR" "$DRL_FILE"
 
 # Check if extraction was successful
 if [ $? -ne 0 ]; then
-    echo "Error: Failed to extract the DRL file"
+    dialog --title "F1" --msgbox "Error: Failed to extract the DRL file" 8 60
     rm -rf $TEMP_DIR
     exit 1
 fi

@@ -46,13 +46,13 @@ gcm_bua_register() {
 # The BUA updater asks for the latest version this way; nothing is installed.
 if [ "${BUA_REGISTRATION_ONLY:-0}" = "1" ]; then
     latest=$(gcm_latest_release)
-    [ -n "$latest" ] || { echo "Could not look up the latest GCM release." >&2; exit 1; }
+    [ -n "$latest" ] || { dialog --title "GCM" --msgbox "Could not look up the latest GCM release." 8 60; exit 1; }
     gcm_bua_register "$(echo "$latest" | sed -n 1p)" "$(echo "$latest" | sed -n 2p)"
     exit $?
 fi
 
 if [ "$(uname -m)" != "x86_64" ]; then
-    echo "GCM is only available for x86_64 Batocera."
+    dialog --title "GCM" --msgbox "GCM is only available for x86_64 Batocera." 8 60
     exit 1
 fi
 
@@ -79,31 +79,31 @@ echo "Downloading Game Content Manager: ${release_url##*/}"
 rm -rf "$work_dir"
 mkdir -p "$work_dir"
 if ! wget -q --show-progress -O "$work_dir/gcm.zip" "$release_url"; then
-    echo "Download failed."
+    dialog --title "GCM" --msgbox "Download failed." 8 60
     exit 1
 fi
 
 echo "Unpacking..."
 if ! unzip -q "$work_dir/gcm.zip" -d "$work_dir"; then
-    echo "The download is damaged; GCM was not installed."
+    dialog --title "GCM" --msgbox "The download is damaged; GCM was not installed." 8 60
     exit 1
 fi
 rm -f "$work_dir/gcm.zip"
 installer=$(ls -d "$work_dir"/*/install.sh 2>/dev/null | head -1)
 if [ -z "$installer" ]; then
-    echo "The release has no installer; GCM was not installed."
+    dialog --title "GCM" --msgbox "The release has no installer; GCM was not installed." 8 60
     exit 1
 fi
 
 echo "Checking this device..."
 if ! bash "$installer" --check; then
-    echo "GCM was not installed."
+    dialog --title "GCM" --msgbox "GCM was not installed." 8 60
     exit 1
 fi
 
 echo "Installing..."
 if ! bash "$installer" $replace; then
-    echo "GCM was not installed."
+    dialog --title "GCM" --msgbox "GCM was not installed." 8 60
     exit 1
 fi
 

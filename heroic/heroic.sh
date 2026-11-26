@@ -37,8 +37,7 @@ fi
 HEROIC_VERSION=$(basename "$HEROIC_URL" | sed -E 's/Heroic-([^-]+).*/\1/')
 
 if [ -z "$HEROIC_URL" ]; then
-    echo "Failed to fetch the latest Heroic version. Please check your internet connection or the GitHub API."
-    echo "You may have hit GitHub's rate limit. Please try again later."
+    dialog --title "Heroic" --msgbox "Failed to fetch the latest Heroic version. Please check your internet connection or the GitHub API.\nYou may have hit GitHub's rate limit. Please try again later." 8 60
     exit 1
 fi
 
@@ -51,7 +50,7 @@ mkdir -p "$INSTALL_DIR"
 wget --show-progress -O "${INSTALL_DIR}/heroic.AppImage" "$HEROIC_URL"
 
 if [ $? -ne 0 ] || [ ! -f "${INSTALL_DIR}/heroic.AppImage" ]; then
-    echo "Failed to download Heroic AppImage from $HEROIC_URL"
+    dialog --title "Heroic" --msgbox "Failed to download Heroic AppImage from $HEROIC_URL" 8 60
     exit 1
 fi
 

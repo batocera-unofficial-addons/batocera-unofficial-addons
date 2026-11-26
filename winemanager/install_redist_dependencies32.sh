@@ -9,7 +9,7 @@ download() {
     local url=$2
     echo "Downloading $name..."
     if ! wget -q --show-progress -O "$WINE_EXE_DIR/$name" "$url"; then
-        echo "ERROR: Failed to download $name"
+        dialog --title "Wine Dependencies" --msgbox "ERROR: Failed to download $name" 8 60
         exit 1
     fi
 }

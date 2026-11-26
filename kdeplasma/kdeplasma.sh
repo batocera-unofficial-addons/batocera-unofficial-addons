@@ -19,7 +19,7 @@ base_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addo
 log_file="/userdata/system/logs/kdeplasma-install.log"
 
 fail() {
-    echo "$1"
+    dialog --title "$APPNAME" --msgbox "$1" 10 60
     exit 1
 }
 

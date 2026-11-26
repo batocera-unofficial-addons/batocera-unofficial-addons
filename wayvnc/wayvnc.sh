@@ -34,7 +34,7 @@ case "$ARCH" in
         TAR_URL="$REPO_BASE/wayvnc.tar.gz"
         ;;
     *)
-        echo "Unsupported architecture: $ARCH"
+        dialog --title "WayVNC" --msgbox "Unsupported architecture: $ARCH" 8 60
         exit 1
         ;;
 esac

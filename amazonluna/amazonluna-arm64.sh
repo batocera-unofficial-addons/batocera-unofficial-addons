@@ -9,7 +9,7 @@ PORTIMG="https://github.com/batocera-unofficial-addons/batocera-unofficial-addon
 
 # Check for Xwayland
 if ! pgrep -x "Xwayland" > /dev/null; then
-    echo "Xwayland is not running. Exiting."
+    dialog --title "Amazon Luna" --msgbox "Xwayland is not running. Exiting." 8 60
     exit 1
 fi
 

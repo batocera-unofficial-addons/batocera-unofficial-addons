@@ -43,16 +43,16 @@ elif [ "$arch" == "aarch64" ]; then
     if [ -n "$ARM_SUFFIX" ]; then
         appimage_url="${REPO_BASE_URL}${ARM_SUFFIX}"
     else
-        echo "No ARM64 AppImage suffix provided. Skipping download. Exiting."
+        dialog --title "$APP_NAME" --msgbox "No ARM64 AppImage suffix provided. Skipping download. Exiting." 8 60
         exit 1
     fi
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
 if [ -z "$appimage_url" ]; then
-    echo "No suitable AppImage found for architecture: $arch. Exiting."
+    dialog --title "$APP_NAME" --msgbox "No suitable AppImage found for architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -66,7 +66,7 @@ echo "Extracting $APP_NAME tar.gz file..."
 tar -xzf "$ADDONS_DIR/${APP_NAME,,}/Fightcade-linux-latest.tar.gz" -C "$ADDONS_DIR/${APP_NAME,,}/"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to extract $APP_NAME tar.gz file."
+    dialog --title "$APP_NAME" --msgbox "Failed to extract $APP_NAME tar.gz file." 8 60
     exit 1
 fi
 
@@ -75,14 +75,14 @@ echo "Cleaning up the tar.gz file..."
 rm "$ADDONS_DIR/${APP_NAME,,}/Fightcade-linux-latest.tar.gz"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to remove $APP_NAME tar.gz file."
+    dialog --title "$APP_NAME" --msgbox "Failed to remove $APP_NAME tar.gz file." 8 60
     exit 1
 fi
 
 echo "$APP_NAME tar.gz file extracted and removed successfully."
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download $APP_NAME."
+    dialog --title "$APP_NAME" --msgbox "Failed to download $APP_NAME." 8 60
     exit 1
 fi
 
@@ -95,7 +95,7 @@ echo "Downloading wine AppImage into $BIN_DIR as 'wine'..."
 wget -c -q --show-progress -O "$BIN_DIR/wine" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/wine-staging_ge-proton_8-26-x86_64.AppImage"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download the wine AppImage."
+    dialog --title "$APP_NAME" --msgbox "Failed to download the wine AppImage." 8 60
     exit 1
 fi
 
@@ -104,7 +104,7 @@ echo "Making the wine AppImage executable..."
 chmod +x "$BIN_DIR/wine"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to make the wine AppImage executable."
+    dialog --title "$APP_NAME" --msgbox "Failed to make the wine AppImage executable." 8 60
     exit 1
 fi
 
@@ -114,7 +114,7 @@ echo "Downloading sym_wine.sh..."
 wget -q --show-progress -O "$SYM_WINE_SCRIPT" "$SYM_WINE_URL"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download sym_wine.sh."
+    dialog --title "$APP_NAME" --msgbox "Failed to download sym_wine.sh." 8 60
     exit 1
 fi
 
@@ -143,7 +143,7 @@ echo "Downloading json.zip into $EMULATOR_DIR..."
 wget -q --show-progress -O "json.zip" "https://fightcade.download/fc2json.zip"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download json.zip."
+    dialog --title "$APP_NAME" --msgbox "Failed to download json.zip." 8 60
     exit 1
 fi
 
@@ -152,7 +152,7 @@ echo "Extracting json.zip..."
 unzip -q "json.zip"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to extract json.zip."
+    dialog --title "$APP_NAME" --msgbox "Failed to extract json.zip." 8 60
     exit 1
 fi
 
@@ -169,7 +169,7 @@ echo "Cleaning up extracted files..."
 rm "json.zip" 2>/dev/null
 
 if [ $? -ne 0 ]; then
-    echo "Failed to clean up files."
+    dialog --title "$APP_NAME" --msgbox "Failed to clean up files." 8 60
     exit 1
 fi
 
@@ -182,7 +182,7 @@ TEMPLATE="/tmp/switchres_fightcade_wrap.template.sh"
 echo "Downloading Switchres wrapper template..."
 wget -q --show-progress -O "$TEMPLATE" "$TEMPLATE_URL"
 if [ ! -r "$TEMPLATE" ]; then
-    echo "ERROR: Failed to download switchres_fightcade_wrap.template.sh" >&2
+    dialog --title "$APP_NAME" --msgbox "ERROR: Failed to download switchres_fightcade_wrap.template.sh" 8 60
     exit 1
 fi
 sed "s|__FIGHTCADE_ADDON__|${ADDONS_DIR}/${APP_NAME,,}|g" "$TEMPLATE" > "$SW_WRAP"

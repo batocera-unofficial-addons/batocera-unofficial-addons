@@ -34,16 +34,16 @@ elif [ "$arch" == "aarch64" ]; then
     if [ -n "$ARM_SUFFIX" ]; then
         appimage_url="${REPO_BASE_URL}${ARM_SUFFIX}"
     else
-        echo "No ARM64 AppImage suffix provided. Skipping download. Exiting."
+        dialog --title "$APP_NAME" --msgbox "No ARM64 AppImage suffix provided. Skipping download. Exiting." 8 60
         exit 1
     fi
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
 if [ -z "$appimage_url" ]; then
-    echo "No suitable AppImage found for architecture: $arch. Exiting."
+    dialog --title "$APP_NAME" --msgbox "No suitable AppImage found for architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -53,7 +53,7 @@ mkdir -p "$ADDONS_DIR/${APP_NAME,,}"
 wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.AppImage" "$appimage_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download $APP_NAME AppImage."
+    dialog --title "$APP_NAME" --msgbox "Failed to download $APP_NAME AppImage." 8 60
     exit 1
 fi
 
@@ -65,7 +65,7 @@ echo "Downloading $APP_NAME icon..."
 wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/extra/icon.png" "$ICON_URL"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download $APP_NAME icon."
+    dialog --title "$APP_NAME" --msgbox "Failed to download $APP_NAME icon." 8 60
     exit 1
 fi
 

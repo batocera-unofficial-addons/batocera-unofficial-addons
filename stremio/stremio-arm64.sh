@@ -8,7 +8,7 @@ PORTIMG="https://blog.stremio.com/wp-content/uploads/2023/08/Stremio-logo-dark-b
 
 # Check for Xwayland
 if ! pgrep -x "Xwayland" > /dev/null; then
-    echo "❌ Xwayland is not running. Exiting."
+    dialog --title "$APPNAME" --msgbox "Xwayland is not running. Exiting." 8 60
     exit 1
 fi
 

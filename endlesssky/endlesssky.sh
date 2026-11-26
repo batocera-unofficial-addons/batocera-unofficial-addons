@@ -9,7 +9,7 @@ if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
     appimage_url="https://github.com/endless-sky/endless-sky/releases/download/${LATEST}/Endless_Sky-${LATEST}-x86_64.AppImage"
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "Endless Sky" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -19,7 +19,7 @@ mkdir -p /userdata/system/add-ons/endless-sky
 wget -q --show-progress -O /userdata/system/add-ons/endless-sky/EndlessSky.AppImage "$appimage_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download Endless Sky AppImage."
+    dialog --title "Endless Sky" --msgbox "Failed to download Endless Sky AppImage." 8 60
     exit 1
 fi
 

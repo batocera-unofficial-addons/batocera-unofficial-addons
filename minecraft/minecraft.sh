@@ -19,7 +19,7 @@ clear
 
 # Check if the user pressed Cancel
 if [ -z "$edition_choice" ]; then
-    echo "No choice made. Exiting."
+    dialog --title "Minecraft" --msgbox "No choice made. Exiting." 8 60
     exit 1
 fi
 
@@ -38,7 +38,7 @@ if [ "$edition_choice" == "1" ]; then
         appimage_url="https://launcherupdates.lunarclientcdn.com/Lunar%20Client-3.3.2-ow.AppImage"
         app_dir="/userdata/system/add-ons/minecraft/minecraftjava"
     else
-        echo "Java Edition is not supported on this architecture: $arch. Exiting."
+        dialog --title "Minecraft" --msgbox "Java Edition is not supported on this architecture: $arch. Exiting." 8 60
         exit 1
     fi
 
@@ -63,7 +63,7 @@ if [ "$edition_choice" == "2" ] || [ "$edition_choice" == "3" ] || [ "$edition_c
     echo "Running the script directly from $appimage_url..."
     curl -L "$appimage_url" | bash
     if [ $? -ne 0 ]; then
-        echo "Failed to execute the script from $appimage_url. Exiting."
+        dialog --title "Minecraft" --msgbox "Failed to execute the script from $appimage_url. Exiting." 8 60
         exit 1
     fi
 else
@@ -72,7 +72,7 @@ else
     wget -q --show-progress -O "$app_dir/Minecraft_Launcher.AppImage" "$appimage_url"
 
     if [ $? -ne 0 ]; then
-        echo "Failed to download the AppImage. Exiting."
+        dialog --title "Minecraft" --msgbox "Failed to download the AppImage. Exiting." 8 60
         exit 1
     fi
 

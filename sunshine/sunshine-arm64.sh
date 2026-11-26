@@ -15,7 +15,7 @@ if [ -n "$APPIMAGE_URL" ]; then
     chmod +x /userdata/system/add-ons/sunshine/sunshine.AppImage
     echo "Sunshine ARM64 AppImage installed successfully."
 else
-    echo "Failed to fetch the latest Sunshine ARM64 AppImage URL."
+    dialog --title "Sunshine" --msgbox "Failed to fetch the latest Sunshine ARM64 AppImage URL." 8 60
     exit 1
 fi
 

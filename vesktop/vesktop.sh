@@ -12,7 +12,7 @@ elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: arm64 detected."
     appimage_url="https://github.com/Vencord/Vesktop/releases/download/${LATEST}/Vesktop-${LATEST#v}-arm64.AppImage"
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "Vesktop" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -22,7 +22,7 @@ mkdir -p /userdata/system/add-ons/vesktop
 wget -q --show-progress -O /userdata/system/add-ons/vesktop/Vesktop.AppImage "$appimage_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download the Vesktop AppImage."
+    dialog --title "Vesktop" --msgbox "Failed to download the Vesktop AppImage." 8 60
     exit 1
 fi
 

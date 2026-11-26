@@ -8,7 +8,7 @@ if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
     appimage_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/"
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "Steam" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -51,7 +51,7 @@ rm -f "$steam_file"
 wget -q --show-progress -O "$steam_file" "$appimage_url/steam.AppImage"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download Steam."
+    dialog --title "Steam" --msgbox "Failed to download Steam." 8 60
     exit 1
 fi
 

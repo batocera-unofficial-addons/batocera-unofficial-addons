@@ -12,7 +12,7 @@ elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: aarch64 detected."
     url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/batocera-containers-aarch64"
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "Docker" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 

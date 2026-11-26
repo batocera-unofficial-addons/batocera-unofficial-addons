@@ -9,7 +9,7 @@ if [ "$arch" == "x86_64" ]; then
 appimage_url=$(curl -s https://api.github.com/repos/ivan-hc/Chrome-appimage/releases/latest | jq -r '.assets[] | select(.name | endswith("x86_64.AppImage") and contains("Google-Chrome-stable")) | .browser_download_url')
 
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "Google Chrome" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -19,7 +19,7 @@ mkdir -p /userdata/system/add-ons/google-chrome/extra
 wget -q --show-progress -O /userdata/system/add-ons/google-chrome/GoogleChrome.AppImage "$appimage_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download Google Chrome AppImage."
+    dialog --title "Google Chrome" --msgbox "Failed to download Google Chrome AppImage." 8 60
     exit 1
 fi
 

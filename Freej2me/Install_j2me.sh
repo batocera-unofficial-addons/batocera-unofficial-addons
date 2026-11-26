@@ -113,7 +113,7 @@ curl -L -o $DRL_FILE "https://github.com/DRLEdition19/batocera-unofficial-addons
 
 # Check if download was successful
 if [ ! -f "$DRL_FILE" ]; then
-    echo "Error: Failed to download Freej2me.DRL"
+    dialog --title "Freej2me" --msgbox "Error: Failed to download Freej2me.DRL" 8 60
     exit 1
 fi
 
@@ -123,7 +123,7 @@ unsquashfs -f -d "$EXTRACT_DIR" "$DRL_FILE"
 
 # Check if extraction was successful
 if [ $? -ne 0 ]; then
-    echo "Error: Failed to extract the DRL file"
+    dialog --title "Freej2me" --msgbox "Error: Failed to extract the DRL file" 8 60
     rm -rf $TEMP_DIR
     exit 1
 fi

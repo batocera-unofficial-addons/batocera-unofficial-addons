@@ -8,7 +8,7 @@ if [ "$arch" == "aarch64" ]; then
     echo "Architecture: aarch64 detected."
     firefox_url="https://download-installer.cdn.mozilla.net/pub/firefox/releases/137.0.1/linux-aarch64/en-US/firefox-137.0.1.tar.xz"
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "Firefox" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 

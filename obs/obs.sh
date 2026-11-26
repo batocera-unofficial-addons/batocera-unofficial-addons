@@ -29,26 +29,26 @@ case "$arch" in
         if [ -n "$ARM_SUFFIX" ]; then
             appimage_url="${REPO_BASE_URL}${ARM_SUFFIX}"
         else
-            echo "No ARM64 AppImage available. Exiting."
+            dialog --title "$APPNAME" --msgbox "No ARM64 AppImage available. Exiting." 8 60
             exit 1
         fi
         ;;
     *)
-        echo "Unsupported architecture: $arch. Exiting."
+        dialog --title "$APPNAME" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
         exit 1
         ;;
 esac
 
 # Download the AppImage
 if ! wget -q --show-progress -O "$ADDONS_DIR/${APPNAME,,}/${APPNAME,,}.AppImage" "$appimage_url"; then
-    echo "Failed to download $APPNAME AppImage. Exiting."
+    dialog --title "$APPNAME" --msgbox "Failed to download $APPNAME AppImage. Exiting." 8 60
     exit 1
 fi
 chmod a+x "$ADDONS_DIR/${APPNAME,,}/${APPNAME,,}.AppImage"
 
 # Download the application icon
 if ! wget -q --show-progress -O "$ADDONS_DIR/${APPNAME,,}/extra/${APPNAME,,}-icon.png" "$ICON_URL"; then
-    echo "Failed to download $APPNAME icon. Exiting."
+    dialog --title "$APPNAME" --msgbox "Failed to download $APPNAME icon. Exiting." 8 60
     exit 1
 fi
 

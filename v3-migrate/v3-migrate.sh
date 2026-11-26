@@ -47,7 +47,7 @@ v3m_bua_register() {
 # The BUA updater asks for the latest version this way; nothing is installed.
 if [ "${BUA_REGISTRATION_ONLY:-0}" = "1" ]; then
     latest=$(v3m_latest_release)
-    [ -n "$latest" ] || { echo "Could not look up the latest migration tool release." >&2; exit 1; }
+    [ -n "$latest" ] || { dialog --title "V3 Migration" --msgbox "Could not look up the latest migration tool release." 8 60; exit 1; }
     v3m_bua_register "$(echo "$latest" | sed -n 1p)" "$(echo "$latest" | sed -n 2p)"
     exit $?
 fi
@@ -55,7 +55,7 @@ fi
 echo "## BUA - x86-64-v3 Migration"
 
 if [ "$(id -u)" -ne 0 ]; then
-    echo "Error: must be run as root."
+    dialog --title "V3 Migration" --msgbox "Error: must be run as root." 8 60
     exit 1
 fi
 

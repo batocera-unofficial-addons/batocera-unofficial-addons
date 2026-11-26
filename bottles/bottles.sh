@@ -16,7 +16,7 @@ mkdir -p "/userdata/system/configs/${APPNAME,,}"
 
 # Ensure xmlstarlet is installed
 if ! command -v xmlstarlet &> /dev/null; then
-    echo "xmlstarlet is not installed. Please install xmlstarlet before running this script."
+    dialog --title "Bottles" --msgbox "xmlstarlet is not installed. Please install xmlstarlet before running this script." 8 60
     exit 1
 fi
 

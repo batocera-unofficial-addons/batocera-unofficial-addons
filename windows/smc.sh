@@ -37,7 +37,7 @@ mkdir -p "/userdata/roms/windows/images"
 echo "Downloading $APP_NAME..."
 wget -q --show-progress -O "$DEST_DIR/$URL_SUFFIX" "$URL"
 if [[ $? -ne 0 ]]; then
-  echo "Error downloading $URL"
+  dialog --title "$APP_NAME" --msgbox "Error downloading $URL" 8 60
   exit 1
 fi
 
@@ -81,7 +81,7 @@ if [[ -f "$GAME_LIST" ]]; then
     "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
 
   if [[ $? -ne 0 ]]; then
-    echo "Error: Failed to update gamelist.xml"
+    dialog --title "$APP_NAME" --msgbox "Error: Failed to update gamelist.xml" 8 60
     exit 1
   fi
 
@@ -89,7 +89,7 @@ if [[ -f "$GAME_LIST" ]]; then
   echo "Reloading game list..."
   curl -s http://127.0.0.1:1234/reloadgames
 else
-  echo "Error: Game list file not found: $GAME_LIST"
+  dialog --title "$APP_NAME" --msgbox "Error: Game list file not found: $GAME_LIST" 8 60
   exit 1
 fi
 

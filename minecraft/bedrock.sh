@@ -22,7 +22,7 @@ elif [ "$arch" == "aarch64" ]; then
     echo "Bedrock Edition selected for arm64."
     appimage_url=$(curl -s https://api.github.com/repos/minecraft-linux/appimage-builder/releases/latest | grep '"browser_download_url"' | grep 'arm64' | grep -v bookworm | grep '\.AppImage"' | cut -d'"' -f4)
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "Minecraft Bedrock" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -32,7 +32,7 @@ mkdir -p "$app_dir"
 wget -q --show-progress -O "$app_dir/Minecraft_Launcher.AppImage" "$appimage_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download the AppImage. Exiting."
+    dialog --title "Minecraft Bedrock" --msgbox "Failed to download the AppImage. Exiting." 8 60
     exit 1
 fi
 

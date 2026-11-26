@@ -40,7 +40,7 @@ main() {
         echo "Uninstalling the ${FLATPAK_ID} Flatpak..."
         flatpak uninstall --system -y --noninteractive "${FLATPAK_ID}"
         if flatpak info --system "${FLATPAK_ID}" >/dev/null 2>&1; then
-            echo "Failed to uninstall the ${FLATPAK_ID} Flatpak; ${APPNAME} was not removed."
+            dialog --title "$APPNAME" --msgbox "Failed to uninstall the ${FLATPAK_ID} Flatpak; ${APPNAME} was not removed." 8 60
             exit 1
         fi
 

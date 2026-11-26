@@ -18,7 +18,7 @@ dialog --title "Install $APPNAME" \
 
 # Check the user's choice
 if [[ $? -ne 0 ]]; then
-  echo "Installation canceled by user."
+  dialog --title "$APPNAME" --msgbox "Installation canceled by user." 8 60
   exit 1
 fi
 
@@ -32,7 +32,7 @@ if [[ ! -f $APPPATH ]]; then
   echo "Running the Google Chrome installer..."
   bash "$APPDIR/chrome.sh"
   if [[ ! -f $APPPATH ]]; then
-    echo "Google Chrome installation failed. Exiting."
+    dialog --title "$APPNAME" --msgbox "Google Chrome installation failed. Exiting." 8 60
     exit 1
   fi
 fi

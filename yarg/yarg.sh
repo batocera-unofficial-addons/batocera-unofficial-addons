@@ -15,7 +15,7 @@ ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addo
 echo "Detecting system architecture..."
 arch=$(uname -m)
 if [ "$arch" != "x86_64" ]; then
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -23,7 +23,7 @@ fi
 echo "Fetching latest YARC Launcher release..."
 LATEST=$(curl -s https://api.github.com/repos/YARC-Official/YARC-Launcher/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
 if [ -z "$LATEST" ]; then
-    echo "Failed to fetch latest release. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Failed to fetch latest release. Exiting." 8 60
     exit 1
 fi
 LAUNCHER_URL="https://github.com/YARC-Official/YARC-Launcher/releases/download/${LATEST}/YARC.Launcher_${LATEST#v}_amd64.AppImage"
@@ -34,7 +34,7 @@ echo "Downloading YARC Launcher..."
 mkdir -p "$INSTALL_DIR" "$LOGS_DIR"
 wget -q --show-progress -O "${INSTALL_DIR}/yarg-launcher.AppImage" "$LAUNCHER_URL"
 if [ $? -ne 0 ]; then
-    echo "Failed to download YARC Launcher. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Failed to download YARC Launcher. Exiting." 8 60
     exit 1
 fi
 chmod a+x "${INSTALL_DIR}/yarg-launcher.AppImage"

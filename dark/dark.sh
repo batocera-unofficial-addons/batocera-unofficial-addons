@@ -22,7 +22,7 @@ if [ -f "$ZIP_FILE" ]; then
     unzip -oq "$ZIP_FILE" -d "$DEST_DIR"
     rm -f "$ZIP_FILE"
 else
-    echo "Error: Failed to download Adwaita-dark.zip"
+    dialog --title "Dark Theme" --msgbox "Error: Failed to download Adwaita-dark.zip" 8 60
     exit 1
 fi
 

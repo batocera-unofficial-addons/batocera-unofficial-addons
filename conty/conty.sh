@@ -14,7 +14,7 @@ curl -L -o "$CONTY_DIR/conty.sh" "$CONTY_URL"
 
 # Check if download was successful
 if [ $? -ne 0 ]; then
-    echo "Failed to download conty.sh. Exiting."
+    dialog --title "Conty" --msgbox "Failed to download conty.sh. Exiting." 8 60
     exit 1
 fi
 

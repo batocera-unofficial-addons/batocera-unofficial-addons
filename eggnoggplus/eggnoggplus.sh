@@ -30,7 +30,7 @@ elif [[ "$FILE_URL" =~ \.zip$ ]]; then
     EXTRACT_CMD="unzip -j"
     STRIP_COMPONENTS=""
 else
-    echo "Error: Unsupported archive format in FILE_URL"
+    dialog --title "$APP_NAME" --msgbox "Error: Unsupported archive format in FILE_URL" 8 60
     exit 1
 fi
 
@@ -57,7 +57,7 @@ echo "Downloading $APP_NAME..."
 wget -q --show-progress -O "$DOWNLOAD_PATH" "$FILE_URL"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download $APP_NAME. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Failed to download $APP_NAME. Exiting." 8 60
     exit 1
 fi
 
@@ -67,7 +67,7 @@ cd "$ADDONS_DIR/${APP_NAME,,}"
 $EXTRACT_CMD "$DOWNLOAD_PATH" $STRIP_COMPONENTS
 
 if [ $? -ne 0 ]; then
-    echo "Failed to extract $APP_NAME. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Failed to extract $APP_NAME. Exiting." 8 60
     exit 1
 fi
 
@@ -113,7 +113,7 @@ xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
 
 if [ $? -ne 0 ]; then
-    echo "Error: Failed to update gamelist.xml"
+    dialog --title "$APP_NAME" --msgbox "Error: Failed to update gamelist.xml" 8 60
     exit 1
 fi
 

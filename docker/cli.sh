@@ -3,7 +3,7 @@
 # Architecture check
 architecture=$(uname -m)
 if [ "$architecture" != "x86_64" ]; then
-    echo "This script only runs on AMD or Intel (x86_64) CPUs, not on $architecture."
+    dialog --title "Docker CLI" --msgbox "This script only runs on AMD or Intel (x86_64) CPUs, not on $architecture." 8 60
     exit 1
 fi
 

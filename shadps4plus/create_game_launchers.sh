@@ -82,7 +82,7 @@ mv "$temp_processed_list" "$processed_list"
 csv_file="/tmp/PS4_Title_ID_List.csv"
 wget -q -O "$csv_file" "$csv_url"
 if [ ! -s "$csv_file" ]; then
-    echo "Error: Failed to download CSV or file is empty. Exiting."
+    dialog --title "ShadPS4+" --msgbox "Error: Failed to download CSV or file is empty. Exiting." 8 60
     exit 1
 fi
 

@@ -9,7 +9,7 @@ echo
 
 # Check running as root
 if [ "$(id -u)" -ne 0 ]; then
-    echo "Error: must be run as root."
+    dialog --title "Overlay Remove" --msgbox "Error: must be run as root." 8 60
     exit 1
 fi
 
@@ -23,7 +23,7 @@ fi
 # Remount /boot read-write
 echo "Remounting /boot as read-write..."
 if ! mount -o remount,rw /boot; then
-    echo "Error: failed to remount /boot as read-write."
+    dialog --title "Overlay Remove" --msgbox "Error: failed to remount /boot as read-write." 8 60
     exit 1
 fi
 

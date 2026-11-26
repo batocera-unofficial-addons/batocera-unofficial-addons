@@ -199,7 +199,7 @@ main() {
         echo "WARNING: Freej2me shares these parts with other apps:"
         echo "${shared}"
         if ! ask "Uninstall Freej2me" "Freej2me shares these parts with other apps:\n\n${shared}\n\nUninstall Freej2me? You will be asked next whether to remove each shared part."; then
-            echo "Freej2me was not uninstalled."
+            dialog --title "Freej2me" --msgbox "Freej2me was not uninstalled." 8 60
             exit 1
         fi
     fi

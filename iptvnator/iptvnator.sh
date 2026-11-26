@@ -13,7 +13,7 @@ elif [ "$arch" == "aarch64" ] || [ "$arch" == "arm64" ]; then
     appimage_url=$(curl -s https://api.github.com/repos/4gray/iptvnator/releases/latest \
     | jq -r ".assets[] | select(.name | endswith(\".AppImage\")) | select(.name | contains(\"arm64\")) | .browser_download_url")
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "IPTVNator" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -23,7 +23,7 @@ mkdir -p /userdata/system/add-ons/iptvnator
 wget -q --show-progress -O /userdata/system/add-ons/iptvnator/IPTVNator.AppImage "$appimage_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download IPTVNator AppImage."
+    dialog --title "IPTVNator" --msgbox "Failed to download IPTVNator AppImage." 8 60
     exit 1
 fi
 

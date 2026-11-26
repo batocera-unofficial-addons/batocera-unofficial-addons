@@ -48,8 +48,7 @@ for _ in 1 2 3 4 5 6 7 8; do
     sleep 1
 done
 if awk -v r="$root" 'index($2, r)==1 {f=1} END {exit !f}' /proc/mounts; then
-    echo "Some of Plasma's folders are still mounted, so nothing was deleted."
-    echo "Restart Batocera and run the uninstaller again."
+    dialog --title "KDE Plasma" --msgbox "Some of Plasma's folders are still mounted, so nothing was deleted. Restart Batocera and run the uninstaller again." 8 60
     exit 1
 fi
 

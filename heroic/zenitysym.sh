@@ -6,7 +6,7 @@ TARGET_DIR="/usr/share/zenity"
 
 # Check if source directory exists
 if [ ! -d "$SRC_DIR" ]; then
-  echo "Source directory $SRC_DIR does not exist. Exiting."
+  dialog --title "Heroic" --msgbox "Source directory $SRC_DIR does not exist. Exiting." 8 60
   exit 1
 fi
 

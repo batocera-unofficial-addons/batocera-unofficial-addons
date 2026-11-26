@@ -45,7 +45,7 @@ if pgrep -f "runimage.*rim-desktop" >/dev/null 2>&1 || \
     pgrep -fa "Xephyr.*rim-desktop" || true
     echo ""
     if ! ask "Uninstall RunImage Desktop" "RunImage Desktop appears to be running.\n\nClose it and uninstall anyway?"; then
-        echo "[i] Uninstall cancelled."
+        dialog --title "RunImage Desktop" --msgbox "Uninstall cancelled." 8 60
         exit 1
     fi
     if [ "${ignore_warning}" = "true" ]; then

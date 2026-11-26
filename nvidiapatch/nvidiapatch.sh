@@ -48,7 +48,7 @@ if lspci | grep -i "nvidia" > /dev/null; then
     
     # Check if driver version was found
     if [[ -z "$driver_version" ]]; then
-        echo "Error: Could not detect Nvidia driver version."
+        dialog --title "Nvidia Patch" --msgbox "Error: Could not detect Nvidia driver version." 8 60
         exit 1
     fi
 

@@ -10,7 +10,7 @@ mkdir -p "$INSTALL_DIR"
 # Check for required commands
 for cmd in jq wget curl tar; do
     if ! command -v $cmd &> /dev/null; then
-        echo "Error: $cmd is not installed."
+        dialog --title "Wine GE" --msgbox "Error: $cmd is not installed." 8 60
         exit 1
     fi
 done
@@ -21,7 +21,7 @@ release_data=$(curl -s "$REPO_URL")
 
 # Check if curl succeeded
 if [[ $? -ne 0 || -z "$release_data" ]]; then
-    echo "Failed to fetch release data."
+    dialog --title "Wine GE" --msgbox "Failed to fetch release data." 8 60
     exit 1
 fi
 
@@ -79,7 +79,7 @@ else
         choice=$(dialog --stdout --title "Select Wine-GE Version" --menu "Choose Wine-GE version ($page_info):" 25 90 20 "${menu_args[@]}")
 
         if [ -z "$choice" ]; then
-            echo "Installation cancelled."
+            dialog --title "Wine GE" --msgbox "Installation cancelled." 8 60
             exit 1
         fi
 
@@ -104,7 +104,7 @@ fi
 url=$(echo "$release_data" | jq -r ".[] | select(.tag_name == \"$version\") | .assets[] | select(.name | endswith(\"x86_64.tar.xz\")).browser_download_url" | head -n1)
 
 if [[ -z "$url" ]]; then
-    echo "No compatible download found for Wine ${version}."
+    dialog --title "Wine GE" --msgbox "No compatible download found for Wine ${version}." 8 60
     exit 1
 fi
 

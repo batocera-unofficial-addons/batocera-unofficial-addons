@@ -24,7 +24,7 @@ cat ge-customv40.tar.xz.001 ge-customv40.tar.xz.002 > ge-customv40.tar.xz
 
 # Verify the combined file exists
 if [[ ! -f "ge-customv40.tar.xz" ]]; then
-    echo "Error: Failed to combine files."
+    dialog --title "Wine v40" --msgbox "Error: Failed to combine files." 8 60
     exit 1
 fi
 
@@ -34,7 +34,7 @@ xz -d ge-customv40.tar.xz
 
 # Verify the decompressed file exists
 if [[ ! -f "ge-customv40.tar" ]]; then
-    echo "Error: Decompression failed."
+    dialog --title "Wine v40" --msgbox "Error: Decompression failed." 8 60
     exit 1
 fi
 
@@ -46,7 +46,7 @@ tar -xf ge-customv40.tar -C "$EXTRACT_DIR"
 if [[ $? -eq 0 ]]; then
     echo "Extraction complete! Files are in $EXTRACT_DIR."
 else
-    echo "Error: Extraction failed."
+    dialog --title "Wine v40" --msgbox "Error: Extraction failed." 8 60
     exit 1
 fi
 

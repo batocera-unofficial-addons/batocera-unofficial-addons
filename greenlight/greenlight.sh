@@ -9,7 +9,7 @@ if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
     app_url="https://github.com/unknownskl/greenlight/releases/download/${LATEST}/Greenlight-${LATEST#v}.AppImage"
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "Greenlight" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -22,7 +22,7 @@ mkdir -p "$temp_dir"
 
 wget -q --show-progress -O "${temp_dir}/greenlight.AppImage" "$app_url"
 if [ $? -ne 0 ]; then
-    echo "Failed to download Greenlight. Exiting."
+    dialog --title "Greenlight" --msgbox "Failed to download Greenlight. Exiting." 8 60
     exit 1
 fi
 mv "${temp_dir}/greenlight.AppImage" "$app_dir/"

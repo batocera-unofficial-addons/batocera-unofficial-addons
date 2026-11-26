@@ -17,7 +17,7 @@ mkdir -p "$(dirname "$LOGO_PATH")"
 # Download the main .wsquashfs file
 wget -q --show-progress -O "$DEST_DIR/$(basename "$URL")" "$URL"
 if [[ $? -ne 0 ]]; then
-  echo "Error downloading $URL"
+  dialog --title "$APP_NAME" --msgbox "Error downloading $URL" 8 60
   exit 1
 fi
 

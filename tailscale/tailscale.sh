@@ -19,7 +19,7 @@ case "$ARCH" in
     TS_ARCH_KEY="arm64"
     ;;
   *)
-    echo "Unsupported architecture: $ARCH"
+    dialog --title "Tailscale" --msgbox "Unsupported architecture: $ARCH" 8 60
     exit 1
     ;;
 esac
@@ -30,7 +30,7 @@ META_URL="https://pkgs.tailscale.com/stable/?mode=json"
 echo "Fetching metadata from $META_URL ..."
 
 JSON=$(wget -qO- "$META_URL") || {
-  echo "Failed to download version metadata."
+  dialog --title "Tailscale" --msgbox "Failed to download version metadata." 8 60
   exit 1
 }
 
@@ -40,14 +40,14 @@ FILE=$(printf '%s\n' "$JSON" \
   | sed 's/.*": "\(.*\)".*/\1/')
 
 if [ -z "$FILE" ]; then
-  echo "Could not parse Tailscale tarball for arch '$TS_ARCH_KEY'"
+  dialog --title "Tailscale" --msgbox "Could not parse Tailscale tarball for arch '$TS_ARCH_KEY'" 8 60
   exit 1
 fi
 
 echo "Latest version tarball: $FILE"
 echo "Downloading..."
 wget -q "https://pkgs.tailscale.com/stable/${FILE}" || {
-  echo "Failed to download Tailscale tarball."
+  dialog --title "Tailscale" --msgbox "Failed to download Tailscale tarball." 8 60
   exit 1
 }
 

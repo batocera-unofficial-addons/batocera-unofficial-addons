@@ -25,8 +25,7 @@ case "$arch" in
         BINARY_NAME="nzportablearm64-sdl"
         ;;
     *)
-        echo "[!] Error: Unsupported architecture: $arch"
-        echo "    Supported architectures: x86_64, ARM64/aarch64"
+        dialog --title "NZP" --msgbox "[!] Error: Unsupported architecture: $arch\n    Supported architectures: x86_64, ARM64/aarch64" 8 60
         exit 1
         ;;
 esac

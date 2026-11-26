@@ -8,7 +8,7 @@ if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
     appimage_url=$(curl -s https://api.github.com/repos/srevinsaju/Firefox-AppImage/releases/tags/firefox-nightly | jq -r ".assets[] | select(.name | endswith(\"x86_64.AppImage\")) | .browser_download_url")
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "Firefox" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -18,7 +18,7 @@ mkdir -p /userdata/system/add-ons/firefox/extra
 wget -q --show-progress -O /userdata/system/add-ons/firefox/Firefox.AppImage "$appimage_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download Firefox AppImage."
+    dialog --title "Firefox" --msgbox "Failed to download Firefox AppImage." 8 60
     exit 1
 fi
 

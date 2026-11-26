@@ -33,16 +33,16 @@ elif [ "$arch" == "aarch64" ]; then
         appimage_url=$(echo "$releases_json" | jq -r --arg suffix "$ARM_SUFFIX" '
             .[] | .assets[]? | select(.name | endswith($suffix)) | .browser_download_url' | head -n 1)
     else
-        echo "No ARM64 AppImage suffix provided. Skipping download. Exiting."
+        dialog --title "$APP_NAME" --msgbox "No ARM64 AppImage suffix provided. Skipping download. Exiting." 8 60
         exit 1
     fi
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
 if [ -z "$appimage_url" ]; then
-    echo "No suitable AppImage found for architecture: $arch. Exiting."
+    dialog --title "$APP_NAME" --msgbox "No suitable AppImage found for architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -54,7 +54,7 @@ mkdir -p "$ADDONS_DIR/${APP_NAME,,}"
 wget -q --show-progress -O "$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.AppImage" "$appimage_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download $APP_NAME AppImage."
+    dialog --title "$APP_NAME" --msgbox "Failed to download $APP_NAME AppImage." 8 60
     exit 1
 fi
 

@@ -16,7 +16,7 @@ KEYS_PATH="/userdata/roms/ports/plex.sh.keys"
 
 # Ensure xmlstarlet is installed
 if ! command -v xmlstarlet &> /dev/null; then
-    echo "xmlstarlet is not installed. Please install xmlstarlet before running this script."
+    dialog --title "Plex" --msgbox "xmlstarlet is not installed. Please install xmlstarlet before running this script." 8 60
     exit 1
 fi
 

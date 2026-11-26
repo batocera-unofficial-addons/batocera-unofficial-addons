@@ -4477,8 +4477,11 @@ export -f desktop
             name = self.jobs[self.current][0]
             status_text = f"{job_verb(name)} {completed + 1} / {total_jobs}: {job_label(name)}"
         elif self.all_finished:
-            # "All installations complete!" is wrong after uninstalls
-            if all(name.endswith(UNINSTALL_SUFFIX) for name, _cmd in self.jobs):
+            if fail_count and not success_count:
+                status_text = t("failed")
+            elif fail_count:
+                status_text = f"{success_count} {t('succeeded')}, {fail_count} {t('failed')}"
+            elif all(name.endswith(UNINSTALL_SUFFIX) for name, _cmd in self.jobs):
                 status_text = t("completed")
             else:
                 status_text = t("all_complete")

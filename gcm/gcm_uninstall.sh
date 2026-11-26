@@ -27,7 +27,7 @@ for a in assets:
 fi
 
 if [ -z "$uninstaller" ] || ! bash "$uninstaller"; then
-    echo "GCM uninstall did not complete."
+    dialog --title "GCM" --msgbox "GCM uninstall did not complete." 8 60
     exit 1
 fi
 batocera-services disable GCMV36 >/dev/null 2>&1

@@ -17,7 +17,7 @@ if [[ "$ARCH" == "x86_64" ]]; then
 elif [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
     ARCHIVE_URL="$ARCH_ARM64"
 else
-    echo "Unsupported architecture: $ARCH"
+    dialog --title "$APP_NAME" --msgbox "Unsupported architecture: $ARCH" 8 60
     exit 1
 fi
 
@@ -40,7 +40,7 @@ mkdir -p "$LOGS_DIR"
 echo "Downloading $APP_NAME for architecture $ARCH..."
 wget -q --show-progress -O "${TUX_DIR}/SuperTuxKart.tar.gz" "$ARCHIVE_URL"
 if [ $? -ne 0 ]; then
-    echo "Failed to download $APP_NAME. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Failed to download $APP_NAME. Exiting." 8 60
     exit 1
 fi
 

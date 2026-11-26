@@ -35,7 +35,7 @@ for lib in "${libs[@]}"; do
     echo -e "${GREEN}Downloading $lib...${X}"
     wget --progress=bar --no-check-certificate -q -O "$LIBPATH/$lib" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/minecraft/extra/lib/$lib"
     if [[ ! -f "$LIBPATH/$lib" ]]; then
-        echo -e "${RED}Failed to download $lib. Aborting.${X}"
+        dialog --title "Minecraft" --msgbox "Failed to download $lib. Aborting." 8 60
         exit 1
     fi
     echo -e "${GREEN}$lib downloaded successfully.${X}"
@@ -47,13 +47,13 @@ if cat liblauncher.tar.bz2.part* > liblauncher.tar.bz2; then
     echo -e "${GREEN}Combining parts succeeded. Extracting...${X}"
     tar -xjf liblauncher.tar.bz2
     if [[ $? -ne 0 ]]; then
-        echo -e "${RED}Extraction failed. Archive might be corrupted.${X}"
+        dialog --title "Minecraft" --msgbox "Extraction failed. Archive might be corrupted." 8 60
         exit 1
     fi
     chmod a+x $LIBPATH/liblauncher.so
     rm -f liblauncher.tar.bz2.part* liblauncher.tar.bz2
 else
-    echo -e "${RED}Failed to combine parts. Aborting.${X}"
+    dialog --title "Minecraft" --msgbox "Failed to combine parts. Aborting." 8 60
     exit 1
 fi
 
@@ -62,7 +62,7 @@ cd $IMAGEPATH
 echo -e "${GREEN}Downloading Minecraft AppImage...${X}"
 wget --progress=bar --no-check-certificate -q -O "$IMAGEPATH/$AppName" "$APPLINK"
 if [[ ! -f "$IMAGEPATH/$AppName" ]]; then
-    echo -e "${RED}Failed to download Minecraft AppImage. Aborting.${X}"
+    dialog --title "Minecraft" --msgbox "Failed to download Minecraft AppImage. Aborting." 8 60
     exit 1
 fi
 chmod a+x "$IMAGEPATH/$AppName"
@@ -72,7 +72,7 @@ cd $PORTSPATH
 echo -e "${GREEN}Downloading Minecraft.sh.keys...${X}"
 wget --progress=bar --no-check-certificate -q -O "$PORTSPATH/Minecraft.sh.keys" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/minecraft/extra/Minecraft.sh.keys"
 if [[ ! -f "$PORTSPATH/Minecraft.sh.keys" ]]; then
-    echo -e "${RED}Failed to download Minecraft.sh.keys. Aborting.${X}"
+    dialog --title "Minecraft" --msgbox "Failed to download Minecraft.sh.keys. Aborting." 8 60
     exit 1
 fi
 

@@ -19,7 +19,7 @@ mkdir -p "$APP_DIR/extra" "$APP_CONFIG_DIR/home"
 # Architecture check
 arch=$(uname -m)
 if [ "$arch" != "x86_64" ]; then
-    echo "WPS Office AppImage is only available for x86_64. Exiting."
+    dialog --title "$APP_NAME" --msgbox "WPS Office AppImage is only available for x86_64. Exiting." 8 60
     exit 1
 fi
 
@@ -29,14 +29,14 @@ appimage_url=$(curl -s https://api.github.com/repos/ivan-hc/WPS-Office-appimage/
     | jq -r '.assets[] | select(.name | endswith("x86_64.AppImage")) | .browser_download_url' | head -1)
 
 if [ -z "$appimage_url" ]; then
-    echo "Failed to fetch AppImage URL. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Failed to fetch AppImage URL. Exiting." 8 60
     exit 1
 fi
 
 echo "Downloading WPS Office from $appimage_url..."
 wget -q --show-progress -O "$APPIMAGE" "$appimage_url"
 if [ $? -ne 0 ]; then
-    echo "Failed to download WPS Office AppImage."
+    dialog --title "$APP_NAME" --msgbox "Failed to download WPS Office AppImage." 8 60
     exit 1
 fi
 chmod a+x "$APPIMAGE"

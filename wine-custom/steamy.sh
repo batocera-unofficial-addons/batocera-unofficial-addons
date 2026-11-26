@@ -10,7 +10,7 @@ DOWNLOAD_FILE="steamy.exe"
 echo "Downloading aria2c..."
 wget -q "$ARIA2C_URL" -O /userdata/system/add-ons/.dep/aria2c && chmod +x /userdata/system/add-ons/.dep/aria2c
 if ! command -v aria2c &> /dev/null; then
-    echo "Failed to symlink or execute aria2c. Exiting."
+    dialog --title "Steam Wine" --msgbox "Failed to symlink or execute aria2c. Exiting." 8 60
     exit 1
 fi
 
@@ -23,7 +23,7 @@ aria2c -x 5 -s 5 -d "$DOWNLOAD_DIR" -o "$DOWNLOAD_FILE" "$DOWNLOAD_URL"
 if [ -f "$DOWNLOAD_DIR/$DOWNLOAD_FILE" ]; then
     echo "$DOWNLOAD_FILE downloaded successfully to $DOWNLOAD_DIR."
 else
-    echo "Download failed or $DOWNLOAD_FILE not found."
+    dialog --title "Steam Wine" --msgbox "Download failed or $DOWNLOAD_FILE not found." 8 60
     exit 1
 fi
 

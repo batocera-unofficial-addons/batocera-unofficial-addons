@@ -10,7 +10,7 @@ mkdir -p "$INSTALL_DIR"
 # Check for required commands
 for cmd in jq wget curl tar; do
     if ! command -v $cmd &> /dev/null; then
-        echo "Error: $cmd is not installed."
+        dialog --title "GE-Proton" --msgbox "Error: $cmd is not installed." 8 60
         exit 1
     fi
 done
@@ -21,7 +21,7 @@ release_data=$(curl -s "$REPO_URL")
 
 # Check if curl succeeded
 if [[ $? -ne 0 || -z "$release_data" ]]; then
-    echo "Failed to fetch release data."
+    dialog --title "GE-Proton" --msgbox "Failed to fetch release data." 8 60
     exit 1
 fi
 
@@ -69,7 +69,7 @@ while true; do
     choice=$(dialog --stdout --title "Select Proton-GE Version" --menu "Choose Proton-GE version ($page_info):" 25 90 20 "${menu_args[@]}")
     
     if [ -z "$choice" ]; then
-        echo "Installation cancelled."
+        dialog --title "GE-Proton" --msgbox "Installation cancelled." 8 60
         exit 1
     fi
     
@@ -91,7 +91,7 @@ version="$choice"
 url=$(echo "$release_data" | jq -r ".[] | select(.tag_name == \"$version\") | .assets[] | select(.name | endswith(\".tar.gz\")).browser_download_url" | head -n1)
 
 if [[ -z "$url" ]]; then
-    echo "No compatible download found for Proton ${version}."
+    dialog --title "GE-Proton" --msgbox "No compatible download found for Proton ${version}." 8 60
     exit 1
 fi
 

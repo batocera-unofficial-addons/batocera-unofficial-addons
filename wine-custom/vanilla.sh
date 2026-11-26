@@ -13,7 +13,7 @@ release_data=$(curl -s $REPO_URL)
 
 # Check if curl succeeded
 if [[ $? -ne 0 ]]; then
-    echo "Failed to fetch release data."
+    dialog --title "Wine Vanilla" --msgbox "Failed to fetch release data." 8 60
     exit 1
 fi
 
@@ -67,7 +67,7 @@ else
         choice=$(dialog --stdout --title "Select Wine/Proton Version" --menu "Choose Wine/Proton version ($page_info):" 25 90 20 "${menu_args[@]}")
 
         if [ -z "$choice" ]; then
-            echo "Installation cancelled."
+            dialog --title "Wine Vanilla" --msgbox "Installation cancelled." 8 60
             exit 1
         fi
 
@@ -90,7 +90,7 @@ fi
 url=$(echo "$release_data" | jq -r ".[] | select(.tag_name == \"$version\") | .assets[] | select(.name | endswith(\"amd64.tar.xz\")).browser_download_url" | head -n1)
 
 if [[ -z "$url" ]]; then
-    echo "No compatible download found for Wine ${version}."
+    dialog --title "Wine Vanilla" --msgbox "No compatible download found for Wine ${version}." 8 60
     exit 1
 fi
 

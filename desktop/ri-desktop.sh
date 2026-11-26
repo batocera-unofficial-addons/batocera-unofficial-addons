@@ -23,8 +23,7 @@ case "$arch" in
         OVERLAY_PACKAGE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages/ri-desktop-x86_64.tar.xz"
         ;;
     *)
-        echo "[!] Error: Unsupported architecture: $arch"
-        echo "    Supported: x86_64, aarch64"
+        dialog --title "RunImage Desktop" --msgbox "Error: Unsupported architecture: $arch\nSupported: x86_64, aarch64" 8 60
         exit 1
         ;;
 esac
@@ -39,7 +38,7 @@ if command -v wget >/dev/null 2>&1; then
 elif command -v curl >/dev/null 2>&1; then
     curl -L -o "${TEMP_PACKAGE}" "${OVERLAY_PACKAGE_URL}"
 else
-    echo "[!] Error: Neither wget nor curl found!"
+    dialog --title "RunImage Desktop" --msgbox "Error: Neither wget nor curl found!" 8 60
     exit 1
 fi
 

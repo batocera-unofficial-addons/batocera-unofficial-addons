@@ -17,7 +17,7 @@ wget -q --show-progress -O "$emulationstation_config_dir/es_features_ps4.cfg" "$
 if [ $? -eq 0 ]; then
     echo "Downloaded es_features_ps4.cfg to $emulationstation_config_dir"
 else
-    echo "Failed to download es_features_ps4.cfg"
+    dialog --title "PS4 System" --msgbox "Failed to download es_features_ps4.cfg" 8 60
     exit 1
 fi
 
@@ -25,7 +25,7 @@ wget -q --show-progress -O "$emulationstation_config_dir/es_systems_ps4.cfg" "$e
 if [ $? -eq 0 ]; then
     echo "Downloaded es_systems_ps4.cfg to $emulationstation_config_dir"
 else
-    echo "Failed to download es_systems_ps4.cfg"
+    dialog --title "PS4 System" --msgbox "Failed to download es_systems_ps4.cfg" 8 60
     exit 1
 fi
 

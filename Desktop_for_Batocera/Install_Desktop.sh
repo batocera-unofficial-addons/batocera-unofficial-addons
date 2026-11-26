@@ -14,17 +14,10 @@ BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addo
 
 # Desktop for Batocera is built on Batocera's X11 desktop (Openbox, tint2,
 # pcmanfm, picom). On Batocera's Wayland desktop (labwc, Batocera 44+) it
-# cannot show anything, and it would take over F1, closing EmulationStation
-# to a blank screen. There, this installs the Light Desktop instead
-# (lightdesktop/): the same idea built on labwc, with a taskbar, app menu,
-# desktop icons and F1. Install_Desktop_uninstall.sh removes either one.
-LIGHT_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/lightdesktop"
+# cannot work. Use Light Desktop or KDE Plasma instead.
 if pgrep -x labwc >/dev/null 2>&1; then
-    echo "Batocera's Wayland desktop (labwc) is running, so this installs the"
-    echo "Light Desktop: Desktop for Batocera made for Wayland."
-    echo ""
-    curl -fsSL "$LIGHT_URL/lightdesktop.sh" | bash
-    exit "${PIPESTATUS[1]}"
+    dialog --title "Desktop for Batocera" --msgbox "Desktop for Batocera requires Batocera's X11 desktop (Openbox).\n\nBatocera's Wayland desktop (labwc) is running instead.\n\nUse 'Light Desktop' or 'KDE Plasma' for Batocera 44+ (Wayland)." 12 60
+    exit 1
 fi
 
 ARCH=$(uname -m)
@@ -32,7 +25,7 @@ case "$ARCH" in
     x86_64)  SFS_URL="$BASE_URL/Desktop_for_batocera_8.8.squashfs" ;;
     aarch64) SFS_URL="$BASE_URL/Desktop_for_batocera_8.8_arm64.squashfs" ;;
     *)
-        echo "Unsupported architecture: $ARCH"
+        dialog --title "Desktop for Batocera" --msgbox "Unsupported architecture: $ARCH" 8 60
         exit 1
         ;;
 esac
@@ -207,7 +200,7 @@ echo "Downloading..."
 curl -L -o "$SFS_FILE" "$SFS_URL"
 
 if [ ! -f "$SFS_FILE" ]; then
-    echo "Error: Download failed."
+    dialog --title "Desktop for Batocera" --msgbox "Error: Download failed." 8 60
     exit 1
 fi
 
@@ -216,7 +209,7 @@ echo "Extracting..."
 unsquashfs -f -d "$EXTRACT_DIR" "$SFS_FILE"
 
 if [ $? -ne 0 ]; then
-    echo "Error: Extraction failed."
+    dialog --title "Desktop for Batocera" --msgbox "Error: Extraction failed." 8 60
     rm -rf "$TEMP_DIR"
     exit 1
 fi

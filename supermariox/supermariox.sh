@@ -9,7 +9,7 @@ if [ "$ARCH" == "x86_64" ]; then
 elif [ "$ARCH" == "aarch64" ]; then
     URL="https://wohlsoft.ru/projects/TheXTech/_downloads/releases/super-mario-bros-x-thextech-v1.3.7.1-linux-generic-u20.04-aarch64.tar.gz"
 else
-    echo "Unsupported architecture: $ARCH"
+    dialog --title "Super Mario X" --msgbox "Unsupported architecture: $ARCH" 8 60
     exit 1
 fi
 

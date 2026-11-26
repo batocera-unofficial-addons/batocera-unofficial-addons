@@ -20,11 +20,11 @@ if [ -n "$APPIMAGE_URL" ]; then
         echo "Sunshine installed successfully."
     else
         rm -f /userdata/system/add-ons/sunshine/sunshine.AppImage.new
-        echo "Failed to download the Sunshine AppImage."
+        dialog --title "Sunshine" --msgbox "Failed to download the Sunshine AppImage." 8 60
         exit 1
     fi
 else
-    echo "Failed to fetch the latest Sunshine AppImage URL."
+    dialog --title "Sunshine" --msgbox "Failed to fetch the latest Sunshine AppImage URL." 8 60
     exit 1
 fi
 

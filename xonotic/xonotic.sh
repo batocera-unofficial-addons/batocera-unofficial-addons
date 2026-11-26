@@ -28,16 +28,16 @@ elif [ "$arch" == "aarch64" ]; then
     if [ -n "$ARM_SUFFIX" ]; then
         zip_url="${REPO_BASE_URL}/${ARM_SUFFIX}"
     else
-        echo "No ARM64 zip suffix provided. Skipping download. Exiting."
+        dialog --title "$APP_NAME" --msgbox "No ARM64 zip suffix provided. Skipping download. Exiting." 8 60
         exit 1
     fi
 else
-    echo "Unsupported architecture: $arch. Exiting."
+    dialog --title "$APP_NAME" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
 if [ -z "$zip_url" ]; then
-    echo "No suitable zip found for architecture: $arch. Exiting."
+    dialog --title "$APP_NAME" --msgbox "No suitable zip found for architecture: $arch. Exiting." 8 60
     exit 1
 fi
 
@@ -48,7 +48,7 @@ ZIP_FILE="$ADDONS_DIR/${APP_NAME,,}/${APP_NAME,,}.zip"
 wget -q --show-progress -O "$ZIP_FILE" "$zip_url"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to download $APP_NAME zip."
+    dialog --title "$APP_NAME" --msgbox "Failed to download $APP_NAME zip." 8 60
     exit 1
 fi
 
@@ -57,7 +57,7 @@ echo "Extracting $APP_NAME zip to $ADDONS_DIR/${APP_NAME,,}..."
 unzip -o "$ZIP_FILE" -d "$ADDONS_DIR/${APP_NAME,,}"
 
 if [ $? -ne 0 ]; then
-    echo "Failed to extract $APP_NAME zip."
+    dialog --title "$APP_NAME" --msgbox "Failed to extract $APP_NAME zip." 8 60
     exit 1
 fi
 
@@ -68,7 +68,7 @@ rm -f "$ZIP_FILE"
 if [ $? -eq 0 ]; then
     echo "$APP_NAME has been successfully downloaded and extracted."
 else
-    echo "Failed to remove the ZIP file."
+    dialog --title "$APP_NAME" --msgbox "Failed to remove the ZIP file." 8 60
     exit 1
 fi
 
