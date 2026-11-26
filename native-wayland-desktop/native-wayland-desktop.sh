@@ -64,6 +64,16 @@ if [ -f /userdata/system/services/native-wayland-desktop ]; then
     batocera-services disable native-wayland-desktop >/dev/null 2>&1
     rm -f /userdata/system/services/native-wayland-desktop
 fi
+# The Native X11 Desktop cannot run on Wayland, but /userdata survives a switch
+# from the X11 image, and its service would still take F1 at boot (its
+# launcher then exits without Openbox). Switch it off; its files stay, and
+# installing it again on X11 turns it back on.
+for svc in native_x11_desktop native-x11-desktop; do
+    if [ -f "/userdata/system/services/$svc" ]; then
+        bash "/userdata/system/services/$svc" stop >/dev/null 2>&1
+        batocera-services disable "$svc" >/dev/null 2>&1
+    fi
+done
 if [ -f /userdata/system/services/kdeplasma ]; then
     bash /userdata/system/services/kdeplasma stop >/dev/null 2>&1
     batocera-services disable kdeplasma >/dev/null 2>&1

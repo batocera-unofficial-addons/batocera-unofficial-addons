@@ -55,8 +55,28 @@ bash "$install_dir/kdeplasma-build.sh" 2>&1 | tee "$log_file"
 # installed gets F1, so the Native Wayland Desktop's service is stopped and
 # switched off (the Native Wayland Desktop itself stays installed and opens from Ports).
 echo "Setting up F1..."
-# (native-wayland-desktop and lightdesktop are its older service names)
-for svc in native_wayland_desktop native-wayland-desktop lightdesktop; do
+# Older desktops (Light Desktop, Desktop for Batocera and its DRL services
+# "desktop" and "desktop_drl") are X11-only or replaced, and their services
+# take F1 at boot in ways Plasma's bind mount cannot override. They are removed
+# with the same cleanup the Native Desktop uses; the Docker "Desktop" add-on
+# is never touched.
+cleanup_script=$(mktemp)
+if curl -fsSL -o "$cleanup_script" "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/native-desktop/native-desktop-legacy-cleanup.sh"; then
+    bash "$cleanup_script" install
+else
+    echo "Could not download the cleanup for older desktops; skipped."
+fi
+rm -f "$cleanup_script"
+# The Native X11 Desktop cannot run on Wayland, but /userdata survives a switch
+# from the X11 image and its service would still take F1 at boot: switch it off
+for svc in native_x11_desktop native-x11-desktop; do
+  if [ -f "/userdata/system/services/$svc" ]; then
+    bash "/userdata/system/services/$svc" stop >/dev/null 2>&1
+    batocera-services disable "$svc" >/dev/null 2>&1
+  fi
+done
+# (native-wayland-desktop is its service name from before hyphens were dropped)
+for svc in native_wayland_desktop native-wayland-desktop; do
   if [ -f "/userdata/system/services/$svc" ]; then
     bash "/userdata/system/services/$svc" stop >/dev/null 2>&1
     batocera-services disable "$svc" >/dev/null 2>&1

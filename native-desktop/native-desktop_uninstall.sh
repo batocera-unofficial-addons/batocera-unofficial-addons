@@ -18,7 +18,8 @@ if [ -d /userdata/system/add-ons/native-wayland-desktop ] || [ -f /userdata/syst
 fi
 
 # --- Remove lightweight Native X11 Desktop if installed ---
-if [ -d /userdata/system/add-ons/native-x11-desktop ] && [ ! -d /userdata/system/add-ons/native-x11-desktop/rootfs ]; then
+if { [ -d /userdata/system/add-ons/native-x11-desktop ] && [ ! -d /userdata/system/add-ons/native-x11-desktop/rootfs ]; } || \
+   [ -f /userdata/system/services/native_x11_desktop ]; then
     echo "Removing Native X11 Desktop..."
 
     # Close it if running
