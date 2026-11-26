@@ -14,10 +14,17 @@ BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addo
 
 # Desktop for Batocera is built on Batocera's X11 desktop (Openbox, tint2,
 # pcmanfm, picom). On Batocera's Wayland desktop (labwc, Batocera 44+) it
-# cannot work. Use Light Desktop or KDE Plasma instead.
+# cannot show anything, and it would take over F1, closing EmulationStation
+# to a blank screen. There, this installs the Light Desktop instead
+# (lightdesktop/): the same idea built on labwc, with a taskbar, app menu,
+# desktop icons and F1. Install_Desktop_uninstall.sh removes either one.
+LIGHT_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/lightdesktop"
 if pgrep -x labwc >/dev/null 2>&1; then
-    dialog --title "Desktop for Batocera" --msgbox "Desktop for Batocera requires Batocera's X11 desktop (Openbox).\n\nBatocera's Wayland desktop (labwc) is running instead.\n\nUse 'Light Desktop' or 'KDE Plasma' for Batocera 44+ (Wayland)." 12 60
-    exit 1
+    echo "Batocera's Wayland desktop (labwc) is running, so this installs the"
+    echo "Light Desktop: Desktop for Batocera made for Wayland."
+    echo ""
+    curl -fsSL "$LIGHT_URL/lightdesktop.sh" | bash
+    exit "${PIPESTATUS[1]}"
 fi
 
 ARCH=$(uname -m)
