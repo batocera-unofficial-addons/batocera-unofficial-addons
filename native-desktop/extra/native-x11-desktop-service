@@ -10,14 +10,24 @@ launcher=/userdata/system/add-ons/native-x11-desktop/native-x11-desktop-launch.s
 target=/usr/bin/filemanagerlauncher
 
 is_bound() { awk -v m="$target" '$2==m {f=1} END {exit !f}' /proc/mounts; }
+# F1 still runs an older copy of this launcher: the installer replaces the
+# file (new inode), and the bind mount keeps the deleted one
+is_stale() {
+    awk -v m="$target" -v l="/$(basename "$launcher")//deleted" \
+        '$5==m && index($4, l) {f=1} END {exit !f}' /proc/self/mountinfo
+}
+# umount fails while the desktop is open (the launcher is running); a lazy
+# unmount frees F1 at once and leaves the open desktop alone
+unbind() { umount "$target" 2>/dev/null || umount -l "$target"; }
 
 case "$1" in
     start)
         [ -x "$launcher" ] || { echo "native-x11-desktop: $launcher is missing"; exit 1; }
+        while is_stale; do unbind || break; done
         is_bound || mount --bind "$launcher" "$target"
         ;;
     stop)
-        while is_bound; do umount "$target" || break; done
+        while is_bound; do unbind || break; done
         ;;
     status)
         if is_bound && [ "$target" -ef "$launcher" ]; then echo "native-x11-desktop: F1 opens the Native X11 Desktop"
