@@ -12,8 +12,8 @@
 #      add-ons/desktop and a "desktop" service that symlinks it (and its icon
 #      packs) over Batocera's files at boot, keeping the originals as .bak.
 #      Nothing of it is in Batocera's saved overlay.
-#   3. The original DRL desktop - written into Batocera's overlay and kept
-#      with batocera-save-overlay, with its own remover
+#   3. The original DRL desktop - written into Batocera's overlay, with its
+#      own remover
 #
 # /userdata survives an image switch, so all three are checked on X11 and
 # Wayland. The Docker "Desktop" add-on shares /userdata/system/add-ons/desktop
@@ -284,12 +284,6 @@ cleanup_drl() {
         rm -rf "$OVL/usr/share/icons/batocera" 2>/dev/null
         rmdir /etc/xdg/libfm /etc/xdg/menus /etc/xdg/pcmanfm/default /etc/openbox \
               /etc/X11 /usr/share/icons/batocera 2>/dev/null
-        # The original DRL desktop lived in the saved overlay: without saving
-        # it again, everything removed above comes back at the next boot
-        if [ -f /boot/boot/overlay ] && command -v batocera-save-overlay >/dev/null 2>&1; then
-            echo "Saving Batocera's overlay without the DRL desktop..."
-            batocera-save-overlay >/dev/null 2>&1
-        fi
     fi
     restore_filemanagerlauncher
     echo "Old DRL desktop removed."
