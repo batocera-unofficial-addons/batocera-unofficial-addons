@@ -27,18 +27,24 @@ fail() {
 pgrep -x openbox >/dev/null || fail "$APPNAME needs Batocera's X11 desktop (Openbox), not Wayland (labwc)."
 
 echo "Installing $APPNAME..."
-mkdir -p "$install_dir/config"
+mkdir -p "$install_dir/config" "$install_dir/palettes"
 
 echo "Downloading $APPNAME..."
 for f in native-x11-desktop-launch.sh native-x11-desktop-session.sh native-x11-desktop-exit.sh \
-         native-x11-desktop-panel.py native-x11-desktop-desktop.py native-x11-desktop-service \
-         native-x11-desktop-logo.png wallpaper.png; do
+         native-x11-desktop-panel.py native-x11-desktop-desktop.py native-x11-desktop-theme.py \
+         native-x11-desktop-service native-x11-desktop-logo.png wallpaper.png \
+         wallpaper.svg.template; do
     wget -q --show-progress -O "$install_dir/$f.tmp" "$base_url/extra/$f" || fail "Failed to download $f."
     mv -f "$install_dir/$f.tmp" "$install_dir/$f"
 done
 for f in rc.xml menu.xml; do
     wget -q --show-progress -O "$install_dir/config/$f.tmp" "$base_url/extra/config/$f" || fail "Failed to download config/$f."
     mv -f "$install_dir/config/$f.tmp" "$install_dir/config/$f"
+done
+echo "Downloading palettes..."
+for f in amber blue crimson cyan emerald neon-green neon-orange neon-pink \
+         pastel-lavender pastel-mint pastel-rose pastel-sky purple; do
+    wget -q -O "$install_dir/palettes/$f.palette" "$base_url/extra/palettes/$f.palette" || true
 done
 chmod +x "$install_dir"/*.sh "$install_dir"/*.py "$install_dir/native-x11-desktop-service"
 

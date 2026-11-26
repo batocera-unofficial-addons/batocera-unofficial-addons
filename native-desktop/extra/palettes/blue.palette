@@ -1,0 +1,22 @@
+# Blue — default Plasma-style blue palette
+P_MODE=dark
+P_BASE=#0f1424
+P_BASE1=#182038
+P_BASE2=#233255
+P_BASE_H=#16203a
+P_BASE_P=#1b2948
+P_BASE3=#223055
+P_ACT=#25448b
+P_ACT_H=#2f56b0
+P_ACT_P=#21407d
+P_ACC=#3f6ed8
+P_ACC_H=#5e8cff
+P_ACC_L=#6f97ff
+P_ACC_LL=#7aa2ff
+P_ACC_BT=#8eb5ff
+P_ACC_BH=#b3cbff
+P_ACC_BP=#d0deff
+P_NB_H=#4b72d1
+P_FG=#d8e2ff
+P_FG_DIM=#98a5c7
+P_FG_HI=#eef3ff

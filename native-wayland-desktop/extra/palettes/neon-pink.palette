@@ -1,0 +1,22 @@
+# Neon Pink — deep purple-black base, magenta accent
+P_MODE=dark
+P_BASE=#0f0514
+P_BASE1=#1a0a24
+P_BASE2=#260f35
+P_BASE_H=#1e0c2c
+P_BASE_P=#221030
+P_BASE3=#240e33
+P_ACT=#4a1a65
+P_ACT_H=#5a2078
+P_ACT_P=#45187e
+P_ACC=#e600e6
+P_ACC_H=#ff00ff
+P_ACC_L=#ff33ff
+P_ACC_LL=#ff55ff
+P_ACC_BT=#ff77ff
+P_ACC_BH=#ff99ff
+P_ACC_BP=#ffbbff
+P_NB_H=#cc00cc
+P_FG=#ffe0ff
+P_FG_DIM=#cc88cc
+P_FG_HI=#fff0ff

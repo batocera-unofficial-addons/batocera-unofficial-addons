@@ -1,0 +1,22 @@
+# Neon Green — near-black base, matrix green accent
+P_MODE=dark
+P_BASE=#050f0a
+P_BASE1=#0a1a10
+P_BASE2=#0f2518
+P_BASE_H=#0c1f14
+P_BASE_P=#102818
+P_BASE3=#0e2216
+P_ACT=#1a4a28
+P_ACT_H=#205a32
+P_ACT_P=#184525
+P_ACC=#00e642
+P_ACC_H=#00ff50
+P_ACC_L=#33ff6e
+P_ACC_LL=#55ff85
+P_ACC_BT=#77ff9c
+P_ACC_BH=#99ffb8
+P_ACC_BP=#bbffcd
+P_NB_H=#00cc3a
+P_FG=#ccffdd
+P_FG_DIM=#66cc88
+P_FG_HI=#eeffee

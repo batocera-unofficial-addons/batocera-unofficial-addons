@@ -1,0 +1,22 @@
+# Cyan — deep teal base, vivid cyan accent
+P_MODE=dark
+P_BASE=#091818
+P_BASE1=#102424
+P_BASE2=#1a3838
+P_BASE_H=#0f2020
+P_BASE_P=#132a2a
+P_BASE3=#183535
+P_ACT=#0a5555
+P_ACT_H=#0d6a6a
+P_ACT_P=#084848
+P_ACC=#00aaaa
+P_ACC_H=#00cccc
+P_ACC_L=#1abfbf
+P_ACC_LL=#33cccc
+P_ACC_BT=#66dddd
+P_ACC_BH=#99e8e8
+P_ACC_BP=#bbf0f0
+P_NB_H=#008888
+P_FG=#c8efef
+P_FG_DIM=#6aadad
+P_FG_HI=#e0f8f8

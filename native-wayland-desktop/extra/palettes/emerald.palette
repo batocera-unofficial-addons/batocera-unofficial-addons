@@ -1,0 +1,22 @@
+# Emerald — dark green base, vivid emerald accent
+P_MODE=dark
+P_BASE=#0a1610
+P_BASE1=#102018
+P_BASE2=#1a3328
+P_BASE_H=#0e1c14
+P_BASE_P=#12261c
+P_BASE3=#183022
+P_ACT=#1a5c35
+P_ACT_H=#207040
+P_ACT_P=#155030
+P_ACC=#2db36a
+P_ACC_H=#35cc78
+P_ACC_L=#2ec870
+P_ACC_LL=#44cc7a
+P_ACC_BT=#77dd99
+P_ACC_BH=#99e8b3
+P_ACC_BP=#bbf0cc
+P_NB_H=#229955
+P_FG=#d0f0da
+P_FG_DIM=#7ab595
+P_FG_HI=#e5faec

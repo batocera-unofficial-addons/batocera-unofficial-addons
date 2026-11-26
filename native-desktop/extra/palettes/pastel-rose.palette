@@ -1,0 +1,22 @@
+# Pastel Rose — warm pink base, vivid rose accent
+P_MODE=light
+P_BASE=#ffe0e8
+P_BASE1=#fcc8d4
+P_BASE2=#f8b0c0
+P_BASE_H=#fdd0dc
+P_BASE_P=#fbbcc8
+P_BASE3=#fbbec9
+P_ACT=#f890a8
+P_ACT_H=#f578a0
+P_ACT_P=#f27098
+P_ACC=#ff2255
+P_ACC_H=#ff4470
+P_ACC_L=#e01844
+P_ACC_LL=#c01038
+P_ACC_BT=#ff88aa
+P_ACC_BH=#ffaacc
+P_ACC_BP=#ffcce0
+P_NB_H=#ff3366
+P_FG=#2a0010
+P_FG_DIM=#882244
+P_FG_HI=#140008

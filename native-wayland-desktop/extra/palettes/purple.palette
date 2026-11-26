@@ -1,0 +1,22 @@
+# Purple — dark violet base, vivid purple accent
+P_MODE=dark
+P_BASE=#110e1e
+P_BASE1=#1a152e
+P_BASE2=#2a2048
+P_BASE_H=#161228
+P_BASE_P=#1e1938
+P_BASE3=#261c42
+P_ACT=#3d2266
+P_ACT_H=#4d2d80
+P_ACT_P=#341c58
+P_ACC=#7c4dcc
+P_ACC_H=#9466dd
+P_ACC_L=#8855d4
+P_ACC_LL=#9966d8
+P_ACC_BT=#b399e8
+P_ACC_BH=#ccbbf2
+P_ACC_BP=#ddd0f8
+P_NB_H=#6633bb
+P_FG=#ddd8f2
+P_FG_DIM=#9988cc
+P_FG_HI=#f0eeff

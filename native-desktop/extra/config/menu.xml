@@ -15,6 +15,9 @@
   <item label="Change wallpaper">
     <action name="Execute"><command>python3 /userdata/system/add-ons/native-x11-desktop/native-x11-desktop-desktop.py --wallpaper</command></action>
   </item>
+  <item label="Change theme">
+    <action name="Execute"><command>python3 /userdata/system/add-ons/native-x11-desktop/native-x11-desktop-panel.py --theme</command></action>
+  </item>
   <separator/>
   <item label="Back to EmulationStation">
     <action name="Execute"><command>/userdata/system/add-ons/native-x11-desktop/native-x11-desktop-exit.sh</command></action>

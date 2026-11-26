@@ -1,0 +1,22 @@
+# Pastel Sky — clear blue base, vivid sky accent
+P_MODE=light
+P_BASE=#d0eaff
+P_BASE1=#b8dcff
+P_BASE2=#99ccff
+P_BASE_H=#c4e4ff
+P_BASE_P=#b0d8ff
+P_BASE3=#aed6ff
+P_ACT=#77bbff
+P_ACT_H=#55aaff
+P_ACT_P=#4499ff
+P_ACC=#1177ee
+P_ACC_H=#2288ff
+P_ACC_L=#0066dd
+P_ACC_LL=#0055cc
+P_ACC_BT=#66aaff
+P_ACC_BH=#88ccff
+P_ACC_BP=#aaddff
+P_NB_H=#2288ff
+P_FG=#001838
+P_FG_DIM=#224488
+P_FG_HI=#000c1e

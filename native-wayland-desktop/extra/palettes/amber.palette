@@ -1,0 +1,22 @@
+# Amber — dark warm base, vivid amber/gold accent
+P_MODE=dark
+P_BASE=#1a1508
+P_BASE1=#261e0a
+P_BASE2=#3d3010
+P_BASE_H=#201a0c
+P_BASE_P=#2a2210
+P_BASE3=#382c0e
+P_ACT=#5c4210
+P_ACT_H=#705015
+P_ACT_P=#50380d
+P_ACC=#d4a017
+P_ACC_H=#e6b520
+P_ACC_L=#d8a81e
+P_ACC_LL=#dcb030
+P_ACC_BT=#e8cc70
+P_ACC_BH=#f0dd99
+P_ACC_BP=#f8eebb
+P_NB_H=#bb8e14
+P_FG=#f0e8cc
+P_FG_DIM=#b5a070
+P_FG_HI=#faf4e0

@@ -39,15 +39,13 @@ MARGIN = 16
 DRAG_START = 8           # pixels the mouse moves before a press becomes a drag
 TERMINAL = ["xterm", "-fs", "14", "-fg", "white", "-bg", "black", "-fa", "Monospace", "-en", "UTF-8", "-sb", "-rightbar"]
 
-CSS = b"""
-.ld-icon { background: transparent; border-radius: 10px; }
-.ld-icon.ld-hover { background: rgba(255, 255, 255, 0.10); }
-.ld-icon.ld-selected { background: rgba(79, 155, 255, 0.35); }
-.ld-desktop label {
-  color: #ffffff; font-size: 10pt;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.9);
-}
-"""
+# Theme engine
+import importlib.util
+_spec = importlib.util.spec_from_file_location("theme", os.path.join(INSTALL, "native-wayland-desktop-theme.py"))
+_theme_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_theme_mod)
+_palette = _theme_mod.load_palette()
+CSS = _theme_mod.build_desktop_css(_palette).encode()
 
 
 def spawn(argv):
@@ -59,10 +57,14 @@ def spawn(argv):
 
 
 def wallpaper_path():
-    if os.path.isdir(CONF):
-        for f in sorted(os.listdir(CONF)):
-            if f.startswith("wallpaper."):
-                return os.path.join(CONF, f)
+    # User-set custom wallpaper takes priority
+    custom = _theme_mod.has_custom_wallpaper(CONF)
+    if custom:
+        return custom
+    # Generate themed wallpaper from SVG template
+    themed = _theme_mod.generate_wallpaper()
+    if themed and os.path.exists(themed):
+        return themed
     return DEFAULT_WALLPAPER
 
 

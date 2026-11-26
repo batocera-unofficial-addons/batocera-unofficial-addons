@@ -1,0 +1,22 @@
+# Pastel Lavender — purple-tinted base, vivid violet accent
+P_MODE=light
+P_BASE=#ecdcff
+P_BASE1=#dcc8ff
+P_BASE2=#ccb0ff
+P_BASE_H=#e4d0ff
+P_BASE_P=#d8c0ff
+P_BASE3=#d6befd
+P_ACT=#bb99ff
+P_ACT_H=#aa80ff
+P_ACT_P=#a077ff
+P_ACC=#8833ff
+P_ACC_H=#9944ff
+P_ACC_L=#7722ee
+P_ACC_LL=#6611dd
+P_ACC_BT=#bb88ff
+P_ACC_BH=#ccaaff
+P_ACC_BP=#ddccff
+P_NB_H=#9944ff
+P_FG=#1a0044
+P_FG_DIM=#662299
+P_FG_HI=#0d0022

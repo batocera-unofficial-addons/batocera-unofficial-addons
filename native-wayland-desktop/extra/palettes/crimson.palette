@@ -1,0 +1,22 @@
+# Crimson — dark red base, vivid crimson accent
+P_MODE=dark
+P_BASE=#180c10
+P_BASE1=#241218
+P_BASE2=#3d1d26
+P_BASE_H=#1e1015
+P_BASE_P=#2a1620
+P_BASE3=#381822
+P_ACT=#6e1528
+P_ACT_H=#882032
+P_ACT_P=#5c1022
+P_ACC=#cc2244
+P_ACC_H=#e03355
+P_ACC_L=#d44466
+P_ACC_LL=#dd5577
+P_ACC_BT=#ee8899
+P_ACC_BH=#f5aabb
+P_ACC_BP=#facccc
+P_NB_H=#aa1a38
+P_FG=#f0d5d8
+P_FG_DIM=#b08090
+P_FG_HI=#faeaea

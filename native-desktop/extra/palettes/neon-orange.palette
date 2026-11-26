@@ -1,0 +1,22 @@
+# Neon Orange — dark brown-black base, vivid orange accent
+P_MODE=dark
+P_BASE=#0f0800
+P_BASE1=#1a1000
+P_BASE2=#251800
+P_BASE_H=#201400
+P_BASE_P=#221600
+P_BASE3=#231700
+P_ACT=#4a2800
+P_ACT_H=#5a3200
+P_ACT_P=#452500
+P_ACC=#ff6600
+P_ACC_H=#ff8000
+P_ACC_L=#ff9933
+P_ACC_LL=#ffaa55
+P_ACC_BT=#ffbb77
+P_ACC_BH=#ffcc99
+P_ACC_BP=#ffddbb
+P_NB_H=#e65c00
+P_FG=#ffe8cc
+P_FG_DIM=#cc9966
+P_FG_HI=#fff5ee

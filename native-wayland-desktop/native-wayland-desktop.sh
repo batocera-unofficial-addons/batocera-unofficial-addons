@@ -29,17 +29,24 @@ fail() {
 pgrep -x labwc >/dev/null || fail "$APPNAME needs Batocera's Wayland desktop (labwc), not X11 (Openbox)."
 
 echo "Installing $APPNAME..."
-mkdir -p "$install_dir/config"
+mkdir -p "$install_dir/config" "$install_dir/palettes"
 
 echo "Downloading $APPNAME..."
 for f in native-wayland-desktop-launch.sh native-wayland-desktop-session.sh native-wayland-desktop-exit.sh \
-         native-wayland-desktop-panel.py native-wayland-desktop-desktop.py native-wayland-desktop-service native-wayland-desktop-logo.png wallpaper.png; do
+         native-wayland-desktop-panel.py native-wayland-desktop-desktop.py native-wayland-desktop-theme.py \
+         native-wayland-desktop-service native-wayland-desktop-logo.png wallpaper.png \
+         wallpaper.svg.template; do
     wget -q --show-progress -O "$install_dir/$f.tmp" "$base_url/extra/$f" || fail "Failed to download $f."
     mv -f "$install_dir/$f.tmp" "$install_dir/$f"
 done
 for f in rc.xml menu.xml themerc-override autostart; do
     wget -q --show-progress -O "$install_dir/config/$f.tmp" "$base_url/extra/config/$f" || fail "Failed to download config/$f."
     mv -f "$install_dir/config/$f.tmp" "$install_dir/config/$f"
+done
+echo "Downloading palettes..."
+for f in amber blue crimson cyan emerald neon-green neon-orange neon-pink \
+         pastel-lavender pastel-mint pastel-rose pastel-sky purple; do
+    wget -q -O "$install_dir/palettes/$f.palette" "$base_url/extra/palettes/$f.palette" || true
 done
 rm -f "$install_dir/native-wayland-desktop-wallpaper.sh"  # older versions drew the wallpaper with swaybg
 chmod +x "$install_dir"/*.sh "$install_dir"/*.py "$install_dir/native-wayland-desktop-service" "$install_dir/config/autostart"

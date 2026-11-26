@@ -1,0 +1,22 @@
+# Pastel Mint — vivid mint green base, punchy green accent
+P_MODE=light
+P_BASE=#c8ffea
+P_BASE1=#aaffd8
+P_BASE2=#88ffcc
+P_BASE_H=#b8ffe0
+P_BASE_P=#a8ffd4
+P_BASE3=#a4ffd2
+P_ACT=#66ffbb
+P_ACT_H=#44ffaa
+P_ACT_P=#33ffa0
+P_ACC=#00bb66
+P_ACC_H=#00dd77
+P_ACC_L=#009955
+P_ACC_LL=#007744
+P_ACC_BT=#55eea0
+P_ACC_BH=#88f5bb
+P_ACC_BP=#aafacc
+P_NB_H=#00cc77
+P_FG=#002216
+P_FG_DIM=#226644
+P_FG_HI=#00110a

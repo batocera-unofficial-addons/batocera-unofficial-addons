@@ -9,10 +9,12 @@ native-x11-desktop-session.sh), with GTK 3 on X11. Open windows come from
 
   native-x11-desktop-panel.py              run the panel
   native-x11-desktop-panel.py --wallpaper  choose a wallpaper (desktop menu)
+  native-x11-desktop-panel.py --theme      open the theme picker and exit
 
 Right-click an app in the app menu to pin it to the taskbar or add it to the
 desktop.
 """
+import importlib.util
 import os
 import re
 import shlex
@@ -49,56 +51,94 @@ CATEGORIES = ["All", "Games", "Emulator settings", "Add-ons", "System"]
 PANEL_HEIGHT = 56
 PANEL_MARGIN = 10
 
-CSS = b"""
-window.ld-panel { background: transparent; }
-window.ld-popup { background: transparent; }
-label { color: #e8edf5; }
-.ld-bar {
-  background: rgba(20, 27, 40, 0.88); border: 1px solid rgba(255, 255, 255, 0.10);
+# ---- theme engine (loaded via importlib because the filename has hyphens) ----
+_spec = importlib.util.spec_from_file_location(
+    "theme", os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                          "native-x11-desktop-theme.py"))
+_theme_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_theme_mod)
+
+
+def _hex_to_rgb(h):
+    """'#aabbcc' -> (170, 187, 204)"""
+    h = h.lstrip("#")
+    return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+
+
+def _rgba(hexcol, alpha):
+    r, g, b = _hex_to_rgb(hexcol)
+    return f"rgba({r}, {g}, {b}, {alpha})"
+
+
+def _build_css(palette):
+    """Build the full panel CSS from a palette dict.
+
+    The theme module generates the core widget CSS; this wraps it with the
+    panel-specific class overrides that the old hardcoded blob provided.
+    """
+    acc = palette.get("P_ACC", "#4f9bff")
+    acc_h = palette.get("P_ACC_H", "#64a8ff")
+    fg = palette.get("P_FG", "#e8edf5")
+    fg_dim = palette.get("P_FG_DIM", "#9aa6b8")
+    base = palette.get("P_BASE", "#0b0f17")
+    base1 = palette.get("P_BASE1", "#141b28")
+
+    return f"""
+window.ld-panel {{ background: transparent; }}
+window.ld-popup {{ background: transparent; }}
+label {{ color: {fg}; }}
+.ld-bar {{
+  background: {_rgba(base1, 0.88)}; border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 14px; padding: 4px 6px;
-}
-.ld-bar button, .ld-card button {
+}}
+.ld-bar button, .ld-card button {{
   background: transparent; background-image: none; border: none; box-shadow: none;
-  text-shadow: none; -gtk-icon-shadow: none; color: #e8edf5;
-  border-radius: 10px; padding: 4px 10px; min-height: 30px; outline-color: #4f9bff;
-}
-.ld-bar button:hover, .ld-card button:hover, .ld-card button:focus { background: rgba(255, 255, 255, 0.09); }
-.ld-bar button.ld-start { background: #4f9bff; font-weight: 600; }
-.ld-bar button.ld-start:hover { background: #64a8ff; }
-.ld-bar button.ld-start label, .ld-bar button.ld-start image { color: #ffffff; }
-button.ld-es { background: rgba(255, 181, 71, 0.15); }
-button.ld-es:hover { background: rgba(255, 181, 71, 0.26); }
-button.ld-es label { color: #ffb547; font-weight: 600; }
-.ld-bar button.ld-task.ld-active { background: rgba(79, 155, 255, 0.24); }
-.ld-sep { background: rgba(255, 255, 255, 0.12); min-width: 1px; margin: 8px 4px; }
-.ld-dim { color: #9aa6b8; font-size: 9pt; }
-.ld-card {
-  background: rgba(20, 27, 40, 0.96); border: 1px solid rgba(255, 255, 255, 0.10);
+  text-shadow: none; -gtk-icon-shadow: none; color: {fg};
+  border-radius: 10px; padding: 4px 10px; min-height: 30px; outline-color: {acc};
+}}
+.ld-bar button:hover, .ld-card button:hover, .ld-card button:focus {{ background: rgba(255, 255, 255, 0.09); }}
+.ld-bar button.ld-start {{ background: {acc}; font-weight: 600; }}
+.ld-bar button.ld-start:hover {{ background: {acc_h}; }}
+.ld-bar button.ld-start label, .ld-bar button.ld-start image {{ color: #ffffff; }}
+button.ld-es {{ background: rgba(255, 181, 71, 0.15); }}
+button.ld-es:hover {{ background: rgba(255, 181, 71, 0.26); }}
+button.ld-es label {{ color: #ffb547; font-weight: 600; }}
+.ld-bar button.ld-task.ld-active {{ background: {_rgba(acc, 0.24)}; }}
+.ld-sep {{ background: rgba(255, 255, 255, 0.12); min-width: 1px; margin: 8px 4px; }}
+.ld-dim {{ color: {fg_dim}; font-size: 9pt; }}
+.ld-card {{
+  background: {_rgba(base1, 0.96)}; border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 16px; padding: 14px;
-}
-.ld-card entry {
-  background: rgba(255, 255, 255, 0.06); background-image: none; color: #e8edf5;
+}}
+.ld-card entry {{
+  background: rgba(255, 255, 255, 0.06); background-image: none; color: {fg};
   border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 10px; padding: 6px 10px;
-  box-shadow: none; caret-color: #e8edf5;
-}
-.ld-card entry image { color: #9aa6b8; }
-.ld-card button.ld-cat {
+  box-shadow: none; caret-color: {fg};
+}}
+.ld-card entry image {{ color: {fg_dim}; }}
+.ld-card button.ld-cat {{
   border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 999px; padding: 2px 12px; min-height: 24px;
-}
-.ld-card button.ld-cat label { color: #9aa6b8; }
-.ld-card button.ld-cat.ld-on { background: #e8edf5; }
-.ld-card button.ld-cat.ld-on label { color: #0b0f17; }
-.ld-card flowboxchild { padding: 0; background: transparent; }
-.ld-card button.ld-app { padding: 8px 4px; }
-.ld-card button.ld-app label { font-size: 9.5pt; }
-.ld-foot { border-top: 1px solid rgba(255, 255, 255, 0.10); padding-top: 10px; }
-.ld-card button.ld-warn label { color: #ff6b6b; font-weight: 600; }
-.ld-card scrolledwindow, .ld-card viewport { background: transparent; border: none; }
-scale trough { background: rgba(255, 255, 255, 0.15); min-height: 6px; border-radius: 3px; border: none; }
-scale highlight { background: #4f9bff; border-radius: 3px; border: none; }
-scale slider { background: #e8edf5; border: none; min-width: 16px; min-height: 16px; border-radius: 8px; }
-.ld-title { font-weight: 600; }
+}}
+.ld-card button.ld-cat label {{ color: {fg_dim}; }}
+.ld-card button.ld-cat.ld-on {{ background: {fg}; }}
+.ld-card button.ld-cat.ld-on label {{ color: {base}; }}
+.ld-card flowboxchild {{ padding: 0; background: transparent; }}
+.ld-card button.ld-app {{ padding: 8px 4px; }}
+.ld-card button.ld-app label {{ font-size: 9.5pt; }}
+.ld-foot {{ border-top: 1px solid rgba(255, 255, 255, 0.10); padding-top: 10px; }}
+.ld-card button.ld-warn label {{ color: #ff6b6b; font-weight: 600; }}
+.ld-card scrolledwindow, .ld-card viewport {{ background: transparent; border: none; }}
+scale trough {{ background: rgba(255, 255, 255, 0.15); min-height: 6px; border-radius: 3px; border: none; }}
+scale highlight {{ background: {acc}; border-radius: 3px; border: none; }}
+scale slider {{ background: {fg}; border: none; min-width: 16px; min-height: 16px; border-radius: 8px; }}
+.ld-title {{ font-weight: 600; }}
+.ld-theme-btn {{ border-radius: 10px; padding: 6px 10px; }}
+.ld-theme-btn label {{ font-size: 9pt; }}
 """
+
+
+_palette = _theme_mod.load_palette()
+CSS = _build_css(_palette).encode()
 
 
 def run(args, timeout=2):
@@ -440,12 +480,33 @@ class AppMenu(Popup):
         scroll.add(self.grid)
         self.card.pack_start(scroll, True, True, 0)
 
+        # Theme picker area (hidden by default, shown when Theme is clicked)
+        self.theme_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        theme_head = Gtk.Box(spacing=8)
+        theme_title = Gtk.Label(label="Theme", xalign=0)
+        theme_title.get_style_context().add_class("ld-title")
+        theme_head.pack_start(theme_title, True, True, 0)
+        theme_back = Gtk.Button(label="Back")
+        theme_back.connect("clicked", lambda *_: self.hide_theme_picker())
+        theme_head.pack_end(theme_back, False, False, 0)
+        self.theme_box.pack_start(theme_head, False, False, 0)
+        self.theme_grid = Gtk.FlowBox(homogeneous=True, min_children_per_line=4,
+                                      max_children_per_line=6,
+                                      selection_mode=Gtk.SelectionMode.NONE,
+                                      row_spacing=6, column_spacing=6)
+        self.theme_box.pack_start(self.theme_grid, True, True, 0)
+        self.theme_box.set_no_show_all(True)
+        self.card.pack_start(self.theme_box, False, False, 0)
+
         foot = Gtk.Box(spacing=6, homogeneous=True)
         foot.get_style_context().add_class("ld-foot")
         es = Gtk.Button(label="EmulationStation")
         es.get_style_context().add_class("ld-es")
         es.connect("clicked", lambda *_: exit_desktop())
         foot.pack_start(es, True, True, 0)
+        theme_btn = Gtk.Button(label="Theme")
+        theme_btn.connect("clicked", lambda *_: self.show_theme_picker())
+        foot.pack_start(theme_btn, True, True, 0)
         self.power = {}
         for key, label, cmd in (("reboot", "Restart", ["batocera-es-swissknife", "--reboot"]),
                                 ("shutdown", "Shut down", ["batocera-es-swissknife", "--shutdown"])):
@@ -536,6 +597,44 @@ class AppMenu(Popup):
         apps = self.visible_apps()
         if apps:
             self.on_app(None, apps[0])
+
+    def show_theme_picker(self):
+        for child in self.theme_grid.get_children():
+            self.theme_grid.remove(child)
+        current = _theme_mod.get_current_palette()
+        for name in _theme_mod.list_palettes():
+            p = _theme_mod.load_palette(name)
+            acc = p.get("P_ACC", "#4f9bff")
+            label_text = name.replace("-", " ").capitalize()
+            b = Gtk.Button(label=label_text)
+            b.get_style_context().add_class("ld-theme-btn")
+            # Color the button background with the palette's accent
+            btn_css = Gtk.CssProvider()
+            btn_css.load_from_data(
+                f".ld-theme-btn#{name} {{ background: {acc}; color: #ffffff; }}"
+                f".ld-theme-btn#{name}:hover {{ background: {acc}; opacity: 0.85; }}".encode()
+            )
+            b.set_name(name)
+            b.get_style_context().add_provider(btn_css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1)
+            if name == current:
+                b.set_label(f"{label_text} (current)")
+            b.connect("clicked", self.on_theme_pick, name)
+            self.theme_grid.add(b)
+        self.theme_box.set_no_show_all(False)
+        self.theme_box.show_all()
+
+    def hide_theme_picker(self):
+        self.theme_box.hide()
+        self.theme_box.set_no_show_all(True)
+
+    def on_theme_pick(self, _b, name):
+        global _palette, CSS
+        _theme_mod.set_current_palette(name)
+        _theme_mod.generate_wallpaper()
+        _palette = _theme_mod.load_palette(name)
+        CSS = _build_css(_palette).encode()
+        self.panel.reload_theme()
+        self.hide()
 
     def on_app_menu(self, button, event, app):
         if event.button != 3:
@@ -723,6 +822,17 @@ class Panel(Gtk.Window):
     def close_popups(self):
         self.menu.hide()
         self.volume.hide()
+
+    def reload_theme(self):
+        """Reload CSS from the current palette and re-apply it."""
+        screen = Gdk.Screen.get_default()
+        # Remove old provider
+        if hasattr(self, '_css_provider'):
+            Gtk.StyleContext.remove_provider_for_screen(screen, self._css_provider)
+        self._css_provider = Gtk.CssProvider()
+        self._css_provider.load_from_data(CSS)
+        Gtk.StyleContext.add_provider_for_screen(screen, self._css_provider,
+                                                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def on_menu_key(self):
         # Super key, or X on a controller (sent by Openbox's keybind)
@@ -925,6 +1035,63 @@ def choose_wallpaper():
     # native-x11-desktop-desktop.py watches CONF and shows the new wallpaper
 
 
+def theme_picker_window():
+    """Standalone theme picker window (for --theme CLI or right-click menu)."""
+    win = Gtk.Window(title="Choose a theme")
+    win.set_default_size(480, 320)
+    win.set_position(Gtk.WindowPosition.CENTER)
+    visual = win.get_screen().get_rgba_visual()
+    if visual:
+        win.set_visual(visual)
+
+    card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+    card.get_style_context().add_class("ld-card")
+    card.set_margin_top(14)
+    card.set_margin_bottom(14)
+    card.set_margin_start(14)
+    card.set_margin_end(14)
+
+    title = Gtk.Label(label="Choose a theme", xalign=0)
+    title.get_style_context().add_class("ld-title")
+    card.pack_start(title, False, False, 0)
+
+    grid = Gtk.FlowBox(homogeneous=True, min_children_per_line=3,
+                       max_children_per_line=5,
+                       selection_mode=Gtk.SelectionMode.NONE,
+                       row_spacing=8, column_spacing=8)
+    current = _theme_mod.get_current_palette()
+    for name in _theme_mod.list_palettes():
+        p = _theme_mod.load_palette(name)
+        acc = p.get("P_ACC", "#4f9bff")
+        label_text = name.replace("-", " ").capitalize()
+        b = Gtk.Button(label=label_text + (" (current)" if name == current else ""))
+        b.get_style_context().add_class("ld-theme-btn")
+        btn_css = Gtk.CssProvider()
+        btn_css.load_from_data(
+            f".ld-theme-btn#{name} {{ background: {acc}; color: #ffffff; }}"
+            f".ld-theme-btn#{name}:hover {{ background: {acc}; opacity: 0.85; }}".encode()
+        )
+        b.set_name(name)
+        b.get_style_context().add_provider(btn_css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1)
+
+        def on_pick(_b, n=name):
+            _theme_mod.set_current_palette(n)
+            _theme_mod.generate_wallpaper()
+            Gtk.main_quit()
+
+        b.connect("clicked", on_pick)
+        grid.add(b)
+
+    scroll = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
+    scroll.add(grid)
+    card.pack_start(scroll, True, True, 0)
+
+    win.add(card)
+    win.connect("destroy", Gtk.main_quit)
+    win.show_all()
+    Gtk.main()
+
+
 def main():
     css = Gtk.CssProvider()
     css.load_from_data(CSS)
@@ -936,7 +1103,12 @@ def main():
     if "--wallpaper" in sys.argv:
         choose_wallpaper()
         return
-    Panel().show_all()
+    if "--theme" in sys.argv:
+        theme_picker_window()
+        return
+    panel = Panel()
+    panel._css_provider = css  # so reload_theme() can remove it later
+    panel.show_all()
     Gtk.main()
 
 

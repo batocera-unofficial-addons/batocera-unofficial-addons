@@ -15,6 +15,9 @@
     <item label="Change wallpaper">
       <action name="Execute" command="python3 /userdata/system/add-ons/native-wayland-desktop/native-wayland-desktop-panel.py --wallpaper" />
     </item>
+    <item label="Change theme">
+      <action name="Execute" command="python3 /userdata/system/add-ons/native-wayland-desktop/native-wayland-desktop-panel.py --theme" />
+    </item>
     <separator />
     <item label="Back to EmulationStation">
       <action name="Exit" />
