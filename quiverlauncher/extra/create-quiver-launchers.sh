@@ -22,13 +22,15 @@ mkdir -p "$ROMS/images"
 
 scan() {
     python3 - "$QUIVER_DIR" "$ROMS" <<'PYEOF'
-import json, os, re, sys, urllib.request
+import json, os, re, shutil, sys, urllib.request
 import xml.etree.ElementTree as ET
 
 quiver_dir, roms = sys.argv[1], sys.argv[2]
 images = os.path.join(roms, "images")
 gamelist_path = os.path.join(roms, "gamelist.xml")
 MARKER = "# quiver-app: "
+# Windows apps run through Batocera's Wine, which only x86_64 Batocera has
+HAS_WINE = shutil.which("batocera-wine") is not None
 
 def load_json(path):
     try:
@@ -185,6 +187,8 @@ for app in library.get("apps", []):
     if not os.path.isdir(game_path):
         continue  # not installed
     exe, why = find_executable(game_path)
+    if exe and exe.lower().endswith(".exe") and not HAS_WINE:
+        exe, why = None, "Windows app, and this Batocera has no Wine (x86_64 only)"
     if not exe:
         print(f"Skipping {name}: {why}")
         continue
