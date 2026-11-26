@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_menu xmlns="http://openbox.org/3.4/rc">
+
+<menu id="root-menu" label="Native X11 Desktop">
+  <item label="Apps">
+    <action name="Execute"><command>pkill -USR1 -f native-x11-desktop-panel.p[y]</command></action>
+  </item>
+  <item label="File Manager">
+    <action name="Execute"><command>pcmanfm /userdata</command></action>
+  </item>
+  <item label="Terminal">
+    <action name="Execute"><command>xterm -fs 14 -fg white -bg black -fa Monospace -en UTF-8 -sb -rightbar</command></action>
+  </item>
+  <separator/>
+  <item label="Change wallpaper">
+    <action name="Execute"><command>python3 /userdata/system/add-ons/native-x11-desktop/native-x11-desktop-desktop.py --wallpaper</command></action>
+  </item>
+  <separator/>
+  <item label="Back to EmulationStation">
+    <action name="Execute"><command>/userdata/system/add-ons/native-x11-desktop/native-x11-desktop-exit.sh</command></action>
+  </item>
+</menu>
+
+</openbox_menu>

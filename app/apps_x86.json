@@ -280,7 +280,7 @@
     },
     {
       "name": "Native Desktop",
-      "description": "Native desktop for Batocera. Auto-detects X11 vs Wayland: on Batocera 44+ (Wayland) installs a taskbar, app menu, and desktop icons that open with F1; on older X11 builds installs the classic desktop.",
+      "description": "Native desktop for Batocera. Auto-detects X11 vs Wayland and installs a taskbar, app menu, and desktop icons that open with F1.",
       "categories": [
         "System Utilities"
       ],

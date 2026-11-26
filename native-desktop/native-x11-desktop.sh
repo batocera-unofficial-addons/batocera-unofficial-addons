@@ -1,512 +1,97 @@
 #!/bin/bash
-# Native X11 Desktop — installs the X11 desktop (Openbox, tint2, pcmanfm,
-# picom) from a squashfs image. Called by native-desktop.sh when X11 is
-# detected, or directly.
-
-echo "Native X11 Desktop — Installer"
-echo "==============================="
+# Installer for the Native X11 Desktop. Called by native-desktop.sh
+# (the unified BUA entry) when X11 (Openbox) is detected, or directly.
+#
+# It provides a desktop with a taskbar, app menu, desktop icons, dark mode,
+# and movable/resizable windows, running within Batocera's Openbox session.
+# Everything it uses is already part of Batocera (Openbox, GTK, PCManFM,
+# xterm, wmctrl), so the add-on itself is under 1 MB and nothing else is
+# downloaded. F1 opens the desktop; Hotkey+Start returns to EmulationStation.
+#
+# F1 opens whichever desktop was installed last: installing this one takes F1
+# over from other desktops, and installing another gives it back.
 
 APPNAME="Native X11 Desktop"
-TEMP_DIR="/userdata/tmp/native-desktop"
-SFS_FILE="$TEMP_DIR/native-desktop.squashfs"
-EXTRACT_DIR="$TEMP_DIR/extracted"
-ADDON_NAME="native-x11-desktop"
-ADDON_DIR="/userdata/system/add-ons/${ADDON_NAME}"
-DEST_DIR="${ADDON_DIR}/rootfs"
-DRL_REMOVER="/userdata/system/configs/bat-drl/Remover_Desktop.sh"
-BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages"
+install_dir="/userdata/system/add-ons/native-x11-desktop"
+ports_dir="/userdata/roms/ports"
+port_script="$ports_dir/Native X11 Desktop.sh"
+service_file="/userdata/system/services/native-x11-desktop"
+base_url="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/native-desktop"
 
-ARCH=$(uname -m)
-case "$ARCH" in
-    x86_64)  SFS_URL="$BASE_URL/Desktop_for_batocera_8.8.squashfs" ;;
-    aarch64) SFS_URL="$BASE_URL/Desktop_for_batocera_8.8_arm64.squashfs" ;;
-    *)
-        dialog --title "$APPNAME" --msgbox "Unsupported architecture: $ARCH" 8 60
-        exit 1
-        ;;
-esac
-antimicrox_in_use() {
-    for addon in f1 android-bua winconfig freej2me; do
-        [ -d "/userdata/system/add-ons/$addon" ] && return 0
-    done
-    return 1
+fail() {
+    dialog --title "$APPNAME" --msgbox "$1" 10 60
+    exit 1
 }
 
-cleanup_drl_rootfs_remnants() {
-    echo "Cleaning up DRL rootfs remnants..."
+# Requires X11 (Openbox)
+pgrep -x openbox >/dev/null || fail "$APPNAME needs Batocera's X11 desktop (Openbox), not Wayland (labwc)."
 
-    antimicrox_in_use || rm -f /usr/bin/antimicrox
-    rm -f /usr/bin/zenity
+echo "Installing $APPNAME..."
+mkdir -p "$install_dir/config"
 
-    # Remove DRL overlay lib files by exact name via /overlay/overlay/.
-    # Using wildcards through the merged /usr/lib path would create whiteouts for
-    # Batocera-native libs (e.g. libgtk-3.so.0.2411.32, libnettle.so.8) that have
-    # different version numbers from DRL's copies and are visible alongside them.
-    # A wildcard on /overlay/overlay/ is also unsafe — other system libs (Nvidia etc)
-    # live there too. Exact filenames sourced from the DRL squashfs are the only safe option.
-    OVL=/overlay/overlay/usr/lib
-    rm -f \
-        "$OVL/libXtst.so"        "$OVL/libXtst.so.6"              "$OVL/libXtst.so.6.1.0" \
-        "$OVL/libXv.so"          "$OVL/libXv.so.1"                "$OVL/libXv.so.1.0.0" \
-        "$OVL/libaio.so"         "$OVL/libaio.so.1.0.1" \
-        "$OVL/libadwaita-1.so.0" \
-        "$OVL/libatk-bridge-2.0.so.0" \
-        "$OVL/libatspi.so.0" \
-        "$OVL/libbrotlicommon.so.1" \
-        "$OVL/libbrotlidec.so.1" \
-        "$OVL/libcanberra.so.0" \
-        "$OVL/libcap.so.2.27" \
-        "$OVL/libcprime-core.so"    "$OVL/libcprime-core.so.4"    "$OVL/libcprime-core.so.4.5.0" \
-        "$OVL/libcprime-gui.so"     "$OVL/libcprime-gui.so.4"     "$OVL/libcprime-gui.so.4.5.0" \
-        "$OVL/libcprime-widgets.so" "$OVL/libcprime-widgets.so.4" "$OVL/libcprime-widgets.so.4.5.0" \
-        "$OVL/libcroco-0.6.so"   "$OVL/libcroco-0.6.so.3"        "$OVL/libcroco-0.6.so.3.0.1" \
-        "$OVL/libcrypt.so.1"     "$OVL/libcrypt.so.2" \
-        "$OVL/libcups.so.2" \
-        "$OVL/libcurl-gnutls.so.4" \
-        "$OVL/libdbus-glib-1.so.2" \
-        "$OVL/libexslt.so"       "$OVL/libexslt.so.0.8.20" \
-        "$OVL/libfdisk.so.1.1.0" \
-        "$OVL/libfm-gtk.so"      "$OVL/libfm-gtk.so.4"           "$OVL/libfm-gtk.so.4.1.2" \
-        "$OVL/libgailutil-3.so"  "$OVL/libgailutil-3.so.0"       "$OVL/libgailutil-3.so.0.0.0" \
-        "$OVL/libgdk-3.so"       "$OVL/libgdk-3.so.0.2404.8" \
-        "$OVL/libgdk-x11-2.0.so" "$OVL/libgdk-x11-2.0.so.0"     "$OVL/libgdk-x11-2.0.so.0.2400.32" \
-        "$OVL/libgtk-3.so"       "$OVL/libgtk-3.so.0.2404.8" \
-        "$OVL/libgtk-4.so.1" \
-        "$OVL/libgtk-x11-2.0.so" "$OVL/libgtk-x11-2.0.so.0"     "$OVL/libgtk-x11-2.0.so.0.2400.32" \
-        "$OVL/libImlib2.so"      "$OVL/libImlib2.so.1"           "$OVL/libImlib2.so.1.5.1" \
-        "$OVL/libidn2.so.0" \
-        "$OVL/libjack.so.0" \
-        "$OVL/libkeyutils.so.1" \
-        "$OVL/liblightspark.so.0.8.5" "$OVL/liblightsparkplugin.so" \
-        "$OVL/libnettle.so.7" \
-        "$OVL/libnsl.so.1" \
-        "$OVL/libpepflashplayer.so" \
-        "$OVL/libQt5DBus.so"     "$OVL/libQt5DBus.so.5"     "$OVL/libQt5DBus.so.5.15"    "$OVL/libQt5DBus.so.5.15.8" \
-        "$OVL/libQt5X11Extras.so" "$OVL/libQt5X11Extras.so.5" "$OVL/libQt5X11Extras.so.5.15" "$OVL/libQt5X11Extras.so.5.15.8" \
-        "$OVL/librsvg-2.so"      "$OVL/librsvg-2.so.2.40.20" \
-        "$OVL/libsecret-1.so.0" \
-        "$OVL/libselinux.so.1" \
-        "$OVL/libSoundTouch.so"  "$OVL/libSoundTouch.so.1"       "$OVL/libSoundTouch.so.1.0.0" \
-        "$OVL/libtdb.so.1" \
-        "$OVL/libthai.so.0"      "$OVL/libthai.so.0.3"           "$OVL/libthai.so.0.3.1" \
-        "$OVL/libunistring.so.2" \
-        "$OVL/libwayland-client.so.0" \
-        "$OVL/libwayland-cursor.so.0" \
-        "$OVL/libwayland-egl.so.1" \
-        "$OVL/libwayland-server.so.0" \
-        "$OVL/libxslt.so"        "$OVL/libxslt.so.1.1.34" \
-        "$OVL/libyaml-cpp.so"    "$OVL/libyaml-cpp.so.0.6"      "$OVL/libyaml-cpp.so.0.6.3" \
-        2>/dev/null || true
-
-    # Top-level /lib/ DRL files (DRL remover handles /overlay/overlay/lib/ but belt-and-suspenders)
-    rm -f \
-        /overlay/overlay/lib/libfdisk.so.1.1.0 \
-        /overlay/overlay/lib/libthai.so.0.3.1 \
-        2>/dev/null || true
-
-    # Remove DRL overlay files that rmdir cannot handle
-    rm -f  /overlay/overlay/etc/openbox/rc.xml 2>/dev/null || true
-    rm -f  /overlay/overlay/etc/xdg/openbox/autostart.bak 2>/dev/null || true
-    rm -rf /overlay/overlay/usr/share/icons/batocera/ 2>/dev/null || true
-
-    rmdir \
-        /etc/xdg/libfm \
-        /etc/xdg/menus \
-        /etc/xdg/pcmanfm/default \
-        /etc/openbox \
-        /etc/X11 \
-        /usr/share/icons/batocera \
-        2>/dev/null || true
-
-    batocera-services stop symlink_manager 2>/dev/null || true
-    batocera-services start symlink_manager >/dev/null 2>&1 &
-}
-
-# Detect existing DRL install
-if [ -f "$DRL_REMOVER" ]; then
-    dialog --title "Existing Desktop Detected" \
-        --yesno "An existing Desktop for Batocera (DRL) installation was detected.\n\nIt must be removed before installing the new version.\n\nRun the uninstaller now?" 12 55
-    if [ $? -eq 0 ]; then
-        echo "Removing old DRL installation..."
-        function yad() { return 0; }; export -f yad
-        bash "$DRL_REMOVER"
-        unset -f yad
-
-        echo "Cleaning up DRL remnants..."
-        rm -rf /userdata/system/Desktop
-        rm -rf /userdata/system/configs/bat-drl/Desktop
-        rm -rf /userdata/system/configs/bat-drl/tint2
-        antimicrox_in_use || rm -rf /userdata/system/configs/bat-drl/AntiMicroX
-        rm -rf /userdata/system/configs/bat-drl/FP_Atalho
-        antimicrox_in_use || rm -f /userdata/system/configs/bat-drl/Nav_Redist2.joystick.amgp
-        rm -rf /userdata/userdata
-        rm -rf /userdata/system/add-ons/desktop_drl
-        rm -f /userdata/system/services/desktop_drl
-        rm -rf /userdata/system/.config/tint2
-        rm -rf /userdata/system/.config/jgmenu
-        rm -rf /userdata/system/.config/libfm
-        rm -rf /userdata/system/.config/pcmanfm
-        rm -rf /userdata/system/.config/sublime-text
-        cleanup_drl_rootfs_remnants
-        for proc in tint2 jgmenu pcmanfm xcompmgr picom; do
-            pkill -x "$proc" 2>/dev/null || true
-        done
-    else
-        echo "Installation cancelled."
-        exit 0
-    fi
-fi
-
-# Detect existing install — back up customisations before updating
-BACKUP_DIR="$TEMP_DIR/backup"
-IS_UPDATE=0
-if [ -d "$ADDON_DIR/rootfs" ]; then
-    IS_UPDATE=1
-    echo "Existing install detected — backing up customisations..."
-    mkdir -p "$BACKUP_DIR"
-    [ -d /userdata/system/Desktop ]             && cp -r /userdata/system/Desktop             "$BACKUP_DIR/Desktop"
-    [ -f /userdata/system/.config/tint2/tint2rc ] && cp /userdata/system/.config/tint2/tint2rc "$BACKUP_DIR/tint2rc"
-    [ -d /userdata/system/.config/jgmenu ]      && cp -r /userdata/system/.config/jgmenu      "$BACKUP_DIR/jgmenu"
-    [ -f /userdata/system/.config/pcmanfm/default/desktop-items-0.conf ] && \
-        cp /userdata/system/.config/pcmanfm/default/desktop-items-0.conf "$BACKUP_DIR/desktop-items-0.conf"
-    PALETTE_FILE="/userdata/system/add-ons/native-x11-desktop/config/Desktop/theme/current.palette"
-    BAR_CONF_FILE="/userdata/system/add-ons/native-x11-desktop/config/Desktop/theme/bar.conf"
-    [ -f "$PALETTE_FILE" ]  && cp "$PALETTE_FILE"  "$BACKUP_DIR/current.palette"
-    [ -f "$BAR_CONF_FILE" ] && cp "$BAR_CONF_FILE" "$BACKUP_DIR/bar.conf"
-
-    echo "Stopping desktop service..."
-    batocera-services stop native-x11-desktop
-
-    echo "Removing renamed/obsolete files from rootfs..."
-    # Binaries renamed from Portuguese
-    rm -f "$DEST_DIR/usr/bin/flat-atalho"
-    rm -f "$DEST_DIR/usr/bin/linksimb"
-    rm -f "$DEST_DIR/usr/bin/tema"
-    # Desktop files for renamed binaries
-    rm -f "$DEST_DIR/usr/share/applications/linksimb.desktop"
-    # Icon renamed
-    rm -f "$DEST_DIR/usr/share/icons/batocera/tema.png"
-fi
-
-# Create temp directories
-mkdir -p "$TEMP_DIR" "$EXTRACT_DIR" "$DEST_DIR"
-
-# Download squashfs
-echo "Downloading..."
-curl -L -o "$SFS_FILE" "$SFS_URL"
-
-if [ ! -f "$SFS_FILE" ]; then
-    dialog --title "$APPNAME" --msgbox "Error: Download failed." 8 60
-    exit 1
-fi
-
-# Extract
-echo "Extracting..."
-unsquashfs -f -d "$EXTRACT_DIR" "$SFS_FILE"
-
-if [ $? -ne 0 ]; then
-    dialog --title "$APPNAME" --msgbox "Error: Extraction failed." 8 60
-    rm -rf "$TEMP_DIR"
-    exit 1
-fi
-
-# userdata content goes directly to /userdata (persistent)
-echo "Installing userdata files..."
-cp -r "$EXTRACT_DIR/userdata/." /userdata/ 2>/dev/null || true
-
-# Root FS content goes into rootfs for the service to symlink on each boot
-echo "Installing root FS files..."
-for dir in usr etc lib; do
-    [ -d "$EXTRACT_DIR/$dir" ] && cp -r "$EXTRACT_DIR/$dir" "$DEST_DIR/" || true
+echo "Downloading $APPNAME..."
+for f in native-x11-desktop-launch.sh native-x11-desktop-session.sh native-x11-desktop-exit.sh \
+         native-x11-desktop-panel.py native-x11-desktop-desktop.py native-x11-desktop-service \
+         native-x11-desktop-logo.png wallpaper.png; do
+    wget -q --show-progress -O "$install_dir/$f.tmp" "$base_url/extra/$f" || fail "Failed to download $f."
+    mv -f "$install_dir/$f.tmp" "$install_dir/$f"
 done
+for f in rc.xml menu.xml; do
+    wget -q --show-progress -O "$install_dir/config/$f.tmp" "$base_url/extra/config/$f" || fail "Failed to download config/$f."
+    mv -f "$install_dir/config/$f.tmp" "$install_dir/config/$f"
+done
+chmod +x "$install_dir"/*.sh "$install_dir"/*.py "$install_dir/native-x11-desktop-service"
 
-# Icon packs
-if [ -d "$EXTRACT_DIR/icons" ]; then
-    echo "Installing icon packs..."
-    cp -r "$EXTRACT_DIR/icons" "$ADDON_DIR/"
+# F1 opens the Native X11 Desktop: a Batocera service, enabled at boot.
+# The last desktop installed gets F1, so competing desktop services are
+# stopped and switched off (the addons themselves stay installed).
+echo "Setting up F1..."
+if [ -f /userdata/system/services/native-wayland-desktop ]; then
+    bash /userdata/system/services/native-wayland-desktop stop >/dev/null 2>&1
+    batocera-services disable native-wayland-desktop >/dev/null 2>&1
+    echo "F1 now opens the Native X11 Desktop instead of Native Wayland Desktop."
 fi
-
-# Restore customisations if updating
-if [ "$IS_UPDATE" -eq 1 ]; then
-    echo "Restoring customisations..."
-    [ -d "$BACKUP_DIR/Desktop" ]       && rm -rf /userdata/system/Desktop && cp -r "$BACKUP_DIR/Desktop" /userdata/system/Desktop
-    [ -f "$BACKUP_DIR/tint2rc" ]       && cp "$BACKUP_DIR/tint2rc" /userdata/system/.config/tint2/tint2rc
-    [ -d "$BACKUP_DIR/jgmenu" ]        && rm -rf /userdata/system/.config/jgmenu && cp -r "$BACKUP_DIR/jgmenu" /userdata/system/.config/jgmenu
-    [ -f "$BACKUP_DIR/desktop-items-0.conf" ] && \
-        cp "$BACKUP_DIR/desktop-items-0.conf" /userdata/system/.config/pcmanfm/default/desktop-items-0.conf
-    [ -f "$BACKUP_DIR/current.palette" ] && mkdir -p "$(dirname "$PALETTE_FILE")" && cp "$BACKUP_DIR/current.palette" "$PALETTE_FILE"
-    [ -f "$BACKUP_DIR/bar.conf" ]       && cp "$BACKUP_DIR/bar.conf" "$BAR_CONF_FILE"
-
-    # Re-apply system Desktop files from squashfs — overwrite any stale versions restored from backup
-    echo "Updating system Desktop files..."
-    cp -r "$EXTRACT_DIR/userdata/system/Desktop/." /userdata/system/Desktop/ 2>/dev/null || true
+if [ -f /userdata/system/services/kdeplasma ]; then
+    bash /userdata/system/services/kdeplasma stop >/dev/null 2>&1
+    batocera-services disable kdeplasma >/dev/null 2>&1
+    echo "F1 now opens the Native X11 Desktop instead of KDE Plasma (Plasma is still in Ports)."
 fi
-
-# Cleanup
-echo "Cleaning up..."
-rm -rf "$TEMP_DIR"
-
-# Write the desktop service script
-echo "Installing desktop service..."
 mkdir -p /userdata/system/services
-cat << 'SERVICEEOF' > /userdata/system/services/native-x11-desktop
+cp -f "$install_dir/native-x11-desktop-service" "$service_file"
+chmod +x "$service_file"
+batocera-services enable native-x11-desktop >/dev/null 2>&1
+batocera-services start native-x11-desktop >/dev/null 2>&1 || bash "$service_file" start
+
+# Ports entry, with a controller mapping (left stick is the mouse, A/B click,
+# X opens the app menu, Hotkey+Start closes the desktop)
+echo "Creating Ports entry..."
+mkdir -p "$ports_dir/images"
+cat > "$port_script" <<'PORT'
 #!/bin/bash
+# Native X11 Desktop (BUA). F1 in EmulationStation opens it too.
+# Press EmulationStation in the taskbar, or Hotkey+Start, to return.
+exec /userdata/system/add-ons/native-x11-desktop/native-x11-desktop-launch.sh
+PORT
+chmod +x "$port_script"
+wget -q --show-progress -O "$port_script.keys" "$base_url/extra/native-x11-desktop.keys" || fail "Failed to download the controller mapping."
 
-ADDON_NAME="native-x11-desktop"
-ADDON_DIR="/userdata/system/add-ons/${ADDON_NAME}"
-ROOTFS="${ADDON_DIR}/rootfs"
-ICONS_DIR="${ADDON_DIR}/icons"
-LOG="/userdata/system/logs/${ADDON_NAME}.log"
+# Logo in the Ports list
+cp -f "$install_dir/native-x11-desktop-logo.png" "$ports_dir/images/native-x11-desktop-logo.png"
+gamelist="$ports_dir/gamelist.xml"
+[ -s "$gamelist" ] || printf '<?xml version="1.0"?>\n<gameList>\n</gameList>\n' > "$gamelist"
+xmlstarlet ed -L -d "/gameList/game[path='./Native X11 Desktop.sh']" "$gamelist"
+xmlstarlet ed -L \
+    -s /gameList -t elem -n gameTMP \
+    -s //gameTMP -t elem -n path -v "./Native X11 Desktop.sh" \
+    -s //gameTMP -t elem -n name -v "Native X11 Desktop" \
+    -s //gameTMP -t elem -n desc -v "A native X11 desktop with a taskbar, app menu and file manager. F1 in EmulationStation opens it too. Press EmulationStation in the taskbar, or Hotkey+Start, to return." \
+    -s //gameTMP -t elem -n image -v "./images/native-x11-desktop-logo.png" \
+    -r //gameTMP -v game \
+    "$gamelist"
 
-log() { echo "$(date): $*" | tee -a "$LOG"; }
-
-link_file() {
-    local src="$1"
-    local target="${src#${ROOTFS}}"
-    mkdir -p "$(dirname "$target")"
-
-    if [ -L "$target" ]; then
-        local cur; cur="$(readlink "$target")"
-        if [ "$cur" = "$src" ]; then
-            return
-        else
-            log "Conflict: $target -> $cur (expected $src). Skipping."
-            return
-        fi
-    elif [ -e "$target" ]; then
-        log "Backing up: $target -> ${target}.bak"
-        mv "$target" "${target}.bak"
-    fi
-
-    log "Linking: $target -> $src"
-    ln -s "$src" "$target"
-}
-
-unlink_file() {
-    local src="$1"
-    local target="${src#${ROOTFS}}"
-
-    if [ -L "$target" ]; then
-        local cur; cur="$(readlink "$target")"
-        if [ "$cur" = "$src" ]; then
-            log "Removing symlink: $target"
-            rm "$target"
-            [ -e "${target}.bak" ] && { log "Restoring: ${target}.bak"; mv "${target}.bak" "$target"; }
-        else
-            log "Symlink $target -> $cur, not our file. Skipping."
-        fi
-    elif [ -e "${target}.bak" ]; then
-        log "Orphan backup found — restoring: ${target}.bak"
-        mv "${target}.bak" "$target"
-    fi
-}
-
-apply_symlinks() {
-    [ -d "$ROOTFS" ] || { log "ERROR: rootfs missing at $ROOTFS"; exit 1; }
-    find "$ROOTFS" \( -type f -o -type l \) \
-        ! -path "${ROOTFS}/usr/share/themes/*" \
-        ! -path "${ROOTFS}/usr/share/tint2/*/*" \
-        ! -path "${ROOTFS}/usr/share/icons/*" \
-        ! -path "${ROOTFS}/usr/share/desktop-palettes/*" \
-        ! -path "${ROOTFS}/etc/openbox/rc.xml" \
-        | while read -r src; do link_file "$src"; done
-    log "Symlink pass complete."
-}
-
-remove_symlinks() {
-    [ -d "$ROOTFS" ] || { log "rootfs missing, nothing to remove."; return; }
-    find "$ROOTFS" \( -type f -o -type l \) \
-        ! -path "${ROOTFS}/usr/share/themes/*" \
-        ! -path "${ROOTFS}/usr/share/tint2/*/*" \
-        ! -path "${ROOTFS}/usr/share/icons/*" \
-        ! -path "${ROOTFS}/usr/share/desktop-palettes/*" \
-        ! -path "${ROOTFS}/etc/openbox/rc.xml" \
-        | while read -r src; do unlink_file "$src"; done
-    log "Symlink removal complete."
-}
-
-link_dir_packs() {
-    local src_dir="$1" target_parent="$2"
-    [ -d "$src_dir" ] || return
-    local pack target
-    for pack in "$src_dir"/*/; do
-        [ -d "$pack" ] || continue
-        pack="${pack%/}"
-        target="${target_parent}/$(basename "$pack")"
-        if [ ! -e "$target" ] && [ ! -L "$target" ]; then
-            log "Linking: $target -> $pack"
-            ln -s "$pack" "$target"
-        fi
-    done
-}
-
-unlink_dir_packs() {
-    local src_dir="$1" target_parent="$2"
-    [ -d "$src_dir" ] || return
-    local pack target
-    for pack in "$src_dir"/*/; do
-        [ -d "$pack" ] || continue
-        pack="${pack%/}"
-        target="${target_parent}/$(basename "$pack")"
-        if [ -L "$target" ] && [ "$(readlink "$target")" = "$pack" ]; then
-            log "Removing symlink: $target"
-            rm "$target"
-        fi
-    done
-}
-
-link_files_into_dir() {
-    local src_dir="$1" target_dir="$2"
-    [ -d "$src_dir" ] || return
-    mkdir -p "$target_dir"
-    local src target
-    for src in "$src_dir"/*; do
-        [ -e "$src" ] || continue
-        target="${target_dir}/$(basename "$src")"
-        if [ ! -e "$target" ] && [ ! -L "$target" ]; then
-            log "Linking: $target -> $src"
-            ln -s "$src" "$target"
-        fi
-    done
-}
-
-unlink_files_from_dir() {
-    local src_dir="$1" target_dir="$2"
-    [ -d "$src_dir" ] || return
-    local src target
-    for src in "$src_dir"/*; do
-        [ -e "$src" ] || continue
-        target="${target_dir}/$(basename "$src")"
-        if [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ]; then
-            log "Removing symlink: $target"
-            rm "$target"
-        fi
-    done
-}
-
-link_dir() {
-    local src="$1" target="$2"
-    if [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ]; then return; fi
-    if [ -e "$target" ]; then
-        log "Backing up: $target -> ${target}.bak"
-        mv "$target" "${target}.bak"
-    fi
-    log "Linking dir: $target -> $src"
-    ln -s "$src" "$target"
-}
-
-unlink_dir() {
-    local src="$1" target="$2"
-    if [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ]; then
-        log "Removing dir symlink: $target"
-        rm "$target"
-        [ -e "${target}.bak" ] && { log "Restoring: ${target}.bak"; mv "${target}.bak" "$target"; }
-    fi
-}
-
-link_icon_packs() {
-    [ -d "$ICONS_DIR" ] || return
-    local pack target
-    for pack in "$ICONS_DIR"/*/; do
-        [ -d "$pack" ] || continue
-        pack="${pack%/}"
-        target="/usr/share/icons/$(basename "$pack")"
-        if [ ! -e "$target" ] && [ ! -L "$target" ]; then
-            log "Linking icon pack: $target -> $pack"
-            ln -s "$pack" "$target"
-        fi
-    done
-}
-
-unlink_icon_packs() {
-    [ -d "$ICONS_DIR" ] || return
-    local pack target
-    for pack in "$ICONS_DIR"/*/; do
-        [ -d "$pack" ] || continue
-        pack="${pack%/}"
-        target="/usr/share/icons/$(basename "$pack")"
-        if [ -L "$target" ] && [ "$(readlink "$target")" = "$pack" ]; then
-            log "Removing icon pack symlink: $target"
-            rm "$target"
-        fi
-    done
-}
-
-case "$1" in
-    start)
-        mkdir -p /userdata/system/logs
-        log "Starting desktop overlay..."
-        apply_symlinks
-        link_icon_packs
-        link_dir_packs "${ROOTFS}/usr/share/icons" "/usr/share/icons"
-        link_files_into_dir "${ROOTFS}/usr/share/icons/batocera" "/usr/share/icons/batocera"
-        link_dir_packs "${ROOTFS}/usr/share/themes" "/usr/share/themes"
-        link_dir_packs "${ROOTFS}/usr/share/tint2" "/usr/share/tint2"
-        link_dir "${ROOTFS}/usr/share/desktop-palettes" "/usr/share/desktop-palettes"
-        ;;
-    stop)
-        mkdir -p /userdata/system/logs
-        log "Stopping desktop overlay..."
-        remove_symlinks
-        unlink_icon_packs
-        unlink_dir_packs "${ROOTFS}/usr/share/icons" "/usr/share/icons"
-        unlink_files_from_dir "${ROOTFS}/usr/share/icons/batocera" "/usr/share/icons/batocera"
-        unlink_dir_packs "${ROOTFS}/usr/share/themes" "/usr/share/themes"
-        unlink_dir_packs "${ROOTFS}/usr/share/tint2" "/usr/share/tint2"
-        unlink_dir "${ROOTFS}/usr/share/desktop-palettes" "/usr/share/desktop-palettes"
-        ;;
-    status)
-        if [ ! -d "$ROOTFS" ]; then
-            echo "native-x11-desktop: not installed (rootfs missing)."
-            exit 1
-        fi
-        missing=0
-        while IFS= read -r src; do
-            target="${src#${ROOTFS}}"
-            [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ] || missing=$((missing+1))
-        done < <(find "$ROOTFS" \( -type f -o -type l \))
-        [ "$missing" -eq 0 ] && echo "native-x11-desktop: all symlinks active." \
-                              || echo "native-x11-desktop: ${missing} symlink(s) missing or broken."
-        ;;
-    *)
-        echo "Usage: $0 {start|stop|status}"
-        exit 1
-        ;;
-esac
-SERVICEEOF
-
-chmod +x /userdata/system/services/native-x11-desktop
-
-# Enable and start the service
-batocera-services enable native-x11-desktop
-batocera-services start native-x11-desktop
-
-# Install our rc.xml as the base openbox config so it's active even outside desktop mode
-RC_DESKTOP="/userdata/system/add-ons/native-x11-desktop/rc.xml.desktop"
-RC_ES="/userdata/system/add-ons/native-x11-desktop/rc.xml.es"
-[ -f "$RC_DESKTOP" ] && cp "$RC_DESKTOP" /etc/openbox/rc.xml
-[ -f "$RC_ES" ]      && cp "$RC_ES"      /etc/openbox/rc.xml.es
-openbox --reconfigure >/dev/null 2>&1 || true
-
-# Apply palette icons (service must be running for paths to resolve)
-if [ "$IS_UPDATE" -eq 1 ] && [ -f "$PALETTE_FILE" ]; then
-    PALETTE_NAME=$(cat "$PALETTE_FILE" | tr -d '[:space:]')
-    ICONS_SRC="/usr/share/desktop-palettes/icons/palettes/$PALETTE_NAME"
-    if [ -d "$ICONS_SRC" ]; then
-        echo "Reapplying palette icons ($PALETTE_NAME)..."
-        cp "$ICONS_SRC"/* /usr/share/icons/batocera/ 2>/dev/null || true
-    fi
-else
-    ICONS_SRC="/usr/share/desktop-palettes/icons/palettes/blue"
-    if [ -d "$ICONS_SRC" ]; then
-        echo "Applying default palette icons (blue)..."
-        cp "$ICONS_SRC"/* /usr/share/icons/batocera/ 2>/dev/null || true
-    fi
-fi
+curl -s http://127.0.0.1:1234/reloadgames >/dev/null
 
 echo ""
-if [ "$IS_UPDATE" -eq 1 ]; then
-    echo "Update complete."
-else
-    echo "Installation complete. Please restart for changes to take effect."
-fi
+echo "$APPNAME is installed."
+echo "Press F1 in EmulationStation, or open Ports > Native X11 Desktop."
+echo "Press EmulationStation in the taskbar to return."

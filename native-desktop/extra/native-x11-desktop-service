@@ -1,0 +1,30 @@
+#!/bin/bash
+# Batocera service for the Native X11 Desktop add-on: F1 in EmulationStation
+# opens the Native X11 Desktop instead of the file manager. EmulationStation
+# runs /usr/bin/filemanagerlauncher on F1, so the desktop's launcher is
+# bind-mounted over it. Batocera's own file stays untouched underneath:
+# stopping the service (System Settings > Services, or batocera-services stop
+# native-x11-desktop) brings the file manager back.
+
+launcher=/userdata/system/add-ons/native-x11-desktop/native-x11-desktop-launch.sh
+target=/usr/bin/filemanagerlauncher
+
+is_bound() { awk -v m="$target" '$2==m {f=1} END {exit !f}' /proc/mounts; }
+
+case "$1" in
+    start)
+        [ -x "$launcher" ] || { echo "native-x11-desktop: $launcher is missing"; exit 1; }
+        is_bound || mount --bind "$launcher" "$target"
+        ;;
+    stop)
+        while is_bound; do umount "$target" || break; done
+        ;;
+    status)
+        if is_bound && [ "$target" -ef "$launcher" ]; then echo "native-x11-desktop: F1 opens the Native X11 Desktop"
+        else echo "native-x11-desktop: F1 does not open the Native X11 Desktop"; fi
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status}"
+        exit 1
+        ;;
+esac

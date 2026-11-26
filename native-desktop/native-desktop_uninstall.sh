@@ -1,154 +1,133 @@
 #!/bin/bash
-# Uninstaller for Native Desktop (the X11 native desktop, native-desktop.sh).
-#
-# The add-on keeps a root file system in /userdata/system/add-ons/native-x11-desktop/rootfs
-# and its "native-x11-desktop" service symlinks those files over Batocera's own at every
-# boot, renaming the originals to .bak. One of them is
-# /usr/bin/filemanagerlauncher, which F1 runs: the desktop's version closes
-# EmulationStation and starts Openbox, tint2 and pcmanfm, which cannot show
-# anything on Batocera's Wayland desktop (labwc), so F1 leaves a blank screen.
-#
-# This puts every original back and removes the add-on, so F1 works again
-# right away. It also works on a half-removed install (rootfs already gone,
-# links left dangling) and on an older DRL install. Your own files are kept:
-# only the files the add-on shipped are removed.
-
-ADDON_NAME="native-x11-desktop"
-ADDON_DIR="/userdata/system/add-ons/${ADDON_NAME}"
-ROOTFS="${ADDON_DIR}/rootfs"
-SERVICE_PATH="/userdata/system/services/${ADDON_NAME}"
-SERVICE_LOG="/userdata/system/logs/${ADDON_NAME}.log"
-TEMP_DIR="/userdata/tmp/native-desktop"
-DRL_REMOVER="/userdata/system/configs/bat-drl/Remover_Desktop.sh"
+# Uninstaller for Native Desktop — removes whichever variant is installed
+# (Native X11 Desktop, Native Wayland Desktop, or old squashfs desktop).
 
 echo "========================================="
 echo "Uninstalling: Native Desktop"
 echo "========================================="
 echo ""
 
-# On Batocera's Wayland desktop (labwc), native-desktop.sh installs the
-# Native Wayland Desktop instead; remove it
 LIGHT_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/native-wayland-desktop"
+f1="the file manager"
+
+# --- Remove Native Wayland Desktop if installed ---
 if [ -d /userdata/system/add-ons/native-wayland-desktop ] || [ -f /userdata/system/services/native-wayland-desktop ]; then
     echo "Removing Native Wayland Desktop..."
     curl -fsSL "$LIGHT_URL/native-wayland-desktop_uninstall.sh" | bash
     echo ""
 fi
-# Nothing of the X11 desktop left (the usual case on Wayland): done
-if [ ! -d "$ROOTFS" ] && [ ! -f "$SERVICE_PATH" ] && [ ! -f "$DRL_REMOVER" ] \
-    && [ ! -f /etc/openbox/rc.xml.es ] && [ ! -L /usr/bin/filemanagerlauncher ]; then
-    echo "Native Desktop has been removed."
-    exit 0
-fi
 
-# 1. Leave desktop mode if it is running
-echo "Closing desktop mode..."
-for proc in tint2 jgmenu picom xcompmgr; do
-    pkill -x "$proc" 2>/dev/null
-done
-pkill -f 'pcmanfm --deskto[p]' 2>/dev/null  # only the desktop, not F1's file manager
+# --- Remove lightweight Native X11 Desktop if installed ---
+if [ -d /userdata/system/add-ons/native-x11-desktop ] && [ ! -d /userdata/system/add-ons/native-x11-desktop/rootfs ]; then
+    echo "Removing Native X11 Desktop..."
 
-# 2. Older DRL installs came with their own remover; run it first
-if [ -f "$DRL_REMOVER" ]; then
-    echo "Running the older Desktop (DRL) remover..."
-    function yad() { return 0; }; export -f yad
-    bash "$DRL_REMOVER" </dev/null
-    unset -f yad
-    rm -f "$DRL_REMOVER"
-fi
-
-# 3. Stop the service so it cannot link anything again, and let it undo its
-#    own links while its files are still there
-if [ -f "$SERVICE_PATH" ]; then
-    echo "Stopping and removing the desktop service..."
-    bash "$SERVICE_PATH" stop >/dev/null 2>&1
-    batocera-services stop "$ADDON_NAME" >/dev/null 2>&1
-    batocera-services disable "$ADDON_NAME" >/dev/null 2>&1
-    rm -f "$SERVICE_PATH"
-fi
-
-# 4. Remove any link still pointing into the add-on (the service skips some,
-#    and a half-removed install leaves dangling ones) and put originals back
-echo "Restoring Batocera's own files..."
-restored=0
-while IFS= read -r -d '' link; do
-    rm -f "$link"
-    if [ -e "${link}.bak" ] || [ -L "${link}.bak" ]; then
-        mv -f "${link}.bak" "$link"
+    # Close it if running
+    pid=$(cat /run/native-x11-desktop.pid 2>/dev/null)
+    if [ -n "$pid" ]; then
+        kill -TERM "$pid" 2>/dev/null
+        sleep 2
     fi
-    restored=$((restored + 1))
-done < <(find /usr /etc /lib -xdev -lname "${ADDON_DIR}/*" -print0 2>/dev/null)
-# Originals the service backed up whose link is already gone
-if [ -f "$SERVICE_LOG" ]; then
-    sed -n 's/.*Backing up: \(.*\) -> \1\.bak$/\1/p' "$SERVICE_LOG" | sort -u | while IFS= read -r target; do
-        if [ -e "${target}.bak" ] && [ ! -e "$target" ]; then
-            mv -f "${target}.bak" "$target"
-        fi
-    done
-fi
-echo "  ${restored} links removed."
+    rm -f /run/native-x11-desktop.pid
 
-# F1's launcher must be Batocera's again
-if [ -L /usr/bin/filemanagerlauncher ] && [ ! -e /usr/bin/filemanagerlauncher ]; then
-    rm -f /usr/bin/filemanagerlauncher
-fi
-if [ ! -e /usr/bin/filemanagerlauncher ]; then
-    # Batocera's read-only system image (where it is visible differs by version)
-    for layer in /overlay/base /overlay/base2 /overlay_root/base /overlay_root/base2; do
-        if [ -f "$layer/usr/bin/filemanagerlauncher" ]; then
-            cp -a "$layer/usr/bin/filemanagerlauncher" /usr/bin/filemanagerlauncher
-            break
-        fi
-    done
-fi
-
-# 5. Openbox (X11): the add-on replaced Batocera's rc.xml with its own
-#    (it keeps Batocera's as rc.xml.es, so that file marks it)
-if [ -f /etc/openbox/rc.xml.es ]; then
-    # Batocera's read-only system image (where it is visible differs by version)
-    for layer in /overlay/base /overlay/base2 /overlay_root/base /overlay_root/base2; do
-        if [ -f "$layer/etc/openbox/rc.xml" ]; then
-            echo "Restoring Batocera's Openbox settings..."
-            cp -f "$layer/etc/openbox/rc.xml" /etc/openbox/rc.xml
-            break
-        fi
-    done
-    rm -f /etc/openbox/rc.xml.es
-    pgrep -x openbox >/dev/null && openbox --reconfigure >/dev/null 2>&1
-fi
-
-# 6. The add-on's own files. The Docker "Desktop" add-on shares this folder;
-#    if it is installed too, keep its files.
-if [ -d "$ADDON_DIR" ]; then
-    echo "Removing the add-on's files..."
-    for item in rootfs icons config rc.xml.desktop rc.xml.es; do
-        rm -rf --one-file-system "${ADDON_DIR:?}/$item"
-    done
-    if [ ! -e "$ADDON_DIR/Desktop.AppImage" ]; then
-        rm -rf --one-file-system "${ADDON_DIR:?}"
+    # Stop and remove service
+    if [ -f /userdata/system/services/native-x11-desktop ]; then
+        bash /userdata/system/services/native-x11-desktop stop 2>/dev/null
+        batocera-services disable native-x11-desktop >/dev/null 2>&1
+        rm -f /userdata/system/services/native-x11-desktop
     fi
-fi
-rm -rf "$TEMP_DIR"
 
-# 7. Settings it installed for its taskbar, menu and file manager, and the
-#    shortcuts it put on its desktop (anything you added there is kept)
-echo "Removing desktop mode settings..."
-rm -rf /userdata/system/.config/tint2 /userdata/system/.config/jgmenu \
-       /userdata/system/.config/sublime-text /userdata/system/.config/pcmanfm \
-       /userdata/system/.config/libfm
-for f in Choose_Browser CoreKeyboard ES FileManagerES Install_WPS_Office \
-         Pack_Theme "Shortcut Creator" screenrec; do
-    rm -f "/userdata/system/Desktop/$f.desktop"
-done
-rmdir /userdata/system/Desktop 2>/dev/null
-# Its shortcut to Steam's games folder (only the link, never the games;
-# a real folder of that name is left alone)
-[ -L "/userdata/Steam Games Folder" ] && rm -f "/userdata/Steam Games Folder"
-rm -f "$SERVICE_LOG" /userdata/system/logs/tint2.log /userdata/system/logs/picom.log
+    # Restore Openbox config if desktop was active
+    if [ -f /tmp/native-x11-desktop-rc-backup.xml ]; then
+        cp /tmp/native-x11-desktop-rc-backup.xml /etc/openbox/rc.xml
+        rm -f /tmp/native-x11-desktop-rc-backup.xml
+        pgrep -x openbox >/dev/null && openbox --reconfigure >/dev/null 2>&1
+    fi
+
+    # Remove addon files and configs
+    rm -rf /userdata/system/add-ons/native-x11-desktop
+    rm -rf /userdata/system/configs/native-x11-desktop
+    rm -f /userdata/system/logs/native-x11-desktop.log
+
+    # Remove Ports entry
+    ports_dir="/userdata/roms/ports"
+    rm -f "$ports_dir/Native X11 Desktop.sh" "$ports_dir/Native X11 Desktop.sh.keys"
+    rm -f "$ports_dir/images/native-x11-desktop-logo.png"
+    if [ -f "$ports_dir/gamelist.xml" ]; then
+        xmlstarlet ed -L -d "/gameList/game[path='./Native X11 Desktop.sh']" "$ports_dir/gamelist.xml"
+    fi
+
+    # Give F1 to KDE Plasma if installed, otherwise file manager
+    if [ -f /userdata/system/services/kdeplasma ] && [ -x /userdata/system/add-ons/kdeplasma/kdeplasma-launch.sh ]; then
+        batocera-services enable kdeplasma >/dev/null 2>&1
+        batocera-services start kdeplasma >/dev/null 2>&1
+        f1="KDE Plasma"
+    fi
+
+    echo "Native X11 Desktop removed."
+fi
+
+# --- Remove old squashfs-based desktop if present ---
+DRL_REMOVER="/userdata/system/configs/bat-drl/Remover_Desktop.sh"
+OLD_ROOTFS="/userdata/system/add-ons/native-x11-desktop/rootfs"
+OLD_DESKTOP_ROOTFS="/userdata/system/add-ons/desktop/rootfs"
+
+if [ -d "$OLD_ROOTFS" ] || [ -d "$OLD_DESKTOP_ROOTFS" ] || [ -f "$DRL_REMOVER" ]; then
+    echo "Removing old squashfs desktop..."
+
+    # Kill old desktop processes
+    for proc in tint2 jgmenu picom xcompmgr; do
+        pkill -x "$proc" 2>/dev/null
+    done
+    pkill -f 'pcmanfm --deskto[p]' 2>/dev/null
+
+    # Run DRL remover if present
+    if [ -f "$DRL_REMOVER" ]; then
+        function yad() { return 0; }; export -f yad
+        bash "$DRL_REMOVER" </dev/null 2>/dev/null
+        unset -f yad
+        rm -f "$DRL_REMOVER"
+    fi
+
+    # Stop old services
+    for svc in desktop native-x11-desktop desktop_drl; do
+        if [ -f "/userdata/system/services/$svc" ]; then
+            bash "/userdata/system/services/$svc" stop >/dev/null 2>&1
+            batocera-services stop "$svc" >/dev/null 2>&1
+            batocera-services disable "$svc" >/dev/null 2>&1
+            rm -f "/userdata/system/services/$svc"
+        fi
+    done
+
+    # Remove old addon dirs
+    rm -rf /userdata/system/add-ons/desktop
+    rm -rf /userdata/system/add-ons/native-x11-desktop
+    rm -rf /userdata/system/add-ons/desktop_drl
+    rm -rf /userdata/tmp/native-desktop
+
+    # Restore Openbox config
+    if [ -f /etc/openbox/rc.xml.es ]; then
+        for layer in /overlay/base /overlay/base2 /overlay_root/base /overlay_root/base2; do
+            if [ -f "$layer/etc/openbox/rc.xml" ]; then
+                cp -f "$layer/etc/openbox/rc.xml" /etc/openbox/rc.xml
+                break
+            fi
+        done
+        rm -f /etc/openbox/rc.xml.es
+        pgrep -x openbox >/dev/null && openbox --reconfigure >/dev/null 2>&1
+    fi
+
+    # Clean up old desktop settings
+    rm -rf /userdata/system/.config/tint2 /userdata/system/.config/jgmenu \
+           /userdata/system/.config/sublime-text /userdata/system/.config/pcmanfm \
+           /userdata/system/.config/libfm
+
+    echo "Old squashfs desktop removed."
+fi
+
+curl -s http://127.0.0.1:1234/reloadgames >/dev/null
 
 echo ""
 echo "========================================="
 echo "Native Desktop has been removed."
-echo "F1 opens Batocera's file manager again."
-echo "Restart Batocera to reset any remaining icons and themes."
+echo "F1 opens ${f1} again."
 echo "========================================="
