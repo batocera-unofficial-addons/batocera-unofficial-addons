@@ -100,6 +100,8 @@ label {{ color: {fg}; }}
 .ld-bar button.ld-start {{ background: {acc}; font-weight: 600; }}
 .ld-bar button.ld-start:hover {{ background: {acc_h}; }}
 .ld-bar button.ld-start label, .ld-bar button.ld-start image {{ color: #ffffff; }}
+button.ld-apply {{ background: {acc}; font-weight: 600; }}
+button.ld-apply label {{ color: #ffffff; }}
 button.ld-es {{ background: rgba(255, 181, 71, 0.15); }}
 button.ld-es:hover {{ background: rgba(255, 181, 71, 0.26); }}
 button.ld-es label {{ color: #ffb547; font-weight: 600; }}
@@ -132,8 +134,6 @@ scale trough {{ background: rgba(255, 255, 255, 0.15); min-height: 6px; border-r
 scale highlight {{ background: {acc}; border-radius: 3px; border: none; }}
 scale slider {{ background: {fg}; border: none; min-width: 16px; min-height: 16px; border-radius: 8px; }}
 .ld-title {{ font-weight: 600; }}
-.ld-theme-btn {{ border-radius: 10px; padding: 6px 10px; }}
-.ld-theme-btn label {{ font-size: 9pt; }}
 """
 
 
@@ -480,24 +480,6 @@ class AppMenu(Popup):
         scroll.add(self.grid)
         self.card.pack_start(scroll, True, True, 0)
 
-        # Theme picker area (hidden by default, shown when Theme is clicked)
-        self.theme_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        theme_head = Gtk.Box(spacing=8)
-        theme_title = Gtk.Label(label="Theme", xalign=0)
-        theme_title.get_style_context().add_class("ld-title")
-        theme_head.pack_start(theme_title, True, True, 0)
-        theme_back = Gtk.Button(label="Back")
-        theme_back.connect("clicked", lambda *_: self.hide_theme_picker())
-        theme_head.pack_end(theme_back, False, False, 0)
-        self.theme_box.pack_start(theme_head, False, False, 0)
-        self.theme_grid = Gtk.FlowBox(homogeneous=True, min_children_per_line=4,
-                                      max_children_per_line=6,
-                                      selection_mode=Gtk.SelectionMode.NONE,
-                                      row_spacing=6, column_spacing=6)
-        self.theme_box.pack_start(self.theme_grid, True, True, 0)
-        self.theme_box.set_no_show_all(True)
-        self.card.pack_start(self.theme_box, False, False, 0)
-
         foot = Gtk.Box(spacing=6, homogeneous=True)
         foot.get_style_context().add_class("ld-foot")
         es = Gtk.Button(label="EmulationStation")
@@ -505,7 +487,7 @@ class AppMenu(Popup):
         es.connect("clicked", lambda *_: exit_desktop())
         foot.pack_start(es, True, True, 0)
         theme_btn = Gtk.Button(label="Theme")
-        theme_btn.connect("clicked", lambda *_: self.show_theme_picker())
+        theme_btn.connect("clicked", self.on_theme_button)
         foot.pack_start(theme_btn, True, True, 0)
         self.power = {}
         for key, label, cmd in (("reboot", "Restart", ["batocera-es-swissknife", "--reboot"]),
@@ -598,43 +580,11 @@ class AppMenu(Popup):
         if apps:
             self.on_app(None, apps[0])
 
-    def show_theme_picker(self):
-        for child in self.theme_grid.get_children():
-            self.theme_grid.remove(child)
-        current = _theme_mod.get_current_palette()
-        for name in _theme_mod.list_palettes():
-            p = _theme_mod.load_palette(name)
-            acc = p.get("P_ACC", "#4f9bff")
-            label_text = name.replace("-", " ").capitalize()
-            b = Gtk.Button(label=label_text)
-            b.get_style_context().add_class("ld-theme-btn")
-            # Color the button background with the palette's accent
-            btn_css = Gtk.CssProvider()
-            btn_css.load_from_data(
-                f".ld-theme-btn#{name} {{ background: {acc}; color: #ffffff; }}"
-                f".ld-theme-btn#{name}:hover {{ background: {acc}; opacity: 0.85; }}".encode()
-            )
-            b.set_name(name)
-            b.get_style_context().add_provider(btn_css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1)
-            if name == current:
-                b.set_label(f"{label_text} (current)")
-            b.connect("clicked", self.on_theme_pick, name)
-            self.theme_grid.add(b)
-        self.theme_box.set_no_show_all(False)
-        self.theme_box.show_all()
-
-    def hide_theme_picker(self):
-        self.theme_box.hide()
-        self.theme_box.set_no_show_all(True)
-
-    def on_theme_pick(self, _b, name):
-        global _palette, CSS
-        _theme_mod.set_current_palette(name)
-        _theme_mod.generate_wallpaper()
-        _palette = _theme_mod.load_palette(name)
-        CSS = _build_css(_palette).encode()
-        self.panel.reload_theme()
+    def on_theme_button(self, *_):
+        # The theme picker is its own window, like the original desktop's
+        # "Desktop Palette"; it tells the panel to reload when applied
         self.hide()
+        spawn([sys.executable, os.path.abspath(__file__), "--theme"])
 
     def on_app_menu(self, button, event, app):
         if event.button != 3:
@@ -790,6 +740,8 @@ class Panel(Gtk.Window):
         GLib.timeout_add_seconds(5, lambda: self.update_volume_icon() or True)
         GLib.timeout_add_seconds(20, lambda: self.update_network() or True)
         GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, self.on_menu_key)
+        # Sent by the standalone theme picker (desktop right-click menu)
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR2, self.on_theme_signal)
         self.connect("destroy", Gtk.main_quit)
 
     def on_realize(self, _widget):
@@ -833,6 +785,14 @@ class Panel(Gtk.Window):
         self._css_provider.load_from_data(CSS)
         Gtk.StyleContext.add_provider_for_screen(screen, self._css_provider,
                                                  Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+    def on_theme_signal(self):
+        """The theme was changed outside the panel: load it and re-apply."""
+        global _palette, CSS
+        _palette = _theme_mod.load_palette()
+        CSS = _build_css(_palette).encode()
+        self.reload_theme()
+        return True
 
     def on_menu_key(self):
         # Super key, or X on a controller (sent by Openbox's keybind)
@@ -1035,60 +995,111 @@ def choose_wallpaper():
     # native-x11-desktop-desktop.py watches CONF and shows the new wallpaper
 
 
+def notify_panel():
+    """Tell the running panel to reload its theme (SIGUSR2).
+
+    Only the panel itself is signalled: a python3 process whose last argument
+    is this script, with no options. The picker and wallpaper windows run the
+    same script with --theme/--wallpaper and have no SIGUSR2 handler, so a
+    signal would kill them.
+    """
+    script = os.path.basename(os.path.abspath(__file__))
+    me = os.getpid()
+    for pid in os.listdir("/proc"):
+        if not pid.isdigit() or int(pid) == me:
+            continue
+        try:
+            with open(f"/proc/{pid}/cmdline", "rb") as f:
+                args = f.read().split(b"\0")
+        except OSError:
+            continue
+        args = [a.decode(errors="replace") for a in args if a]
+        if len(args) >= 2 and os.path.basename(args[-1]) == script \
+                and not any(a.startswith("--") for a in args[1:]):
+            try:
+                os.kill(int(pid), signal.SIGUSR2)
+            except OSError:
+                pass
+
+
 def theme_picker_window():
-    """Standalone theme picker window (for --theme CLI or right-click menu)."""
-    win = Gtk.Window(title="Choose a theme")
-    win.set_default_size(480, 320)
+    """The theme window: app menu > Theme, or desktop right-click > Change theme.
+
+    Like the original desktop's "Desktop Palette" window: one list of colour
+    palettes (the current one first, each with its colour), and Apply /
+    Cancel. Apply saves the palette, draws its wallpaper (the desktop picks it
+    up from CONF) and tells the running panel to reload its colours.
+    """
+    win = Gtk.Window(title="Desktop Theme")
+    win.set_default_size(380, -1)
+    win.set_resizable(False)
     win.set_position(Gtk.WindowPosition.CENTER)
     visual = win.get_screen().get_rgba_visual()
     if visual:
         win.set_visual(visual)
+    win.connect("destroy", Gtk.main_quit)
+    win.connect("key-press-event",
+                lambda _w, e: e.keyval == Gdk.KEY_Escape and (win.destroy() or True))
 
-    card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+    card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
     card.get_style_context().add_class("ld-card")
-    card.set_margin_top(14)
-    card.set_margin_bottom(14)
-    card.set_margin_start(14)
-    card.set_margin_end(14)
+    for side in ("top", "bottom", "start", "end"):
+        getattr(card, f"set_margin_{side}")(18)
 
-    title = Gtk.Label(label="Choose a theme", xalign=0)
+    title = Gtk.Label(label="Desktop Theme", xalign=0)
     title.get_style_context().add_class("ld-title")
     card.pack_start(title, False, False, 0)
 
-    grid = Gtk.FlowBox(homogeneous=True, min_children_per_line=3,
-                       max_children_per_line=5,
-                       selection_mode=Gtk.SelectionMode.NONE,
-                       row_spacing=8, column_spacing=8)
+    # Palettes: name, label, accent colour. The current one first.
+    store = Gtk.ListStore(str, str, str)
     current = _theme_mod.get_current_palette()
-    for name in _theme_mod.list_palettes():
-        p = _theme_mod.load_palette(name)
-        acc = p.get("P_ACC", "#4f9bff")
-        label_text = name.replace("-", " ").capitalize()
-        b = Gtk.Button(label=label_text + (" (current)" if name == current else ""))
-        b.get_style_context().add_class("ld-theme-btn")
-        btn_css = Gtk.CssProvider()
-        btn_css.load_from_data(
-            f".ld-theme-btn#{name} {{ background: {acc}; color: #ffffff; }}"
-            f".ld-theme-btn#{name}:hover {{ background: {acc}; opacity: 0.85; }}".encode()
-        )
-        b.set_name(name)
-        b.get_style_context().add_provider(btn_css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1)
+    names = _theme_mod.list_palettes()
+    if current in names:
+        names.remove(current)
+        names.insert(0, current)
+    for name in names:
+        acc = _theme_mod.load_palette(name).get("P_ACC", "#4f9bff")
+        label = name.replace("-", " ").title() + ("  (current)" if name == current else "")
+        store.append([name, label, acc])
 
-        def on_pick(_b, n=name):
-            _theme_mod.set_current_palette(n)
-            _theme_mod.generate_wallpaper()
-            Gtk.main_quit()
+    row = Gtk.Box(spacing=10)
+    row.pack_start(Gtk.Label(label="Colour palette:"), False, False, 0)
+    combo = Gtk.ComboBox(model=store)
+    swatch = Gtk.CellRendererText()
+    swatch.set_fixed_size(24, -1)
+    combo.pack_start(swatch, False)
+    combo.add_attribute(swatch, "background", 2)
+    text = Gtk.CellRendererText()
+    combo.pack_start(text, True)
+    combo.add_attribute(text, "text", 1)
+    combo.set_active(0)
+    row.pack_start(combo, True, True, 0)
+    card.pack_start(row, False, False, 0)
 
-        b.connect("clicked", on_pick)
-        grid.add(b)
+    def on_apply(*_):
+        it = combo.get_active_iter()
+        if it is None:
+            return
+        name = store[it][0]
+        _theme_mod.set_current_palette(name)
+        _theme_mod.generate_wallpaper()
+        notify_panel()
+        win.destroy()
 
-    scroll = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
-    scroll.add(grid)
-    card.pack_start(scroll, True, True, 0)
+    buttons = Gtk.Box(spacing=8)
+    buttons.set_halign(Gtk.Align.END)
+    cancel = Gtk.Button(label="Cancel")
+    cancel.connect("clicked", lambda *_: win.destroy())
+    apply_btn = Gtk.Button(label="Apply")
+    apply_btn.get_style_context().add_class("ld-apply")
+    apply_btn.connect("clicked", on_apply)
+    buttons.pack_start(cancel, False, False, 0)
+    buttons.pack_start(apply_btn, False, False, 0)
+    card.pack_start(buttons, False, False, 0)
 
     win.add(card)
-    win.connect("destroy", Gtk.main_quit)
     win.show_all()
+    combo.grab_focus()
     Gtk.main()
 
 

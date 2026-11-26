@@ -6,7 +6,7 @@ colours. The same logic is used by the Wayland desktop (with different
 install paths).
 """
 
-import os, re
+import os, re, shutil, subprocess
 
 INSTALL = os.path.dirname(os.path.abspath(__file__))
 CONF = "/userdata/system/configs/native-wayland-desktop"
@@ -127,9 +127,49 @@ def generate_wallpaper(p=None, template_path=None, output_path=None):
         return None
     svg = svg.replace("{{P_ACC}}", p.get("P_ACC", "#4f9bff"))
     svg = svg.replace("{{P_BASE}}", p.get("P_BASE", "#0b0f17"))
-    with open(output_path, "w") as f:
-        f.write(svg)
-    return output_path
+    # Only write when the palette changed: the desktop watches CONF and
+    # calls this again on every change there, so an unconditional write
+    # would keep it redrawing the wallpaper in a loop
+    try:
+        with open(output_path) as f:
+            same = f.read() == svg
+    except OSError:
+        same = False
+    if not same:
+        with open(output_path, "w") as f:
+            f.write(svg)
+    return _render_png(output_path) or output_path
+
+
+def _render_png(svg_path):
+    """Render svg_path to a PNG next to it and return the PNG's path.
+
+    Batocera's gdk-pixbuf has no SVG loader, so GTK cannot show the SVG
+    itself; rsvg-convert (librsvg) is part of Batocera. Rendered again only
+    when the SVG is newer. Returns None if it cannot be rendered.
+    """
+    png_path = os.path.splitext(svg_path)[0] + ".png"
+    try:
+        if os.path.getmtime(png_path) >= os.path.getmtime(svg_path):
+            return png_path
+    except OSError:
+        pass
+    rsvg = shutil.which("rsvg-convert")
+    if not rsvg:
+        return None
+    tmp = png_path + ".tmp"
+    try:
+        subprocess.run([rsvg, "-w", "1920", "-h", "1080", "-o", tmp, svg_path],
+                       check=True, timeout=30,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        os.replace(tmp, png_path)
+    except (OSError, subprocess.SubprocessError):
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+        return None
+    return png_path
 
 
 def get_current_palette(conf_dir=None):
