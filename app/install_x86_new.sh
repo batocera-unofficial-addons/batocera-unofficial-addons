@@ -206,7 +206,10 @@ curl -fs http://127.0.0.1:1234/reloadgames || true
 
 # Install BUA Python hook (enables add-on configgen generators)
 echo "Installing BUA Python hook..."
-USERCUSTOMIZE_DIR="/userdata/system/.local/lib/python3.12/site-packages"
+# Python's per-user site-packages as EmulationStation sees it (HOME=/userdata/system);
+# the folder is named after the Python version, which changes between Batocera releases
+USERCUSTOMIZE_DIR=$(HOME=/userdata/system python3 -c 'import site; print(site.getusersitepackages())' 2>/dev/null)
+[ -n "$USERCUSTOMIZE_DIR" ] || USERCUSTOMIZE_DIR="/userdata/system/.local/lib/python3.12/site-packages"
 mkdir -p "$USERCUSTOMIZE_DIR"
 curl -fLs -o "$USERCUSTOMIZE_DIR/usercustomize.py" \
     "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/usercustomize.py"
