@@ -27,10 +27,13 @@ fail() {
     exit 1
 }
 
-# Batocera 44 or later, running its Wayland desktop (labwc)
-major=$(batocera-version 2>/dev/null | grep -o '^[0-9]*')
-[ -n "$major" ] && [ "$major" -ge 44 ] || fail "The Light Desktop needs Batocera 44 or later."
-pgrep -x labwc >/dev/null || fail "The Light Desktop needs Batocera's Wayland desktop (labwc), which is not running."
+# On X11, redirect to the regular Desktop for Batocera installer.
+DESKTOP_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/Desktop_for_Batocera"
+if ! pgrep -x labwc >/dev/null; then
+    dialog --title "$APPNAME" --infobox "X11 detected — installing Desktop for Batocera (X11 version)." 5 60
+    curl -fsSL "$DESKTOP_URL/Install_Desktop.sh" | bash
+    exit "${PIPESTATUS[1]}"
+fi
 
 echo "Installing $APPNAME..."
 mkdir -p "$install_dir/config"

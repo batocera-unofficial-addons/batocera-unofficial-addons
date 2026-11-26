@@ -11,7 +11,7 @@ exec > "$log" 2>&1
 echo "== $(date) Light Desktop start"
 
 if ! pgrep -x labwc >/dev/null; then
-    echo "The Light Desktop needs Batocera's Wayland desktop (labwc), Batocera 44 or later."
+    echo "The Light Desktop needs Batocera's Wayland desktop (labwc), not X11 (Openbox)."
     exit 1
 fi
 # Already open (F1 pressed twice): do nothing

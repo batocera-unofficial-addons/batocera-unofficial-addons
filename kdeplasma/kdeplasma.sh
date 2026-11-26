@@ -23,10 +23,8 @@ fail() {
     exit 1
 }
 
-# Checks: x86_64, Batocera 44 or later, running its Wayland desktop (labwc)
+# Checks: x86_64, running Wayland desktop (labwc)
 [ "$(uname -m)" = "x86_64" ] || fail "KDE Plasma Desktop is for x86_64 machines. This one is $(uname -m)."
-major=$(batocera-version 2>/dev/null | grep -o '^[0-9]*')
-[ -n "$major" ] && [ "$major" -ge 44 ] || fail "KDE Plasma Desktop needs Batocera 44 or later."
 pgrep -x labwc >/dev/null || fail "KDE Plasma Desktop needs Batocera's Wayland desktop (labwc), which is not running."
 free_kb=$(df -Pk /userdata | awk 'NR==2 {print $4}')
 if [ ! -d "$install_dir/rootfs/usr" ] && [ "${free_kb:-0}" -lt 8000000 ]; then
