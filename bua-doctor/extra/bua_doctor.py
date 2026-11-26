@@ -33,7 +33,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import Callable
 
-VERSION = "1.1"
+VERSION = "1.2"
 ROOT = os.environ.get("BUA_DOCTOR_ROOT", "")
 REPO = "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main"
 
@@ -81,6 +81,19 @@ def log(msg: str) -> None:
         f.write(f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S} {msg}\n")
 
 
+def bua_fds() -> tuple[int, ...]:
+    """File descriptor 9, if open. The BUA menu runs jobs with "exec 9>&2"
+    and its dialog function sends its markers there; Python closes inherited
+    descriptors in child processes unless they are passed on, and without it
+    every dialog (ours, and an install script's during a reinstall) fails
+    with "9: Bad file descriptor" and waits forever."""
+    try:
+        os.fstat(9)
+        return (9,)
+    except OSError:
+        return ()
+
+
 def run(args: list[str], timeout: int = 60) -> tuple[int, str]:
     """Runs a command; never raises. In a test root, system commands are
     only logged."""
@@ -88,7 +101,7 @@ def run(args: list[str], timeout: int = 60) -> tuple[int, str]:
         log("TEST, not run: " + " ".join(args))
         return 0, ""
     try:
-        p = subprocess.run(args, capture_output=True, text=True, timeout=timeout)
+        p = subprocess.run(args, capture_output=True, text=True, timeout=timeout, pass_fds=bua_fds())
         return p.returncode, p.stdout
     except (OSError, subprocess.SubprocessError) as e:
         return 1, str(e)
@@ -557,7 +570,7 @@ def _reinstall(addon: str) -> str:
     log(f"reinstalling {addon}: {cmd}")
     if ROOT:
         return f"reinstalled {addon} (test, not run)"
-    rc = subprocess.run(["bash", "-c", cmd]).returncode
+    rc = subprocess.run(["bash", "-c", cmd], pass_fds=bua_fds()).returncode
     return f"reinstalled {addon}" if rc == 0 else f"FAILED: reinstalling {addon} exited {rc}"
 
 
@@ -1252,7 +1265,7 @@ def check_installed_missing() -> list[Finding]:
             log(f"reinstalling {name}: {cmd}")
             if ROOT:
                 return f"reinstalled {name} (test, not run)"
-            rc = subprocess.run(["bash", "-c", cmd]).returncode
+            rc = subprocess.run(["bash", "-c", cmd], pass_fds=bua_fds()).returncode
             return f"reinstalled {name}" if rc == 0 else f"FAILED: reinstalling {name} exited {rc}"
 
         found.append(Finding(f"missing-{name}", f"Installed, but its files are gone: {name}",
@@ -1489,7 +1502,7 @@ def check_docker() -> list[Finding]:
 def dialog(*args: str) -> tuple[int, str]:
     """Through bash, so the BUA menu's dialog function is used when present."""
     p = subprocess.run(["bash", "-c", 'dialog --stdout "$@"', "dialog", *args],
-                       stdout=subprocess.PIPE, text=True)
+                       stdout=subprocess.PIPE, text=True, pass_fds=bua_fds())
     return p.returncode, p.stdout.strip()
 
 
