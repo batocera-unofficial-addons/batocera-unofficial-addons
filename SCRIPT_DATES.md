@@ -4,14 +4,14 @@
 |------|------------------|
 | `.dep/mousemove.sh` | 2025-05-22 18:53:29 +0100 |
 | `.github/contribkit/build.sh` | 2026-11-20 20:43:12 +0000 |
-| `.github/scripts/check_apps_json.py` | 2026-11-20 20:45:26 +0000 |
+| `.github/scripts/check_apps_json.py` | 2026-11-22 21:51:20 -0500 |
 | `.github/scripts/update_script_dates.py` | 2025-11-27 21:41:34 +0000 |
 | `7zip/7zip.sh` | 2025-05-22 17:09:18 +0100 |
 | `7zip/7zip_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Android/Install_Android.sh` | 2026-05-04 21:46:58 +0100 |
 | `Android/Install_Android_uninstall.sh` | 2026-10-26 23:57:00 -0400 |
-| `Desktop_for_Batocera/Install_Desktop.sh` | 2026-11-17 19:57:42 +0000 |
-| `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2026-05-11 11:35:15 +0100 |
+| `Desktop_for_Batocera/Install_Desktop.sh` | 2026-11-21 16:43:14 -0500 |
+| `Desktop_for_Batocera/Install_Desktop_uninstall.sh` | 2026-11-21 16:43:14 -0500 |
 | `Freej2me/Install_j2me-old .sh` | 2026-11-20 21:00:36 +0000 |
 | `Freej2me/Install_j2me-old _uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `Freej2me/Install_j2me.sh` | 2026-05-04 21:46:58 +0100 |
@@ -20,7 +20,7 @@
 | `Winconfig_Windows_Game_Fix/Install_Winconfig_uninstall.sh` | 2026-11-17 15:00:30 -0500 |
 | `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config - old.sh` | 2025-05-14 19:17:39 -0300 |
 | `Winconfig_Windows_Game_Fix/extra/Winconfig_gamelist_config.sh` | 2026-11-17 19:59:42 +0000 |
-| `amazonluna/amazonluna-arm64.sh` | 2025-05-22 17:11:10 +0100 |
+| `amazonluna/amazonluna-arm64.sh` | 2026-11-20 23:51:30 -0500 |
 | `amazonluna/amazonluna.sh` | 2026-10-27 03:20:22 +0000 |
 | `amazonluna/amazonluna_uninstall.sh` | 2026-10-27 03:20:22 +0000 |
 | `ambermoon/ambermoon.sh` | 2026-04-17 14:03:29 +0100 |
@@ -32,16 +32,16 @@
 | `app/batocera-unofficial-addons-arm64.sh` | 2025-11-20 16:56:24 +0000 |
 | `app/batocera-unofficial-addons.sh` | 2026-07-02 16:31:40 -0300 |
 | `app/bua_cli.py` | 2026-10-24 14:00:37 -0400 |
-| `app/bua_installerarm64.py` | 2026-11-17 15:04:59 -0500 |
-| `app/bua_installerx86.py` | 2026-11-20 11:24:56 -0700 |
+| `app/bua_installerarm64.py` | 2026-11-20 23:51:30 -0500 |
+| `app/bua_installerx86.py` | 2026-11-20 23:51:30 -0500 |
 | `app/dep.sh` | 2025-05-22 17:16:35 +0100 |
 | `app/dep_arm64.sh` | 2025-05-22 17:16:49 +0100 |
 | `app/install.sh` | 2025-05-22 17:17:07 +0100 |
 | `app/install_arm64.sh` | 2025-05-22 17:17:22 +0100 |
-| `app/install_arm64_new.sh` | 2026-10-18 16:05:09 -0400 |
+| `app/install_arm64_new.sh` | 2026-11-20 23:51:30 -0500 |
 | `app/install_new.sh` | 2025-11-20 03:09:00 +0000 |
 | `app/install_x86.sh` | 2025-05-22 17:17:37 +0100 |
-| `app/install_x86_new.sh` | 2026-11-20 11:24:56 -0700 |
+| `app/install_x86_new.sh` | 2026-11-20 23:51:30 -0500 |
 | `app/rd.sh` | 2025-04-01 03:36:47 +0100 |
 | `app/symlinks.sh` | 2025-12-11 02:28:52 +0000 |
 | `app/templates/desktop_template.sh` | 2025-01-06 01:25:01 +0000 |
@@ -134,9 +134,9 @@
 | `fightcade/sym_wine.sh` | 2025-01-13 02:20:54 +0000 |
 | `filezilla/filezilla.sh` | 2025-05-22 17:53:05 +0100 |
 | `filezilla/filezilla_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `firefox/firefox-arm64.sh` | 2025-05-22 17:52:19 +0100 |
+| `firefox/firefox-arm64.sh` | 2026-11-20 22:16:21 -0500 |
 | `firefox/firefox-arm64_uninstall.sh` | 2026-10-18 16:23:44 -0400 |
-| `firefox/firefox.sh` | 2026-05-04 23:50:50 +0100 |
+| `firefox/firefox.sh` | 2026-11-20 22:16:21 -0500 |
 | `firefox/firefox_uninstall.sh` | 2026-10-18 16:23:44 -0400 |
 | `flashbox/flashbox.sh` | 2025-05-22 17:54:17 +0100 |
 | `flathub/flathub.sh` | 2025-07-29 17:12:59 -0400 |
@@ -147,8 +147,8 @@
 | `freetube/freetube_uninstall.sh` | 2026-10-23 12:37:46 -0400 |
 | `gamescope/gamescope.sh` | 2025-12-09 23:14:24 +0000 |
 | `gamescope/gamescope_uninstall.sh` | 2026-10-26 23:57:27 -0400 |
-| `gcm/gcm.sh` | 2026-11-19 08:28:32 -0700 |
-| `gcm/gcm_uninstall.sh` | 2026-11-19 08:28:32 -0700 |
+| `gcm/gcm.sh` | 2026-11-24 09:55:38 -0700 |
+| `gcm/gcm_uninstall.sh` | 2026-11-24 09:55:38 -0700 |
 | `gparted/gparted.sh` | 2025-12-11 02:16:04 +0000 |
 | `gparted/gparted_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `greenlight/greenlight.sh` | 2026-04-17 14:03:29 +0100 |
@@ -158,7 +158,7 @@
 | `hbomax/hbomax_uninstall.sh` | 2026-10-24 09:12:00 -0400 |
 | `heroic/create_game_launchers.sh` | 2025-01-04 14:59:32 +0000 |
 | `heroic/create_game_launchers_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `heroic/heroic.sh` | 2026-08-21 03:40:15 +0200 |
+| `heroic/heroic.sh` | 2026-11-20 23:51:30 -0500 |
 | `heroic/heroic_uninstall.sh` | 2026-10-26 23:57:45 -0400 |
 | `heroic/monitor_heroic.sh` | 2025-01-04 05:18:01 +0000 |
 | `heroic/zenitysym.sh` | 2025-01-04 18:30:39 +0000 |
@@ -182,6 +182,14 @@
 | `jdownloader/jdownloader_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `jellyfin-client/jellyfin-client.sh` | 2026-04-20 03:12:15 +0100 |
 | `jellyfin-client/jellyfin-client_uninstall.sh` | 2026-04-20 03:12:15 +0100 |
+| `kdeplasma/extra/kdeplasma-apps.py` | 2026-11-21 03:19:55 -0500 |
+| `kdeplasma/extra/kdeplasma-build.sh` | 2026-11-21 03:14:39 -0500 |
+| `kdeplasma/extra/kdeplasma-enter.py` | 2026-11-21 11:44:17 -0500 |
+| `kdeplasma/extra/kdeplasma-exit.sh` | 2026-11-20 22:52:07 -0500 |
+| `kdeplasma/extra/kdeplasma-launch.sh` | 2026-11-21 03:14:39 -0500 |
+| `kdeplasma/extra/kdeplasma-places.py` | 2026-11-21 11:44:17 -0500 |
+| `kdeplasma/kdeplasma.sh` | 2026-11-21 16:19:24 -0500 |
+| `kdeplasma/kdeplasma_uninstall.sh` | 2026-11-21 16:19:24 -0500 |
 | `kytyps5/extra/kyty-args.py` | 2026-11-03 14:50:54 -0500 |
 | `kytyps5/extra/kyty-launcher.sh` | 2026-11-03 14:38:42 -0500 |
 | `kytyps5/extra/kyty.sh` | 2026-11-03 14:50:54 -0500 |
@@ -191,6 +199,13 @@
 | `kytyps5/kytyps5_uninstall.sh` | 2026-11-03 14:38:42 -0500 |
 | `kytyps5/launch/batocera_launch_kyty/__init__.py` | 2026-10-28 17:09:05 -0400 |
 | `librewolf/librewolf.sh` | 2025-05-22 17:59:45 +0100 |
+| `lightdesktop/extra/lightdesktop-desktop.py` | 2026-11-21 16:33:43 -0500 |
+| `lightdesktop/extra/lightdesktop-exit.sh` | 2026-11-21 16:19:24 -0500 |
+| `lightdesktop/extra/lightdesktop-launch.sh` | 2026-11-21 16:26:48 -0500 |
+| `lightdesktop/extra/lightdesktop-panel.py` | 2026-11-21 16:26:48 -0500 |
+| `lightdesktop/extra/lightdesktop-session.sh` | 2026-11-21 16:26:48 -0500 |
+| `lightdesktop/lightdesktop.sh` | 2026-11-21 16:43:14 -0500 |
+| `lightdesktop/lightdesktop_uninstall.sh` | 2026-11-21 16:26:48 -0500 |
 | `luanti/luanti.sh` | 2026-02-23 14:59:57 +0100 |
 | `luanti/luanti_uninstall.sh` | 2026-10-24 09:05:41 -0400 |
 | `lutris/extra/create-lutris-launchers.sh` | 2026-05-04 21:46:58 +0100 |
@@ -204,7 +219,7 @@
 | `minecraft/minecraft_2.sh` | 2025-05-22 18:02:00 +0100 |
 | `minecraft/minecraft_3.sh` | 2025-05-22 18:02:19 +0100 |
 | `moonlight/moonlight.sh` | 2025-05-22 18:03:32 +0100 |
-| `moonlight/moonlight_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
+| `moonlight/moonlight_uninstall.sh` | 2026-11-21 00:22:26 -0500 |
 | `mubi/mubi.sh` | 2025-05-22 18:03:50 +0100 |
 | `mubi/mubi_uninstall.sh` | 2026-10-24 09:12:00 -0400 |
 | `netflix/netflix.sh` | 2025-05-22 18:04:11 +0100 |
@@ -273,7 +288,7 @@
 | `stepmania/stepmania_uninstall.sh` | 2026-10-24 09:07:55 -0400 |
 | `stremio/stremio-arm64.sh` | 2025-05-22 18:14:23 +0100 |
 | `stremio/stremio-arm64_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
-| `stremio/stremio.sh` | 2025-11-25 15:20:38 +0000 |
+| `stremio/stremio.sh` | 2026-11-21 00:22:26 -0500 |
 | `stremio/stremio_uninstall.sh` | 2026-11-17 15:00:09 -0500 |
 | `sunshine/sunshine-arm64.sh` | 2026-10-13 16:19:18 -0400 |
 | `sunshine/sunshine.sh` | 2026-11-17 15:05:37 -0500 |
@@ -296,6 +311,8 @@
 | `twitch/twitch_uninstall.sh` | 2026-10-24 09:12:00 -0400 |
 | `usdeluxe/usdeluxe.sh` | 2025-04-03 02:20:56 +0100 |
 | `usdeluxe/usdeluxe_uninstall.sh` | 2026-10-24 09:09:14 -0400 |
+| `v3-migrate/v3-migrate.sh` | 2026-11-24 16:07:59 -0700 |
+| `v3-migrate/v3-migrate_uninstall.sh` | 2026-11-24 16:07:59 -0700 |
 | `v40wine/v40wine.sh` | 2025-05-22 18:19:02 +0100 |
 | `vclean/vclean.sh` | 2025-11-13 21:54:58 +0000 |
 | `vclean/vclean_uninstall.sh` | 2025-11-13 22:29:18 +0000 |
@@ -359,6 +376,7 @@
 | `winemanager/install_redist_dependencies32.sh` | 2026-11-17 19:55:29 +0000 |
 | `winemanager/install_redist_dependencies32_uninstall.sh` | 2025-11-13 17:23:41 +0000 |
 | `winemanager/install_redist_dependencies64.sh` | 2026-11-17 19:55:29 +0000 |
+| `winemanager/install_redist_dependencies64_uninstall.sh` | 2026-11-22 21:51:20 -0500 |
 | `winemanager/winemanager.sh` | 2025-01-07 21:03:20 -0300 |
 | `winemanager/winemanager_uninstall.sh` | 2026-11-17 15:05:19 -0500 |
 | `wps-office/wps-office.sh` | 2026-05-04 21:46:58 +0100 |

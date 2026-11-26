@@ -12,6 +12,21 @@ DEST_DIR="${ADDON_DIR}/rootfs"
 DRL_REMOVER="/userdata/system/configs/bat-drl/Remover_Desktop.sh"
 BASE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/AppImages"
 
+# Desktop for Batocera is built on Batocera's X11 desktop (Openbox, tint2,
+# pcmanfm, picom). On Batocera's Wayland desktop (labwc, Batocera 44+) it
+# cannot show anything, and it would take over F1, closing EmulationStation
+# to a blank screen. There, this installs the Light Desktop instead
+# (lightdesktop/): the same idea built on labwc, with a taskbar, app menu,
+# desktop icons and F1. Install_Desktop_uninstall.sh removes either one.
+LIGHT_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/lightdesktop"
+if pgrep -x labwc >/dev/null 2>&1; then
+    echo "Batocera's Wayland desktop (labwc) is running, so this installs the"
+    echo "Light Desktop: Desktop for Batocera made for Wayland."
+    echo ""
+    curl -fsSL "$LIGHT_URL/lightdesktop.sh" | bash
+    exit "${PIPESTATUS[1]}"
+fi
+
 ARCH=$(uname -m)
 case "$ARCH" in
     x86_64)  SFS_URL="$BASE_URL/Desktop_for_batocera_8.8.squashfs" ;;

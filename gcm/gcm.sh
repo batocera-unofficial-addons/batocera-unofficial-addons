@@ -1,35 +1,70 @@
 #!/bin/bash
 # Game Content Manager (GCM) for Batocera: update and DLC management in the game menu.
-# Developer preview for Batocera 44 (x86_64). Source: https://github.com/klova5/Game-Content-Manager-GCM-for-Batocera
+# For Batocera 44 (x86_64). Source: https://github.com/klova5/Game-Content-Manager-GCM-for-Batocera
 #
 # Installs the latest GCM release (the same release BUA's updater reports), and updates an existing GCM
 # in place: only GCM's program files are replaced; its settings, state and game content are kept.
 
 repo="klova5/Game-Content-Manager-GCM-for-Batocera"
-fallback_url="https://github.com/$repo/releases/download/GCM-v3.6-preview-4/gcm-v3.6-preview-4-batocera44-x86_64.zip"
+fallback_tag="GCM-v4.0-preview-1"
+fallback_url="https://github.com/$repo/releases/download/$fallback_tag/gcm-v4.0-preview-1-batocera44-x86_64.zip"
 gcm_dir="/userdata/system/add-ons/game-content-manager"
 work_dir="$gcm_dir/release"
+version_file="$gcm_dir/bua-version.json"
+
+# The latest release: tag, a fingerprint of the release and its files (BUA's update identity), and the
+# x86_64 zip. Prints nothing if GitHub cannot be asked.
+gcm_latest_release() {
+    curl -fsSL --max-time 20 "https://api.github.com/repos/$repo/releases/latest" 2>/dev/null | python3 -c '
+import hashlib, json, sys
+try:
+    release = json.load(sys.stdin)
+except ValueError:
+    sys.exit(0)
+tag = str(release.get("tag_name") or "").strip()
+assets = release.get("assets") or []
+url = next((a.get("browser_download_url", "") for a in assets
+            if a.get("browser_download_url", "").endswith("-batocera44-x86_64.zip")
+            and a.get("browser_download_url", "").startswith("https://github.com/")), "")
+if not tag or not url:
+    sys.exit(0)
+files = sorted((str(a.get("name")), str(a.get("id")), str(a.get("size")), str(a.get("updated_at"))) for a in assets)
+digest = hashlib.sha256(json.dumps([release.get("id"), files]).encode()).hexdigest()
+print(tag)
+print("github-release:%s:%s" % (release.get("id"), digest))
+print(url)
+'
+}
+
+# BUA updater: report the installed GCM version (from bua-version.json) and the latest release.
+gcm_bua_register() {
+    declare -F bua_register >/dev/null 2>&1 || return 0
+    bua_register "$1" "github_release" "klova5" "Game-Content-Manager-GCM-for-Batocera" "reinstall" \
+        "json" "$version_file" "version" "$2"
+}
+
+# The BUA updater asks for the latest version this way; nothing is installed.
+if [ "${BUA_REGISTRATION_ONLY:-0}" = "1" ]; then
+    latest=$(gcm_latest_release)
+    [ -n "$latest" ] || { echo "Could not look up the latest GCM release." >&2; exit 1; }
+    gcm_bua_register "$(echo "$latest" | sed -n 1p)" "$(echo "$latest" | sed -n 2p)"
+    exit $?
+fi
 
 if [ "$(uname -m)" != "x86_64" ]; then
     echo "GCM is only available for x86_64 Batocera."
     exit 1
 fi
 
-# The latest release's x86_64 zip; the known release if GitHub cannot be asked.
-release_url=$(curl -fsSL --max-time 20 "https://api.github.com/repos/$repo/releases/latest" 2>/dev/null | python3 -c '
-import json, sys
-try:
-    assets = json.load(sys.stdin).get("assets", [])
-except ValueError:
-    sys.exit(0)
-for a in assets:
-    url = a.get("browser_download_url", "")
-    if url.endswith("-batocera44-x86_64.zip") and url.startswith("https://github.com/"):
-        print(url)
-        break
-')
+# The latest release; the known release if GitHub cannot be asked.
+latest=$(gcm_latest_release)
+release_tag=$(echo "$latest" | sed -n 1p)
+release_identity=$(echo "$latest" | sed -n 2p)
+release_url=$(echo "$latest" | sed -n 3p)
 if [ -z "$release_url" ]; then
     echo "Could not look up the latest GCM release; using the known release."
+    release_tag="$fallback_tag"
+    release_identity="$fallback_tag"
     release_url="$fallback_url"
 fi
 
@@ -74,6 +109,12 @@ fi
 
 # Start GCM at every boot (it replaces the standard frontend after startup; switch back any time).
 batocera-services enable GCMV36
+
+# Record the installed release for BUA's updater (shown as the app version).
+python3 -c 'import json, sys; json.dump({"version": sys.argv[1], "update_identity": sys.argv[2]}, open(sys.argv[3], "w"), indent=1)' \
+    "$release_tag" "$release_identity" "$version_file"
+gcm_bua_register "$release_tag" "$release_identity" || true
+echo "GCM version: $release_tag"
 
 echo
 echo "Game Content Manager installed. It starts after the next reboot."

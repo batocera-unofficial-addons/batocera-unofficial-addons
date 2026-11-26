@@ -35,7 +35,8 @@ wget -q -O "${APPDIR}/extra/icon.png" "$ICONURL"
 # Create launcher script
 cat <<EOF > "${APPDIR}/Launcher"
 #!/bin/bash
-unclutter-remote -s
+# Show the mouse cursor: unclutter-remote on X11, batocera-mouse on Wayland (labwc)
+command -v unclutter-remote >/dev/null && unclutter-remote -s || batocera-mouse show
 HOME="${APPDIR}/home" \\
 XDG_CONFIG_HOME="${APPDIR}/config" \\
 QT_SCALE_FACTOR="1" \\
@@ -68,7 +69,8 @@ PORT_LAUNCHER="/userdata/roms/ports/AmazonLuna.sh"
 cat <<EOF > "$PORT_LAUNCHER"
 #!/bin/bash
 killall -9 amazonluna 2>/dev/null
-unclutter-remote -s
+# Show the mouse cursor: unclutter-remote on X11, batocera-mouse on Wayland (labwc)
+command -v unclutter-remote >/dev/null && unclutter-remote -s || batocera-mouse show
 ${APPDIR}/Launcher
 EOF
 

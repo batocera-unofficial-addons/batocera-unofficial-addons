@@ -44,6 +44,7 @@ def live_update_block():
     """
     try:
         setup_custom_service_handler()
+        setup_window_rules()
         check_symlink_manager_and_warn()
         live_update()
 
@@ -6274,6 +6275,53 @@ def play_splash_and_load():
     pygame.display.set_caption(t('main_title'))
 
     print("[BUA] Ready!")
+
+def setup_window_rules():
+    """Keep BUA's window rules for Batocera's Wayland desktop (labwc) current.
+
+    labwc leaves add-on windows small and without a title bar unless it has a
+    rule for them (Openbox on X11 made every window full screen). The
+    bua_window_rules service applies app/window_rules.txt to labwc at every
+    boot; this refreshes the list and the service on each launch and applies
+    any change straight away. Runs in the background so it never slows the
+    menu, and does nothing when Batocera has no labwc (X11/Openbox)."""
+    if not os.path.exists("/usr/share/labwc/rc.xml"):
+        return
+
+    def worker():
+        base = "https://raw.githubusercontent.com/batocera-unofficial-addons/batocera-unofficial-addons/main/app/"
+        targets = [
+            (base + "bua_window_rules", "/userdata/system/services/bua_window_rules", 0o755),
+            (base + "window_rules.txt", "/userdata/system/add-ons/bua/window_rules.txt", 0o644),
+        ]
+        changed = False
+        for url, path, mode in targets:
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": "BUA-Installer"})
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    data = response.read()
+            except Exception as e:
+                print(f"[BUA] Could not fetch {os.path.basename(path)}: {e}")
+                continue
+            try:
+                with open(path, "rb") as f:
+                    if f.read() == data:
+                        continue
+            except OSError:
+                pass
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "wb") as f:
+                f.write(data)
+            os.chmod(path, mode)
+            changed = True
+        service = "/userdata/system/services/bua_window_rules"
+        if changed and os.path.exists(service):
+            subprocess.run(["batocera-services", "enable", "bua_window_rules"],
+                           check=False, timeout=10, capture_output=True)
+            subprocess.run(["bash", service, "start"], check=False, timeout=60, capture_output=True)
+            print("[BUA] Window rules updated")
+
+    threading.Thread(target=worker, daemon=True).start()
 
 def setup_custom_service_handler():
     """Check if custom_service_handler exists, download if missing, and enable it."""

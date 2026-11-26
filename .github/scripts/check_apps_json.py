@@ -45,7 +45,6 @@ KNOWN_MISSING_UNINSTALL = {
         "Streets of Rage Remake",
         "Super Crate Box",
         "Unreal Tournament",
-        "Wine Dependencies x64",
         "Zero-K",
         # Only an uninstaller for an older installer exists
         "F1",

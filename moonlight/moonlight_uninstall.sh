@@ -31,8 +31,6 @@ if [ -f "/userdata/system/add-ons/moonlight/moonlight.AppImage" ]; then
     echo "Removing file: /userdata/system/add-ons/moonlight/moonlight.AppImage"
     rm -f "/userdata/system/add-ons/moonlight/moonlight.AppImage"
 fi
-    echo "Removing file: latest"
-fi
 
 # Remove created directories (deepest first)
 if [ -d "/userdata/system/add-ons/moonlight/moonlight-config" ]; then
@@ -42,7 +40,6 @@ fi
 if [ -d "/userdata/system/add-ons/moonlight" ]; then
     echo "Removing directory: /userdata/system/add-ons/moonlight"
     rm -rf "/userdata/system/add-ons/moonlight"
-fi
 fi
 
 echo ""
