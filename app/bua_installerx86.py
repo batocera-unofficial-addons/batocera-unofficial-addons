@@ -6896,9 +6896,9 @@ UPDATER_PACKAGE = "/userdata/system/add-ons/bua/updater/bua_updater_overlay.py"
 # install_x86_new.sh. BUA keeps the installed package on this release.
 UPDATER_PACKAGE_URL = (
     "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons"
-    "/releases/download/updater-v2/bua-updater-x86_64.tar.gz"
+    "/releases/download/updater-v3/bua-updater-x86_64.tar.gz"
 )
-UPDATER_PACKAGE_SHA256 = "a44959b31520e6667a5ca011b572d3a529532e7489dc59a74b38c52b135e04a3"
+UPDATER_PACKAGE_SHA256 = "a1d3100300328dfdaa46f9bdf91c90a3540cf8bb69a0f1eb5f786c68d28b565f"
 UPDATER_PACKAGE_MARKER = ".package-sha256"
 
 
