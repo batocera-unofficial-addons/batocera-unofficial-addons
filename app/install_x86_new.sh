@@ -220,8 +220,8 @@ echo
 # works the same without it. Keep the URL and SHA256 in step with
 # UPDATER_PACKAGE_URL / UPDATER_PACKAGE_SHA256 in bua_installerx86.py,
 # which updates installed copies when BUA opens.
-BUA_UPDATER_URL="${BUA_UPDATER_URL:-https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/updater-v2/bua-updater-x86_64.tar.gz}"
-BUA_UPDATER_SHA256="a44959b31520e6667a5ca011b572d3a529532e7489dc59a74b38c52b135e04a3"
+BUA_UPDATER_URL="${BUA_UPDATER_URL:-https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/releases/download/updater-v3/bua-updater-x86_64.tar.gz}"
+BUA_UPDATER_SHA256="a1d3100300328dfdaa46f9bdf91c90a3540cf8bb69a0f1eb5f786c68d28b565f"
 BUA_UPDATER_DIR="/userdata/system/add-ons/bua/updater"
 
 install_bua_updater() {
