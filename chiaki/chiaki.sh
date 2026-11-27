@@ -132,11 +132,16 @@ fi
 
 echo "Adding Chiaki to Ports menu..."
 curl -L -o /userdata/roms/ports/images/chiakilogo.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/chiaki/extra/chiakilogo.png
-xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-  -s "/gameList/game[last()]" -t elem -n "path" -v "./Chiaki.sh" \
-  -s "/gameList/game[last()]" -t elem -n "name" -v "Chiaki" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/chiakilogo.png" \
-  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+# Skip the entry on a reinstall, so Chiaki isn't listed twice
+if xmlstarlet sel -t -v "//game[path='./Chiaki.sh']" /userdata/roms/ports/gamelist.xml 2>/dev/null | grep -q .; then
+  echo "Chiaki is already in the Ports menu."
+else
+  xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+    -s "/gameList/game[last()]" -t elem -n "path" -v "./Chiaki.sh" \
+    -s "/gameList/game[last()]" -t elem -n "name" -v "Chiaki" \
+    -s "/gameList/game[last()]" -t elem -n "image" -v "./images/chiakilogo.png" \
+    /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+fi
 
 # Step 6: Refresh the Ports menu
 echo "Refreshing Ports menu..."
