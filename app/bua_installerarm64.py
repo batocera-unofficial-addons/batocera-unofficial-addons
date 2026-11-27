@@ -1504,6 +1504,7 @@ def init_assets():
                 BUTTON_ICONS["RB"] = rb_surf
 
     build_background()
+    _ui_refresh_cached()
 
 
 def build_background():
@@ -1522,8 +1523,6 @@ def build_background():
         pygame.draw.circle(glow_small, (*ACCENT, int(5 * (28 - r) / 28) + 1), (8, 4), r)
     surf.blit(pygame.transform.smoothscale(glow_small, (W, H)), (0, 0))
     BACKGROUND_SURF = surf
-
-    _ui_refresh_cached()
 
 def draw_background(surf):
     if BACKGROUND_SURF is not None:
@@ -2269,12 +2268,14 @@ def draw_app_icon(surf, rect, key: str, font, align_left: bool = False):
 
 
 def draw_check_badge(surf, center, radius: int, fill):
-    """A filled circle with a white tick, for installed or selected apps."""
+    """A filled circle with a tick, for installed or selected apps. White,
+    or dark on a light theme's accent."""
     pygame.draw.circle(surf, fill, center, radius)
     cx, cy = center
     w = max(2, radius // 4)
     pts = [(cx - radius * 0.45, cy), (cx - radius * 0.1, cy + radius * 0.35), (cx + radius * 0.5, cy - radius * 0.35)]
-    pygame.draw.lines(surf, (255, 255, 255), False, [(int(x), int(y)) for x, y in pts], w)
+    tick = ON_ACCENT if tuple(fill) == tuple(ACCENT) and _luminance(ACCENT) > 0.4 else (255, 255, 255)
+    pygame.draw.lines(surf, tick, False, [(int(x), int(y)) for x, y in pts], w)
 
 
 def draw_cross_badge(surf, center, radius: int, fill):
@@ -5106,7 +5107,7 @@ class KonamiCodeScreen(BaseScreen):
             y += S(30)
 
         # The code, with the steps entered so far highlighted
-        steps = [self._step_surface(step, FG if i < self.progress else MUTED)
+        steps = [self._step_surface(step, ON_ACCENT if i < self.progress else MUTED)
                  for i, step in enumerate(KONAMI_CODE)]
         gap = S(10)
         row_h = max(s.get_height() for s in steps)
