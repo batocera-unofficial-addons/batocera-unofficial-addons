@@ -4,13 +4,17 @@
 echo "Detecting system architecture..."
 arch=$(uname -m)
 
-LATEST=$(curl -s https://api.github.com/repos/streetpea/chiaki-ng/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+LATEST=$(curl -sL https://api.github.com/repos/chiaki-ng/chiaki-ng/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+if [ -z "${LATEST}" ]; then
+    dialog --title "Chiaki" --msgbox "Could not find the latest Chiaki release. Exiting." 8 60
+    exit 1
+fi
 if [ "$arch" == "x86_64" ]; then
     echo "Architecture: x86_64 detected."
-    appimage_url="https://github.com/streetpea/chiaki-ng/releases/download/${LATEST}/chiaki-ng.AppImage_x86_64"
+    appimage_url="https://github.com/chiaki-ng/chiaki-ng/releases/download/${LATEST}/chiaki-ng.AppImage_x86_64"
 elif [ "$arch" == "aarch64" ]; then
     echo "Architecture: ARM64 detected."
-    appimage_url="https://github.com/streetpea/chiaki-ng/releases/download/${LATEST}/chiaki-ng.AppImage_arm64"
+    appimage_url="https://github.com/chiaki-ng/chiaki-ng/releases/download/${LATEST}/chiaki-ng.AppImage_arm64"
 else
     dialog --title "Chiaki" --msgbox "Unsupported architecture: $arch. Exiting." 8 60
     exit 1
@@ -30,8 +34,7 @@ ICON_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addo
 INSTALL_DIR="/userdata/system/add-ons/chiaki"
 # Step 3: Download the AppImage
 echo "Downloading Chiaki AppImage..."
-wget -q --show-progress -O /userdata/system/add-ons/chiaki/Chiaki.AppImage "$appimage_url"
-if [ $? -ne 0 ]; then
+if ! wget -q --show-progress -O /userdata/system/add-ons/chiaki/Chiaki.AppImage "$appimage_url"; then
     dialog --title "Chiaki" --msgbox "Failed to download Chiaki AppImage. Exiting." 8 60
     exit 1
 fi
@@ -48,9 +51,13 @@ cat << 'EOF' > /userdata/roms/ports/Chiaki.sh
 #!/bin/bash
 
 # Environment setup
-export $(cat /proc/1/environ | tr '\0' '\n')
+while IFS= read -r -d '' env_var; do
+    export "${env_var?}"
+done < /proc/1/environ
 export DISPLAY=:0.0
 export QTWEBENGINE_DISABLE_SANDBOX=1
+# Keep settings (registered consoles) on /userdata; PID 1's HOME=/ is in RAM
+export HOME="/userdata/system/add-ons/chiaki"
 
 # Directories and file paths
 app_dir="/userdata/system/add-ons/chiaki"
@@ -67,7 +74,7 @@ echo "$(date): Launching Chiaki"
 
 # Launch Chiaki AppImage
 if [ -x "${app_image}" ]; then
-    cd "${app_dir}"
+    cd "${app_dir}" || exit 1
     ./Chiaki.AppImage > "${log_file}" 2>&1
     echo
 fi
@@ -113,7 +120,7 @@ chmod +x "/userdata/system/configs/chiaki/restore_desktop_entry.sh"
 custom_startup="/userdata/system/custom.sh"
 if ! grep -q "/userdata/system/configs/chiaki/restore_desktop_entry.sh" "$custom_startup"; then
     echo "Adding Chiaki restore script to startup..."
-    echo "bash "/userdata/system/configs/chiaki/restore_desktop_entry.sh" &" >> "$custom_startup"
+    echo "bash /userdata/system/configs/chiaki/restore_desktop_entry.sh &" >> "$custom_startup"
 fi
 chmod +x "$custom_startup"
 
@@ -125,11 +132,16 @@ fi
 
 echo "Adding Chiaki to Ports menu..."
 curl -L -o /userdata/roms/ports/images/chiakilogo.png https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/chiaki/extra/chiakilogo.png
-xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-  -s "/gameList/game[last()]" -t elem -n "path" -v "./Chiaki.sh" \
-  -s "/gameList/game[last()]" -t elem -n "name" -v "Chiaki" \
-  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/chiakilogo.png" \
-  /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+# Skip the entry on a reinstall, so Chiaki isn't listed twice
+if xmlstarlet sel -t -v "//game[path='./Chiaki.sh']" /userdata/roms/ports/gamelist.xml 2>/dev/null | grep -q .; then
+  echo "Chiaki is already in the Ports menu."
+else
+  xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+    -s "/gameList/game[last()]" -t elem -n "path" -v "./Chiaki.sh" \
+    -s "/gameList/game[last()]" -t elem -n "name" -v "Chiaki" \
+    -s "/gameList/game[last()]" -t elem -n "image" -v "./images/chiakilogo.png" \
+    /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+fi
 
 # Step 6: Refresh the Ports menu
 echo "Refreshing Ports menu..."
