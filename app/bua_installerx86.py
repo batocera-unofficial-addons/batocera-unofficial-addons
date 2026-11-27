@@ -813,13 +813,15 @@ CHIP_BG = (26, 70, 120)
 TEXT_SOFT = (196, 206, 218)   # dialog and log text
 TEXT_MSG = (210, 215, 225)
 TEXT_FAINT = (92, 108, 126)   # placeholders
+LOGO_PANEL = (16, 22, 30)     # behind add-on logos
 ON_ACCENT = FG                # text drawn on an accent fill
 
 # The neutrals above, as the blue theme has them; other themes tint these
 _BLUE_NEUTRALS = {name: globals()[name] for name in (
     "BG", "CARD", "CARD_HI", "FG", "MUTED", "FOOTER_BG", "BG_TOP", "PANEL_DARK",
     "LINE", "DIALOG_FILL", "DIALOG_BORDER", "TRACK", "FIELD", "ICON_IDLE",
-    "QUEUE_IDLE", "CHIP_FG", "CHIP_BG", "TEXT_SOFT", "TEXT_MSG", "TEXT_FAINT")}
+    "QUEUE_IDLE", "CHIP_FG", "CHIP_BG", "TEXT_SOFT", "TEXT_MSG", "TEXT_FAINT",
+    "LOGO_PANEL")}
 
 THEME_FILE = "/userdata/system/add-ons/bua_theme.txt"
 DEFAULT_THEME = "blue"
@@ -2032,6 +2034,9 @@ LOGO_DIR = "/userdata/system/add-ons/bua_logos"
 LOGO_INDEX_FILE = os.path.join(LOGO_DIR, "index.json")
 REPO_TREE_URL = "https://api.github.com/repos/batocera-unofficial-addons/batocera-unofficial-addons/git/trees/main?recursive=1"
 LOGO_INDEX_MAX_AGE = 7 * 24 * 3600  # guess again after a week, to pick up new logos
+# Raise when the lookup rules change, so add-ons cached as having no logo
+# are looked up again with the new rules (logos already found are kept)
+LOGO_RULES = 2
 # Images that are not logos: key maps, controller pictures, backgrounds
 LOGO_SKIP = re.compile(r"(key|joy|acima|abaixo|direita|esquerda|button|screenshot|controller|wallpaper|background|splash)", re.I)
 
@@ -2058,7 +2063,9 @@ def _load_logo_index():
             data = json.load(f)
         if time.time() - data.get("time", 0) < LOGO_INDEX_MAX_AGE:
             _logo_index_time = data["time"]
-            _logo_index = {k: v for k, v in data.get("apps", {}).items() if not v or os.path.exists(v)}
+            same_rules = data.get("rules") == LOGO_RULES
+            _logo_index = {k: v for k, v in data.get("apps", {}).items()
+                           if (v and os.path.exists(v)) or (not v and same_rules)}
     except Exception:
         pass
 
@@ -2069,7 +2076,7 @@ def _save_logo_index():
         os.makedirs(LOGO_DIR, exist_ok=True)
         _logo_index_time = _logo_index_time or time.time()
         with _logo_lock:
-            data = {"time": _logo_index_time, "apps": dict(_logo_index)}
+            data = {"time": _logo_index_time, "rules": LOGO_RULES, "apps": dict(_logo_index)}
         tmp = LOGO_INDEX_FILE + ".tmp"
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump(data, f)
@@ -2083,6 +2090,32 @@ def _app_folder(app: str) -> str | None:
     return m.group(1) if m else None
 
 
+def _script_slug(app: str) -> str:
+    """The installer script's name, e.g. "dka" for .../windows/dka.sh."""
+    m = re.search(r"/([^/\s]+)\.sh\b", APPS.get(app, ""))
+    return _slug(m.group(1)) if m else ""
+
+
+def _skip_image(name: str) -> bool:
+    """Key maps, controller pictures, backgrounds... A name with "logo" in it
+    is still a logo ("Stremio-logo-dark-background.png")."""
+    return bool(LOGO_SKIP.search(name)) and "logo" not in name.lower()
+
+
+def _image_core(name: str) -> str:
+    """A file name without its extension and the words logo/icon/thumb/marquee."""
+    return re.sub(r"(logo|icon|thumb|marquee)", "", _slug(name.rsplit(".", 1)[0]))
+
+
+def _image_named(name: str, app: str) -> bool:
+    """Whether an image file is named after the app, or after its installer
+    script (windows/extra/dka.png for windows/dka.sh)."""
+    core, app_slug, script = _image_core(name), _slug(app), _script_slug(app)
+    if len(core) < 3:
+        return False
+    return core in app_slug or app_slug in core or (len(script) >= 3 and core == script)
+
+
 def _logo_score(path: str) -> int:
     """How much an image path looks like a logo; 0 means not at all."""
     low = path.lower()
@@ -2094,12 +2127,20 @@ def _listed_logo_url(app: str) -> str | None:
     return LOGO_URLS.get(app)
 
 
-def _installer_logo_url(app: str) -> str | None:
-    """The logo or icon image the app's installer downloads, if it names one."""
+_installer_sources: Dict[str, str] = {}
+
+
+def _installer_logo_url(app: str, last_resort: bool = False) -> str | None:
+    """The logo or icon image the app's installer downloads, if it names one.
+    An image named neither logo/icon/thumb nor after the app (often a
+    screenshot) is only returned as a last resort, after the repo folder."""
     m = re.search(r"https?://\S+?\.sh\b", APPS.get(app, ""))
     if not m:
         return None
-    src = fetch_url_with_retry(m.group(0), {"User-Agent": "BUA"}, timeout=8, retries=1).decode("utf-8", "replace")
+    if m.group(0) not in _installer_sources:
+        _installer_sources[m.group(0)] = fetch_url_with_retry(
+            m.group(0), {"User-Agent": "BUA"}, timeout=8, retries=1).decode("utf-8", "replace")
+    src = _installer_sources[m.group(0)]
     # Fill in shell variables such as ${APPNAME,,} from the script's own assignments
     shell_vars = dict(re.findall(r'^\s*([A-Za-z_]\w*)="?([^"\s$]+)"?\s*$', src, re.M))
 
@@ -2107,7 +2148,7 @@ def _installer_logo_url(app: str) -> str | None:
         url = re.sub(r"\$\{(\w+),,\}", lambda v: shell_vars.get(v.group(1), "$").lower(), url)
         return re.sub(r"\$\{(\w+)\}|\$(\w+)", lambda v: shell_vars.get(v.group(1) or v.group(2), "$"), url)
 
-    best, best_score = None, 0
+    best, best_rank = None, None
     for url in re.findall(r"https?://[^\s\"'<>()]+?\.(?:png|jpe?g)\b", src, re.I):
         url = expand(url)
         if "$" in url:
@@ -2115,11 +2156,17 @@ def _installer_logo_url(app: str) -> str | None:
         # A GitHub page link (/blob/) to the file itself (/raw/)
         url = re.sub(r"^(https?://github\.com/[^/]+/[^/]+)/blob/", r"\1/raw/", url)
         path = urllib.parse.urlparse(url).path
-        if LOGO_SKIP.search(path.rsplit("/", 1)[-1]):
+        name = urllib.parse.unquote(path.rsplit("/", 1)[-1])
+        if _skip_image(name):
             continue
-        score = _logo_score(path.replace("batocera-unofficial-addons", ""))
-        if score > best_score:
-            best, best_score = url, score
+        if LOGO_SKIP.search(name):
+            rank = (0, False)  # a logo on a background or the like: last resort
+        else:
+            rank = (_logo_score(path.replace("batocera-unofficial-addons", "")), _image_named(name, app))
+        if best_rank is None or rank > best_rank:
+            best, best_rank = url, rank
+    if best_rank is None or (best_rank == (0, False) and not last_resort):
+        return None
     return best
 
 
@@ -2140,17 +2187,18 @@ def _repo_logo_url(app: str) -> str | None:
     if not folder:
         return None
     shared = sum(1 for k in APPS if _app_folder(k) == folder) > 1
-    app_slug = _slug(app)
     best, best_score = None, 0
     for path in _repo_images():
         if not path.startswith(folder + "/"):
             continue
-        base = path.rsplit("/", 1)[-1].rsplit(".", 1)[0]
-        if LOGO_SKIP.search(base):
+        name = path.rsplit("/", 1)[-1]
+        base = name.rsplit(".", 1)[0]
+        if _skip_image(base):
             continue
-        core = re.sub(r"(logo|icon|thumb|marquee)", "", _slug(base))
-        named = len(core) >= 3 and (core in app_slug or app_slug in core)
-        if shared and not named:
+        named = _image_named(name, app)
+        # A plain logo.png / icon.png is the folder's own, fine for all its apps
+        generic = _image_core(name) == ""
+        if shared and not (named or generic):
             continue
         score = 4 * named + _logo_score(base) + ("/extra/" in path) - ("marquee" in base.lower())
         if score > best_score:
@@ -2181,7 +2229,8 @@ def _find_logo(app: str) -> str:
     """Download the app's logo and return its file, or "" when there is none.
     A logo the app list or installer names that turns out missing or not an
     image falls back to the next way of finding one."""
-    for finder in (_listed_logo_url, _installer_logo_url, _repo_logo_url):
+    for finder in (_listed_logo_url, _installer_logo_url, _repo_logo_url,
+                   lambda a: _installer_logo_url(a, last_resort=True)):
         url = finder(app)
         if not url:
             continue
@@ -2256,7 +2305,7 @@ def draw_app_icon(surf, rect, key: str, font, align_left: bool = False):
             square.center = rect.center
         draw_monogram(surf, square, key, font)
         return
-    pygame.draw.rect(surf, (16, 22, 30), rect, border_radius=max(4, side // 5))
+    pygame.draw.rect(surf, LOGO_PANEL, rect, border_radius=max(4, side // 5))
     surf.blit(logo, logo.get_rect(center=rect.center))
 
 
