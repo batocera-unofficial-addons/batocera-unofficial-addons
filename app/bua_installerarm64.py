@@ -2044,12 +2044,17 @@ LOGO_INDEX_MAX_AGE = 7 * 24 * 3600  # guess again after a week, to pick up new l
 # Raise when the lookup rules change, so add-ons cached as having no logo
 # are looked up again with the new rules (logos already found are kept)
 LOGO_RULES = 2
+# How long "no logo" is remembered. Short, because a logo added to the repo
+# can take hours to show up: the updater package caches GitHub API answers
+# (the repo listing among them) for up to 6 hours.
+LOGO_MISS_MAX_AGE = 6 * 3600
 # Images that are not logos: key maps, controller pictures, backgrounds
 LOGO_SKIP = re.compile(r"(key|joy|acima|abaixo|direita|esquerda|button|screenshot|controller|wallpaper|background|splash)", re.I)
 
 _logo_lock = threading.Lock()
 _logo_index: Dict[str, str] = {}      # app -> logo file, or "" when none was found
 _logo_index_time = 0.0
+_logo_misses: Dict[str, float] = {}   # app -> when it was found to have no logo
 _logo_loaded = False
 _logo_pending: List[str] = []
 _logo_requested: set = set()
@@ -2063,16 +2068,21 @@ def _slug(text: str) -> str:
 
 
 def _load_logo_index():
-    global _logo_index, _logo_index_time, _logo_loaded
+    global _logo_index, _logo_index_time, _logo_loaded, _logo_misses
     _logo_loaded = True
     try:
         with open(LOGO_INDEX_FILE, encoding="utf-8") as f:
             data = json.load(f)
-        if time.time() - data.get("time", 0) < LOGO_INDEX_MAX_AGE:
+        now = time.time()
+        if now - data.get("time", 0) < LOGO_INDEX_MAX_AGE:
             _logo_index_time = data["time"]
             same_rules = data.get("rules") == LOGO_RULES
+            # A miss is kept only while recent (and found under these rules);
+            # older ones, or ones with no time, are looked up again
+            _logo_misses = {k: t for k, t in data.get("misses", {}).items()
+                            if same_rules and now - t < LOGO_MISS_MAX_AGE}
             _logo_index = {k: v for k, v in data.get("apps", {}).items()
-                           if (v and os.path.exists(v)) or (not v and same_rules)}
+                           if (v and os.path.exists(v)) or (not v and k in _logo_misses)}
     except Exception:
         pass
 
@@ -2083,7 +2093,8 @@ def _save_logo_index():
         os.makedirs(LOGO_DIR, exist_ok=True)
         _logo_index_time = _logo_index_time or time.time()
         with _logo_lock:
-            data = {"time": _logo_index_time, "rules": LOGO_RULES, "apps": dict(_logo_index)}
+            data = {"time": _logo_index_time, "rules": LOGO_RULES, "apps": dict(_logo_index),
+                    "misses": dict(_logo_misses)}
         tmp = LOGO_INDEX_FILE + ".tmp"
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump(data, f)
@@ -2235,7 +2246,11 @@ def _download_logo(url: str) -> str:
 def _find_logo(app: str) -> str:
     """Download the app's logo and return its file, or "" when there is none.
     A logo the app list or installer names that turns out missing or not an
-    image falls back to the next way of finding one."""
+    image falls back to the next way of finding one. If one failed to
+    download and nothing else turned up, this raises instead of returning "",
+    so the app is looked up again next time rather than remembered as having
+    no logo (a file just added can 404 for a while)."""
+    failed = None
     for finder in (_listed_logo_url, _installer_logo_url, _repo_logo_url,
                    lambda a: _installer_logo_url(a, last_resort=True)):
         url = finder(app)
@@ -2243,10 +2258,12 @@ def _find_logo(app: str) -> str:
             continue
         try:
             path = _download_logo(url)
-        except urllib.error.HTTPError:
-            path = ""
+        except urllib.error.HTTPError as e:
+            path, failed = "", e
         if path:
             return path
+    if failed is not None:
+        raise failed
     return ""
 
 
@@ -2265,6 +2282,10 @@ def _logo_worker():
             continue
         with _logo_lock:
             _logo_index[app] = path
+            if path:
+                _logo_misses.pop(app, None)
+            else:
+                _logo_misses[app] = time.time()
         _save_logo_index()
 
 
