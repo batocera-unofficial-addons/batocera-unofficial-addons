@@ -160,8 +160,10 @@ main() {
     fi
 
     rm -rf "${DEP_DIR:?}" "${ADDONS_DIR:?}/${APPNAME_LC}"
-    # The BUA app's settings, history and caches, and the old dialog theme
-    rm -f "${ADDONS_DIR}"/bua_* "${ADDONS_DIR}/.dialogrc"
+    # The BUA app's settings, history and caches (files, and the bua_logos and
+    # bua_ui_cache folders), and the old dialog theme. Only bua_ with an
+    # underscore: add-ons such as bua-doctor are left alone.
+    rm -rf "${ADDONS_DIR:?}"/bua_* "${ADDONS_DIR:?}/.dialogrc"
     rmdir "${ADDONS_DIR}" 2>/dev/null
 
     rm -f "${BATOCERA_ADDONS_PATH}" "${BATOCERA_ADDONS_PATH}.keys"
