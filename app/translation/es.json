@@ -168,5 +168,16 @@
   "resolution_desc": "Cambiar resolución de la interfaz",
 
   "cards_per_page": "Tarjetas por Página",
-  "cards_per_page_desc": "Establece cuántas tarjetas mostrar en los menús (Auto/3/4/5/6/7/8/10)"
+  "cards_per_page_desc": "Establece cuántas tarjetas mostrar en los menús (Auto/3/4/5/6/7/8/10)",
+  "theme": "Tema",
+  "theme_desc": "Cambiar la paleta de colores de BUA",
+  "theme_blue": "Azul",
+  "theme_green": "Verde",
+  "theme_red": "Rojo",
+  "theme_orange": "Naranja",
+  "theme_pink": "Rosa",
+  "theme_purple": "Morado",
+  "theme_yellow": "Amarillo",
+  "theme_gray": "Gris",
+  "theme_white": "Blanco"
 }

@@ -321,8 +321,24 @@ def t(key: str) -> str:
         if value:
             return value
 
-    # Last resort: return key itself
-    return key
+    # Then strings built into BUA, then the key itself
+    return BUILTIN_STRINGS.get(key, key)
+
+
+# English for keys newer than the translation files on GitHub
+BUILTIN_STRINGS: Dict[str, str] = {
+    "theme": "Theme",
+    "theme_desc": "Change BUA's color palette",
+    "theme_blue": "Blue",
+    "theme_green": "Green",
+    "theme_red": "Red",
+    "theme_orange": "Orange",
+    "theme_pink": "Pink",
+    "theme_purple": "Purple",
+    "theme_yellow": "Yellow",
+    "theme_gray": "Gray",
+    "theme_white": "White",
+}
 
 def check_language_exists(lang_data: Tuple[str, str, str], results: list, lock: threading.Lock):
     """Check if a language file exists on GitHub (threaded helper)"""
@@ -771,7 +787,9 @@ def load_console_fonts():
 UI_FONTS = load_console_fonts()
 
 # Batocera brand-inspired palette
-# Near-black blue background, raised slate tiles, bright blue accent
+# Near-black blue background, raised slate tiles, bright blue accent.
+# These are the "blue" theme. Settings > Theme changes them through
+# apply_theme(); drawing code reads them every frame, so a change shows at once.
 BG = (10, 13, 18)
 CARD = (27, 35, 45)
 CARD_HI = (36, 48, 62)
@@ -781,6 +799,104 @@ MUTED = (139, 152, 166)
 SELECT = (58, 166, 255)
 SUCCESS = (76, 205, 140)
 FOOTER_BG = (6, 8, 12)
+BG_TOP = (16, 22, 32)         # top of the background gradient
+PANEL_DARK = (17, 23, 31)     # message boxes, unselected options
+LINE = (34, 45, 58)           # footer separator
+DIALOG_FILL = (24, 31, 41)
+DIALOG_BORDER = (48, 62, 80)
+TRACK = (44, 58, 74)          # progress tracks, separators
+FIELD = (14, 19, 26)          # text fields, log panel
+ICON_IDLE = (172, 184, 198)   # icons on unselected rows
+QUEUE_IDLE = (30, 64, 104)    # "Start install" button when not selected
+CHIP_FG = (205, 230, 255)     # "Queued" chip
+CHIP_BG = (26, 70, 120)
+TEXT_SOFT = (196, 206, 218)   # dialog and log text
+TEXT_MSG = (210, 215, 225)
+TEXT_FAINT = (92, 108, 126)   # placeholders
+ON_ACCENT = FG                # text drawn on an accent fill
+
+# The neutrals above, as the blue theme has them; other themes tint these
+_BLUE_NEUTRALS = {name: globals()[name] for name in (
+    "BG", "CARD", "CARD_HI", "FG", "MUTED", "FOOTER_BG", "BG_TOP", "PANEL_DARK",
+    "LINE", "DIALOG_FILL", "DIALOG_BORDER", "TRACK", "FIELD", "ICON_IDLE",
+    "QUEUE_IDLE", "CHIP_FG", "CHIP_BG", "TEXT_SOFT", "TEXT_MSG", "TEXT_FAINT")}
+
+THEME_FILE = "/userdata/system/add-ons/bua_theme.txt"
+DEFAULT_THEME = "blue"
+# Theme name -> accent color. The dark neutrals take the accent's hue;
+# gray and white use plain grays.
+THEMES: Dict[str, Tuple[int, int, int]] = {
+    "blue": (58, 166, 255),
+    "green": (46, 204, 113),
+    "red": (235, 77, 75),
+    "orange": (255, 140, 40),
+    "pink": (255, 92, 170),
+    "purple": (155, 100, 255),
+    "yellow": (250, 204, 50),
+    "gray": (150, 158, 168),
+    "white": (240, 242, 246),
+}
+THEME = DEFAULT_THEME
+
+
+def _luminance(rgb) -> float:
+    def lin(c):
+        c /= 255
+        return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+    r, g, b = (lin(c) for c in rgb)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def _tint(rgb, hue: float, sat_scale: float):
+    import colorsys
+    _h, s, v = colorsys.rgb_to_hsv(*(c / 255 for c in rgb))
+    r, g, b = colorsys.hsv_to_rgb(hue, s * sat_scale, v)
+    return (round(r * 255), round(g * 255), round(b * 255))
+
+
+def apply_theme(name: str):
+    """Switch the palette to a theme (unknown names fall back to blue)."""
+    global THEME, ACCENT, SELECT, ON_ACCENT
+    import colorsys
+    if name not in THEMES:
+        name = DEFAULT_THEME
+    THEME = name
+    accent = THEMES[name]
+    if name == DEFAULT_THEME:
+        neutrals = dict(_BLUE_NEUTRALS)
+    else:
+        hue = colorsys.rgb_to_hsv(*(c / 255 for c in accent))[0]
+        sat = 0.0 if name in ("gray", "white") else 1.0
+        neutrals = {k: _tint(v, hue, sat) for k, v in _BLUE_NEUTRALS.items()}
+    globals().update(neutrals)
+    ACCENT = accent
+    # Light accents (green, orange, yellow, white) get dark text on them, and
+    # selected options, which carry white text, a darker shade of the accent
+    if _luminance(accent) > 0.4:
+        ON_ACCENT = neutrals["BG"]
+        SELECT = tuple(round(a * 0.45 + b * 0.55) for a, b in zip(accent, neutrals["BG"]))
+    else:
+        ON_ACCENT = neutrals["FG"]
+        SELECT = accent
+    if BACKGROUND_SURF is not None:
+        build_background()
+
+
+def load_saved_theme():
+    try:
+        with open(THEME_FILE, "r") as f:
+            apply_theme(f.read().strip())
+    except Exception:
+        apply_theme(DEFAULT_THEME)
+
+
+def save_theme(name: str):
+    try:
+        os.makedirs(os.path.dirname(THEME_FILE), exist_ok=True)
+        with open(THEME_FILE, "w") as f:
+            f.write(name)
+    except Exception as e:
+        print(f"[BUA] Could not save theme: {e}")
 
 # ---------- Assets & Background ----------
 LOGO_SURF = None
@@ -927,7 +1043,7 @@ def run_manual_button_mapper() -> bool:
         draw_text(screen, desc, FONT_SMALL, MUTED, (rect.x + S(16), rect.y + S(96)))
         # progress bar
         bar_x, bar_y, bar_w, bar_h = rect.x + S(16), rect.y + box_h - S(60), box_w - S(32), S(20)
-        pygame.draw.rect(screen, (17, 23, 31), (bar_x, bar_y, bar_w, bar_h), border_radius=6)
+        pygame.draw.rect(screen, PANEL_DARK, (bar_x, bar_y, bar_w, bar_h), border_radius=6)
         fill_w = int(bar_w * max(0.0, min(1.0, prog)))
         if fill_w > 0:
             pygame.draw.rect(screen, ACCENT, (bar_x, bar_y, fill_w, bar_h), border_radius=6)
@@ -1380,21 +1496,26 @@ def init_assets():
             if rb_surf is not None:
                 BUTTON_ICONS["RB"] = rb_surf
 
-    # Build the background once: a dark blue vertical gradient with a soft
-    # accent glow in the top-left corner, like a console dashboard
-    BACKGROUND_SURF = pygame.Surface((W, H)).convert()
-    top, bottom = (16, 22, 32), BG
+    build_background()
+    _ui_refresh_cached()
+
+
+def build_background():
+    """A dark vertical gradient in the theme's hue with a soft accent glow in
+    the top-left corner, like a console dashboard."""
+    global BACKGROUND_SURF
+    surf = pygame.Surface((W, H)).convert()
+    top, bottom = BG_TOP, BG
     for i in range(H):
         f = i / max(1, H - 1)
         color = tuple(int(top[c] + (bottom[c] - top[c]) * f) for c in range(3))
-        pygame.draw.line(BACKGROUND_SURF, color, (0, i), (W, i))
+        pygame.draw.line(surf, color, (0, i), (W, i))
     # Drawn small and scaled up, so the glow comes out smooth and cheap
     glow_small = pygame.Surface((64, 36), pygame.SRCALPHA)
     for r in range(28, 0, -1):
         pygame.draw.circle(glow_small, (*ACCENT, int(5 * (28 - r) / 28) + 1), (8, 4), r)
-    BACKGROUND_SURF.blit(pygame.transform.smoothscale(glow_small, (W, H)), (0, 0))
-
-    _ui_refresh_cached()
+    surf.blit(pygame.transform.smoothscale(glow_small, (W, H)), (0, 0))
+    BACKGROUND_SURF = surf
 
 def draw_background(surf):
     if BACKGROUND_SURF is not None:
@@ -2140,12 +2261,14 @@ def draw_app_icon(surf, rect, key: str, font, align_left: bool = False):
 
 
 def draw_check_badge(surf, center, radius: int, fill):
-    """A filled circle with a white tick, for installed or selected apps."""
+    """A filled circle with a tick, for installed or selected apps. White,
+    or dark on a light theme's accent."""
     pygame.draw.circle(surf, fill, center, radius)
     cx, cy = center
     w = max(2, radius // 4)
     pts = [(cx - radius * 0.45, cy), (cx - radius * 0.1, cy + radius * 0.35), (cx + radius * 0.5, cy - radius * 0.35)]
-    pygame.draw.lines(surf, (255, 255, 255), False, [(int(x), int(y)) for x, y in pts], w)
+    tick = ON_ACCENT if tuple(fill) == tuple(ACCENT) and _luminance(ACCENT) > 0.4 else (255, 255, 255)
+    pygame.draw.lines(surf, tick, False, [(int(x), int(y)) for x, y in pts], w)
 
 
 def draw_cross_badge(surf, center, radius: int, fill):
@@ -2307,7 +2430,7 @@ def draw_footer(surf, hints: str, status: str = "") -> int:
     bar = pygame.Surface((W, h), pygame.SRCALPHA)
     bar.fill((*FOOTER_BG, 215))
     surf.blit(bar, (0, H - h))
-    pygame.draw.line(surf, (34, 45, 58), (0, H - h), (W, H - h), 1)
+    pygame.draw.line(surf, LINE, (0, H - h), (W, H - h), 1)
     font = UI_FONTS["body"]
     y = H - h + (h - font.get_height()) // 2
     # Measure the hints off-screen first so they can be right-aligned
@@ -2359,7 +2482,7 @@ def draw_screen_header(title: str, subtitle: str = "") -> int:
 def draw_toast(message: str):
     """A short message in an accent pill at the top-right of the screen."""
     f = UI_FONTS
-    img = f["body"].render(message, True, FG)
+    img = f["body"].render(message, True, ON_ACCENT)
     chip = pygame.Rect(0, 0, img.get_width() + S(28), img.get_height() + S(14))
     chip.topright = (W - S(48), S(34))
     pygame.draw.rect(screen, ACCENT, chip, border_radius=chip.h // 2)
@@ -2385,7 +2508,7 @@ def draw_list_row(rect, selected: bool, title: str, subtitle: str = "", right_te
     x = rect.x + S(20)
     if icon:
         isz = min(S(30), rect.h - S(20))
-        draw_icon(screen, icon, (x + isz // 2, rect.centery), isz, accent if selected else (172, 184, 198))
+        draw_icon(screen, icon, (x + isz // 2, rect.centery), isz, accent if selected else ICON_IDLE)
         x += isz + S(16)
     right_w = 0
     if current:
@@ -2459,8 +2582,8 @@ def draw_dialog_backdrop(dialog):
 
 def draw_dialog_panel(rect, accent=None):
     """The dialog box itself: a raised panel with a thin border."""
-    draw_tile(screen, rect, radius=S(20), fill=(24, 31, 41))
-    pygame.draw.rect(screen, accent or (48, 62, 80), rect, width=max(1, S(2)), border_radius=S(20))
+    draw_tile(screen, rect, radius=S(20), fill=DIALOG_FILL)
+    pygame.draw.rect(screen, accent or DIALOG_BORDER, rect, width=max(1, S(2)), border_radius=S(20))
 
 
 def draw_app_tile(surf, rect, key: str, selected: bool, checked: bool, installed: bool):
@@ -2504,7 +2627,7 @@ def draw_app_details(surf, panel, key: str):
         chip = draw_chip(surf, t("installed"), f["small"], (chip_x, y), (196, 245, 218), (24, 82, 54))
         chip_x = chip.right + S(8)
     if any(k == key for k, _cmd in INSTALL_QUEUE):
-        chip = draw_chip(surf, t("queued"), f["small"], (chip_x, y), (205, 230, 255), (26, 70, 120))
+        chip = draw_chip(surf, t("queued"), f["small"], (chip_x, y), CHIP_FG, CHIP_BG)
         chip_x = chip.right + S(8)
     if SELECTED_APPS.get(key, False):
         badge_r = (f["small"].get_height() + S(8)) // 2
@@ -2529,7 +2652,7 @@ def draw_app_details(surf, panel, key: str):
     line_h = f["body"].get_height() + S(4)
     max_lines = max(0, (panel.bottom - pad - y) // line_h)
     for line in wrap(DESCRIPTIONS.get(key, ""), inner_w, f["body"])[:max_lines]:
-        draw_text(surf, line, f["body"], (196, 206, 218), (x, y))
+        draw_text(surf, line, f["body"], TEXT_SOFT, (x, y))
         y += line_h
 
 # ------------------------------
@@ -3004,7 +3127,7 @@ class MenuScreen(BaseScreen):
             draw_tile(screen, rect, selected)
             english = category_map.get(name, special.get(name, name))
             kind = icons.get(english, "")
-            icon_color = ACCENT if selected else (172, 184, 198)
+            icon_color = ACCENT if selected else ICON_IDLE
             if english == "Exit" and selected:
                 icon_color = (240, 96, 96)
             if i in big:
@@ -3017,7 +3140,7 @@ class MenuScreen(BaseScreen):
                     inst, total = self.stats['category_stats'][english]
                     count = f["small"].render(f"{inst} / {total}", True, SUCCESS if inst else MUTED)
                     bar = pygame.Rect(rect.x + pad, rect.bottom - S(28), rect.w - 2 * pad - count.get_width() - S(12), S(5))
-                    pygame.draw.rect(screen, (44, 58, 74), bar, border_radius=bar.h // 2)
+                    pygame.draw.rect(screen, TRACK, bar, border_radius=bar.h // 2)
                     if total and inst:
                         done = bar.copy()
                         done.w = max(bar.h, int(bar.w * inst / total))
@@ -3112,19 +3235,19 @@ class ConfirmDialog(BaseScreen):
         for line in lines:
             if msg_y + line_h > button_y - S(12):
                 break  # only on a screen too small for the whole message
-            draw_text(screen, line, f["body"], (196, 206, 218), (dialog_x + S(30), msg_y))
+            draw_text(screen, line, f["body"], TEXT_SOFT, (dialog_x + S(30), msg_y))
             msg_y += line_h
 
         for n, (label, color) in enumerate(((t("yes"), ACCENT), (t("no"), (220, 90, 90)))):
             rect = pygame.Rect(0, button_y, button_w, button_h)
             rect.centerx = dialog_x + dialog_w // 2 + (2 * n - 1) * (button_w // 2 + S(12))
             pygame.draw.rect(screen, color if self.selected == n else CARD_HI, rect, border_radius=button_h // 2)
-            img = f["tile"].render(label, True, FG)
+            img = f["tile"].render(label, True, ON_ACCENT if n == 0 and self.selected == n else FG)
             screen.blit(img, img.get_rect(center=rect.center))
 
 
 class InfoDialog(BaseScreen):
-    border_color = ACCENT  # the dialog's border and OK button
+    border_color = None  # the dialog's border and OK button; None: the theme's accent
 
     def __init__(self, title: str, message: List[str], on_close=None):
         self.title = title
@@ -3160,14 +3283,14 @@ class InfoDialog(BaseScreen):
         dialog_x = (W - dialog_w) // 2
         dialog_y = (H - dialog_h) // 2
         dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_w, dialog_h)
-        draw_dialog_panel(dialog_rect, self.border_color)
+        draw_dialog_panel(dialog_rect, self.border_color or ACCENT)
 
         draw_text(screen, fit_text(self.title, UI_FONTS["hero"], dialog_w - S(60)), UI_FONTS["hero"], FG,
                   (dialog_x + S(30), dialog_y + S(28)))
 
         # Message box area
         msg_rect = pygame.Rect(dialog_x + S(30), dialog_y + S(90), dialog_w - S(60), dialog_h - S(160))
-        pygame.draw.rect(screen, (17, 23, 31), msg_rect, border_radius=10)
+        pygame.draw.rect(screen, PANEL_DARK, msg_rect, border_radius=10)
 
         # Render multi-line text with wrapping
         y = msg_rect.y + S(10)
@@ -3178,14 +3301,14 @@ class InfoDialog(BaseScreen):
             for ln in wrap(raw_line, msg_rect.w - S(20), FONT):
                 if y > msg_rect.bottom - S(20):
                     break
-                draw_text(screen, ln, FONT, (210, 215, 225), (msg_rect.x + S(10), y))
+                draw_text(screen, ln, FONT, TEXT_MSG, (msg_rect.x + S(10), y))
                 y += S(22)
 
         # OK button
         btn_w, btn_h = S(120), S(45)
         btn_rect = pygame.Rect(dialog_x + (dialog_w - btn_w)//2, dialog_y + dialog_h - S(60), btn_w, btn_h)
-        pygame.draw.rect(screen, self.border_color, btn_rect, border_radius=btn_h // 2)
-        ok_img = UI_FONTS["tile"].render(t("ok"), True, FG)
+        pygame.draw.rect(screen, self.border_color or ACCENT, btn_rect, border_radius=btn_h // 2)
+        ok_img = UI_FONTS["tile"].render(t("ok"), True, FG if self.border_color else ON_ACCENT)
         screen.blit(ok_img, ok_img.get_rect(center=btn_rect.center))
 
 
@@ -3223,7 +3346,7 @@ class ChangelogDialog(BaseScreen):
 
         # Changelog content area
         msg_rect = pygame.Rect(dialog_x + S(30), dialog_y + S(90), dialog_w - S(60), dialog_h - S(160))
-        pygame.draw.rect(screen, (17, 23, 31), msg_rect, border_radius=10)
+        pygame.draw.rect(screen, PANEL_DARK, msg_rect, border_radius=10)
 
         # Render changelog text with wrapping
         y = msg_rect.y + S(15)
@@ -3234,14 +3357,14 @@ class ChangelogDialog(BaseScreen):
             for ln in wrap(raw_line, msg_rect.w - S(20), FONT):
                 if y > msg_rect.bottom - S(20):
                     break
-                draw_text(screen, ln, FONT, (210, 215, 225), (msg_rect.x + S(10), y))
+                draw_text(screen, ln, FONT, TEXT_MSG, (msg_rect.x + S(10), y))
                 y += S(22)
 
         # Close button
         btn_w, btn_h = S(120), S(45)
         btn_rect = pygame.Rect(dialog_x + (dialog_w - btn_w)//2, dialog_y + dialog_h - S(60), btn_w, btn_h)
         pygame.draw.rect(screen, ACCENT, btn_rect, border_radius=btn_h // 2)
-        ok_img = UI_FONTS["tile"].render(t("ok"), True, FG)
+        ok_img = UI_FONTS["tile"].render(t("ok"), True, ON_ACCENT)
         screen.blit(ok_img, ok_img.get_rect(center=btn_rect.center))
 
 
@@ -3374,7 +3497,7 @@ class InteractiveDialog(BaseScreen):
         max_msg_h = dialog_h - S(80) - S(50) - S(30) - min(len(self.options), 3) * S(50)
         msg_h = max(S(120), min(needed_h, max_msg_h))
         msg_rect = pygame.Rect(dialog_x + S(30), msg_y, dialog_w - S(60), msg_h)
-        pygame.draw.rect(screen, (17, 23, 31), msg_rect, border_radius=10)
+        pygame.draw.rect(screen, PANEL_DARK, msg_rect, border_radius=10)
 
         # Render message text
         y = msg_rect.y + S(10)
@@ -3385,7 +3508,7 @@ class InteractiveDialog(BaseScreen):
             for ln in wrap(raw_line, msg_rect.w - S(20), FONT):
                 if y > msg_rect.bottom - S(20):
                     break
-                draw_text(screen, ln, FONT, (210, 215, 225), (msg_rect.x + S(10), y))
+                draw_text(screen, ln, FONT, TEXT_MSG, (msg_rect.x + S(10), y))
                 y += S(22)
 
         # Hints
@@ -3423,7 +3546,7 @@ class InteractiveDialog(BaseScreen):
                 pygame.draw.rect(screen, SELECT, opt_rect, border_radius=8)
                 pygame.draw.rect(screen, ACCENT, opt_rect, width=3, border_radius=8)
             else:
-                pygame.draw.rect(screen, (17, 23, 31), opt_rect, border_radius=8)
+                pygame.draw.rect(screen, PANEL_DARK, opt_rect, border_radius=8)
 
             # Draw checkbox for checklist mode
             text_x = opt_rect.x + S(15)
@@ -3568,7 +3691,7 @@ class MenuSelectionDialog(BaseScreen):
                 pygame.draw.rect(screen, SELECT, opt_rect, border_radius=8)
                 pygame.draw.rect(screen, ACCENT, opt_rect, width=3, border_radius=8)
             else:
-                pygame.draw.rect(screen, (17, 23, 31), opt_rect, border_radius=8)
+                pygame.draw.rect(screen, PANEL_DARK, opt_rect, border_radius=8)
 
             draw_text(screen, label, FONT, FG, (opt_rect.x + S(15), opt_rect.y + S(12)))
 
@@ -4043,7 +4166,7 @@ class ChecklistScreen(BaseScreen):
                   f["body"], MUTED, (margin, sub_y))
         current_time = pygame.time.get_ticks() / 1000.0
         if self.queue_message and (current_time - self.queue_message_time) < 2.0:
-            img = f["body"].render(self.queue_message, True, FG)
+            img = f["body"].render(self.queue_message, True, ON_ACCENT)
             chip = pygame.Rect(0, 0, img.get_width() + S(28), img.get_height() + S(14))
             chip.topright = (W - margin, top_y + S(6))
             pygame.draw.rect(screen, ACCENT, chip, border_radius=chip.h // 2)
@@ -4282,13 +4405,13 @@ class GlobalSearchScreen(BaseScreen):
                 lx = rect.x + S(48)
                 screen.blit(label, (lx, rect.centery - label.get_height() // 2))
                 # Count badge, then a line to the right edge
-                img = f["small"].render(str(count), True, FG)
+                img = f["small"].render(str(count), True, ON_ACCENT if selected else FG)
                 chip = pygame.Rect(0, 0, max(img.get_width() + S(16), img.get_height() + S(8)), img.get_height() + S(8))
                 chip.midleft = (lx + label.get_width() + S(12), rect.centery)
                 pygame.draw.rect(screen, ACCENT if selected else CARD_HI, chip, border_radius=chip.h // 2)
                 screen.blit(img, img.get_rect(center=chip.center))
                 if chip.right + S(16) < rect.right - S(20):
-                    pygame.draw.line(screen, (44, 58, 74), (chip.right + S(16), rect.centery),
+                    pygame.draw.line(screen, TRACK, (chip.right + S(16), rect.centery),
                                      (rect.right - S(20), rect.centery), max(1, S(1)))
                 continue
             key = item[1]
@@ -4328,7 +4451,7 @@ class NoResultsScreen(BaseScreen):
         draw_screen_header(t("search_results"))
         footer_h = S(54)
         mid = (H - footer_h) // 2
-        draw_icon(screen, "search", (W // 2, mid - S(70)), S(84), (92, 108, 126))
+        draw_icon(screen, "search", (W // 2, mid - S(70)), S(84), TEXT_FAINT)
         title = fit_text(f"{t('no_addons_found')} '{self.query}'", f["hero"], W - S(96))
         img = f["hero"].render(title, True, FG)
         screen.blit(img, img.get_rect(midtop=(W // 2, mid)))
@@ -4448,12 +4571,12 @@ class QueueScreen(BaseScreen):
                 selected = i == self.idx
                 if selected:
                     rect = rect.inflate(S(8), S(8))
-                draw_tile(screen, rect, selected, radius=S(12), fill=ACCENT if selected else (30, 64, 104))
+                draw_tile(screen, rect, selected, radius=S(12), fill=ACCENT if selected else QUEUE_IDLE)
                 label = f"{t('start_install')} ({len(INSTALL_QUEUE)} {t('items_lowercase')})"
-                img = f["tile"].render(label, True, (255, 255, 255))
+                img = f["tile"].render(label, True, ON_ACCENT if selected else FG)
                 tri = S(14)
                 cx = rect.centerx - (img.get_width() + tri + S(14)) // 2
-                pygame.draw.polygon(screen, (255, 255, 255),
+                pygame.draw.polygon(screen, ON_ACCENT if selected else FG,
                                     [(cx, rect.centery - tri // 2 - S(2)), (cx, rect.centery + tri // 2 + S(2)), (cx + tri, rect.centery)])
                 screen.blit(img, (cx + tri + S(14), rect.centery - img.get_height() // 2))
 
@@ -4841,7 +4964,7 @@ export -f desktop
             top = draw_screen_header(t("installation_log"))
             draw_footer(screen, f"X={t('hint_hide_log')} | B={t('hint_return')}")
             log_rect = pygame.Rect(margin, top, W - 2 * margin, H - S(54) - S(16) - top)
-            draw_tile(screen, log_rect, radius=S(14), fill=(14, 19, 26))
+            draw_tile(screen, log_rect, radius=S(14), fill=FIELD)
             line_h = f["small"].get_height() + S(4)
             rows = max(1, (log_rect.h - S(24)) // line_h)
             with self.runner.lock:
@@ -4856,7 +4979,7 @@ export -f desktop
                     view.extend(wrap(ln, log_rect.w - S(32), f["small"]))
             y = log_rect.y + S(12)
             for ln in view[-rows:]:
-                draw_text(screen, ln, f["small"], (196, 206, 218), (log_rect.x + S(16), y))
+                draw_text(screen, ln, f["small"], TEXT_SOFT, (log_rect.x + S(16), y))
                 y += line_h
             return
 
@@ -5251,7 +5374,7 @@ class KonamiCodeScreen(BaseScreen):
             y += S(30)
 
         # The code, with the steps entered so far highlighted
-        steps = [self._step_surface(step, FG if i < self.progress else MUTED)
+        steps = [self._step_surface(step, ON_ACCENT if i < self.progress else MUTED)
                  for i, step in enumerate(KONAMI_CODE)]
         gap = S(10)
         row_h = max(s.get_height() for s in steps)
@@ -5651,7 +5774,7 @@ class OnScreenKeyboard:
 
         # Search box with a blinking cursor
         field = pygame.Rect(x, y, keys_w, field_h)
-        pygame.draw.rect(surf, (14, 19, 26), field, border_radius=S(14))
+        pygame.draw.rect(surf, FIELD, field, border_radius=S(14))
         pygame.draw.rect(surf, ACCENT, field, width=max(2, S(2)), border_radius=S(14))
         fisz = S(26)
         draw_icon(surf, "search", (field.x + S(22) + fisz // 2, field.centery), fisz, MUTED)
@@ -5663,7 +5786,7 @@ class OnScreenKeyboard:
                 shown = shown[1:]  # keep the end of a long text in view
             img = f["hero"].render(shown, True, FG)
         else:
-            img = f["hero"].render(fit_text(t("search_placeholder"), f["hero"], text_w), True, (92, 108, 126))
+            img = f["hero"].render(fit_text(t("search_placeholder"), f["hero"], text_w), True, TEXT_FAINT)
         surf.blit(img, (tx, field.centery - img.get_height() // 2))
         if pygame.time.get_ticks() // 530 % 2 == 0:
             cx = tx + (img.get_width() + S(3) if current_text else 0)
@@ -5696,9 +5819,9 @@ class OnScreenKeyboard:
                 continue
             if key == "ENTER":
                 isz = S(22)
-                label = f["tile"].render(t("search"), True, FG)
+                label = f["tile"].render(t("search"), True, ON_ACCENT)
                 lx = rect.centerx - (isz + S(10) + label.get_width()) // 2
-                draw_icon(surf, "search", (lx + isz // 2, rect.centery), isz, FG)
+                draw_icon(surf, "search", (lx + isz // 2, rect.centery), isz, ON_ACCENT)
                 surf.blit(label, (lx + isz + S(10), rect.centery - label.get_height() // 2))
                 continue
             text = t("key_space") if key == "SPACE" else key
@@ -5725,6 +5848,7 @@ def get_settings_items() -> List[Tuple[str, str]]:
         (t("configure_buttons"), t("configure_buttons_desc")),
         (t("language"), t("language_desc")),
         (t("cards_per_page"), t("cards_per_page_desc")),
+        (t("theme"), t("theme_desc")),
         (t("uninstall_bua"), t("uninstall_bua_desc")),
     ]
 
@@ -5778,6 +5902,8 @@ class SettingsScreen(BaseScreen):
             push_screen(LanguageScreen())
         elif name == t("cards_per_page"):
             push_screen(CardsPerPageScreen())
+        elif name == t("theme"):
+            push_screen(ThemeScreen())
         elif name == t("uninstall_bua"):
             push_screen(BuaUninstallInfoScreen())
 
@@ -5790,6 +5916,7 @@ class SettingsScreen(BaseScreen):
             t("configure_buttons"): "gear",
             t("language"): "globe",
             t("cards_per_page"): "windows",
+            t("theme"): "monitor",
             t("uninstall_bua"): "trash",
         }
         pitch, row_h = S(84), S(74)
@@ -6037,6 +6164,79 @@ class CardsPerPageScreen(BaseScreen):
             draw_list_row(rect, i == self.idx, label, current=value == CARDS_PER_PAGE)
 
 
+class ThemeScreen(BaseScreen):
+    """Settings > Theme. Moving through the list previews each theme; A keeps
+    it, B puts the saved one back."""
+
+    def __init__(self):
+        self.options = list(THEMES)
+        self.saved = THEME
+        self.idx = self.options.index(THEME) if THEME in self.options else 0
+
+    def move(self, step: int):
+        self.idx = (self.idx + step) % len(self.options)
+        apply_theme(self.options[self.idx])
+
+    def leave(self):
+        if THEME != self.saved:
+            apply_theme(self.saved)
+        pop_screen()
+
+    def handle(self, events):
+        # Process analog stick for navigation (arcade cabinet support)
+        analog_v, _analog_h = process_analog_navigation(events)
+        if analog_v in (1, -1):
+            self.move(analog_v)
+
+        for e in events:
+            if e.type == pygame.QUIT:
+                clean_exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key in (pygame.K_ESCAPE,):
+                    self.leave(); return
+                if e.key in (pygame.K_DOWN,):
+                    self.move(1)
+                if e.key in (pygame.K_UP,):
+                    self.move(-1)
+                if e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    self.apply_choice()
+            if e.type == pygame.JOYHATMOTION:
+                _x, y = e.value
+                if y == -1:
+                    self.move(1)
+                elif y == 1:
+                    self.move(-1)
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button in (BTN_A, BTN_START):
+                    self.apply_choice()
+                if e.button in (BTN_B, BTN_BACK):
+                    self.leave(); return
+
+    def apply_choice(self):
+        name = self.options[self.idx]
+        apply_theme(name)
+        save_theme(name)
+        self.saved = name
+        push_screen(InfoDialog(t("settings_title"), [f"{t('theme')}: {t('theme_' + name)}"]))
+
+    def draw(self):
+        draw_background(screen)
+        top = draw_screen_header(t("theme"), f"{t('current')}: {t('theme_' + self.saved)}")
+        draw_footer(screen, f"A={t('hint_select')} | B={t('hint_return')} | Back={t('hint_back_settings')}")
+        pitch, row_h = S(68), S(58)
+        first, rows = list_window(len(self.options), self.idx, top, pitch)
+        for i in range(first, min(len(self.options), first + rows)):
+            name = self.options[i]
+            rect = pygame.Rect(S(48), top + (i - first) * pitch, W - 2 * S(48), row_h)
+            current = name == self.saved
+            draw_list_row(rect, i == self.idx, t("theme_" + name), current=current)
+            # A swatch of the theme's accent, left of the tick
+            r = S(13)
+            cx = rect.right - S(20) - r - (2 * S(12) + S(16) if current else 0)
+            pygame.draw.circle(screen, THEMES[name], (cx, rect.centery), r)
+            pygame.draw.circle(screen, MUTED, (cx, rect.centery), r, max(1, S(2)))
+
+
 class ResolutionScreen(BaseScreen):
     def __init__(self):
         # Common resolution options (including CRT resolutions)
@@ -6213,7 +6413,7 @@ def main():
             try:
                 top = SCREENS[-1] if SCREENS else None
                 # Not over Settings itself, or over a running BUA uninstall
-                if not isinstance(top, (SettingsScreen, ControllerLayoutScreen, BuaUninstallRunScreen)):
+                if not isinstance(top, (SettingsScreen, ControllerLayoutScreen, ThemeScreen, BuaUninstallRunScreen)):
                     push_screen(SettingsScreen())
                 # Filter out Back button events so Settings doesn't immediately close
                 events = [e for e in events if not (
@@ -6251,6 +6451,8 @@ def play_splash_and_load():
             load_language()
             # Load cards per page preference
             load_saved_cards_per_page()
+            # Load the color theme (before the background is built)
+            load_saved_theme()
             # Load assets (images, icons)
             init_assets()
         except Exception as e:

@@ -167,5 +167,16 @@
   "resolution_desc": "Auflösung der Benutzeroberfläche ändern",
 
   "cards_per_page": "Kacheln pro Seite",
-  "cards_per_page_desc": "Anzahl der anzuzeigenden Kacheln in Menüs festlegen (Auto/3/4/5/6/7/8/10)"
+  "cards_per_page_desc": "Anzahl der anzuzeigenden Kacheln in Menüs festlegen (Auto/3/4/5/6/7/8/10)",
+  "theme": "Design",
+  "theme_desc": "Farbpalette von BUA ändern",
+  "theme_blue": "Blau",
+  "theme_green": "Grün",
+  "theme_red": "Rot",
+  "theme_orange": "Orange",
+  "theme_pink": "Pink",
+  "theme_purple": "Lila",
+  "theme_yellow": "Gelb",
+  "theme_gray": "Grau",
+  "theme_white": "Weiß"
 }

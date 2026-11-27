@@ -169,5 +169,16 @@
   "resolution_desc": "Zmień rozdzielczość interfejsu",
 
   "cards_per_page": "Karty na stronie",
-  "cards_per_page_desc": "Ustaw liczbę kart wyświetlanych w menu (Auto/3/4/5/6/7/8/10)"
+  "cards_per_page_desc": "Ustaw liczbę kart wyświetlanych w menu (Auto/3/4/5/6/7/8/10)",
+  "theme": "Motyw",
+  "theme_desc": "Zmień paletę kolorów BUA",
+  "theme_blue": "Niebieski",
+  "theme_green": "Zielony",
+  "theme_red": "Czerwony",
+  "theme_orange": "Pomarańczowy",
+  "theme_pink": "Różowy",
+  "theme_purple": "Fioletowy",
+  "theme_yellow": "Żółty",
+  "theme_gray": "Szary",
+  "theme_white": "Biały"
 }
