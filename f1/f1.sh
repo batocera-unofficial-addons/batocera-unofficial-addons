@@ -65,15 +65,14 @@ ANTIMICROX_PROFILE="/userdata/system/configs/bat-drl/Nav_Redist2.joystick.amgp"
 
 # fix for exfat on HOME + pcmanfm
 export XDG_CACHE_HOME=/tmp/xdg_cache
-ANTIMICROX_PROFILE="/userdata/system/configs/bat-drl/Nav_Redist2.joystick.amgp"
 
-### Inicia o AntiMicroX ###
+### Start AntiMicroX ###
     if [ -e '/dev/input/js0' ]; then
         antimicrox --hidden --profile "$ANTIMICROX_PROFILE" &
         ANTIMICROX_PID=$!
-        success "AntiMicroX iniciado (PID: $ANTIMICROX_PID)"
+        echo "AntiMicroX started (PID: $ANTIMICROX_PID)"
     else
-        warning "Nenhum joystick detectado"
+        echo "No joystick detected, AntiMicroX not started"
     fi
 
 ### Inicia o desktop e o pcmanfm ###
@@ -84,7 +83,6 @@ batocera-mouse hide
 ### Encerra o AntiMicroX, o desktop e o pcmanfm ###
     if [ -n "${ANTIMICROX_PID}" ]; then
         kill -9 "${ANTIMICROX_PID}" 2>/dev/null
-        pkill -9 "${ANTIMICROX_PID}" 2>/dev/null
     fi
     
 exit 0
@@ -104,6 +102,10 @@ curl -s -L -o "$LOGO_PATH" "$LOGO_URL"
 
 # Step 4: Add entry to gamelist.xml
 echo "Adding $APP_NAME to gamelist.xml..."
+# Drop an entry left by an earlier install, so a reinstall doesn't add a second one
+if [ -f "$GAME_LIST" ]; then
+  xmlstarlet ed -d "/gameList/game[path='./${APP_NAME}.sh']" "$GAME_LIST" > "$GAME_LIST.tmp" && mv "$GAME_LIST.tmp" "$GAME_LIST"
+fi
 xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./${APP_NAME}.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \

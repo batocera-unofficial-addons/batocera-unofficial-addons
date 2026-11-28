@@ -1,9 +1,9 @@
 #!/bin/bash
 # Uninstaller for Bridge, installed by bridge.sh.
 # Removes the AppImage and icon, the desktop entry and its persistent copy,
-# the restore script and its custom.sh line, and the settings and cache
-# Bridge creates in /userdata/system/.config/bridge on first run. Charts
-# Bridge downloaded are kept: they are in the library folder the user chose.
+# and the restore script and its custom.sh line. Kept: Bridge's settings in
+# /userdata/system/.config/bridge and the charts it downloaded (in the
+# library folder the user chose).
 
 APPNAME="Bridge"
 
@@ -24,9 +24,13 @@ main() {
     fi
 
     rm -f "${DESKTOP_FILE}"
-    rm -rf "${ADDONS_DIR:?}/${APPNAME,,}" "${APP_CONFIG_DIR:?}" "${USER_DATA_DIR:?}"
+    rm -rf "${ADDONS_DIR:?}/${APPNAME,,}" "${APP_CONFIG_DIR:?}"
 
     echo "${APPNAME} has been removed."
+    if [ -d "${USER_DATA_DIR}" ]; then
+        echo "Bridge settings were kept in ${USER_DATA_DIR}."
+    fi
+    echo "Downloaded charts were kept in your chart library folder."
 }
 
 main "$@"

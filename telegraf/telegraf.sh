@@ -143,8 +143,10 @@ mv -vf usr/lib/telegraf/scripts/telegraf.service /userdata/system/add-ons/telegr
 mv -vf usr/bin/telegraf /userdata/system/add-ons/telegraf/telegraf
 cp -vf etc/telegraf/telegraf.conf /userdata/system/add-ons/telegraf/etc/telegraf/telegraf.conf.default
 # We don't want to mess with an already setup Telegraf
-if [ ! -f /userdata/system/add-ons/telegraf/telegraf.conf ]; then
-  mv -v etc/telegraf/telegraf.conf /userdata/system/add-ons/telegraf/etc/telegraf
+if [ ! -f /userdata/system/add-ons/telegraf/etc/telegraf/telegraf.conf ]; then
+  mv -v etc/telegraf/telegraf.conf /userdata/system/add-ons/telegraf/etc/telegraf/telegraf.conf
+else
+  echo "Keeping existing /userdata/system/add-ons/telegraf/etc/telegraf/telegraf.conf"
 fi
 
 # Cleanup temporary files

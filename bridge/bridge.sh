@@ -82,9 +82,13 @@ fi
 EOF
 chmod +x "${APP_CONFIG_DIR}/restore_desktop_entry.sh"
 
-# Register restore script in custom.sh if not already present
-if ! grep -q "${APP_CONFIG_DIR}/restore_desktop_entry.sh" "$CUSTOM_SCRIPT"; then
+# Register the restore script in custom.sh, which Batocera runs at boot
+# (on Batocera 43 and later through BUA's custom_service_handler service).
+# /usr/share/applications is not persistent, so the entry is copied back each boot.
+[ -f "$CUSTOM_SCRIPT" ] || echo "#!/bin/bash" > "$CUSTOM_SCRIPT"
+if ! grep -qF "${APP_CONFIG_DIR}/restore_desktop_entry.sh" "$CUSTOM_SCRIPT"; then
     echo "\"${APP_CONFIG_DIR}/restore_desktop_entry.sh\" &" >> "$CUSTOM_SCRIPT"
 fi
+chmod a+x "$CUSTOM_SCRIPT"
 
 echo "✅ ${APPNAME} setup complete with --no-sandbox."

@@ -2,6 +2,10 @@
 
 STOP_FILE="/tmp/wayvnc_headless.stop"
 LOG_FILE="/userdata/system/logs/wayvnc_headless.log"
+SWAY_LOG="/tmp/sway_headless.log"
+# PID of the headless sway this service started. Only that sway is ever
+# stopped, so a desktop sway session on the same machine keeps running.
+SWAY_PID_FILE="/tmp/wayvnc_headless_sway.pid"
 WAYVNC_BIN="/usr/bin/wayvnc"
 RUN_CMD="$WAYVNC_BIN 0.0.0.0"
 export XDG_RUNTIME_DIR=/run/user/0
@@ -12,9 +16,32 @@ export WLR_BACKENDS=headless
 export WLR_LIBINPUT_NO_DEVICES=1
 export LD_LIBRARY_PATH="/userdata/system/add-ons/wayvnc/lib:$LD_LIBRARY_PATH"
 
+# Stops the headless sway this service started, if it is still running.
+stop_our_sway() {
+    local pid
+    pid=$(cat "$SWAY_PID_FILE" 2>/dev/null)
+    if [ -n "$pid" ] && [ "$(cat "/proc/$pid/comm" 2>/dev/null)" = "sway" ]; then
+        kill "$pid" 2>/dev/null
+        for _ in 1 2 3 4 5; do
+            kill -0 "$pid" 2>/dev/null || break
+            sleep 1
+        done
+        kill -9 "$pid" 2>/dev/null
+    fi
+    rm -f "$SWAY_PID_FILE"
+}
+
+# Prints the Wayland sockets in XDG_RUNTIME_DIR, one per line.
+list_sockets() {
+    local s
+    for s in "$XDG_RUNTIME_DIR"/wayland-*; do
+        [ -S "$s" ] && echo "$s"
+    done
+}
+
 case "$1" in
     start)
-	# Wait until wayvnc is installed and executable
+        # Wait until wayvnc is installed and executable
         while [ ! -x "$WAYVNC_BIN" ]; do
             echo "$(date) Waiting for $WAYVNC_BIN to appear..." >> "$LOG_FILE"
             sleep 1
@@ -22,34 +49,44 @@ case "$1" in
 
         [ -f "$STOP_FILE" ] && rm "$STOP_FILE"
 
-        [[ $(pgrep -f "$RUN_CMD" > /dev/null) ]] && exit 0
+        # Already running (or the normal WayVNC service holds port 5900)
+        if pgrep -f "$RUN_CMD" > /dev/null; then
+            echo "$(date) wayvnc is already running, not starting another." | tee -a "$LOG_FILE"
+            exit 0
+        fi
 
         (
             while [ ! -f "$STOP_FILE" ]; do
-                pkill sway
-		echo "$(date) Starting wayvnc..." | tee -a "$LOG_FILE"
+                stop_our_sway
+                echo "$(date) Starting headless sway..." | tee -a "$LOG_FILE"
 
-                sway > /tmp/sway_headless.log 2>&1 &
-                for i in {1..10}; do
-                    socket=$(ls $XDG_RUNTIME_DIR/wayland-* 2>/dev/null | head -n1)
-                    if [ -n "$socket" ]; then
-                        export WAYLAND_DISPLAY=$(basename "$socket")
-                        break
-                    fi
+                # Sockets that exist before our sway starts belong to other
+                # sessions; ours is the one that appears afterwards.
+                before=$(list_sockets)
+                sway > "$SWAY_LOG" 2>&1 &
+                sway_pid=$!
+                echo "$sway_pid" > "$SWAY_PID_FILE"
+
+                socket=""
+                for _ in {1..10}; do
+                    while IFS= read -r s; do
+                        grep -qxF "$s" <<< "$before" || { socket="$s"; break; }
+                    done < <(list_sockets)
+                    [ -n "$socket" ] && break
+                    kill -0 "$sway_pid" 2>/dev/null || break
                     sleep 1
                 done
 
-                if [ -z "$WAYLAND_DISPLAY" ]; then
+                if [ -z "$socket" ]; then
                     echo "$(date) Sway failed to start, log:" | tee -a "$LOG_FILE"
-                    cat /tmp/sway_headless.log >> "$LOG_FILE"
+                    cat "$SWAY_LOG" >> "$LOG_FILE"
+                    stop_our_sway
                     sleep 5
                     continue
                 fi
+                export WAYLAND_DISPLAY="${socket##*/}"
 
-                while [ ! -f "$STOP_FILE" ]; do
-                    socket=$(ls $XDG_RUNTIME_DIR/wayland-* 2>/dev/null | head -n1)
-                    [ -z "$socket" ] && break
-                    export WAYLAND_DISPLAY=$(basename "$socket")
+                while [ ! -f "$STOP_FILE" ] && kill -0 "$sway_pid" 2>/dev/null && [ -S "$socket" ]; do
                     echo "$(date) Starting wayvnc headless with $WAYLAND_DISPLAY..." | tee -a "$LOG_FILE"
                     $RUN_CMD >> "$LOG_FILE" 2>&1
                     echo "$(date) wayvnc headless exited. Restarting..." | tee -a "$LOG_FILE"
@@ -57,14 +94,15 @@ case "$1" in
                 done
             done
 
+            stop_our_sway
             echo "$(date) Stop file found. Exiting wayvnc headless service." | tee -a "$LOG_FILE"
         ) &
         ;;
     stop)
         echo "$(date) Stopping wayvnc headless..." | tee -a "$LOG_FILE"
         touch "$STOP_FILE"
-        pkill sway
-	pkill -f "$RUN_CMD"
+        pkill -f "$RUN_CMD"
+        stop_our_sway
         ;;
     status)
         if pgrep -f "$RUN_CMD" > /dev/null; then
@@ -80,4 +118,3 @@ case "$1" in
 esac
 
 exit 0
-

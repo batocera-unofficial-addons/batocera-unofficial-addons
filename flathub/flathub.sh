@@ -9,7 +9,9 @@ PORT_SCRIPT="/userdata/roms/ports/flathub.sh"
 ICON_PATH="/userdata/roms/ports/images/flathub-logo.jpg"
 KEYS_PATH="/userdata/roms/ports/flathub.sh.keys"
 LOGO_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/flathub/extra/flathub-logo.jpg"
-KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/flathub/extra/flathub.sh.keys"
+# Same Chrome port controls as Netflix, Disney+ and the other browser ports:
+# d-pad/A/B to navigate, right stick as mouse, hotkey+start to close
+KEYS_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/netflix/extra/Netflix.sh.keys"
 GAMELIST="/userdata/roms/ports/gamelist.xml"
 
 # Step 1: Show dialog to confirm
@@ -56,9 +58,11 @@ curl -L -o "$ICON_PATH" "$LOGO_URL"
 echo "Downloading key mapping file..."
 curl -L -o "$KEYS_PATH" "$KEYS_URL"
 
-# Step 6: Add flathub entry to gamelist.xml
+# Step 6: Add flathub entry to gamelist.xml (replacing one from an earlier install)
 echo "Updating gamelist.xml..."
-xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+[ -f "$GAMELIST" ] || echo "<gameList />" > "$GAMELIST"
+xmlstarlet ed -d "/gameList/game[path='./flathub.sh']" \
+  -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./flathub.sh" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "$APPNAME" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/flathub-logo.jpg" \

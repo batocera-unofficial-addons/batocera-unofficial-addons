@@ -73,8 +73,9 @@ if [[ -f "$GAME_LIST" ]]; then
   fi
 
   # Add game entry to gamelist.xml
-  echo "Adding $APP_NAME entry to gamelist.xml..."
-  xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+  echo "Adding $APP_NAME entry to gamelist.xml (replacing any existing one)..."
+  xmlstarlet ed -d "/gameList/game[path='./$URL_SUFFIX']" \
+    -s "/gameList" -t elem -n "game" -v "" \
     -s "/gameList/game[last()]" -t elem -n "path" -v "./$URL_SUFFIX" \
     -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \
     -s "/gameList/game[last()]" -t elem -n "image" -v "./images/${GAME_BASENAME}-logo.${LOGO_EXT}" \

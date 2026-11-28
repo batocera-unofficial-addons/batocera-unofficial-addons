@@ -1,104 +1,156 @@
 #!/bin/bash
+# BUA Installer: JDownloader 2
+# Installs JDownloader with its own Java 17 runtime, an F1 Applications entry
+# and the "jdownloader" background service. On a reinstall the JDownloader
+# settings in jd2/cfg (accounts, My.JDownloader login, download list) are kept.
 
 # Variables
 APPNAME="JDownloader"
 PACKAGE_URL="https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/jdownloader/extra/jdownloader.tar.gz"
-INSTALL_DIR="/userdata/system/add-ons/jdownloader"
+JDK_URL="https://aka.ms/download-jdk/microsoft-jdk-17-linux-x64.tar.gz"
+ADDONS_DIR="/userdata/system/add-ons"
+INSTALL_DIR="${ADDONS_DIR}/jdownloader"
+JD_DIR="${INSTALL_DIR}/jd2"
+JAVA_DIR="${INSTALL_DIR}/java"
+TEMP_DIR="/userdata/tmp/jdownloader"
 ICON_URL="https://upload.wikimedia.org/wikipedia/commons/f/f7/Jdownloader.png"
-ICON_PATH="/userdata/system/add-ons/${APPNAME,,}/extra/${APPNAME,,}-icon.png"
-DESKTOP_ENTRY="/userdata/system/configs/${APPNAME,,}/${APPNAME,,}.desktop"
+ICON_PATH="${INSTALL_DIR}/extra/jdownloader-icon.png"
+CONFIG_DIR="/userdata/system/configs/jdownloader"
+DESKTOP_ENTRY="${CONFIG_DIR}/jdownloader.desktop"
 DESKTOP_DIR="/usr/share/applications"
+RESTORE_SCRIPT="${CONFIG_DIR}/restore_desktop_entry.sh"
 CUSTOM_SCRIPT="/userdata/system/custom.sh"
-SERVICE_SCRIPT="/userdata/system/services/jdownloader"
+SERVICE_NAME="jdownloader"
+SERVICE_SCRIPT="/userdata/system/services/${SERVICE_NAME}"
 
-mkdir -p "/userdata/system/add-ons/${APPNAME,,}/extra"
-mkdir -p "/userdata/system/configs/${APPNAME,,}"
-mkdir -p "/userdata/system/services"
+error_exit() {
+    echo "Error: $1" >&2
+    rm -rf "${TEMP_DIR:?}"
+    exit 1
+}
 
-echo "[+] Installing JDownloader..."
+if [ "$(uname -m)" != "x86_64" ]; then
+    dialog --title "$APPNAME" --msgbox "${APPNAME} is only available for x86_64." 8 60
+    exit 1
+fi
 
-# === Step 1: Set up Java ===
-echo "Installing Java..."
-mkdir -p /userdata/system/java
-cd /userdata/system/java
+echo "[+] Installing ${APPNAME}..."
 
-# Clean up previous download
-rm -f microsoft-jdk-17-linux-x64.tar.gz
+mkdir -p "$INSTALL_DIR" "$CONFIG_DIR" "/userdata/system/services" "$TEMP_DIR"
 
-echo "Downloading Java JDK 17..."
-curl -L -O https://aka.ms/download-jdk/microsoft-jdk-17-linux-x64.tar.gz
+# Stop a running service from an earlier install before replacing its files
+if [ -x "$SERVICE_SCRIPT" ]; then
+    batocera-services stop "$SERVICE_NAME" >/dev/null 2>&1
+fi
 
-echo "Extracting Java..."
-tar -xzf microsoft-jdk-17-linux-x64.tar.gz
-JDK_DIR=$(find . -maxdepth 1 -type d -name "jdk-17*" | head -n 1)
-JDK_PATH="/userdata/system/java/$JDK_DIR"
-
-echo "Java installed at $JDK_PATH"
+# === Step 1: Java 17 (kept inside the add-on folder, used only by JDownloader) ===
+JDK_PATH=$(find "$JAVA_DIR" -mindepth 1 -maxdepth 1 -type d -name "jdk-17*" 2>/dev/null | head -n 1)
+if [ -n "$JDK_PATH" ] && [ -x "${JDK_PATH}/bin/java" ]; then
+    echo "Java already installed at ${JDK_PATH}"
+else
+    echo "Downloading Java JDK 17..."
+    curl -fL -o "${TEMP_DIR}/jdk.tar.gz" "$JDK_URL" || error_exit "Failed to download Java."
+    echo "Extracting Java..."
+    mkdir -p "$JAVA_DIR"
+    tar -xzf "${TEMP_DIR}/jdk.tar.gz" -C "$JAVA_DIR" || error_exit "Failed to extract Java."
+    JDK_PATH=$(find "$JAVA_DIR" -mindepth 1 -maxdepth 1 -type d -name "jdk-17*" | head -n 1)
+    [ -n "$JDK_PATH" ] && [ -x "${JDK_PATH}/bin/java" ] || error_exit "Java not found after extraction."
+    echo "Java installed at ${JDK_PATH}"
+fi
 
 # === Step 2: Download and extract JDownloader package ===
-echo "Downloading JDownloader package..."
-mkdir -p "$INSTALL_DIR"
-cd /tmp
-curl -L -o jdownloader.tar.gz "$PACKAGE_URL"
+echo "Downloading ${APPNAME} package..."
+curl -fL -o "${TEMP_DIR}/jdownloader.tar.gz" "$PACKAGE_URL" || error_exit "Failed to download ${APPNAME}."
 
-echo "Extracting JDownloader..."
-tar -xzf jdownloader.tar.gz -C /userdata/system/add-ons/
-rm -f jdownloader.tar.gz
+# Keep the user's settings: the package ships its own jd2/cfg
+if [ -d "${JD_DIR}/cfg" ]; then
+    echo "Keeping existing ${APPNAME} settings..."
+    mv "${JD_DIR}/cfg" "${TEMP_DIR}/cfg"
+fi
 
-# Set Java path for JDownloader
-export INSTALL4J_JAVA_HOME="$JDK_PATH"
-export PATH="$JDK_PATH/bin:$PATH"
+echo "Extracting ${APPNAME}..."
+tar -xzf "${TEMP_DIR}/jdownloader.tar.gz" -C "$ADDONS_DIR" || error_exit "Failed to extract ${APPNAME}."
 
-# === Step 3: Create service management script ===
-create_service_script() {
-echo "Creating service management script..."
+if [ -d "${TEMP_DIR}/cfg" ]; then
+    rm -rf "${JD_DIR:?}/cfg"
+    mv "${TEMP_DIR}/cfg" "${JD_DIR}/cfg"
+fi
+rm -rf "${TEMP_DIR:?}"
 
-cat <<EOF > "${SERVICE_SCRIPT}"
+# === Step 3: Launchers using this Java (the package's copies point at a fixed JDK version) ===
+cat <<EOF > "${INSTALL_DIR}/jdownloader2"
 #!/bin/bash
+# JDownloader with its window
+export INSTALL4J_JAVA_HOME="${JDK_PATH}"
+export PATH="${JDK_PATH}/bin:\$PATH"
+cd "${JD_DIR}" || exit 1
+DISPLAY=\${DISPLAY:-:0.0} exec java -jar JDownloader.jar
+EOF
 
-JDOWNLOADER_DIR="/userdata/system/add-ons/jdownloader"
-LAUNCHER="\${JDOWNLOADER_DIR}/jdownloader-background"
+cat <<EOF > "${INSTALL_DIR}/jdownloader2-background"
+#!/bin/bash
+# JDownloader headless, in the foreground (the service puts it in the background)
+export INSTALL4J_JAVA_HOME="${JDK_PATH}"
+export PATH="${JDK_PATH}/bin:\$PATH"
+cd "${JD_DIR}" || exit 1
+exec java -Djava.awt.headless=true -jar JDownloader.jar -norestart
+EOF
+chmod a+x "${INSTALL_DIR}/jdownloader2" "${INSTALL_DIR}/jdownloader2-background"
+
+# === Step 4: Service script ===
+echo "Creating service script..."
+cat <<'EOF' > "$SERVICE_SCRIPT"
+#!/bin/bash
+# JDownloader background service for Batocera (BUA)
+
+LAUNCHER="/userdata/system/add-ons/jdownloader/jdownloader2-background"
+LOG_FILE="/userdata/system/add-ons/jdownloader/jd2/jd.log"
 PID_FILE="/var/run/jdownloader.pid"
 
-# Set Java environment
-export INSTALL4J_JAVA_HOME="$JDK_PATH"
-export PATH="$JDK_PATH/bin:\$PATH"
+is_running() {
+    [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null
+}
 
-case "\$1" in
+case "$1" in
     start)
-        if [ -f "\$PID_FILE" ] && kill -0 \$(cat "\$PID_FILE") 2>/dev/null; then
+        if is_running; then
             echo "JDownloader is already running"
             exit 0
         fi
+        if [ ! -x "$LAUNCHER" ]; then
+            echo "JDownloader launcher not found: $LAUNCHER"
+            exit 1
+        fi
         echo "Starting JDownloader in background mode..."
-        nohup "\$LAUNCHER" > /dev/null 2>&1 &
-        echo \$! > "\$PID_FILE"
-        echo "JDownloader started (PID: \$(cat \$PID_FILE))"
+        nohup "$LAUNCHER" > "$LOG_FILE" 2>&1 &
+        echo $! > "$PID_FILE"
+        echo "JDownloader started (PID: $(cat "$PID_FILE"))"
         ;;
     stop)
-        if [ ! -f "\$PID_FILE" ]; then
+        if ! is_running; then
             echo "JDownloader is not running"
+            rm -f "$PID_FILE"
             exit 0
         fi
-        PID=\$(cat "\$PID_FILE")
-        if kill -0 "\$PID" 2>/dev/null; then
-            echo "Stopping JDownloader (PID: \$PID)..."
-            kill "\$PID"
-            rm -f "\$PID_FILE"
-            echo "JDownloader stopped"
-        else
-            echo "JDownloader is not running (stale PID file)"
-            rm -f "\$PID_FILE"
-        fi
+        PID=$(cat "$PID_FILE")
+        echo "Stopping JDownloader (PID: $PID)..."
+        kill "$PID"
+        for _ in 1 2 3 4 5 6 7 8 9 10; do
+            kill -0 "$PID" 2>/dev/null || break
+            sleep 1
+        done
+        kill -0 "$PID" 2>/dev/null && kill -9 "$PID"
+        rm -f "$PID_FILE"
+        echo "JDownloader stopped"
         ;;
     restart)
-        \$0 stop
+        "$0" stop
         sleep 2
-        \$0 start
+        "$0" start
         ;;
     status)
-        if [ -f "\$PID_FILE" ] && kill -0 \$(cat "\$PID_FILE") 2>/dev/null; then
-            echo "JDownloader is running (PID: \$(cat \$PID_FILE))"
+        if is_running; then
+            echo "JDownloader is running (PID: $(cat "$PID_FILE"))"
             exit 0
         else
             echo "JDownloader is not running"
@@ -106,25 +158,20 @@ case "\$1" in
         fi
         ;;
     *)
-        echo "Usage: \$0 {start|stop|restart|status}"
+        echo "Usage: $0 {start|stop|restart|status}"
         exit 1
         ;;
 esac
 EOF
-
-chmod +x "${SERVICE_SCRIPT}"
+chmod a+x "$SERVICE_SCRIPT"
 echo "Service script created at ${SERVICE_SCRIPT}"
-}
 
-# === Step 4: Create desktop launcher ===
-create_launcher() {
+# === Step 5: Desktop launcher (F1 Applications) ===
 echo "Creating desktop launcher..."
+mkdir -p "$(dirname "$ICON_PATH")"
+curl -fL -o "$ICON_PATH" "$ICON_URL" || echo "Warning: could not download the icon, using the packaged one."
 
-# Download icon
-curl -L -o "$ICON_PATH" "$ICON_URL"
-
-# Create desktop entry
-cat <<EOF > "${DESKTOP_ENTRY}"
+cat <<EOF > "$DESKTOP_ENTRY"
 [Desktop Entry]
 Version=1.0
 Type=Application
@@ -134,41 +181,39 @@ Icon=${ICON_PATH}
 Terminal=false
 Categories=Utility;batocera.linux;
 EOF
+chmod a+x "$DESKTOP_ENTRY"
+cp "$DESKTOP_ENTRY" "${DESKTOP_DIR}/jdownloader.desktop"
+chmod a+x "${DESKTOP_DIR}/jdownloader.desktop"
 
-cp "${DESKTOP_ENTRY}" "${DESKTOP_DIR}/${APPNAME,,}.desktop"
-chmod +x "${DESKTOP_ENTRY}" "${DESKTOP_DIR}/${APPNAME,,}.desktop"
-
-# Restore script for .desktop
-cat <<EOF > "/userdata/system/configs/${APPNAME,,}/restore_desktop_entry.sh"
+# Restore the desktop entry at boot (/usr/share/applications is not persistent)
+cat <<EOF > "$RESTORE_SCRIPT"
 #!/bin/bash
-if [ ! -f "${DESKTOP_DIR}/${APPNAME,,}.desktop" ]; then
-    cp "${DESKTOP_ENTRY}" "${DESKTOP_DIR}/${APPNAME,,}.desktop"
-    chmod +x "${DESKTOP_DIR}/${APPNAME,,}.desktop"
+if [ ! -f "${DESKTOP_DIR}/jdownloader.desktop" ]; then
+    cp "${DESKTOP_ENTRY}" "${DESKTOP_DIR}/jdownloader.desktop"
+    chmod a+x "${DESKTOP_DIR}/jdownloader.desktop"
 fi
 EOF
-chmod +x "/userdata/system/configs/${APPNAME,,}/restore_desktop_entry.sh"
+chmod a+x "$RESTORE_SCRIPT"
 
-# Add restore script to custom.sh if not already added
-if ! grep -q "jdownloader/restore_desktop_entry.sh" "${CUSTOM_SCRIPT}" 2>/dev/null; then
-    echo "\"/userdata/system/configs/${APPNAME,,}/restore_desktop_entry.sh\" &" >> "${CUSTOM_SCRIPT}"
+[ -f "$CUSTOM_SCRIPT" ] || echo "#!/bin/bash" > "$CUSTOM_SCRIPT"
+if ! grep -qF "$RESTORE_SCRIPT" "$CUSTOM_SCRIPT"; then
+    echo "\"${RESTORE_SCRIPT}\" &" >> "$CUSTOM_SCRIPT"
 fi
-}
+chmod a+x "$CUSTOM_SCRIPT"
 
-# Run all setup steps
-create_service_script
-create_launcher
-
-batocera-services enable jdownloader
-batocera-services start jdownloader
+# === Step 6: Enable and start the service ===
+batocera-services enable "$SERVICE_NAME"
+batocera-services start "$SERVICE_NAME"
 
 echo ""
 echo "========================================="
 echo "  Installation Complete!"
 echo "========================================="
-echo "JDownloader installed successfully!"
+echo "${APPNAME} installed successfully!"
 echo ""
 echo "You can:"
-echo "  - Launch JDownloader from the applications menu"
-echo "  - Manage background service:"
-echo "    /userdata/system/services/jdownloader start|stop|restart|status"
+echo "  - Launch ${APPNAME} from F1 > Applications"
+echo "  - Manage the background service:"
+echo "    batocera-services start|stop ${SERVICE_NAME}"
+echo "    ${SERVICE_SCRIPT} start|stop|restart|status"
 echo ""

@@ -10,8 +10,6 @@ DESKTOP_FILE="${DESKTOP_DIR}/${APP_EXEC}.desktop"
 PORTS_DIR="/userdata/roms/ports"
 IMAGES_DIR="${PORTS_DIR}/images"
 GAMELIST_PATH="${PORTS_DIR}/gamelist.xml"
-BACKUP_PATH="${PORTS_DIR}/gamelist.xml.DRL"
-BIN_DIR="${PORTS_DIR}"
 FLATPAK_GAMELIST="/userdata/roms/flatpak/gamelist.xml"
 
 # URLs
@@ -36,7 +34,7 @@ Icon=${MARQUEE_IMG}
 "
 
 PORT_SCRIPT_CONTENT="#!/bin/bash
-flatpak --filesystem="/userdata/" --filesystem=host:/:rw --filesystem=host --filesystem="/media" run $APP_ID
+flatpak run --filesystem=/userdata --filesystem=host --filesystem=/media ${APP_ID}
 "
 
 
@@ -76,7 +74,9 @@ add_everest_to_ports_gamelist() {
         exit 1
     fi
 
+    # Drop an entry from an earlier install so a reinstall does not add a second one
     xmlstarlet ed --inplace \
+        -d "/gameList/game[path='./${PORT_SCRIPT_NAME}']" \
         -s "/gameList" -t elem -n game \
         -s "/gameList/game[last()]" -t elem -n path -v "./${PORT_SCRIPT_NAME}" \
         -s "/gameList/game[last()]" -t elem -n name -v "${APP_NAME}" \
@@ -180,8 +180,11 @@ echo "Directories created."
 # 3. .desktop File Creation
 echo "Creating .desktop file..."
 echo "$DESKTOP_CONTENT" > "$DESKTOP_FILE" || error_exit "Failed to create $DESKTOP_FILE"
-echo "$DESKTOP_CONTENT" > "$PATH_DESKTOP" || error_exit "Failed to create $PATH_DESKTOP"
-echo ".desktop file created at $DESKTOP_FILE and $PATH_DESKTOP"
+echo ".desktop file created at $DESKTOP_FILE"
+# Desktop shortcut only when a desktop add-on has set up the Desktop folder
+if [ -d "$(dirname "$PATH_DESKTOP")" ]; then
+    echo "$DESKTOP_CONTENT" > "$PATH_DESKTOP" && echo "Desktop shortcut created at $PATH_DESKTOP"
+fi
 
 # 4. Image Download
 download_file "$MARQUEE_URL" "$MARQUEE_IMG"
@@ -190,7 +193,7 @@ download_file "$THUMB_URL" "$THUMB_IMG"
 # 5. Ports Script Creation
 echo "Creating ports script..."
 echo "$PORT_SCRIPT_CONTENT" > "$PORT_SCRIPT_PATH" || error_exit "Failed to create $PORT_SCRIPT_PATH"
-chmod 777 "$PORT_SCRIPT_PATH" || error_exit "Failed to make $PORT_SCRIPT_PATH executable."
+chmod a+x "$PORT_SCRIPT_PATH" || error_exit "Failed to make $PORT_SCRIPT_PATH executable."
 echo "Ports script created."
 
 # 6. gamelist.xml Update

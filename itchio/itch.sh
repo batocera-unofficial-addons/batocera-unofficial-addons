@@ -10,8 +10,6 @@ DESKTOP_FILE="${DESKTOP_DIR}/${APP_EXEC}.desktop"
 PORTS_DIR="/userdata/roms/ports"
 IMAGES_DIR="${PORTS_DIR}/images"
 GAMELIST_PATH="${PORTS_DIR}/gamelist.xml"
-BACKUP_PATH="${PORTS_DIR}/gamelist.xml.DRL"
-BIN_DIR="${PORTS_DIR}"
 FLATPAK_GAMELIST="/userdata/roms/flatpak/gamelist.xml"
 
 # URLs
@@ -75,7 +73,9 @@ add_itchio_to_ports_gamelist() {
         exit 1
     fi
 
+    # -d drops an entry left by an earlier install, so a reinstall doesn't add a second one
     xmlstarlet ed --inplace \
+        -d "/gameList/game[path='./${PORT_SCRIPT_NAME}']" \
         -s "/gameList" -t elem -n game \
         -s "/gameList/game[last()]" -t elem -n path -v "./${PORT_SCRIPT_NAME}" \
         -s "/gameList/game[last()]" -t elem -n name -v "${APP_NAME}" \
@@ -167,7 +167,7 @@ clear
 # 2. Directory Creation
 echo "Creating necessary directories..."
 mkdir -p "$DESKTOP_DIR" || error_exit "Failed to create $DESKTOP_DIR"
-mkdir -p $(dirname "$PATH_DESKTOP") || error_exit "Failed to create $PATH_DESKTOP directory"
+mkdir -p "$(dirname "$PATH_DESKTOP")" || error_exit "Failed to create $PATH_DESKTOP directory"
 mkdir -p "$IMAGES_DIR" || error_exit "Failed to create $IMAGES_DIR"
 echo "Directories created."
 

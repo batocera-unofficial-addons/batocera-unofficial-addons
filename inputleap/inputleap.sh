@@ -97,9 +97,11 @@ EOF
 chmod +x "/userdata/system/configs/${APPNAME,,}/restore_desktop_entry.sh"
 
 # Add restore script to custom.sh if not already added
-if ! grep -q "restore_desktop_entry.sh" "${CUSTOM_SCRIPT}" 2>/dev/null; then
+[ -f "${CUSTOM_SCRIPT}" ] || echo "#!/bin/bash" > "${CUSTOM_SCRIPT}"
+if ! grep -qF "/userdata/system/configs/${APPNAME,,}/restore_desktop_entry.sh" "${CUSTOM_SCRIPT}"; then
     echo "\"/userdata/system/configs/${APPNAME,,}/restore_desktop_entry.sh\" &" >> "${CUSTOM_SCRIPT}"
 fi
+chmod a+x "${CUSTOM_SCRIPT}"
 }
 
 # Update flatpak gamelist to hide the default entry

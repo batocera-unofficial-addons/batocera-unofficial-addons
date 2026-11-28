@@ -66,7 +66,12 @@ fi
 
 # Remove pad-to-key profile and images
 echo "[*] Removing pad-to-key profile and images..."
-rm -f "${PAD2KEY_PROFILE}" "${PORTS_DIR}/images/desktop-logo.png" "${PORTS_DIR}/images/desktop-marquee.png"
+rm -f "${PAD2KEY_PROFILE}" "${PORTS_DIR}/images/ri-desktop-logo.png" "${PORTS_DIR}/images/ri-desktop-marquee.png"
+# Earlier versions used Desktop (Docker)'s image names. Remove those copies
+# only when Desktop (Docker) isn't installed: it uses the same files.
+if [ ! -f "${PORTS_DIR}/BatoDesktop.sh" ]; then
+    rm -f "${PORTS_DIR}/images/desktop-logo.png" "${PORTS_DIR}/images/desktop-marquee.png"
+fi
 
 # Remove installation directory
 if [ -d "${DEST_BASE}" ]; then

@@ -9,17 +9,18 @@ TAR_NAME="wayvnc.tar.gz"
 SERVICE_NAME="wayvnc_headless"
 PORT="5900"
 
-# === STEP 1: Check display server ===
-WAYLAND_SOCK=$(ls /run/user/0/wayland-* 2>/dev/null | head -n1)
-X11_SOCK=$(ls /tmp/.X11-unix/X* 2>/dev/null | head -n1)
-
-if [ -z "$WAYLAND_SOCK" ]; then
-    if [ -n "$X11_SOCK" ]; then
-        if dialog --yesno "This system is using X11, not Wayland.\n\nWayVNC requires Wayland. Would you like to install x11vnc instead?" 9 55; then
+# === STEP 1: Check for sway ===
+# The service starts its own headless sway session, so no display (or
+# running Wayland session) is needed, only the sway compositor that
+# Batocera's Wayland builds ship. X11 builds don't have it.
+if ! command -v sway >/dev/null 2>&1; then
+    X11_SOCK=$(ls /tmp/.X11-unix/X* 2>/dev/null | head -n1)
+    if [ -n "$X11_SOCK" ] || command -v Xorg >/dev/null 2>&1; then
+        if dialog --yesno "This Batocera build uses X11 and has no sway.\n\nWayVNC Headless needs sway (Wayland builds). Would you like to install x11vnc instead?" 10 60; then
             curl -s "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/refs/heads/main/x11vnc/x11vnc.sh" | bash
         fi
     else
-        dialog --msgbox "ERROR: No display server detected.\n\nMake sure Wayland is running before installing WayVNC." 8 55
+        dialog --msgbox "ERROR: sway was not found.\n\nWayVNC Headless needs a Batocera build that ships sway (Wayland)." 8 60
     fi
     exit 0
 fi

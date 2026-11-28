@@ -47,8 +47,9 @@ if [[ -f "$GAME_LIST" ]]; then
 # Download the logo
 echo "Downloading $APP_NAME logo..."
 curl -L -o "$LOGO_PATH" "$LOGO_URL"
-echo "Adding logo to $APP_NAME entry in gamelist.xml..."
-xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
+echo "Adding $APP_NAME entry to gamelist.xml (replacing any existing one)..."
+xmlstarlet ed -d "/gameList/game[path='./Zelda-DungeonsOfInfinity.wsquashfs']" \
+  -s "/gameList" -t elem -n "game" -v "" \
   -s "/gameList/game[last()]" -t elem -n "path" -v "./Zelda-DungeonsOfInfinity.wsquashfs" \
   -s "/gameList/game[last()]" -t elem -n "name" -v "$APP_NAME" \
   -s "/gameList/game[last()]" -t elem -n "image" -v "./images/zeldadoi-logo.png" \

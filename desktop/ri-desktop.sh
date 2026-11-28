@@ -296,25 +296,34 @@ cat > "${PAD2KEY_PROFILE}" << 'PAD2KEY_EOF'
 }
 PAD2KEY_EOF
 
-# Download images
+# Download images. RunImage Desktop has its own image names: Desktop (Docker)
+# uses desktop-logo.png / desktop-marquee.png, and its uninstaller removes them.
 echo "[*] Downloading images..."
 mkdir -p "${PORTS_DIR}/images"
-curl -L -o "${PORTS_DIR}/images/desktop-logo.png" \
+curl -L -o "${PORTS_DIR}/images/ri-desktop-logo.png" \
   "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/desktop/extra/desktop-logo.png" 2>/dev/null || true
-curl -L -o "${PORTS_DIR}/images/desktop-marquee.png" \
+curl -L -o "${PORTS_DIR}/images/ri-desktop-marquee.png" \
   "https://github.com/batocera-unofficial-addons/batocera-unofficial-addons/raw/main/desktop/extra/desktop-marquee.png" 2>/dev/null || true
-
-# Add entry to gamelist.xml with xmlstarlet
-echo "[*] Adding entry to gamelist.xml..."
-if [ -f /userdata/roms/ports/gamelist.xml ]; then
-    xmlstarlet ed -s "/gameList" -t elem -n "game" -v "" \
-      -s "/gameList/game[last()]" -t elem -n "path" -v "./RunImageDesktop.sh" \
-      -s "/gameList/game[last()]" -t elem -n "name" -v "RunImage Desktop" \
-      -s "/gameList/game[last()]" -t elem -n "image" -v "./images/desktop-logo.png" \
-      -s "/gameList/game[last()]" -t elem -n "marquee" -v "./images/desktop-marquee.png" \
-      /userdata/roms/ports/gamelist.xml > /userdata/roms/ports/gamelist.xml.tmp && \
-      mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
+# Earlier versions used Desktop (Docker)'s image names. Remove those copies
+# unless Desktop (Docker) is installed and still uses them.
+if [ ! -f "${PORTS_DIR}/BatoDesktop.sh" ]; then
+    rm -f "${PORTS_DIR}/images/desktop-logo.png" "${PORTS_DIR}/images/desktop-marquee.png"
 fi
+
+# Add entry to gamelist.xml with xmlstarlet (replacing one left by an
+# earlier install, so a reinstall doesn't add a second one)
+echo "[*] Adding entry to gamelist.xml..."
+if [ ! -f "${PORTS_DIR}/gamelist.xml" ]; then
+    echo '<?xml version="1.0" encoding="UTF-8"?><gameList></gameList>' > "${PORTS_DIR}/gamelist.xml"
+fi
+xmlstarlet ed -d "/gameList/game[path='./RunImageDesktop.sh']" \
+  -s "/gameList" -t elem -n "game" -v "" \
+  -s "/gameList/game[last()]" -t elem -n "path" -v "./RunImageDesktop.sh" \
+  -s "/gameList/game[last()]" -t elem -n "name" -v "RunImage Desktop" \
+  -s "/gameList/game[last()]" -t elem -n "image" -v "./images/ri-desktop-logo.png" \
+  -s "/gameList/game[last()]" -t elem -n "marquee" -v "./images/ri-desktop-marquee.png" \
+  "${PORTS_DIR}/gamelist.xml" > "${PORTS_DIR}/gamelist.xml.tmp" && \
+  mv "${PORTS_DIR}/gamelist.xml.tmp" "${PORTS_DIR}/gamelist.xml"
 
 # Refresh EmulationStation game list
 echo "[*] Refreshing EmulationStation..."

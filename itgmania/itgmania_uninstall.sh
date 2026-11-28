@@ -1,36 +1,65 @@
 #!/bin/bash
+# Uninstaller for ITGMania, installed by itgmania.sh.
+# Removes the game files that came with the release, the Ports launcher,
+# logo and gamelist entry.
+# Keeps your data in /userdata/system/add-ons/itgmania: settings, profiles
+# and scores in .itgmania/, and songs, courses, themes and noteskins you
+# added to the folder. A reinstall picks them up again.
 
-echo "========================================="
-echo "Uninstalling: ITGMania"
-echo "========================================="
-echo ""
+INSTALL_DIR="/userdata/system/add-ons/itgmania"
+MANIFEST="${INSTALL_DIR}/.bua-files"
+PORTS_DIR="/userdata/roms/ports"
+GAMELIST="${PORTS_DIR}/gamelist.xml"
+PORT_SCRIPT="${PORTS_DIR}/ITGMania.sh"
 
-# Remove addon directory
-if [ -d "/userdata/system/add-ons/itgmania" ]; then
-    echo "Removing /userdata/system/add-ons/itgmania"
-    rm -rf "/userdata/system/add-ons/itgmania"
-fi
+# Program folders of the release that hold no user data. Used for installs
+# made before the installer listed its files in .bua-files.
+PROGRAM_PARTS="itgmania itgmania.desktop Data Docs Scripts BGAnimations BackgroundEffects BackgroundTransitions"
 
-# Remove ports launcher
-if [ -f "/userdata/roms/ports/ITGMania.sh" ]; then
-    echo "Removing /userdata/roms/ports/ITGMania.sh"
-    rm -f "/userdata/roms/ports/ITGMania.sh"
-fi
+main() {
+    echo "Uninstalling ITGMania..."
 
-# Remove ports logo
-if [ -f "/userdata/roms/ports/images/itgmania-logo.png" ]; then
-    rm -f "/userdata/roms/ports/images/itgmania-logo.png"
-fi
+    pkill -f "${INSTALL_DIR}/itgmania" 2>/dev/null
 
-# Remove gamelist entry
-if [ -f "/userdata/roms/ports/gamelist.xml" ]; then
-    xmlstarlet ed -d "//game[path='./ITGMania.sh']" /userdata/roms/ports/gamelist.xml \
-        > /userdata/roms/ports/gamelist.xml.tmp && mv /userdata/roms/ports/gamelist.xml.tmp /userdata/roms/ports/gamelist.xml
-fi
+    # ES keeps a played game's stats in memory and writes them back to
+    # gamelist.xml on the next reload, which brings back the entry removed
+    # below. Removing the game through ES first drops it from memory.
+    curl -s -X POST "http://127.0.0.1:1234/removegames/ports" \
+        -d "<gameList><game><path>${PORT_SCRIPT}</path></game></gameList>" >/dev/null 2>&1
 
-curl -s http://127.0.0.1:1234/reloadgames
+    if [ -d "${INSTALL_DIR}" ]; then
+        local rel part
+        if [ -f "${MANIFEST}" ]; then
+            echo "Removing ITGMania's game files..."
+            while IFS= read -r rel; do
+                [ -n "${rel}" ] && rm -f "${INSTALL_DIR}/${rel}"
+            done < "${MANIFEST}"
+            rm -f "${MANIFEST}"
+        else
+            echo "Removing ITGMania's program files (songs, themes and noteskins are kept)..."
+            for part in ${PROGRAM_PARTS}; do
+                rm -rf "${INSTALL_DIR:?}/${part}"
+            done
+        fi
+        rm -f "${INSTALL_DIR}/itgmania.tar.gz"
+        find "${INSTALL_DIR}" -mindepth 1 -depth -type d -empty ! -path "${INSTALL_DIR}/.itgmania*" -delete 2>/dev/null
+        rmdir "${INSTALL_DIR}" 2>/dev/null
+    fi
 
-echo ""
-echo "========================================="
-echo "Uninstallation complete: ITGMania"
-echo "========================================="
+    rm -f "${PORT_SCRIPT}" "${PORT_SCRIPT}.keys" "${PORTS_DIR}/images/itgmania-logo.png"
+
+    if [ -f "${GAMELIST}" ]; then
+        xmlstarlet ed -d "/gameList/game[path='./ITGMania.sh']" "${GAMELIST}" > "${GAMELIST}.tmp" \
+            && mv "${GAMELIST}.tmp" "${GAMELIST}"
+    fi
+    curl -s http://127.0.0.1:1234/reloadgames >/dev/null 2>&1
+
+    echo "ITGMania uninstalled."
+    if [ -d "${INSTALL_DIR}" ]; then
+        echo "Your ITGMania data (settings, profiles, scores, added songs) was kept in:"
+        echo "  ${INSTALL_DIR}"
+        echo "Delete that folder to free the space, or reinstall to use it again."
+    fi
+}
+
+main "$@"

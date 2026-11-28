@@ -20,7 +20,10 @@ fi
 
 # Prepare directories
 echo "Setting up Prism Launcher..."
-rm -rf "$INSTALL_DIR"
+# Replace only the program files: $DATA_DIR holds your instances, worlds,
+# accounts and settings and is kept on reinstall.
+rm -f "$INSTALL_DIR/prismlauncher.AppImage" "$INSTALL_DIR/launch.sh"
+rm -rf "$INSTALL_DIR/extra"
 mkdir -p "$INSTALL_DIR/extra"
 mkdir -p "$DATA_DIR"
 mkdir -p "/userdata/system/configs/prismlauncher"
