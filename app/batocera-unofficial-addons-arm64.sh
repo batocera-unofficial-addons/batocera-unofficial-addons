@@ -68,7 +68,7 @@ echo -e "\e[0m"
     echo " Install these add-ons at your own risk. They are not endorsed by the Batocera Devs nor are they supported." 
     echo " Please don't go into the official Batocera discord with issues, I can't help you there!"
     echo " Instead; head to https://discord.batoaddons.app and someone will be around to help you!"
-    echo " For guides, head to the Wiki at https://wiki.batoaddons.app"
+    echo " For guides, head to the docs at https://batoaddons.app/docs"
     sleep 10
 }
 
@@ -173,7 +173,7 @@ while true; do
 
 # Exit if the user selects "Exit" or cancels
 if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
-    dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; https://discord.batoaddons.app or https://wiki.batoaddons.app. Goodbye!" 7 50
+    dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; https://discord.batoaddons.app or https://batoaddons.app/docs. Goodbye!" 7 50
     sleep 5  # Pause for 3 seconds to let the user read the message
     clear
     exit 0

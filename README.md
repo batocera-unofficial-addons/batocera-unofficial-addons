@@ -45,7 +45,7 @@ In accordance with the GPL:
 
 ## 🧠 Resources
 
-- **[Batocera Unofficial Add-Ons Wiki](https://wiki.batoaddons.app)** – Guides and support info
+- **[Batocera Unofficial Add-Ons Docs](https://batoaddons.app/docs/)** – Guides and support info
 - **[Batocera Unofficial Add-Ons Discord](https://discord.gg/Uc9BVbDH9e)** – Community support
 
 ---

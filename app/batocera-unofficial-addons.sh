@@ -326,7 +326,7 @@ while true; do
 
   # Exit if the user selects "Exit" or cancels
   if [[ $? -ne 0 || "$category_choice" == "Exit" ]]; then
-    dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; https://discord.batoaddons.app or https://wiki.batoaddons.app. Goodbye!" 7 50
+    dialog --title "Exiting Installer" --infobox "Thank you for using the Batocera Unofficial Add-Ons Installer. For support; https://discord.batoaddons.app or https://batoaddons.app/docs. Goodbye!" 7 50
     sleep 5
     clear
     exit 0
